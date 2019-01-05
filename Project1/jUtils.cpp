@@ -1,0 +1,137 @@
+#include "jUtils.h"
+#include "jMath.h"
+#include "jLog.h"
+#include <sstream>
+#include <iostream>
+
+jUtils::jUtils()
+{
+}
+
+
+jUtils::~jUtils()
+{
+}
+
+void jUtils::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far)
+{
+	_errorif(_near == _far || _aspect == 0);
+	
+	_mat.identity();
+	_mat[5] = 1 / tan(_fovDeg*DegToRad/2);
+	_mat[0] = _mat[5] / _aspect;
+	_mat[10] = _far / (_far - _near);
+	_mat[11] = 1.0;
+	_mat[14] = (_far*_near) / (_near - _far);
+	_mat[15] = 0.0;
+}
+void jUtils::Split(string _str, const char* _del, vector<string>& _vec)
+{
+	trim(_str);
+	std::stringstream stringStream(_str);
+	std::string line;
+	while (std::getline(stringStream, line))
+	{
+		std::size_t prev = 0, pos;
+		while ((pos = line.find_first_of(_del, prev)) != std::string::npos)
+		{
+			if (pos > prev)
+				_vec.push_back(line.substr(prev, pos - prev));
+			prev = pos + 1;
+		}
+		if (prev < line.length())
+			_vec.push_back(line.substr(prev, std::string::npos));
+	}
+}
+
+
+bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf)
+{
+	// targa 파일을 바이너리 모드로 파일을 엽니다.
+	FILE* filePtr;
+	if (fopen_s(&filePtr, filename.c_str(), "rb") != 0)
+	{
+		return false;
+	}
+
+	// 파일 헤더를 읽어옵니다.
+	TargaHeader targaFileHeader;
+	unsigned int count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+	if (count != 1)
+	{
+		return false;
+	}
+
+	// 파일헤더에서 중요 정보를 얻어옵니다.
+	height = (int)targaFileHeader.height;
+	width = (int)targaFileHeader.width;
+	int bpp = (int)targaFileHeader.bpp;
+
+	// 파일이 32bit 인지 24bit인지 체크합니다.
+	if (bpp != 32)
+	{
+		return false;
+	}
+
+	// 32 비트 이미지 데이터의 크기를 계산합니다.
+	int imageSize = width * height * 4;
+
+	//  targa 이미지 데이터 용 메모리를 할당합니다.
+	unsigned char* targaImage = new unsigned char[imageSize];
+	if (!targaImage)
+	{
+		return false;
+	}
+
+	// targa 이미지 데이터를 읽습니다.
+	count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
+	if (count != imageSize)
+	{
+		return false;
+	}
+
+	// 파일을 닫습니다.
+	if (fclose(filePtr) != 0)
+	{
+		return false;
+	}
+
+	// targa 대상 데이터에 대한 메모리를 할당합니다.
+	_buf = new unsigned char[imageSize];
+	if (!_buf)
+	{
+		return false;
+	}
+
+	_bufSize = imageSize;
+	// targa 대상 데이터 배열에 인덱스를 초기화합니다.
+	int index = 0;
+
+	// targa 이미지 데이터에 인덱스를 초기화합니다.
+	int k = (width * height * 4) - (width * 4);
+
+	// 이제 targa 형식이 거꾸로 저장되었으므로 올바른 순서로 targa 이미지 데이터를 targa 대상 배열에 복사합니다.
+	for (int j = 0; j<height; j++)
+	{
+		for (int i = 0; i<width; i++)
+		{
+			_buf[index + 0] = targaImage[k + 2];  // 빨강
+			_buf[index + 1] = targaImage[k + 1];  // 녹색
+			_buf[index + 2] = targaImage[k + 0];  // 파랑
+			_buf[index + 3] = targaImage[k + 3];  // 알파
+
+														 // 인덱스를 targa 데이터로 증가시킵니다.
+			k += 4;
+			index += 4;
+		}
+
+		// targa 이미지 데이터 인덱스를 역순으로 읽은 후 열의 시작 부분에서 이전 행으로 다시 설정합니다.
+		k -= (width * 8);
+	}
+
+	// 대상 배열에 복사 된 targa 이미지 데이터를 해제합니다.
+	delete[] targaImage;
+	targaImage = nullptr;
+
+	return true;
+}
