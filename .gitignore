@@ -1,4 +1,6 @@
 *.vs
-IWAS/bin/
-IWAS/obj/
+Debug/
+Release/
+Project1/Debug/
+Project1/Release/
 ~$*
