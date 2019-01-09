@@ -1,11 +1,10 @@
-.vs
+.vs/
 Debug/
 Release/
 x64/
 Project1/Debug/
 Project1/Release/
 Project1/x64/
-Project1/Project1_.vcxproj
 Project1.VC.VC.opendb
 Project1.VC.db
 ~$*
