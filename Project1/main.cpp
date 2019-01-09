@@ -4,6 +4,8 @@
 #include "jInput.h"
 #include "jSound.h"
 
+int gScreenWidth = 480;
+int gScreenHeight = 640;
 HINSTANCE g_hInst = NULL;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -34,7 +36,7 @@ int main()
 	}
 
 	int nStyle = WS_OVERLAPPED | WS_SYSMENU | WS_VISIBLE | WS_CAPTION | WS_MINIMIZE;
-	handle = CreateWindowEx(WS_EX_APPWINDOW, "windowTitle", "windowTitle", nStyle, 0, 0, 640, 480, nullptr, nullptr, g_hInst, nullptr);
+	handle = CreateWindowEx(WS_EX_APPWINDOW, "windowTitle", "windowTitle", nStyle, 0, 0, gScreenWidth, gScreenHeight, nullptr, nullptr, g_hInst, nullptr);
 	if (handle == nullptr)
 	{
 		return 0;
@@ -43,8 +45,8 @@ int main()
 	jSound::GetInst().Initialize(handle);
 	jSound::GetInst().LoadWaveFile("sound01.wav");
 
-	jInput::GetInst().Initialize(g_hInst, handle, 640, 480);
-	jRenderer::GetInst().Initialize(handle, 640, 480, false, true);
+	jInput::GetInst().Initialize(g_hInst, handle, gScreenWidth, gScreenHeight);
+	jRenderer::GetInst().Initialize(handle, gScreenWidth, gScreenHeight, false, true);
 	jGameObjectMgr::GetInst().Initialize();
 
 	ShowWindow(handle, SW_SHOW);
