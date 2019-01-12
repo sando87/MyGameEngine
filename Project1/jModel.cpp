@@ -287,6 +287,11 @@ bool jModel::LoadPointList(vector<Vector3>& vec, float size)
 	return true;
 }
 
+bool jModel::LoadGrid(int _x, int _z, int _w, int _h, int _step)
+{
+	return true;
+}
+
 void jModel::Release()
 {
 	m_vertexCount = 0;

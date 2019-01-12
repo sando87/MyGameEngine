@@ -19,7 +19,7 @@ bool jGameObjectMgr::Initialize()
 {
 	mCamera = new jCamera();
 	mCamera->init(45, 640 / 480, 1.0, 1000.0);
-	mCamera->lookat(Vector3(-100, 100, -100), Vector3(0, 0, 0), Vector3(0, 1, 0));
+	mCamera->lookat(Vector3(-30, 30, -30), Vector3(0, 0, 0), Vector3(0, 1, 0));
 
 	ObjTutorial1* obj = new ObjTutorial1();
 	obj->AddToMgr();

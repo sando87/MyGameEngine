@@ -27,6 +27,7 @@ public:
 
 	bool Load(string _name);
 	bool LoadPointList(vector<Vector3>& vec, float size);
+	bool LoadGrid(int _x, int _z, int _w, int _h, int _step);
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
 	void Release();
 

@@ -42,7 +42,7 @@ void ObjTutorial1::OnStart()
 
 
 	mModel = new jModel();
-	mModel->Load("teapot_anim.DAE");
+	mModel->Load("axis.DAE");
 	//mModel->Load("teapot_noanim.DAE");
 	//mModel->LoadSprite(Vector3f(0, 0, 0), Vector2f(0.2f, 0.2f));
 
@@ -52,8 +52,8 @@ void ObjTutorial1::OnStart()
 	mTexture = new jTexture();
 	mTexture->Initialize("./stone01.tga");
 
-	mAnim = new jAnimate();
-	mAnim->Load("teapot_anim.DAE");
+	//mAnim = new jAnimate();
+	//mAnim->Load("teapot_anim.DAE");
 
 	//int size = mAnim->mVecBones.size();
 	//vector<Vector3> vec;
@@ -82,8 +82,8 @@ void ObjTutorial1::OnUpdate()
 void ObjTutorial1::OnDraw()
 {
 	vector<Matrix4> mats;
-	//mats.push_back(Matrix4().identity());
-	mAnim->Animate(mAnimTime, mats);
+	mats.push_back(Matrix4().identity());
+	//mAnim->Animate(mAnimTime, mats);
 	//for (int i = 0;i < cnt; ++i)
 	//{
 	//	Matrix4 mm = mAnim->mVecBones[i].mMatLocal;

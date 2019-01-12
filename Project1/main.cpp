@@ -4,8 +4,8 @@
 #include "jInput.h"
 #include "jSound.h"
 
-int gScreenWidth = 480;
-int gScreenHeight = 640;
+int gScreenWidth = 640;
+int gScreenHeight = 480;
 HINSTANCE g_hInst = NULL;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
