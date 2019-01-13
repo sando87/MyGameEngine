@@ -21,16 +21,10 @@
     <ClCompile Include="jModel.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jColorShader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Vectors.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Matrices.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jCamera.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jLog.cpp">
@@ -84,6 +78,21 @@
     <ClCompile Include="jShaderSprite.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jShaderColor.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderSkinned.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjGroundAxis.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjCamera.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jMatrixControl.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -92,16 +101,10 @@
     <ClInclude Include="header.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="jColorShader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Vectors.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Matrices.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jCamera.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jMath.h">
@@ -159,6 +162,21 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jShaderSprite.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderColor.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderSkinned.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjGroundAxis.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjCamera.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jMatrixControl.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

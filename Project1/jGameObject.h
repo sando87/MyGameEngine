@@ -2,7 +2,7 @@
 #define __JGAMEOBJECT_H__
 
 class jGameObjectMgr;
-class jCamera;
+class ObjCamera;
 
 class jGameObject
 {
@@ -13,7 +13,7 @@ public:
 	virtual ~jGameObject();
 
 	void AddToMgr();
-	jCamera& GetCamera();
+	ObjCamera& GetCamera();
 	void DeleteFromMgr() { mIsRemoved = true; }
 
 protected:

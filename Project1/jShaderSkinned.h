@@ -6,10 +6,10 @@
 using namespace std;
 
 class jModel;
-class jCamera;
+class ObjCamera;
 class jTexture;
 
-class jColorShader : jBaseShader
+class jShaderSkinned : jBaseShader
 {
 private:
 	struct MatrixBufferType //should be 16byte aligned
@@ -35,14 +35,14 @@ private:
 	};
 
 public:
-	jColorShader();
-	~jColorShader();
+	jShaderSkinned();
+	~jShaderSkinned();
 
 	bool Initialize(string _vsFilename, string _psFilename);
 	void Release();
 	bool Render();
 
-	void SetParams(jModel * _model, Matrix4 _worldMat, jCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector4f _light, vector<Matrix4>& _mats);
+	void SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector4f _light, vector<Matrix4>& _mats);
 
 private:
 	ID3D11InputLayout* mLayout;

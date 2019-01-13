@@ -2,7 +2,8 @@
 #include "jRenderer.h"
 #include "jGameObject.h"
 #include "ObjTutorial1.h"
-#include "jCamera.h"
+#include "ObjCamera.h"
+#include "ObjGroundAxis.h"
 
 jGameObjectMgr::jGameObjectMgr()
 {
@@ -17,12 +18,12 @@ jGameObjectMgr::~jGameObjectMgr()
 
 bool jGameObjectMgr::Initialize()
 {
-	mCamera = new jCamera();
-	mCamera->init(45, 640 / 480, 1.0, 1000.0);
-	mCamera->lookat(Vector3(-30, 30, -30), Vector3(0, 0, 0), Vector3(0, 1, 0));
-
-	ObjTutorial1* obj = new ObjTutorial1();
+	mCamera = new ObjCamera();
+	mCamera->AddToMgr();
+	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
+	ObjTutorial1* obj2 = new ObjTutorial1();
+	obj2->AddToMgr();
 	return true;
 }
 
@@ -67,10 +68,4 @@ void jGameObjectMgr::Release()
 		obj = nullptr;
 	}
 	mObjects.clear();
-
-	if (mCamera != nullptr)
-	{
-		delete mCamera;
-		mCamera = nullptr;
-	}
 }

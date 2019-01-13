@@ -8,7 +8,7 @@
 using namespace std;
 
 class jModel;
-class jCamera;
+class ObjCamera;
 class jTexture;
 
 class jShaderSprite : jBaseShader
@@ -40,7 +40,7 @@ public:
 	void Release();
 	bool Render();
 
-	void SetParams(jModel * _model, Matrix4 _worldMat, jCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector2f _size, Vector2n _idx);
+	void SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector2f _size, Vector2n _idx);
 
 private:
 	ID3D11InputLayout* mLayout;

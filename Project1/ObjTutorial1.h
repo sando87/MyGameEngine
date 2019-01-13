@@ -1,7 +1,7 @@
 #pragma once
 #include "jGameObject.h"
 #include "Matrices.h"
-class jColorShader;
+class jShaderSkinned;
 class jShaderSprite;
 class jModel;
 class jTexture;
@@ -20,7 +20,7 @@ private:
 
 	jModel* mModel;
 	jTexture * mTexture;
-	jColorShader * mShader;
+	jShaderSkinned * mShader;
 	jAnimate* mAnim;
 	Matrix4 mWorldMat;
 	int mIdxUV;

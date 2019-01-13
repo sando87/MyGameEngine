@@ -20,6 +20,11 @@ private:
 		Vector3f p;
 		Vector2f t;
 	};
+	struct VertexType_Color
+	{
+		Vector3f p;
+		Vector4f c;
+	};
 
 public:
 	jModel();
@@ -28,6 +33,9 @@ public:
 	bool Load(string _name);
 	bool LoadPointList(vector<Vector3>& vec, float size);
 	bool LoadGrid(int _x, int _z, int _w, int _h, int _step);
+	bool LoadAxisX(int _len);
+	bool LoadAxisY(int _len);
+	bool LoadAxisZ(int _len);
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
 	void Release();
 

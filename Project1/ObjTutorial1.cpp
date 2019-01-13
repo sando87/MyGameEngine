@@ -1,15 +1,15 @@
 #include <functional>
 
 #include "ObjTutorial1.h"
-#include "jColorShader.h"
 #include "jModel.h"
 #include "jLog.h"
 #include "jInput.h"
 #include "jSound.h"
 #include "jTexture.h"
 #include "jAnimate.h"
-#include "jCamera.h"
+#include "ObjCamera.h"
 #include "jShaderSprite.h"
+#include "jShaderSkinned.h"
 
 ObjTutorial1::ObjTutorial1()
 {
@@ -42,18 +42,17 @@ void ObjTutorial1::OnStart()
 
 
 	mModel = new jModel();
-	mModel->Load("axis.DAE");
-	//mModel->Load("teapot_noanim.DAE");
+	mModel->Load("teapot_anim.DAE");
 	//mModel->LoadSprite(Vector3f(0, 0, 0), Vector2f(0.2f, 0.2f));
 
-	mShader = new jColorShader();
+	mShader = new jShaderSkinned();
 	mShader->Initialize("./test.vs", "./test.ps");
 
 	mTexture = new jTexture();
 	mTexture->Initialize("./stone01.tga");
 
-	//mAnim = new jAnimate();
-	//mAnim->Load("teapot_anim.DAE");
+	mAnim = new jAnimate();
+	mAnim->Load("teapot_anim.DAE");
 
 	//int size = mAnim->mVecBones.size();
 	//vector<Vector3> vec;
@@ -82,8 +81,8 @@ void ObjTutorial1::OnUpdate()
 void ObjTutorial1::OnDraw()
 {
 	vector<Matrix4> mats;
-	mats.push_back(Matrix4().identity());
-	//mAnim->Animate(mAnimTime, mats);
+	//mats.push_back(Matrix4().identity());
+	mAnim->Animate(mAnimTime, mats);
 	//for (int i = 0;i < cnt; ++i)
 	//{
 	//	Matrix4 mm = mAnim->mVecBones[i].mMatLocal;

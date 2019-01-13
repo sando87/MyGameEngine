@@ -1,32 +1,23 @@
 #include <math.h>
-#include "jCamera.h"
+#include "jMatrixControl.h"
 #include "jMath.h"
 #include "jLog.h"
 #include "jUtils.h"
 
-jCamera::jCamera()
+jMatrixControl::jMatrixControl()
 {
 	mMat.identity();
-	mMatProj.identity();
-
-	mNear = 0.0;
-	mFar = 0.0;
-	mFov = 0.0;
-	mAspect = 0.0;
 }
 
-jCamera::~jCamera()
+jMatrixControl::~jMatrixControl()
 {
 }
-void jCamera::init(double fovDeg, double aspect, double zNear, double zFar)
+void jMatrixControl::init()
 {
 	mMat.identity();
-	mMatProj.identity();
-
-	setProjectionMatrix(fovDeg, aspect, zNear, zFar);
 	lookat(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0));
 }
-jCamera& jCamera::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -48,25 +39,25 @@ jCamera& jCamera::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 	refreshMatrix();
 	return (*this);
 }
-jCamera& jCamera::goForward(double dist)
+jMatrixControl& jMatrixControl::goForward(double dist)
 {
 	mPos = mPos + mView*dist;
 	refreshMatrix();
 	return (*this);
 }
-jCamera& jCamera::moveTo(Vector3 pos)
+jMatrixControl& jMatrixControl::moveTo(Vector3 pos)
 {
 	mPos = pos;
 	refreshMatrix();
 	return (*this);
 }
-jCamera& jCamera::goTo(Vector3 dir)
+jMatrixControl& jMatrixControl::goTo(Vector3 dir)
 {
 	mPos = mPos + dir;
 	refreshMatrix();
 	return (*this);
 }
-jCamera& jCamera::rotateAxis(Vector3 basePoint, Vector3 axis, double degree)
+jMatrixControl& jMatrixControl::rotateAxis(Vector3 basePoint, Vector3 axis, double degree)
 {
 	axis.normalize();
 	Matrix4 rotMat;
@@ -95,7 +86,7 @@ jCamera& jCamera::rotateAxis(Vector3 basePoint, Vector3 axis, double degree)
 
 	return (*this);
 }
-void jCamera::refreshMatrix()
+void jMatrixControl::refreshMatrix()
 {
 	mMat.identity();
 	mMat.setColumn(0, mCross);
@@ -105,7 +96,7 @@ void jCamera::refreshMatrix()
 	mMat[13] = -mPos.dot(mUp);
 	mMat[14] = -mPos.dot(mView);
 }
-void jCamera::refreshAxis()
+void jMatrixControl::refreshAxis()
 {
 	Vector3 cross(mMat[0], mMat[4], mMat[8]);
 	Vector3 up(mMat[1], mMat[5], mMat[9]);
@@ -129,58 +120,12 @@ void jCamera::refreshAxis()
 }
 
 
-void jCamera::setProjectionMatrix(double fovDeg, double aspect, double zNear, double zFar)
-{
-	jUtils::GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
-
-	mNear = zNear;
-	mFar = zFar;
-	mFov = fovDeg;
-	mAspect = aspect;
-}
-
-/*
-void jCamera::setPerspInfo(double fov, double aspect, double zNear, double zFar)
-{
-	mAspect = aspect;
-	mNear = zNear;
-	mFar = zFar;
-	if( mAspect<1.0 )
-	{
-		double rad_w = fov*DegToRad;
-		double rad_h = atan( tan(rad_w)/mAspect );
-		mFov = rad_h*RadToDeg;
-	}
-	else
-		mFov = fov;
-}
-void jCamera::getFrustumInfo(float& left, float& right, float& bottom, float& top, float& zNear, float& zFar)
-{
-	zNear = (float)mNear;
-	zFar = (float)mFar;
-	top = (float)mNear*(float)tan(mFov*DegToRad);
-	bottom = -(float)top;
-	left = bottom*(float)mAspect;  
-	right = top*(float)mAspect;
-}
-void jCamera::getOrthofInfo(float& left, float& right, float& bottom, float& top, float& zNear, float& zFar)
-{
-	float h_half = (float)mPos.z * (float)tan(mFov*DegToRad);
-	top = h_half;
-	bottom = -top;
-	left = bottom*(float)mAspect;  
-	right = top*(float)mAspect;
-	zNear = (float)mNear;
-	zFar = (float)mFar;
-}
-*/
-
 //OpenGL좌표계 (Cross:X, View:-Z, Up:Y) , Projection Mat은 고정
 //DirectX좌표계 (Cross:X, View:Z, Up:Y), Projection Mat은 고정
 
 /*
 //RightHand (Cross:X, View:Y, Up:Z) To DirectX Projection Mat
-jCamera& jCamera::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -211,7 +156,7 @@ jCamera& jCamera::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 }
 
 //LeftHand (Cross:X, View:Z, Up:Y) To DirectX Projection Mat
-jCamera& jCamera::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -242,7 +187,7 @@ jCamera& jCamera::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 }
 
 //RightHand (Cross:X, View:Y, Up:Z) To OpenGL Projection Mat
-jCamera& jCamera::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;

@@ -127,6 +127,23 @@ bool jInput::Update()
 		}
 	}
 
+	if (m_keyboardState[DIK_1] & 0x80)
+	{
+		printf("[1]");
+	}
+	if (m_keyboardState[DIK_A] & 0x80)
+	{
+		printf("[A]");
+	}
+
+	//for (int i = 0; i < 256; ++i)
+	//{
+	//	if (m_keyboardState[i] > 0)
+	//	{
+	//		printf("[%d]0x%x, ", i, m_keyboardState[i]);
+	//	}
+	//}
+
 	// 마우스 디바이스를 얻는다.
 	result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
 	if (FAILED(result))

@@ -1,9 +1,9 @@
-#include "jColorShader.h"
+#include "jShaderSkinned.h"
 #include "jModel.h"
-#include "jCamera.h"
+#include "ObjCamera.h"
 #include "jTexture.h"
 
-jColorShader::jColorShader()
+jShaderSkinned::jShaderSkinned()
 {
 	mLayout = nullptr;
 	mMatrixBuffer = nullptr;
@@ -16,12 +16,12 @@ jColorShader::jColorShader()
 	mVertTypeSize = 0;
 }
 
-jColorShader::~jColorShader()
+jShaderSkinned::~jShaderSkinned()
 {
 	Release();
 }
 
-bool jColorShader::Initialize(string _vsFilename, string _psFilename)
+bool jShaderSkinned::Initialize(string _vsFilename, string _psFilename)
 {
 	ID3D11Device* pDev = jRenderer::GetInst().GetDevice();
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
@@ -169,7 +169,7 @@ bool jColorShader::Initialize(string _vsFilename, string _psFilename)
 	return true;
 }
 
-void jColorShader::Release()
+void jShaderSkinned::Release()
 {
 	// 샘플러 상태를 해제한다.
 	if (mSampleState)
@@ -219,7 +219,7 @@ void jColorShader::Release()
 	mProj.identity();
 }
 
-void jColorShader::SetParams(jModel * _model, Matrix4 _worldMat, jCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector4f _light, vector<Matrix4>& _mats)
+void jShaderSkinned::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector4f _light, vector<Matrix4>& _mats)
 {
 	mTexture = _texture->mTextureView;
 	mVertBuf = _model->GetVertexBuffer();;
@@ -228,8 +228,8 @@ void jColorShader::SetParams(jModel * _model, Matrix4 _worldMat, jCamera * _came
 	mVertTypeSize = _model->GetVertexTypeSize();
 
 	mWorld = _worldMat.transpose();
-	mView = _camera->getMatrix().transpose();
-	mProj = _camera->getProjectionMat().transpose();
+	mView = _camera->getPosMat().transpose();
+	mProj = _camera->getProjMat().transpose();
 
 	mDiffuse = _diffuse;
 	mLight = _light;
@@ -238,7 +238,7 @@ void jColorShader::SetParams(jModel * _model, Matrix4 _worldMat, jCamera * _came
 		mBoneMats[i] = _mats[i];
 }
 
-bool jColorShader::Render()
+bool jShaderSkinned::Render()
 {
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.

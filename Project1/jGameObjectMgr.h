@@ -4,7 +4,8 @@
 #include <list>
 using namespace std;
 class jGameObject;
-class jCamera;
+class jMatrixControl;
+class ObjCamera;
 
 class jGameObjectMgr
 {
@@ -15,7 +16,7 @@ private:
 	jGameObjectMgr();
 	~jGameObjectMgr();
 
-	jCamera* mCamera;
+	ObjCamera* mCamera;
 	list<jGameObject*> mObjects;
 
 public:
@@ -24,7 +25,7 @@ public:
 	void RunObjects();
 
 	void AddGameObject(jGameObject* _obj) { mObjects.push_back(_obj); }
-	jCamera& GetCamera() { return *mCamera; }
+	ObjCamera& GetCamera() { return *mCamera; }
 };
 
 #endif
