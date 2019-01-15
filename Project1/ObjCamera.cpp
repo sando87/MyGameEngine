@@ -1,6 +1,6 @@
 #include "ObjCamera.h"
 #include "jUtils.h"
-
+#include "jInput.h"
 
 ObjCamera::ObjCamera()
 {
@@ -24,6 +24,18 @@ void ObjCamera::OnStart()
 {
 	setProjectionMatrix(45, 640 / 480, 1.0, 1000.0);
 	mPos.lookat(Vector3(-200, 200, -200), Vector3(0, 0, 0), Vector3(0, 1, 0));
+	jInput::GetInst().mMouse = [&](auto info)
+	{
+		if (info.z > 0)
+			mPos.goForward(10.0f);
+		else if(info.z < 0)
+			mPos.goForward(-10.0f);
+
+		if (info.middle & 0x80 && info.x != 0)
+		{
+			mPos.rotateAxis(Vector3(0, 0, 0), Vector3(0, 1, 0), info.x);
+		}
+	};
 }
 void ObjCamera::OnUpdate()
 {

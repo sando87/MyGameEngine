@@ -127,23 +127,6 @@ bool jInput::Update()
 		}
 	}
 
-	if (m_keyboardState[DIK_1] & 0x80)
-	{
-		printf("[1]");
-	}
-	if (m_keyboardState[DIK_A] & 0x80)
-	{
-		printf("[A]");
-	}
-
-	//for (int i = 0; i < 256; ++i)
-	//{
-	//	if (m_keyboardState[i] > 0)
-	//	{
-	//		printf("[%d]0x%x, ", i, m_keyboardState[i]);
-	//	}
-	//}
-
 	// 마우스 디바이스를 얻는다.
 	result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
 	if (FAILED(result))
@@ -159,11 +142,39 @@ bool jInput::Update()
 		}
 	}
 
-	if (m_mouseState.rgbButtons[0] > 0)
+	if (isMouseIN())
 	{
-		if(mFunc != nullptr)
-			mFunc(m_mouseState.lX, m_mouseState.lY);
+		jMouseInfo info;
+		memcpy(&info, &m_mouseState, sizeof(info));
+		if(mMouse != nullptr)
+			mMouse(info);
+	}
+	
+	if (isKeyIN())
+	{
+		if (mKeyboard != nullptr)
+			mKeyboard(m_keyboardState);
 	}
 
+	return true;
+}
+bool jInput::isKeyIN()
+{
+	int size = sizeof(m_keyboardState);
+	for (int i = 0; i < size; i++)
+		if (m_keyboardState[i] != 0)
+			return true;
+	return false;
+}
+bool jInput::isMouseIN()
+{
+	if (m_mouseState.lX == 0 &&
+		m_mouseState.lY == 0 &&
+		m_mouseState.lZ == 0 &&
+		m_mouseState.rgbButtons[0] == 0 &&
+		m_mouseState.rgbButtons[1] == 0 &&
+		m_mouseState.rgbButtons[2] == 0 &&
+		m_mouseState.rgbButtons[3] == 0)
+		return false;
 	return true;
 }

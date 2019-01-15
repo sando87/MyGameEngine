@@ -8,6 +8,16 @@ class jInput
 {
 public:
 	static jInput& GetInst() { static jInput inst; return inst; }
+	typedef struct _jMouseInfo {
+		int    x;
+		int    y;
+		int    z;
+		unsigned char   left;
+		unsigned char   right;
+		unsigned char   middle;
+		unsigned char   reserve;
+	} jMouseInfo;
+
 private:
 	jInput();
 	~jInput();
@@ -16,7 +26,8 @@ public:
 	void Release();
 	bool Update();
 
-	std::function<void(int, int)> mFunc;
+	std::function<void(jMouseInfo)> mMouse;
+	std::function<void(const unsigned char*)> mKeyboard;
 
 private:
 	IDirectInput8 * m_directInput = nullptr;
@@ -25,6 +36,8 @@ private:
 
 	unsigned char m_keyboardState[256] = { 0, };
 	DIMOUSESTATE m_mouseState;
+	bool isKeyIN();
+	bool isMouseIN();
 	int m_screenWidth = 0;
 	int m_screenHeight = 0;
 };
