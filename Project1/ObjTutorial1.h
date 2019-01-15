@@ -3,6 +3,7 @@
 #include "Matrices.h"
 class jShaderSkinned;
 class jShaderSprite;
+class jShaderColor;
 class jModel;
 class jTexture;
 class jAnimate;
@@ -25,5 +26,10 @@ private:
 	Matrix4 mWorldMat;
 	int mIdxUV;
 	float mAnimTime;
+
+	jShaderColor * mShaderColor;
+	jModel* mModelX;
+	jModel* mModelY;
+	jModel* mModelZ;
 };
 

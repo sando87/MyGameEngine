@@ -57,32 +57,17 @@ jMatrixControl& jMatrixControl::goTo(Vector3 dir)
 	refreshMatrix();
 	return (*this);
 }
-jMatrixControl& jMatrixControl::rotateAxis(Vector3 basePoint, Vector3 axis, double degree)
+jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree)
 {
-	axis.normalize();
+	axisUP.normalize();
 	Matrix4 rotMat;
-	rotMat.rotate(degree, axis.x, axis.y, axis.z);
+	rotMat.rotate(degree, axisUP.x, axisUP.y, axisUP.z);
 
-	Vector3 newPos = mPos - basePoint;
+	Vector3 newPos = mPos - groundPt;
 	Vector3 rotPos = rotMat*newPos;
-	Vector3 newUp(0.0, 0.0, 1.0);
-	double dotdot = rotPos.dot(newUp);
-	newPos = rotPos + basePoint;
+	newPos = rotPos + groundPt;
 
-	Vector3 cross = newUp.cross(rotPos);
-	double dot = cross.dot(mCross);
-	if(cross.length()==0 || dot<=0)
-	{
-		newUp = rotMat*mUp;
-		newUp.z = 0.0;
-		newUp.normalize();
-		newPos.x = basePoint.x;
-		newPos.y = basePoint.y;
-		newPos.z = rotPos.length();
-		lookat(newPos, basePoint, newUp);
-	}
-	else
-		lookat(newPos, basePoint, newUp);
+	lookat(newPos, groundPt, axisUP);
 
 	return (*this);
 }

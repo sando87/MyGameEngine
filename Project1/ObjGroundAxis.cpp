@@ -9,7 +9,7 @@ ObjGroundAxis::ObjGroundAxis()
 	mModel = nullptr;
 	mModelX = nullptr;
 	mModelY = nullptr;
-	mModelX = nullptr;
+	mModelZ = nullptr;
 	mWorldMat.identity();
 }
 
