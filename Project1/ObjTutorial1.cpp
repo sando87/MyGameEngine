@@ -9,7 +9,11 @@
 #include "jAnimate.h"
 #include "ObjCamera.h"
 #include "jShaderSprite.h"
+#include "jS1sdf3d.h"
 #include "jShaderSkinned.h"
+#include "jS123d.h"
+#include "jS1swadas3d.h"
+#include "jS1swadas3d.h"
 
 ObjTutorial1::ObjTutorial1()
 {
