@@ -29,7 +29,5 @@ private:
 
 	jShaderColor * mShaderColor;
 	jModel* mModelX;
-	jModel* mModelY;
-	jModel* mModelZ;
 };
 

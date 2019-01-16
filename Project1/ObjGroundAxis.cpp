@@ -8,8 +8,6 @@ ObjGroundAxis::ObjGroundAxis()
 	mShader = nullptr;
 	mModel = nullptr;
 	mModelX = nullptr;
-	mModelY = nullptr;
-	mModelZ = nullptr;
 	mWorldMat.identity();
 }
 
@@ -29,11 +27,7 @@ ObjGroundAxis::~ObjGroundAxis()
 		mModel = nullptr;
 
 		mModelX->Release();
-		mModelY->Release();
-		mModelZ->Release();
 		delete mModelX;
-		delete mModelY;
-		delete mModelZ;
 	}
 }
 
@@ -45,11 +39,7 @@ void ObjGroundAxis::OnStart()
 	mModel->LoadGrid(-100, 100, 200, 200, 10);
 
 	mModelX = new jModel();
-	mModelX->LoadAxisX(100);
-	mModelY = new jModel();
-	mModelY->LoadAxisY(100);
-	mModelZ = new jModel();
-	mModelZ->LoadAxisZ(100);
+	mModelX->LoadAxis(100);
 
 	mShader = new jShaderColor();
 	mShader->Initialize("./color.vs", "./color.ps");
@@ -66,9 +56,5 @@ void ObjGroundAxis::OnDraw()
 	mShader->SetParams(mModel, mWorldMat, &GetCamera(), true);
 	mShader->Render();
 	mShader->SetParams(mModelX, mWorldMat, &GetCamera(), true);
-	mShader->Render();
-	mShader->SetParams(mModelY, mWorldMat, &GetCamera(), true);
-	mShader->Render();
-	mShader->SetParams(mModelZ, mWorldMat, &GetCamera(), true);
 	mShader->Render();
 }

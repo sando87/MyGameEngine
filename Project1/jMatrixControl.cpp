@@ -15,7 +15,7 @@ jMatrixControl::~jMatrixControl()
 void jMatrixControl::init()
 {
 	mMat.identity();
-	lookat(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0));
+	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
 jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
@@ -24,10 +24,10 @@ jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _u
 	Vector3 cross;
 	view.normalize();
 	up.normalize();
-	cross = up.cross(view);
+	cross = view.cross(up);
 	cross.normalize();
 	_warnif(IsOutofOne(cross.length()));
-	up = view.cross(cross);
+	up = cross.cross(view);
 	up.normalize();
 	_warnif(IsOutofOne(up.length()));
 
@@ -75,17 +75,17 @@ void jMatrixControl::refreshMatrix()
 {
 	mMat.identity();
 	mMat.setColumn(0, mCross);
-	mMat.setColumn(1, mUp);
-	mMat.setColumn(2, mView);
+	mMat.setColumn(1, mView);
+	mMat.setColumn(2, mUp);
 	mMat[12] = -mPos.dot(mCross);
-	mMat[13] = -mPos.dot(mUp);
-	mMat[14] = -mPos.dot(mView);
+	mMat[13] = -mPos.dot(mView);
+	mMat[14] = -mPos.dot(mUp);
 }
 void jMatrixControl::refreshAxis()
 {
 	Vector3 cross(mMat[0], mMat[4], mMat[8]);
-	Vector3 up(mMat[1], mMat[5], mMat[9]);
-	Vector3 view(-mMat[2], -mMat[6], -mMat[10]);
+	Vector3 view(mMat[1], mMat[5], mMat[9]);
+	Vector3 up(-mMat[2], -mMat[6], -mMat[10]);
 	cross.normalize();
 	up.normalize();
 	view.normalize();
@@ -93,8 +93,8 @@ void jMatrixControl::refreshAxis()
 
 	Matrix4 mat;
 	mat.setColumn(0, cross);
-	mat.setColumn(1, up);
-	mat.setColumn(2, -view);
+	mat.setColumn(1, view);
+	mat.setColumn(2, up);
 	mat.invert();
 	Matrix4 posMat = mMat * mat;
 	mPos = Vector3(-posMat[12], -posMat[13], -posMat[14]);

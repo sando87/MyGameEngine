@@ -19,8 +19,6 @@ private:
 
 	jModel* mModel;
 	jModel* mModelX;
-	jModel* mModelY;
-	jModel* mModelZ;
 	jShaderColor * mShader;
 	Matrix4 mWorldMat;
 };

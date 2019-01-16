@@ -23,7 +23,7 @@ void ObjCamera::setProjectionMatrix(double fovDeg, double aspect, double zNear, 
 void ObjCamera::OnStart()
 {
 	setProjectionMatrix(45, 640 / 480, 1.0, 1000.0);
-	mPos.lookat(Vector3(-200, 200, -200), Vector3(0, 0, 0), Vector3(0, 1, 0));
+	mPos.lookat(Vector3(-200, -200, 200), Vector3(0, 0, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse = [&](auto info)
 	{
 		if (info.z > 0)
@@ -33,7 +33,7 @@ void ObjCamera::OnStart()
 
 		if (info.middle & 0x80 && info.x != 0)
 		{
-			mPos.rotateAxis(Vector3(0, 0, 0), Vector3(0, 1, 0), info.x);
+			mPos.rotateAxis(Vector3(0, 0, 0), Vector3(0, 0, 1), info.x);
 		}
 	};
 }
@@ -41,6 +41,22 @@ void ObjCamera::OnUpdate()
 {
 }
 
+Matrix4 ObjCamera::getPosMat()
+{
+	Matrix4 mat;
+	Vector3 pos = mPos.getPos();
+	Vector3 cross = mPos.getCross();
+	Vector3 view = mPos.getView();
+	Vector3 up = mPos.getUp();
+	mat.identity();
+	mat.setColumn(0, cross);
+	mat.setColumn(1, up);
+	mat.setColumn(2, view);
+	mat[12] = -pos.dot(cross);
+	mat[13] = -pos.dot(up);
+	mat[14] = -pos.dot(view);
+	return mat;
+}
 /*
 void ObjCamera::setPerspInfo(double fov, double aspect, double zNear, double zFar)
 {

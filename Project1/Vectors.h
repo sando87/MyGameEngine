@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+//LeftHand System
 
 struct Vector2;
 struct Vector3;
@@ -531,7 +532,7 @@ inline Vector2& Vector2::rotate(double radian) {
 inline double Vector2::dot(const Vector2& rhs) const {
 	return (x*rhs.x + y * rhs.y);
 }
-
+//LeftHand System
 inline double Vector2::cross(const Vector2& rhs) const {
 	return (x*rhs.y - y * rhs.x);
 }
@@ -655,7 +656,7 @@ inline Vector3& Vector3::normalize() {
 inline double Vector3::dot(const Vector3& rhs) const {
 	return (x*rhs.x + y * rhs.y + z * rhs.z);
 }
-
+//LeftHand
 inline Vector3 Vector3::cross(const Vector3& rhs) const {
 	return Vector3(y*rhs.z - z * rhs.y, z*rhs.x - x * rhs.z, x*rhs.y - y * rhs.x);
 }
@@ -1029,7 +1030,7 @@ inline Vector3f& Vector3f::normalize() {
 inline float Vector3f::dot(const Vector3f& rhs) const {
 	return (x*rhs.x + y * rhs.y + z * rhs.z);
 }
-
+//LeftHand System
 inline Vector3f Vector3f::cross(const Vector3f& rhs) const {
 	return Vector3f(y*rhs.z - z * rhs.y, z*rhs.x - x * rhs.z, x*rhs.y - y * rhs.x);
 }
@@ -1254,7 +1255,7 @@ inline void Vector2n::set(int x, int y) {
 inline int Vector2n::dot(const Vector2n& vec) const {
 	return (x*vec.x + y * vec.y);
 }
-
+//LeftHand System
 inline int Vector2n::cross(const Vector2n& rhs) const {
 	return (x*rhs.y - y * rhs.x);
 }
@@ -1354,7 +1355,7 @@ inline void Vector3n::set(int x, int y, int z) {
 inline int Vector3n::dot(const Vector3n& rhs) const {
 	return (x*rhs.x + y * rhs.y + z * rhs.z);
 }
-
+//LeftHand System
 inline Vector3n Vector3n::cross(const Vector3n& rhs) const {
 	return Vector3n(y*rhs.z - z * rhs.y, z*rhs.x - x * rhs.z, x*rhs.y - y * rhs.x);
 }

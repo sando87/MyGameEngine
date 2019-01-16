@@ -9,7 +9,7 @@ public:
 	ObjCamera();
 	~ObjCamera();
 
-	Matrix4 getPosMat() { return mPos.getMatrix(); }
+	Matrix4 getPosMat();
 	Matrix4 getProjMat() { return mMatProj; }
 
 	void OnStart();

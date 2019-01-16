@@ -286,26 +286,25 @@ bool jModel::LoadPointList(vector<Vector3>& vec, float size)
 
 	return true;
 }
-bool jModel::LoadGrid(int _x, int _z, int _w, int _h, int _step)
+bool jModel::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 {
-	Vector4f color(0.0f, 1.0f, 0.0f, 1.0f);
 	vector<VertexType_Color> vertices;
 	vector<Vector2n> lines;
 
 	int left = _x;
-	int top = _z;
+	int top = _y;
 	int right = _x + _w;
-	int bottom = _z - _h;
+	int bottom = _y - _h;
 	for (int i = left; i <= right; i += _step)
 	{
 		if (i == 0)
 			continue;
 
 		VertexType_Color vert;
-		vert.c = color;
-		vert.p = Vector3f(i, 0.0f, top);
+		vert.c = Vector4f(1.0f,1.0f,1.0f,1.0f);
+		vert.p = Vector3f(i, top, 0.0f);
 		vertices.push_back(vert);
-		vert.p = Vector3f(i, 0.0f, bottom);
+		vert.p = Vector3f(i, bottom, 0.0f);
 		vertices.push_back(vert);
 
 		int cnt = vertices.size();
@@ -318,10 +317,10 @@ bool jModel::LoadGrid(int _x, int _z, int _w, int _h, int _step)
 			continue;
 
 		VertexType_Color vert;
-		vert.c = color;
-		vert.p = Vector3f(left, 0.0f, i);
+		vert.c = Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
+		vert.p = Vector3f(left, i, 0.0f);
 		vertices.push_back(vert);
-		vert.p = Vector3f(right, 0.0f, i);
+		vert.p = Vector3f(right, i, 0.0f);
 		vertices.push_back(vert);
 
 		int cnt = vertices.size();
@@ -378,189 +377,86 @@ bool jModel::LoadGrid(int _x, int _z, int _w, int _h, int _step)
 
 	return true;
 }
-bool jModel::LoadAxisX(int _len)
+bool jModel::LoadAxis(int _len)
 {
-	Vector4f color(1.0f, 0.0f, 0.0f, 1.0f);
+	float arrowLen = 0.5f;
 	vector<VertexType_Color> vertices;
 	vector<Vector2n> lines;
 
-	float arrowLen = 0.5f;
-	VertexType_Color vert;
-	vert.c = color;
-	vert.p = Vector3f(0.0f, 0.0f, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(_len, 0.0f, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(_len - arrowLen, arrowLen, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(_len - arrowLen, -arrowLen, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(_len - arrowLen, 0.0f, arrowLen);
-	vertices.push_back(vert);
-	vert.p = Vector3f(_len - arrowLen, 0.0f, -arrowLen);
-	vertices.push_back(vert);
+	{ //Axis X
+		Vector4f color(1.0f, 0.0f, 0.0f, 1.0f);
+		int baseCnt = vertices.size();
+		VertexType_Color vert;
+		vert.c = color;
+		vert.p = Vector3f(0.0f, 0.0f, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(_len, 0.0f, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(_len - arrowLen, arrowLen, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(_len - arrowLen, -arrowLen, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(_len - arrowLen, 0.0f, arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(_len - arrowLen, 0.0f, -arrowLen);
+		vertices.push_back(vert);
 
-	lines.push_back(Vector2n(0, 1));
-	lines.push_back(Vector2n(1, 2));
-	lines.push_back(Vector2n(1, 3));
-	lines.push_back(Vector2n(1, 4));
-	lines.push_back(Vector2n(1, 5));
-
-
-	m_vertexCount = vertices.size();
-	m_indexCount = lines.size() * 2;
-	m_sizeVertex = sizeof(VertexType_Color);
-
-	// 정적 정점 버퍼의 구조체를 설정합니다.
-	ID3D11Device * device = jRenderer::GetInst().GetDevice();
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType_Color) * m_vertexCount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
-	D3D11_SUBRESOURCE_DATA vertexData;
-	vertexData.pSysMem = &vertices[0];
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// 이제 정점 버퍼를 만듭니다.
-	if (FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
-	{
-		return false;
+		lines.push_back(Vector2n(baseCnt, baseCnt + 1));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 2));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 3));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 4));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 5));
 	}
 
-	// 정적 인덱스 버퍼의 구조체를 설정합니다.
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
+	{ //Axis Y
+		Vector4f color(0.0f, 1.0f, 0.0f, 1.0f);
+		int baseCnt = vertices.size();
+		VertexType_Color vert;
+		vert.c = color;
+		vert.p = Vector3f(0.0f, 0.0f, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, _len, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, _len - arrowLen, arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, _len - arrowLen, -arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(arrowLen, _len - arrowLen, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(-arrowLen, _len - arrowLen, 0.0f);
+		vertices.push_back(vert);
 
-	// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
-	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = &lines[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// 인덱스 버퍼를 생성합니다.
-	if (FAILED(device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)))
-	{
-		return false;
+		lines.push_back(Vector2n(baseCnt, baseCnt + 1));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 2));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 3));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 4));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 5));
 	}
 
-	return true;
-}
-bool jModel::LoadAxisY(int _len)
-{
-	Vector4f color(0.0f, 1.0f, 0.0f, 1.0f);
-	vector<VertexType_Color> vertices;
-	vector<Vector2n> lines;
+	{ //Axis Z
+		Vector4f color(0.0f, 0.0f, 1.0f, 1.0f);
+		int baseCnt = vertices.size();
+		VertexType_Color vert;
+		vert.c = color;
+		vert.p = Vector3f(0.0f, 0.0f, 0.0f);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, 0.0f, _len);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, arrowLen, _len - arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(0.0f, -arrowLen, _len - arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(arrowLen, 0.0f, _len - arrowLen);
+		vertices.push_back(vert);
+		vert.p = Vector3f(-arrowLen, 0.0f, _len - arrowLen);
+		vertices.push_back(vert);
 
-	float arrowLen = 0.5f;
-	VertexType_Color vert;
-	vert.c = color;
-	vert.p = Vector3f(0.0f, 0.0f, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		,_len				, 0.0f		);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		,_len - arrowLen	, arrowLen	);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		,_len - arrowLen	, -arrowLen	);
-	vertices.push_back(vert);
-	vert.p = Vector3f(arrowLen	,_len - arrowLen	, 0.0f		);
-	vertices.push_back(vert);
-	vert.p = Vector3f(-arrowLen	,_len - arrowLen	, 0.0f		);
-	vertices.push_back(vert);
-
-	lines.push_back(Vector2n(0, 1));
-	lines.push_back(Vector2n(1, 2));
-	lines.push_back(Vector2n(1, 3));
-	lines.push_back(Vector2n(1, 4));
-	lines.push_back(Vector2n(1, 5));
-
-
-	m_vertexCount = vertices.size();
-	m_indexCount = lines.size() * 2;
-	m_sizeVertex = sizeof(VertexType_Color);
-
-	// 정적 정점 버퍼의 구조체를 설정합니다.
-	ID3D11Device * device = jRenderer::GetInst().GetDevice();
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType_Color) * m_vertexCount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
-	D3D11_SUBRESOURCE_DATA vertexData;
-	vertexData.pSysMem = &vertices[0];
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// 이제 정점 버퍼를 만듭니다.
-	if (FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
-	{
-		return false;
+		lines.push_back(Vector2n(baseCnt, baseCnt + 1));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 2));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 3));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 4));
+		lines.push_back(Vector2n(baseCnt + 1, baseCnt + 5));
 	}
-
-	// 정적 인덱스 버퍼의 구조체를 설정합니다.
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
-	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = &lines[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// 인덱스 버퍼를 생성합니다.
-	if (FAILED(device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)))
-	{
-		return false;
-	}
-
-	return true;
-}
-bool jModel::LoadAxisZ(int _len)
-{
-	Vector4f color(0.0f, 0.0f, 1.0f, 1.0f);
-	vector<VertexType_Color> vertices;
-	vector<Vector2n> lines;
-
-	float arrowLen = 0.5f;
-	VertexType_Color vert;
-	vert.c = color;
-	vert.p = Vector3f(0.0f, 0.0f, 0.0f);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		,0.0f	, _len				);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		, arrowLen, _len - arrowLen	);
-	vertices.push_back(vert);
-	vert.p = Vector3f(0.0f		, -arrowLen, _len - arrowLen	);
-	vertices.push_back(vert);
-	vert.p = Vector3f(arrowLen	,0.0f	, _len - arrowLen	);
-	vertices.push_back(vert);
-	vert.p = Vector3f(-arrowLen	,0.0f	, _len - arrowLen	);
-	vertices.push_back(vert);
-
-	lines.push_back(Vector2n(0, 1));
-	lines.push_back(Vector2n(1, 2));
-	lines.push_back(Vector2n(1, 3));
-	lines.push_back(Vector2n(1, 4));
-	lines.push_back(Vector2n(1, 5));
 
 
 	m_vertexCount = vertices.size();
