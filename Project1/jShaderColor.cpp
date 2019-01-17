@@ -115,7 +115,7 @@ void jShaderColor::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _ca
 	mVertTypeSize = _model->GetVertexTypeSize();
 
 	mWorld = _worldMat.transpose();
-	mView = _camera->getPosMat().transpose();
+	mView = _camera->getPosMat_D3D().transpose();
 	mProj = _camera->getProjMat().transpose();
 	mIsWire = _isWire;
 }

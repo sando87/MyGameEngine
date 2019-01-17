@@ -6,7 +6,6 @@
 
 jMatrixControl::jMatrixControl()
 {
-	mMat.identity();
 }
 
 jMatrixControl::~jMatrixControl()
@@ -14,7 +13,6 @@ jMatrixControl::~jMatrixControl()
 }
 void jMatrixControl::init()
 {
-	mMat.identity();
 	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
 jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
@@ -36,25 +34,25 @@ jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _u
 	mUp = up;
 	mPos = _eye;
 
-	refreshMatrix();
+	//refreshMatrix();
 	return (*this);
 }
 jMatrixControl& jMatrixControl::goForward(double dist)
 {
 	mPos = mPos + mView*dist;
-	refreshMatrix();
+	//refreshMatrix();
 	return (*this);
 }
 jMatrixControl& jMatrixControl::moveTo(Vector3 pos)
 {
 	mPos = pos;
-	refreshMatrix();
+	//refreshMatrix();
 	return (*this);
 }
 jMatrixControl& jMatrixControl::goTo(Vector3 dir)
 {
 	mPos = mPos + dir;
-	refreshMatrix();
+	//refreshMatrix();
 	return (*this);
 }
 jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree)
@@ -71,16 +69,30 @@ jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, dou
 
 	return (*this);
 }
-void jMatrixControl::refreshMatrix()
+Matrix4 jMatrixControl::refreshMatrix()
 {
-	mMat.identity();
-	mMat.setColumn(0, mCross);
-	mMat.setColumn(1, mView);
-	mMat.setColumn(2, mUp);
-	mMat[12] = -mPos.dot(mCross);
-	mMat[13] = -mPos.dot(mView);
-	mMat[14] = -mPos.dot(mUp);
+	Matrix4 mat;
+	mat.identity();
+	mat.setRow(0, mCross);
+	mat.setRow(1, mView);
+	mat.setRow(2, mUp);
+	mat.setRow(3, mPos);
+	return mat;
 }
+
+void jMatrixControl::refreshAxis(Matrix4 _mat)
+{
+	Vector3 mCross(_mat[0], _mat[1], _mat[2]);
+	Vector3 mView(_mat[4], _mat[5], _mat[6]);
+	Vector3 mUp(_mat[8], _mat[9], _mat[10]);
+	Vector3 mPos(_mat[12], _mat[13], _mat[14]);
+	mCross.normalize();
+	mView.normalize();
+	mUp.normalize();
+}
+
+
+/*
 void jMatrixControl::refreshAxis()
 {
 	Vector3 cross(mMat[0], mMat[4], mMat[8]);
@@ -108,7 +120,6 @@ void jMatrixControl::refreshAxis()
 //OpenGL좌표계 (Cross:X, View:-Z, Up:Y) , Projection Mat은 고정
 //DirectX좌표계 (Cross:X, View:Z, Up:Y), Projection Mat은 고정
 
-/*
 //RightHand (Cross:X, View:Y, Up:Z) To DirectX Projection Mat
 jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {

@@ -41,7 +41,7 @@ void ObjCamera::OnUpdate()
 {
 }
 
-Matrix4 ObjCamera::getPosMat()
+Matrix4 ObjCamera::getPosMat_D3D()
 {
 	Matrix4 mat;
 	Vector3 pos = mPos.getPos();
@@ -55,6 +55,22 @@ Matrix4 ObjCamera::getPosMat()
 	mat[12] = -pos.dot(cross);
 	mat[13] = -pos.dot(up);
 	mat[14] = -pos.dot(view);
+	return mat;
+}
+Matrix4 ObjCamera::getPosMat_GL()
+{
+	Matrix4 mat;
+	Vector3 pos = mPos.getPos();
+	Vector3 cross = mPos.getCross();
+	Vector3 view = mPos.getView();
+	Vector3 up = mPos.getUp();
+	mat.identity();
+	mat.setColumn(0, cross);
+	mat.setColumn(1, up);
+	mat.setColumn(2, -view);
+	mat[12] = -pos.dot(cross);
+	mat[13] = -pos.dot(up);
+	mat[14] = pos.dot(view);
 	return mat;
 }
 /*

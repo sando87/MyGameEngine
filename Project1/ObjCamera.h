@@ -9,7 +9,8 @@ public:
 	ObjCamera();
 	~ObjCamera();
 
-	Matrix4 getPosMat();
+	Matrix4 getPosMat_D3D();
+	Matrix4 getPosMat_GL();
 	Matrix4 getProjMat() { return mMatProj; }
 
 	void OnStart();

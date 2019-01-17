@@ -10,8 +10,6 @@ private :
 	Vector3 mCross;
 	Vector3 mUp;
 	Vector3 mPos;
-	Matrix4 mMat;
-	Matrix4 mMatProj;
 
 public :
 	jMatrixControl();
@@ -19,15 +17,14 @@ public :
 
 	void		init();
 
-	Matrix4		getProjectionMat() { return mMatProj; }
-	Matrix4		getMatrix() { return mMat; }
+	Matrix4		getMatrix() { return refreshMatrix(); }
 	Vector3		getView() { return mView; }
 	Vector3		getUp() { return mUp; }
 	Vector3		getCross() { return mCross; }
 	Vector3		getPos() { return mPos; }
 
-	void		refreshMatrix();
-	void		refreshAxis();
+	Matrix4		refreshMatrix();
+	void		refreshAxis(Matrix4 _mat);
 
 	jMatrixControl&		lookat(Vector3 eye, Vector3 lookat, Vector3 up);
 	jMatrixControl&		goForward(double dist);

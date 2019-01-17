@@ -4,7 +4,6 @@
 #include <list>
 using namespace std;
 class jGameObject;
-class jMatrixControl;
 class ObjCamera;
 
 class jGameObjectMgr

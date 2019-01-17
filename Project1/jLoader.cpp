@@ -71,8 +71,8 @@ void jLoader::LoadDaeFile(string _filename)
 	{
 		Vector3f pt;
 		pt.x = stof(vecPoints[i * 3 + 0]);
-		pt.z = stof(vecPoints[i * 3 + 1]);
-		pt.y = stof(vecPoints[i * 3 + 2]);
+		pt.y = stof(vecPoints[i * 3 + 1]);
+		pt.z = stof(vecPoints[i * 3 + 2]);
 		mPos.push_back(pt);
 	}
 
@@ -85,8 +85,8 @@ void jLoader::LoadDaeFile(string _filename)
 	{
 		Vector3f nr;
 		nr.x = stof(vecNormals[i * 3 + 0]);
-		nr.z = stof(vecNormals[i * 3 + 1]);
-		nr.y = stof(vecNormals[i * 3 + 2]);
+		nr.y = stof(vecNormals[i * 3 + 1]);
+		nr.z = stof(vecNormals[i * 3 + 2]);
 		mNormal.push_back(nr);
 	}
 
