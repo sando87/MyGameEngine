@@ -60,7 +60,7 @@ void ObjTutorial1::OnStart()
 	mShaderColor->Initialize("./color.vs", "./color.ps");
 
 	mModel = new jModel();
-	mModel->Load("teapot_anim_zup.DAE");
+	mModel->Load("teapot_xyz_anim_zup.DAE");
 	//mModel->LoadSprite(Vector3f(0, 0, 0), Vector2f(0.2f, 0.2f));
 
 	mShader = new jShaderSkinned();
@@ -70,7 +70,7 @@ void ObjTutorial1::OnStart()
 	mTexture->Initialize("./stone01.tga");
 
 	mAnim = new jAnimate();
-	mAnim->Load("teapot_anim_zup.DAE");
+	mAnim->Load("teapot_xyz_anim_zup.DAE");
 
 	//int size = mAnim->mVecBones.size();
 	//vector<Vector3> vec;
@@ -114,14 +114,14 @@ void ObjTutorial1::OnDraw()
 	//}
 	//mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector2f(0.2f, 0.2f), Vector2n(mIdxUV % 5, mIdxUV / 5));
 	mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1,1,-1,0), mats);
-	mShader->Render();
+	//mShader->Render();
 
 	
-	//mShaderColor->SetParams(mModelX, mAnim->mVecBones[0].mMatWorld, &GetCamera(), true);
-	//mShaderColor->Render();
-	//
-	//mShaderColor->SetParams(mModelX, mAnim->mVecBones[1].mMatWorld, &GetCamera(), true);
-	//mShaderColor->Render();
+	mShaderColor->SetParams(mModelX, mats[0], &GetCamera(), true);
+	mShaderColor->Render();
+	
+	mShaderColor->SetParams(mModelX, mats[1], &GetCamera(), true);
+	mShaderColor->Render();
 	//
 	//mShaderColor->SetParams(mModelX, mAnim->mVecBones[2].mMatWorld, &GetCamera(), true);
 	//mShaderColor->Render();
