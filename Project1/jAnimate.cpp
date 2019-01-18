@@ -161,11 +161,10 @@ void jAnimate::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 	{
 		row[i] = Vector4(stof(matrix[i * 4 + 0]), stof(matrix[i * 4 + 1]), stof(matrix[i * 4 + 2]), stof(matrix[i * 4 + 3]));
 	}
-	bone.mMatLocal.setRow(0, row[0]);
-	bone.mMatLocal.setRow(1, row[1]);
-	bone.mMatLocal.setRow(2, row[2]);
-	bone.mMatLocal.setRow(3, row[3]);
-	bone.mMatLocal.transpose();
+	bone.mMatLocal.setColumn(0, row[0]);
+	bone.mMatLocal.setColumn(1, row[1]);
+	bone.mMatLocal.setColumn(2, row[2]);
+	bone.mMatLocal.setColumn(3, row[3]);
 
 	if (_parentBone == nullptr)
 	{

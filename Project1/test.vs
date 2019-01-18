@@ -52,10 +52,10 @@ PixelInputType jVS(VertexInputType input)
     //output.position += mul(input.position, g_bbones[input.index[1]]) * input.weight[1];
     //output.position += mul(input.position, g_bbones[input.index[2]]) * input.weight[2];
     //output.position += mul(input.position, g_bbones[input.index[3]]) * input.weight[3];
-    output.position = float4(mul(input.position, g_bbones[input.index[0]]).xyz, 1.0f) * input.weight[0];
-    output.position += float4(mul(input.position, g_bbones[input.index[1]]).xyz, 1.0f) * input.weight[1];
-    output.position += float4(mul(input.position, g_bbones[input.index[2]]).xyz, 1.0f) * input.weight[2];
-    output.position += float4(mul(input.position, g_bbones[input.index[3]]).xyz, 1.0f) * input.weight[3];
+    output.position = mul(input.position, g_bbones[input.index[0]]) * input.weight[0];
+    output.position += mul(input.position, g_bbones[input.index[1]]) * input.weight[1];
+    output.position += mul(input.position, g_bbones[input.index[2]]) * input.weight[2];
+    output.position += mul(input.position, g_bbones[input.index[3]]) * input.weight[3];
     //output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);

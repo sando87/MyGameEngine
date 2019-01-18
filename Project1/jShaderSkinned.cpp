@@ -234,8 +234,12 @@ void jShaderSkinned::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _
 	mDiffuse = _diffuse;
 	mLight = _light;
 	
-	for(int i=0; i<_mats.size(); ++i)
-		mBoneMats[i] = _mats[i];
+	for (int i = 0; i < _mats.size(); ++i)
+	{
+		Matrix4 mat = _mats[i];
+		mBoneMats[i] = mat.transpose();
+	}
+		
 }
 
 bool jShaderSkinned::Render()
