@@ -1,5 +1,6 @@
 #include "jAnimate.h"
 #include "jUtils.h"
+#include "jLog.h"
 
 jAnimate::jAnimate()
 {
@@ -48,6 +49,7 @@ bool jAnimate::LoadBoneTreeDAE(string _name)
 	jUtils::Split(boneNames, " \n", boneIndicies);
 	int cntBones = boneIndicies.size();
 	mVecBones.clear();
+	mVecBones.reserve(100);
 	mVecBones.resize(cntBones);
 	for (int i = 0; i < cntBones; ++i)
 	{
@@ -147,8 +149,15 @@ void jAnimate::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 	const char* name = nullptr;
 	_ele->QueryStringAttribute("id", &name);
 	int boneIdx = SerchBoneIndex(name);
+	_echoN(boneIdx);
 	if (boneIdx < 0)
-		return;
+	{
+		jBoneNode node;
+		node.mIndex = mVecBones.size();
+		node.mName = name;
+		mVecBones.push_back(node);
+		boneIdx = node.mIndex;
+	}
 
 	jBoneNode& bone = mVecBones[boneIdx];
 	bone.mParentBone = _parentBone;
