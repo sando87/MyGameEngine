@@ -15,16 +15,21 @@ public:
 
 	void OnStart();
 	void OnUpdate();
+	Vector3 GetViewOnMouse(int _x, int _y);
+	jMatrixControl& GetPosture() { return mPos; }
 
 private:
+	int mWidth;
+	int mHeight;
 	double mNear;
 	double mFar;
-	double mFov;
+	double mFovDegHori;
+	double mFovDegVerti;
 	double mAspect;  // Width/Height
 	Matrix4 mMatProj;
 	jMatrixControl mPos;
 
-	void		setProjectionMatrix(double fovDeg, double aspect, double zNear, double zFar);
+	void		setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar);
 	//void		setPerspInfo(double fov, double aspect, double zNear, double zFar);
 	//void		getFrustumInfo(float& left, float& right, float& bottom, float& top, float& zNear, float& zFar);
 	//void		getOrthofInfo(float& left, float& right, float& bottom, float& top, float& zNear, float& zFar);

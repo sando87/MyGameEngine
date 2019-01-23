@@ -146,8 +146,7 @@ bool jInput::Update()
 	{
 		jMouseInfo info;
 		memcpy(&info, &m_mouseState, sizeof(info));
-		if(mMouse != nullptr)
-			mMouse(info);
+		mMouse(info);
 	}
 	
 	if (isKeyIN())

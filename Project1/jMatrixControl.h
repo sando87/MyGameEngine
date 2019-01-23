@@ -27,6 +27,7 @@ public :
 	void		refreshAxis(Matrix4 _mat);
 
 	jMatrixControl&		lookat(Vector3 eye, Vector3 lookat, Vector3 up);
+	jMatrixControl&		lookat(Vector3 view);
 	jMatrixControl&		goForward(double dist);
 	jMatrixControl&		moveTo(Vector3 pos);
 	jMatrixControl&		goTo(Vector3 dir);

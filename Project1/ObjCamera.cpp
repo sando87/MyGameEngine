@@ -1,6 +1,7 @@
 #include "ObjCamera.h"
 #include "jUtils.h"
 #include "jInput.h"
+#include "jMath.h"
 
 ObjCamera::ObjCamera()
 {
@@ -10,27 +11,33 @@ ObjCamera::ObjCamera()
 ObjCamera::~ObjCamera()
 {
 }
-void ObjCamera::setProjectionMatrix(double fovDeg, double aspect, double zNear, double zFar)
+void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar)
 {
+	mWidth = _width;
+	mHeight = _height;
+	double aspect = (double)_width / _height;
 	jUtils::GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
 
 	mNear = zNear;
 	mFar = zFar;
-	mFov = fovDeg;
+	mFovDegHori = fovDeg;
 	mAspect = aspect;
+	double mFovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) / aspect);
+	mFovDegVerti = RadToDeg(mFovRadVerti);
+	mFovDegVerti *= 2;
 }
 
 void ObjCamera::OnStart()
 {
-	setProjectionMatrix(45, 640 / 480, 1.0, 1000.0);
+	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
 	mPos.lookat(Vector3(-200, -200, 200), Vector3(0, 0, 0), Vector3(0, 0, 1));
-	jInput::GetInst().mMouse = [&](auto info)
+	jInput::GetInst().mMouse += [&](auto info)
 	{
 		if (info.z > 0)
 			mPos.goForward(10.0f);
 		else if(info.z < 0)
 			mPos.goForward(-10.0f);
-
+	
 		if (info.middle & 0x80 && info.x != 0)
 		{
 			mPos.rotateAxis(Vector3(0, 0, 0), Vector3(0, 0, 1), info.x);
@@ -39,6 +46,17 @@ void ObjCamera::OnStart()
 }
 void ObjCamera::OnUpdate()
 {
+}
+
+Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
+{
+	Position4 pt(0.5, 0, 0.999998, 1);
+	Position4 camPt = pt * getProjMat().invert();
+	Position4 projPt = camPt * getPosMat_D3D().invert();
+	Position3 worldPt(projPt.x / projPt.w, projPt.y / projPt.w, projPt.z / projPt.w);
+	Vector3 view = worldPt - mPos.getPos();
+
+	return view.normalize();
 }
 
 Matrix4 ObjCamera::getPosMat_D3D()

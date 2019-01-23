@@ -15,6 +15,11 @@ void jMatrixControl::init()
 {
 	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
+jMatrixControl& jMatrixControl::lookat(Vector3 view)
+{
+	lookat(mPos, mPos + view, Vector3(0,0,1));
+	return (*this);
+}
 jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;

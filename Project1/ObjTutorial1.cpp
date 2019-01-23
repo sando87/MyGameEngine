@@ -11,6 +11,7 @@
 #include "jShaderSprite.h"
 #include "jShaderSkinned.h"
 #include "jShaderColor.h"
+#include "jLine3D.h"
 
 ObjTutorial1::ObjTutorial1()
 {
@@ -81,6 +82,24 @@ void ObjTutorial1::OnStart()
 	//}
 	//mModel->LoadPointList(vec, 0.01f);
 
+	jInput::GetInst().mMouse += [&](auto info)
+	{
+		if (info.left & 0x80)
+		{
+			//static bool tt = true;
+			//if (tt)
+			{
+				Vector3 view = GetCamera().GetViewOnMouse(480, 240);
+				jLine3D line(GetCamera().GetPosture().getPos(), view);
+				Position2 pt = line.GetXY(0);
+				_echoF(pt.x);
+				_echoF(pt.y);
+				//GetCamera().GetPosture().lookat(view);
+				//tt = false;
+			}
+		}
+	};
+
 	jInput::GetInst().mKeyboard = [&](auto keys)
 	{
 		//jSound::GetInst().PlayWaveFile();
@@ -114,7 +133,7 @@ void ObjTutorial1::OnDraw()
 	//}
 	//mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector2f(0.2f, 0.2f), Vector2n(mIdxUV % 5, mIdxUV / 5));
 	mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1,1,-1,0), mats);
-	mShader->Render();
+	//mShader->Render();
 
 	mShaderColor->SetParams(mModelX, mats[0], &GetCamera(), true);
 	mShaderColor->Render();

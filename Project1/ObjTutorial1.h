@@ -1,6 +1,7 @@
 #pragma once
 #include "jGameObject.h"
 #include "Matrices.h"
+#include "jInput.h"
 class jShaderSkinned;
 class jShaderSprite;
 class jShaderColor;

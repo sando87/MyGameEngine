@@ -3,6 +3,7 @@
 
 #include "header.h"
 #include <functional>
+#include "jFuncPtrList.h"
 
 class jInput
 {
@@ -26,7 +27,8 @@ public:
 	void Release();
 	bool Update();
 
-	std::function<void(jMouseInfo)> mMouse;
+	jFuncPtrList<void(jMouseInfo)> mMouse;
+	//std::function<void(jMouseInfo)> mMouse;
 	std::function<void(const unsigned char*)> mKeyboard;
 
 private:

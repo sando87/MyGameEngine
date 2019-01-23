@@ -125,6 +125,8 @@
     <ClCompile Include="jAnimate.cpp" />
     <ClCompile Include="jBaseShader.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
+    <ClCompile Include="jFuncPtrList.cpp" />
+    <ClCompile Include="jLine3D.cpp" />
     <ClCompile Include="jMatrixControl.cpp" />
     <ClCompile Include="jShaderSkinned.cpp" />
     <ClCompile Include="jGameObject.cpp" />
@@ -154,6 +156,8 @@
     <ClInclude Include="jAnimate.h" />
     <ClInclude Include="jBaseShader.h" />
     <ClInclude Include="jBoneNode.h" />
+    <ClInclude Include="jFuncPtrList.h" />
+    <ClInclude Include="jLine3D.h" />
     <ClInclude Include="jMatrixControl.h" />
     <ClInclude Include="jShaderSkinned.h" />
     <ClInclude Include="jGameObject.h" />

@@ -149,7 +149,6 @@ void jAnimate::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 	const char* name = nullptr;
 	_ele->QueryStringAttribute("id", &name);
 	int boneIdx = SerchBoneIndex(name);
-	_echoN(boneIdx);
 	if (boneIdx < 0)
 	{
 		jBoneNode node;
