@@ -99,6 +99,12 @@
     <ClCompile Include="jLine3D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ObjDiablo.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderDiablo.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -189,6 +195,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jLine3D.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjDiablo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderDiablo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jGlobalStruct.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -113,6 +113,7 @@ void jShaderColor::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _ca
 	mIdxBuf = _model->GetIndexBuffer();
 	mIndexCount = _model->GetIndexCount();
 	mVertTypeSize = _model->GetVertexTypeSize();
+	mIsIndexTwo = _model->IsIndiciesStrideTwo();
 
 	mWorld = _worldMat.transpose();
 	mView = _camera->getPosMat_D3D().transpose();
@@ -131,7 +132,7 @@ bool jShaderColor::Render()
 	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	pDevContext->IASetIndexBuffer(mIdxBuf, mIsIndexTwo ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0);
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
 	if(mIsWire)

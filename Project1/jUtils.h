@@ -24,6 +24,7 @@ public:
 	static void GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far);
 	static void Split(string _str, const char* _del, vector<string>& _vec);
 	static bool LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf);
+	static void ForEachFiles(const char* _path, void(*_func)(char* _filename));
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);

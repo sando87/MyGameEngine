@@ -3,6 +3,7 @@
 #include "jLog.h"
 #include <sstream>
 #include <iostream>
+#include <Windows.h>
 
 jUtils::jUtils()
 {
@@ -134,4 +135,25 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 	targaImage = nullptr;
 
 	return true;
+}
+
+//example path is like "D:\\temp\\*.*";
+void jUtils::ForEachFiles(const char* _path, void(*_func)(char* _filename))
+{
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	hFind = FindFirstFile(_path, &data);
+	if (hFind != INVALID_HANDLE_VALUE) 
+	{
+		do {
+			if (strncmp(data.cFileName, ".", 260) == 0)
+				continue;
+			if (strncmp(data.cFileName, "..", 260) == 0)
+				continue;
+
+			_func(data.cFileName);
+
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
 }

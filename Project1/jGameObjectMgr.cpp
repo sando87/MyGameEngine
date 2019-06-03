@@ -4,6 +4,7 @@
 #include "ObjTutorial1.h"
 #include "ObjCamera.h"
 #include "ObjGroundAxis.h"
+#include "ObjDiablo.h"
 
 jGameObjectMgr::jGameObjectMgr()
 {
@@ -24,6 +25,8 @@ bool jGameObjectMgr::Initialize()
 	obj->AddToMgr();
 	ObjTutorial1* obj2 = new ObjTutorial1();
 	obj2->AddToMgr();
+	ObjDiablo* obj3 = new ObjDiablo();
+	obj3->AddToMgr();
 	return true;
 }
 
