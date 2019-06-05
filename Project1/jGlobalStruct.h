@@ -24,6 +24,15 @@ struct VertexType_Color
 	Vector3f p;
 	Vector4f c;
 };
+struct VertexType_Diablo
+{
+	Vector3f p;
+	char n[4];
+	char c1[4];
+	char c2[4];
+	char t1[4];
+	char t2[4];
+};
 
 struct MyBuffer {
 	char type;

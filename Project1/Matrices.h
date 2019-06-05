@@ -22,6 +22,8 @@
 #include <iostream>
 #include "Vectors.h"
 
+class Matrix4f;
+
 ///////////////////////////////////////////////////////////////////////////
 // 2x2 matrix
 ///////////////////////////////////////////////////////////////////////////
@@ -143,6 +145,7 @@ public:
             double yx, double yy, double yz, double yw,
             double zx, double zy, double zz, double zw,
             double wx, double wy, double wz, double ww);
+	Matrix4(const Matrix4f& _m);
 
     void        set(const double src[16]);
     void        set(double xx, double xy, double xz, double xw,
@@ -181,6 +184,7 @@ public:
     Matrix4&    scale(double sx, double sy, double sz);    // scale by (sx, sy, sz) on each axis
 
     // operators
+	Matrix4&		operator=(const Matrix4f& _m);
     Matrix4     operator+(const Matrix4& rhs) const;    // add rhs
     Matrix4     operator-(const Matrix4& rhs) const;    // subtract rhs
     Matrix4&    operator+=(const Matrix4& rhs);         // add rhs and update this object
@@ -274,10 +278,24 @@ public:
 		return *this;
 	}
 	const float* get() const { return m; }
+
+	float       operator[](int index) const;
+	float&	 operator[](int index);
+
+	Matrix4f& transpose();
 private:
 	float m[16];
 };
 
+
+inline float Matrix4f::operator[](int index) const
+{
+	return m[index];
+}
+inline float& Matrix4f::operator[](int index)
+{
+	return m[index];
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // inline functions for Matrix2
@@ -720,6 +738,13 @@ inline Matrix4::Matrix4(double xx, double xy, double xz, double xw,
     set(xx, xy, xz, xw,  yx, yy, yz, yw,  zx, zy, zz, zw,  wx, wy, wz, ww);
 }
 
+inline Matrix4::Matrix4(const Matrix4f& _m)
+{
+	m[0] = (double)_m[0];		m[1] = (double)_m[1];		m[2] = (double)_m[2];		m[3] = (double)_m[3];
+	m[4] = (double)_m[4];		m[5] = (double)_m[5];		m[6] = (double)_m[6];		m[7] = (double)_m[7];
+	m[8] = (double)_m[8];		m[9] = (double)_m[9];		m[10] = (double)_m[10];	m[11] = (double)_m[11];
+	m[12] = (double)_m[12];	m[13] = (double)_m[13];	m[14] = (double)_m[14];	m[15] = (double)_m[15];
+}
 
 
 inline void Matrix4::set(const double src[16])
@@ -820,7 +845,14 @@ inline Matrix4& Matrix4::identity()
 }
 
 
-
+inline Matrix4&	 Matrix4::operator=(const Matrix4f& _m)
+{
+	m[0] = (double)_m[0];		m[1] = (double)_m[1];		m[2] = (double)_m[2];		m[3] = (double)_m[3];
+	m[4] = (double)_m[4];		m[5] = (double)_m[5];		m[6] = (double)_m[6];		m[7] = (double)_m[7];
+	m[8] = (double)_m[8];		m[9] = (double)_m[9];		m[10] = (double)_m[10];		m[11] = (double)_m[11];
+	m[12] = (double)_m[12];		m[13] = (double)_m[13];		m[14] = (double)_m[14];		m[15] = (double)_m[15];
+	return *this;
+}
 inline Matrix4 Matrix4::operator+(const Matrix4& rhs) const
 {
     return Matrix4(m[0]+rhs[0],   m[1]+rhs[1],   m[2]+rhs[2],   m[3]+rhs[3],

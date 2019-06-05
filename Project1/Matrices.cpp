@@ -23,6 +23,17 @@
 const double DEG2RAD = 3.14159265358979323846 / 180;
 
 
+Matrix4f& Matrix4f::transpose()
+{
+	std::swap(m[1], m[4]);
+	std::swap(m[2], m[8]);
+	std::swap(m[3], m[12]);
+	std::swap(m[6], m[9]);
+	std::swap(m[7], m[13]);
+	std::swap(m[11], m[14]);
+
+	return *this;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // return the determinant of 2x2 matrix

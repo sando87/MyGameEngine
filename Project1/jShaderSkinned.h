@@ -53,6 +53,7 @@ private:
 	ID3D11SamplerState* mSampleState;
 
 public:
+	jModel *mModel;
 	ID3D11ShaderResourceView * mTexture;
 	ID3D11Buffer* mVertBuf;
 	ID3D11Buffer* mIdxBuf;

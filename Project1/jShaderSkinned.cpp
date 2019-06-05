@@ -221,6 +221,8 @@ void jShaderSkinned::Release()
 
 void jShaderSkinned::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, jTexture * _texture, Vector4f _diffuse, Vector4f _light, vector<Matrix4>& _mats)
 {
+	mModel = _model;
+
 	mTexture = _texture->mTextureView;
 	mVertBuf = _model->GetVertexBuffer();;
 	mIdxBuf = _model->GetIndexBuffer();
@@ -253,7 +255,10 @@ bool jShaderSkinned::Render()
 	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	if(mModel->IsIndiciesStrideTwo())
+		pDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R16_UINT, 0);
+	else
+		pDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
 	pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -294,7 +299,7 @@ bool jShaderSkinned::Render()
 	dataPtrMaterial->specular = mDiffuse;
 	dataPtrMaterial->shininess = mDiffuse;
 	pDevContext->Unmap(mMaterialBuffer, 0);
-	pDevContext->PSSetConstantBuffers(0, 2, &mMaterialBuffer);
+	pDevContext->PSSetConstantBuffers(0, 1, &mMaterialBuffer);
 
 	// light constant buffer를 잠글 수 있도록 기록한다.
 	if (FAILED(pDevContext->Map(mLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
@@ -307,7 +312,7 @@ bool jShaderSkinned::Render()
 	dataPtrLight->color = mLight;
 	dataPtrLight->reserve = mLight;
 	pDevContext->Unmap(mLightBuffer, 0);
-	pDevContext->PSSetConstantBuffers(1, 2, &mLightBuffer);
+	pDevContext->PSSetConstantBuffers(1, 1, &mLightBuffer);
 
 	// 픽셀 셰이더에서 셰이더 텍스처 리소스를 설정합니다.
 	pDevContext->PSSetShaderResources(0, 1, &mTexture);

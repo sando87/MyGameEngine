@@ -3,6 +3,9 @@
 #include "jGameObject.h"
 class jModel;
 class jShaderDiablo;
+class jShaderColor;
+class jShaderSkinned;
+class jTexture;
 
 class ObjDiablo : public jGameObject
 {
@@ -16,6 +19,7 @@ private:
 	void OnDraw();
 
 	jModel* mModel;
-	jShaderDiablo * mShader;
+	jShaderSkinned * mShader;
+	jTexture * mTexture;
 };
 

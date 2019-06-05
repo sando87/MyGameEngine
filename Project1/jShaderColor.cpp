@@ -128,11 +128,21 @@ bool jShaderColor::Render()
 	unsigned int stride = mVertTypeSize;
 	unsigned int offset = 0;
 
+	ID3D11RasterizerState* state;
+	ID3D11RasterizerState* stateNew;
+	pDevContext->RSGetState(&state);
+	D3D11_RASTERIZER_DESC desc;
+	state->GetDesc(&desc);
+	desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+	jRenderer::GetInst().GetDevice()->CreateRasterizerState(&desc, &stateNew);
+	pDevContext->RSSetState(stateNew);
+
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetIndexBuffer(mIdxBuf, mIsIndexTwo ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0);
+	pDevContext->IASetIndexBuffer(mIdxBuf, mIsIndexTwo ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0); 
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
 	if(mIsWire)
@@ -152,8 +162,6 @@ bool jShaderColor::Render()
 	dataPtr->projection = mProj;
 	pDevContext->Unmap(mMatrixBuffer, 0);
 	pDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
-
-
 
 	// 정점 입력 레이아웃을 설정합니다.
 	pDevContext->IASetInputLayout(mLayout);

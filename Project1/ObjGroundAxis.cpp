@@ -39,7 +39,7 @@ void ObjGroundAxis::OnStart()
 	mModel->LoadGrid(-100, 100, 200, 200, 10);
 
 	mModelX = new jModel();
-	mModelX->LoadAxis(100);
+	mModelX->LoadAxis(10);
 
 	mShader = new jShaderColor();
 	mShader->Initialize("./color.vs", "./color.ps");

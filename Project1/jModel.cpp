@@ -514,11 +514,15 @@ bool jModel::LoadAxis(int _len)
 bool jModel::LoadDiablo()
 {
 	{
-		FILE *pFileVert = NULL, *pFileIndex = NULL;
-		MyBuffer *pDataVert = NULL, *pDataIndex = NULL;
-		int filesizeVert, filesizeIndex = 0;
-		fopen_s(&pFileVert, "D:\\temp\\vertexBuf_0_0_0000023AC0D4FA20.dump", "rb"); // vertexBuf_0_1_0000023AC0D51860
-		fopen_s(&pFileIndex, "D:\\temp\\indexBuf_0_0_0000023AC0D54460.dump", "rb");
+		FILE *pFileVert = NULL, *pFileIndex = NULL, *pFileCV = NULL;
+		MyBuffer *pDataVert = NULL, *pDataIndex = NULL, *pDataCV = NULL;
+		int filesizeVert, filesizeIndex = 0, filesizeCV = 0;
+		//fopen_s(&pFileVert, "D:\\temp_1\\vertexBuf_000001C8350369A0_0_0.dump", "rb"); 
+		//fopen_s(&pFileIndex, "D:\\temp_1\\indexBuf_000001C835036160_0.dump", "rb");
+
+		fopen_s(&pFileVert, "D:\\temp\\vertexBuf_1_0_0000023AB0DE0EE0.dump", "rb"); 
+		fopen_s(&pFileIndex, "D:\\temp\\indexBuf_1_0_0000023AB0DE1460.dump", "rb");
+		fopen_s(&pFileCV, "D:\\temp\\VSConstBuf_0000023A5B54C5E0.dump", "rb");
 
 		fseek(pFileVert, 0, SEEK_END);
 		filesizeVert = ftell(pFileVert);
@@ -526,44 +530,84 @@ bool jModel::LoadDiablo()
 		fseek(pFileIndex, 0, SEEK_END);
 		filesizeIndex = ftell(pFileIndex);
 		fseek(pFileIndex, 0, SEEK_SET);
+		fseek(pFileCV, 0, SEEK_END);
+		filesizeCV = ftell(pFileCV);
+		fseek(pFileCV, 0, SEEK_SET);
 
 		pDataVert = (MyBuffer*)malloc(filesizeVert);
 		fread_s(pDataVert, filesizeVert, filesizeVert, 1, pFileVert);
 		pDataIndex = (MyBuffer*)malloc(filesizeIndex);
 		fread_s(pDataIndex, filesizeIndex, filesizeIndex, 1, pFileIndex);
+		pDataCV = (MyBuffer*)malloc(filesizeCV);
+		fread_s(pDataCV, filesizeCV, filesizeCV, 1, pFileCV);
+		CBMain* cbm = (CBMain*)pDataCV->data;
 
-		m_sizeVertex = 32;
+		m_sizeVertex = sizeof(VertexType_Weight);
 		m_sizeIndex = 2;
-		m_vertexCount = pDataVert->desc.ByteWidth / m_sizeVertex;
+		m_vertexCount = pDataVert->desc.ByteWidth / 32;
 		m_indexCount = pDataIndex->desc.ByteWidth / m_sizeIndex;
+		m_indexCount = 1833; //1695; 1833;
 
-		//vector<VertexType_Color> verticies;
-		//char* tmp = pDataVert->data;
-		//for (int i = 0; i < m_vertexCount; ++i)
+		vector<VertexType_Weight> verticies;
+		VertexType_Diablo* tmp = (VertexType_Diablo*)pDataVert->data;
+		for (int i = 0; i < m_vertexCount; ++i)
+		{
+			VertexType_Weight vert;
+			vert.p = tmp[i].p;
+			vert.n = Vector3f(0.0f, 0.0f, 1.0f);
+			vert.weight.x = 1.0f;
+
+			Vector4f tmp1;
+			tmp1.x = (unsigned char)tmp[i].t1[1];
+			tmp1.y = (unsigned char)tmp[i].t1[0];
+			tmp1.z = (unsigned char)tmp[i].t1[3];
+			tmp1.w = (unsigned char)tmp[i].t1[2];
+
+			Vector4f tmp2;
+			tmp2.x = tmp1.y * 0.003906f + tmp1.x;
+			tmp2.y = tmp1.w * 0.003906f + tmp1.z;
+			tmp2.x = tmp2.x * 0.5f - 64.0f;
+			tmp2.y = tmp2.y * 0.5f - 64.0f;
+			tmp2.z = 1.0f;
+
+			Vector4f tmp3;
+			tmp3.x = tmp2.x * cbm->matTex1[0] + tmp2.y * cbm->matTex1[1] + tmp2.z * cbm->matTex1[3] + tmp2.x * cbm->matTex1[0];
+			tmp3.y = tmp2.x * cbm->matTex1[4] + tmp2.y * cbm->matTex1[5] + tmp2.z * cbm->matTex1[7] + tmp2.x * cbm->matTex1[4];
+			tmp3.z = tmp2.x * cbm->matTex1[8] + tmp2.y * cbm->matTex1[9] + tmp2.z * cbm->matTex1[11] + tmp2.x * cbm->matTex1[8];
+			tmp3.w = tmp2.x * cbm->matTex1[12] + tmp2.y * cbm->matTex1[13] + tmp2.z * cbm->matTex1[15] + tmp2.x * cbm->matTex1[12];
+			
+			vert.t.x = tmp3.x;
+			vert.t.y = tmp3.y;
+			
+			verticies.push_back(vert);
+		}
+
+		//vector<unsigned short> indicies;
+		//tmp = pDataIndex->data;
+		//for (int i = 0; i < m_indexCount; ++i)
 		//{
-		//	VertexType_Color vert;
-		//	memcpy(&vert.p, tmp, sizeof(float) * 3);
-		//	vert.c = Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
-		//	tmp += 32;
-		//	verticies.push_back(vert);
+		//	unsigned short vert;
+		//	memcpy(&vert, tmp, 2);
+		//	tmp += 2;
+		//	indicies.push_back(vert);
 		//}
 
 		// 정적 정점 버퍼의 구조체를 설정합니다.
 		ID3D11Device * device = jRenderer::GetInst().GetDevice();
-		//D3D11_BUFFER_DESC vertexBufferDesc;
-		//vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		//vertexBufferDesc.ByteWidth = sizeof(VertexType_Color) * m_vertexCount;
-		//vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		//vertexBufferDesc.CPUAccessFlags = 0;
-		//vertexBufferDesc.MiscFlags = 0;
-		//vertexBufferDesc.StructureByteStride = 0;
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
 
 		// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
 		D3D11_SUBRESOURCE_DATA vertexData;
-		vertexData.pSysMem = pDataVert->data;
+		vertexData.pSysMem = &verticies[0];
 		vertexData.SysMemPitch = 0;
 		vertexData.SysMemSlicePitch = 0;
-		if (FAILED(device->CreateBuffer(&pDataVert->desc, &vertexData, &m_vertexBuffer)))
+		if (FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
 		{
 			return false;
 		}
@@ -579,10 +623,13 @@ bool jModel::LoadDiablo()
 
 		fclose(pFileVert);
 		fclose(pFileIndex);
+		fclose(pFileCV);
 		if (pDataVert)
 			free(pDataVert);
 		if (pDataIndex)
 			free(pDataIndex);
+		if (pDataCV)
+			free(pDataCV);
 	}
 	
 	{
@@ -590,15 +637,15 @@ bool jModel::LoadDiablo()
 		MyBuffer *pData = NULL;
 		int filesize = 0;
 		fopen_s(&pFile, "D:\\temp\\vertexBuf_0_1_0000023AC0D51860.dump", "rb");
-
+	
 		fseek(pFile, 0, SEEK_END);
 		filesize = ftell(pFile);
 		fseek(pFile, 0, SEEK_SET);
-
+	
 		pData = (MyBuffer*)malloc(filesize);
 		fread_s(pData, filesize, filesize, 1, pFile);
-
-
+	
+	
 		ID3D11Device * device = jRenderer::GetInst().GetDevice();
 		D3D11_SUBRESOURCE_DATA vertexData;
 		vertexData.pSysMem = pData->data;
@@ -608,7 +655,7 @@ bool jModel::LoadDiablo()
 		{
 			return false;
 		}
-
+	
 		fclose(pFile);
 		if (pData)
 			free(pData);
