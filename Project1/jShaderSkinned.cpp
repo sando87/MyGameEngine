@@ -93,7 +93,7 @@ bool jShaderSkinned::Initialize(string _vsFilename, string _psFilename)
 	// 행렬 상수 버퍼의 구조체를 작성합니다.
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBoneBufferType);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
@@ -269,7 +269,7 @@ bool jShaderSkinned::Render()
 	{
 		return false;
 	}
-	MatrixBufferType* dataPtr = (MatrixBufferType*)mappedResource.pData;
+	MatrixBoneBufferType* dataPtr = (MatrixBoneBufferType*)mappedResource.pData;
 	dataPtr->world = mWorld;
 	dataPtr->view = mView;
 	dataPtr->projection = mProj;

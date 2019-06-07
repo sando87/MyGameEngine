@@ -6,6 +6,63 @@
 
 #pragma pack(push, 1)
 
+
+#define MYRES_TYPE_CreateBuffer	'b'
+#define MYRES_TYPE_CreateLayout	'l'
+#define MYRES_TYPE_CreateVS		'v'
+#define MYRES_TYPE_CreatePS		'p'
+#define MYRES_TYPE_CreateTex	't'
+#define MYRES_TYPE_CreateSample	's'
+
+struct MyResBase
+{
+	unsigned int type;
+	void * addr;
+	unsigned int crc;
+	unsigned int onlyDataSize;
+	unsigned int reserve1;
+	unsigned int reserve2;
+	unsigned int reserve3;
+};
+
+struct MyRes_CreateBuffer
+{
+	MyResBase head; // reserve1 = vertexstride;
+	D3D11_BUFFER_DESC desc;
+	char data[];
+};
+
+struct MyRes_CreateLayout
+{
+	MyResBase head; // reserve1 = numElements;
+	char data[];
+	unsigned int GetStride(int slotIndex);
+	unsigned int GetTextureOffset(int _index);
+};
+
+struct MyRes_CreateShader
+{
+	MyResBase head;
+	char data[];
+};
+
+struct MyRes_CreateTexture
+{
+	MyResBase head;
+	D3D11_TEXTURE2D_DESC desc;
+	char data[];
+};
+
+
+
+
+
+
+struct VertexType_Texture
+{
+	Vector3f p;
+	Vector2f t;
+};
 struct VertexType_Weight
 {
 	Vector3f p;
@@ -47,6 +104,35 @@ struct MyLayout {
 	char type;
 	char numEle;
 	D3D11_INPUT_ELEMENT_DESC desc[];
+};
+
+
+struct MatrixBufferType //should be 16byte aligned
+{
+	Matrix4f world;
+	Matrix4f view;
+	Matrix4f projection;
+};
+struct MatrixBoneBufferType //should be 16byte aligned
+{
+	Matrix4f world;
+	Matrix4f view;
+	Matrix4f projection;
+	Matrix4f bones[43];
+};
+struct MaterialBufferType //should be 16byte aligned
+{
+	Vector4f ambient;
+	Vector4f diffuse;
+	Vector4f specular;
+	Vector4f shininess;
+};
+struct LightBufferType //should be 16byte aligned
+{
+	Vector4f position;
+	Vector4f direction;
+	Vector4f color;
+	Vector4f reserve;
 };
 
 struct CBMain

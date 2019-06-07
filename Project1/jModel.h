@@ -3,6 +3,7 @@
 
 #include "header.h"
 #include "Vectors.h"
+struct MyResBase;
 
 class jModel
 {
@@ -14,6 +15,8 @@ public:
 	bool LoadPointList(vector<Vector3>& vec, float size);
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);
 	bool LoadAxis(int _len);
+	bool LoadDiablo_color();
+	bool LoadDiablo_FromRes(MyResBase* _res, MyResBase* _layout);
 	bool LoadDiablo();
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
 	void Release();

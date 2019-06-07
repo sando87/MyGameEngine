@@ -1,6 +1,7 @@
 #pragma once
 #include "jBaseShader.h"
 #include "Matrices.h"
+#include "jGlobalStruct.h"
 
 class jModel;
 class ObjCamera;
@@ -9,15 +10,6 @@ class ObjCamera;
 class jShaderColor :
 	public jBaseShader
 {
-
-private:
-	struct MatrixBufferType //should be 16byte aligned
-	{
-		Matrix4f world;
-		Matrix4f view;
-		Matrix4f projection;
-	};
-
 public:
 	jShaderColor();
 	virtual ~jShaderColor();

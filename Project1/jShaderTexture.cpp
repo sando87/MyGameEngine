@@ -1,25 +1,27 @@
-#include "jShaderColor.h"
+#include "jShaderTexture.h"
+#include "jGameObjectMgr.h"
+#include "jTexture.h"
 #include "jModel.h"
 #include "ObjCamera.h"
 
-jShaderColor::jShaderColor()
+jShaderTexture::jShaderTexture()
 {
 	mLayout = nullptr;
 	mMatrixBuffer = nullptr;
-	mVertBuf = nullptr;
-	mIdxBuf = nullptr;
-	mIndexCount = 0;
-	mVertTypeSize = 0;
-	mIsWire = false;
+	mSampleState = nullptr;
+	mTexture = nullptr;
+	mWorld.identity();
 }
 
-jShaderColor::~jShaderColor()
+
+jShaderTexture::~jShaderTexture()
 {
 	Release();
 }
 
-bool jShaderColor::Initialize(string _vsFilename, string _psFilename)
+bool jShaderTexture::Initialize(string _vsFilename, string _psFilename)
 {
+	//Shader Compile & CreateShader Interface
 	ID3D11Device* pDev = jRenderer::GetInst().GetDevice();
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
 	ID3D10Blob* vertexShaderBuffer = CompileVertexShader(_vsFilename);
@@ -27,8 +29,7 @@ bool jShaderColor::Initialize(string _vsFilename, string _psFilename)
 	if (vertexShaderBuffer == nullptr || pixelShaderBuffer == nullptr)
 		return false;
 
-	// 정점 입력 레이아웃 구조체를 설정합니다.
-	// 이 설정은 ModelClass와 셰이더의 VertexType 구조와 일치해야합니다.
+	//CreateLayout Interface
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
@@ -37,33 +38,25 @@ bool jShaderColor::Initialize(string _vsFilename, string _psFilename)
 	polygonLayout[0].AlignedByteOffset = 0;
 	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[0].InstanceDataStepRate = 0;
-
-	polygonLayout[1].SemanticName = "COLOR";
+	polygonLayout[1].SemanticName = "TEXCOORD";
 	polygonLayout[1].SemanticIndex = 0;
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	polygonLayout[1].InputSlot = 0;
 	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
-
-	// 레이아웃의 요소 수를 가져옵니다.
 	unsigned int numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
-	// 정점 입력 레이아웃을 만듭니다.
 	if (FAILED(pDev->CreateInputLayout(polygonLayout, numElements,
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &mLayout)))
-	{
 		return false;
-	}
 
 	// 더 이상 사용되지 않는 정점 셰이더 퍼버와 픽셀 셰이더 버퍼를 해제합니다.
 	vertexShaderBuffer->Release();
 	vertexShaderBuffer = nullptr;
-
 	pixelShaderBuffer->Release();
 	pixelShaderBuffer = nullptr;
 
-	// 행렬 상수 버퍼의 구조체를 작성합니다.
+	//CreateBufferInterface
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
@@ -72,83 +65,57 @@ bool jShaderColor::Initialize(string _vsFilename, string _psFilename)
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 	if (FAILED(pDev->CreateBuffer(&matrixBufferDesc, NULL, &mMatrixBuffer)))
-	{
 		return false;
-	}
+
+	//Create SamplerState
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	if (FAILED(pDev->CreateSamplerState(&samplerDesc, &mSampleState)))
+		return false;
 
 	return true;
 }
-
-void jShaderColor::Release()
+void jShaderTexture::Release()
 {
-	if (mMatrixBuffer)
-	{
-		mMatrixBuffer->Release();
-		mMatrixBuffer = nullptr;
-	}
-
-	// 레이아웃을 해제합니다.
-	if (mLayout)
-	{
-		mLayout->Release();
-		mLayout = nullptr;
-	}
-
-	jBaseShader::Release();
-
+	if (mLayout) mLayout->Release();
+	if (mMatrixBuffer) mMatrixBuffer->Release();
+	if (mSampleState) mSampleState->Release();
 	mLayout = nullptr;
 	mMatrixBuffer = nullptr;
-	mVertBuf = nullptr;
-	mIdxBuf = nullptr;
-	mIndexCount = 0;
-	mVertTypeSize = 0;
-	mWorld.identity();
-	mView.identity();
-	mProj.identity();
+	mSampleState = nullptr;
 }
-
-void jShaderColor::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, bool _isWire)
+bool jShaderTexture::Render()
 {
-	mVertBuf = _model->GetVertexBuffer();;
-	mIdxBuf = _model->GetIndexBuffer();
-	mIndexCount = _model->GetIndexCount();
-	mVertTypeSize = _model->GetVertexTypeSize();
-	mIsIndexTwo = _model->IsIndiciesStrideTwo();
-
-	mWorld = _worldMat.transpose();
-	mView = _camera->getPosMat_D3D().transpose();
-	mProj = _camera->getProjMat().transpose();
-	mIsWire = _isWire;
-}
-
-bool jShaderColor::Render()
-{
+	ObjCamera& cam = jGameObjectMgr::GetInst().GetCamera();
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
-	// 정점 버퍼의 단위와 오프셋을 설정합니다.
-	unsigned int stride = mVertTypeSize;
 	unsigned int offset = 0;
-
-	ID3D11RasterizerState* state;
-	ID3D11RasterizerState* stateNew;
-	pDevContext->RSGetState(&state);
-	D3D11_RASTERIZER_DESC desc;
-	state->GetDesc(&desc);
-	desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-	desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
-	jRenderer::GetInst().GetDevice()->CreateRasterizerState(&desc, &stateNew);
-	pDevContext->RSSetState(stateNew);
+	unsigned int stride = mModel->GetVertexTypeSize();
+	ID3D11Buffer *pVertBuffer = mModel->GetVertexBuffer();
+	ID3D11Buffer *pIndexBuffer = mModel->GetIndexBuffer();
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
+	pDevContext->IASetVertexBuffers(0, 1, &pVertBuffer, &stride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetIndexBuffer(mIdxBuf, mIsIndexTwo ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0); 
+	if (mModel->IsIndiciesStrideTwo())
+		pDevContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	else
+		pDevContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
-	if(mIsWire)
-		pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	else
-		pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// 상수 버퍼의 내용을 쓸 수 있도록 잠급니다.
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -157,11 +124,14 @@ bool jShaderColor::Render()
 		return false;
 	}
 	MatrixBufferType* dataPtr = (MatrixBufferType*)mappedResource.pData;
-	dataPtr->world = mWorld;
-	dataPtr->view = mView;
-	dataPtr->projection = mProj;
+	dataPtr->world = Matrix4(mWorld).transpose();
+	dataPtr->view = cam.getPosMat_D3D().transpose();
+	dataPtr->projection = cam.getProjMat().transpose();
 	pDevContext->Unmap(mMatrixBuffer, 0);
 	pDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
+
+	// 픽셀 셰이더에서 셰이더 텍스처 리소스를 설정합니다.
+	pDevContext->PSSetShaderResources(0, 1, &mTexture);
 
 	// 정점 입력 레이아웃을 설정합니다.
 	pDevContext->IASetInputLayout(mLayout);
@@ -170,8 +140,17 @@ bool jShaderColor::Render()
 	pDevContext->VSSetShader(mVertexShader, NULL, 0);
 	pDevContext->PSSetShader(mPixelShader, NULL, 0);
 
+	// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
+	pDevContext->PSSetSamplers(0, 1, &mSampleState);
+
 	// 삼각형을 그립니다.
-	pDevContext->DrawIndexed(mIndexCount, 0, 0);
+	pDevContext->DrawIndexed(mIndexCount, mStartIndex, mVertexOff);
 	return true;
 }
 
+void jShaderTexture::SetParams(jModel * _model, Matrix4 _worldMat, jTexture * _texture)
+{
+	mModel = _model;
+	mTexture = _texture->mTextureView;
+	mWorld = _worldMat;
+}

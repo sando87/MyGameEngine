@@ -2,6 +2,7 @@
 #include "jRenderer.h"
 #include "jUtils.h"
 #include "jLog.h"
+#include "jGlobalStruct.h"
 
 jTexture::jTexture()
 {
@@ -91,4 +92,44 @@ void jTexture::Release()
 		mTextureView->Release();
 		mTextureView = nullptr;
 	}
+}
+
+bool jTexture::Load_FromRes(MyResBase * _res)
+{
+	MyRes_CreateTexture *pRes = (MyRes_CreateTexture *)_res;
+
+	D3D11_TEXTURE2D_DESC desc;
+	desc = pRes->desc;
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = pRes->data;
+	data.SysMemPitch = pRes->head.reserve1;
+	data.SysMemSlicePitch = pRes->head.reserve2;
+	ID3D11Texture2D* texture = nullptr;
+	HRESULT hResult = jRenderer::GetInst().GetDevice()->CreateTexture2D(&desc, &data, &texture);
+	if (FAILED(hResult))
+	{
+		_warn();
+		return false;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = pRes->desc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1;
+	hResult = jRenderer::GetInst().GetDevice()->CreateShaderResourceView(texture, &srvDesc, &mTextureView);
+	if (FAILED(hResult))
+	{
+		_warn();
+		return false;
+	}
+
+	// 이 텍스처에 대해 밉맵을 생성합니다.
+	jRenderer::GetInst().GetDeviceContext()->GenerateMips(mTextureView);
+
+	texture->Release();
+	texture = nullptr;
+
+	return true;
 }

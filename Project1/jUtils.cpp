@@ -138,7 +138,7 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 }
 
 //example path is like "D:\\temp\\*.*";
-void jUtils::ForEachFiles(const char* _path, void(*_func)(char* _filename))
+void jUtils::ForEachFiles(void* _object, const char* _path, void(*_func)(void *_this, char *_filename))
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA data;
@@ -151,7 +151,7 @@ void jUtils::ForEachFiles(const char* _path, void(*_func)(char* _filename))
 			if (strncmp(data.cFileName, "..", 260) == 0)
 				continue;
 
-			_func(data.cFileName);
+			_func(_object, data.cFileName);
 
 		} while (FindNextFile(hFind, &data));
 		FindClose(hFind);

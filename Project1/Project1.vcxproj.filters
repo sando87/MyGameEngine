@@ -105,6 +105,12 @@
     <ClCompile Include="jShaderDiablo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jShaderTexture.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jGlobalStruct.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -204,6 +210,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jGlobalStruct.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderTexture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

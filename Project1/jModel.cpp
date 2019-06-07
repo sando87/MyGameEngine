@@ -3,6 +3,7 @@
 #include "jRenderer.h"
 #include "jLoader.h"
 #include "jUtils.h"
+#include "jGlobalStruct.h"
 
 jModel::jModel()
 {
@@ -507,6 +508,189 @@ bool jModel::LoadAxis(int _len)
 	{
 		return false;
 	}
+
+	return true;
+}
+
+bool jModel::LoadDiablo_FromRes(MyResBase* _res, MyResBase* _layout)
+{
+	if (_res == NULL)
+		return false;
+
+	if (_res->type != MYRES_TYPE_CreateBuffer)
+		return false;
+
+	ID3D11Device * device = jRenderer::GetInst().GetDevice();
+	MyRes_CreateBuffer *pData = (MyRes_CreateBuffer*)_res;
+	MyRes_CreateLayout *pLayout = (MyRes_CreateLayout*)_layout;
+	if (pData->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER)
+	{
+		unsigned int stride = pLayout->GetStride(0);
+		unsigned int textureOff = pLayout->GetTextureOffset(0);
+		m_sizeVertex = sizeof(VertexType_Texture);
+		m_vertexCount = pData->desc.ByteWidth / stride;
+
+		vector<VertexType_Texture> verticies;
+		char* tmp = pData->data;
+		unsigned char* tex = nullptr;
+		Matrix4 matTex;
+		memset(&matTex, 0x00, sizeof(Matrix4));
+		matTex[0] = 5.0f;
+		matTex[5] = 5.0f;
+		for (int i = 0; i < m_vertexCount; ++i)
+		{
+			VertexType_Texture vert;
+			memcpy(&vert.p, tmp, sizeof(Vector3f));
+			tex = (unsigned char*)(tmp + textureOff);
+
+			Vector4f tmp1;
+			tmp1.x = (unsigned char)tex[1];
+			tmp1.y = (unsigned char)tex[0];
+			tmp1.z = (unsigned char)tex[3];
+			tmp1.w = (unsigned char)tex[2];
+
+			Vector4f tmp2;
+			tmp2.x = tmp1.y * 0.003906f + tmp1.x;
+			tmp2.y = tmp1.w * 0.003906f + tmp1.z;
+			tmp2.x = tmp2.x * 0.5f - 64.0f;
+			tmp2.y = tmp2.y * 0.5f - 64.0f;
+			tmp2.z = 1.0f;
+
+			Vector4f tmp3;
+			tmp3.x = tmp2.x * matTex[0] + tmp2.y * matTex[1] + tmp2.z * matTex[3] + tmp2.x * matTex[0];
+			tmp3.y = tmp2.x * matTex[4] + tmp2.y * matTex[5] + tmp2.z * matTex[7] + tmp2.x * matTex[4];
+			tmp3.z = tmp2.x * matTex[8] + tmp2.y * matTex[9] + tmp2.z * matTex[11] + tmp2.x * matTex[8];
+			tmp3.w = tmp2.x * matTex[12] + tmp2.y * matTex[13] + tmp2.z * matTex[15] + tmp2.x * matTex[12];
+
+			vert.t.x = tmp3.x;
+			vert.t.y = tmp3.y;
+
+			tmp += stride;
+			verticies.push_back(vert);
+		}
+
+		// 정적 정점 버퍼의 구조체를 설정합니다.
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
+
+		// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
+		D3D11_SUBRESOURCE_DATA vertexData;
+		vertexData.pSysMem = &verticies[0];
+		vertexData.SysMemPitch = 0;
+		vertexData.SysMemSlicePitch = 0;
+		if (FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
+			return false;
+	}
+	else if (pData->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER)
+	{
+		m_sizeIndex = 2;
+		m_indexCount = pData->desc.ByteWidth / m_sizeIndex;
+
+		D3D11_SUBRESOURCE_DATA indexData;
+		indexData.pSysMem = pData->data;
+		indexData.SysMemPitch = 0;
+		indexData.SysMemSlicePitch = 0;
+		if (FAILED(device->CreateBuffer(&pData->desc, &indexData, &m_indexBuffer)))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool jModel::LoadDiablo_color()
+{
+	FILE *pFileVert = NULL, *pFileIndex = NULL;
+	MyRes_CreateBuffer *pDataVert = NULL, *pDataIndex = NULL;
+	int filesizeVert, filesizeIndex = 0;
+	//fopen_s(&pFileVert, "D:\\temp_1\\vertexBuf_000001C8350369A0_0_0.dump", "rb"); 
+	//fopen_s(&pFileIndex, "D:\\temp_1\\indexBuf_000001C835036160_0.dump", "rb");
+
+	fopen_s(&pFileVert, "D:\\temp\\object1\\b_000001A2A689C520_4024_168.dump", "rb");
+	fopen_s(&pFileIndex, "D:\\temp\\object1\\b_000001A2A689A6E0_740_96.dump", "rb");
+
+	fseek(pFileVert, 0, SEEK_END);
+	filesizeVert = ftell(pFileVert);
+	fseek(pFileVert, 0, SEEK_SET);
+	fseek(pFileIndex, 0, SEEK_END);
+	filesizeIndex = ftell(pFileIndex);
+	fseek(pFileIndex, 0, SEEK_SET);
+
+	pDataVert = (MyRes_CreateBuffer*)malloc(filesizeVert);
+	fread_s(pDataVert, filesizeVert, filesizeVert, 1, pFileVert);
+	pDataIndex = (MyRes_CreateBuffer*)malloc(filesizeIndex);
+	fread_s(pDataIndex, filesizeIndex, filesizeIndex, 1, pFileIndex);
+
+	m_sizeVertex = sizeof(VertexType_Color);
+	m_sizeIndex = 2;
+	UINT vertexStride = 32;
+	m_vertexCount = pDataVert->desc.ByteWidth / vertexStride;
+	m_indexCount = pDataIndex->desc.ByteWidth / m_sizeIndex;
+	m_indexCount = 312; //1695; 1833;
+
+	vector<VertexType_Color> verticies;
+	char* tmp = pDataVert->data;
+	for (int i = 0; i < m_vertexCount; ++i)
+	{
+		VertexType_Color vert;
+		memcpy(&vert.p, tmp, sizeof(Vector3f));
+		vert.c = Vector4f(0, 1, 0, 1);
+		tmp += vertexStride;
+
+		verticies.push_back(vert);
+	}
+
+	//vector<unsigned short> indicies;
+	//char *pIdicies = pDataIndex->data;
+	//for (int i = 0; i < m_indexCount; ++i)
+	//{
+	//	unsigned short vert;
+	//	memcpy(&vert, pIdicies, 2);
+	//	pIdicies += 2;
+	//	indicies.push_back(vert);
+	//}
+
+	// 정적 정점 버퍼의 구조체를 설정합니다.
+	ID3D11Device * device = jRenderer::GetInst().GetDevice();
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
+	D3D11_SUBRESOURCE_DATA vertexData;
+	vertexData.pSysMem = &verticies[0];
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+	if (FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
+	{
+		return false;
+	}
+
+	D3D11_SUBRESOURCE_DATA indexData;
+	indexData.pSysMem = pDataIndex->data;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+	if (FAILED(device->CreateBuffer(&pDataIndex->desc, &indexData, &m_indexBuffer)))
+	{
+		return false;
+	}
+
+	fclose(pFileVert);
+	fclose(pFileIndex);
+	if (pDataVert)
+		free(pDataVert);
+	if (pDataIndex)
+		free(pDataIndex);
 
 	return true;
 }

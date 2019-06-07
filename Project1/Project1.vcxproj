@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{8476D6F3-789F-4090-9FCE-2FD6154C129C}</ProjectGuid>
     <RootNamespace>Project1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -131,6 +131,7 @@
     <ClCompile Include="jBaseShader.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
+    <ClCompile Include="jGlobalStruct.cpp" />
     <ClCompile Include="jLine3D.cpp" />
     <ClCompile Include="jMatrixControl.cpp" />
     <ClCompile Include="jShaderDiablo.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="jRenderer.cpp" />
     <ClCompile Include="jShaderColor.cpp" />
     <ClCompile Include="jShaderSprite.cpp" />
+    <ClCompile Include="jShaderTexture.cpp" />
     <ClCompile Include="jSound.cpp" />
     <ClCompile Include="jTexture.cpp" />
     <ClCompile Include="jUtils.cpp" />
@@ -180,6 +182,7 @@
     <ClInclude Include="jRenderer.h" />
     <ClInclude Include="jShaderColor.h" />
     <ClInclude Include="jShaderSprite.h" />
+    <ClInclude Include="jShaderTexture.h" />
     <ClInclude Include="jSound.h" />
     <ClInclude Include="jTexture.h" />
     <ClInclude Include="jUtils.h" />

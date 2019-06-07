@@ -2,6 +2,7 @@
 #include "header.h"
 #include "jBaseShader.h"
 #include "Matrices.h"
+#include "jGlobalStruct.h"
 #include <vector>
 using namespace std;
 
@@ -11,29 +12,6 @@ class jTexture;
 
 class jShaderSkinned : jBaseShader
 {
-private:
-	struct MatrixBufferType //should be 16byte aligned
-	{
-		Matrix4f world;
-		Matrix4f view;
-		Matrix4f projection;
-		Matrix4f bones[43];
-	};
-	struct MaterialBufferType //should be 16byte aligned
-	{
-		Vector4f ambient;
-		Vector4f diffuse;
-		Vector4f specular;
-		Vector4f shininess;
-	};
-	struct LightBufferType //should be 16byte aligned
-	{
-		Vector4f position;
-		Vector4f direction;
-		Vector4f color;
-		Vector4f reserve;
-	};
-
 public:
 	jShaderSkinned();
 	~jShaderSkinned();
