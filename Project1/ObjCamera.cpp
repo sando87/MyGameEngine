@@ -30,7 +30,7 @@ void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, doub
 void ObjCamera::OnStart()
 {
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
-	mPos.lookat(Vector3(-200, -200, 200), Vector3(0, 0, 0), Vector3(0, 0, 1));
+	mPos.lookat(Vector3(-25, -25, 25), Vector3(0, 0, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse += [&](auto info)
 	{
 		if (info.z > 0)

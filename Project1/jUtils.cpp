@@ -136,9 +136,48 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 
 	return true;
 }
+bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
+{
+	FILE* filePtr = NULL;
+	int filesize = 0;
+	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+		return false;
 
+	fseek(filePtr, 0, SEEK_END);
+	filesize = ftell(filePtr);
+	fseek(filePtr, 0, SEEK_SET);
+
+	char* pBuf = (char*)malloc(filesize);
+	fread(pBuf, filesize, 1, filePtr);
+
+	*_bufSize = filesize;
+	*_buf = pBuf;
+
+	fclose(filePtr);
+	return true;
+}
 //example path is like "D:\\temp\\*.*";
-void jUtils::ForEachFiles(void* _object, const char* _path, void(*_func)(void *_this, char *_filename))
+void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func)
+{
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	hFind = FindFirstFile(_path, &data);
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do {
+			if (strncmp(data.cFileName, ".", 260) == 0)
+				continue;
+			if (strncmp(data.cFileName, "..", 260) == 0)
+				continue;
+
+			if (!_func(_object, data.cFileName))
+				break;
+
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+}
+void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA data;
@@ -151,7 +190,8 @@ void jUtils::ForEachFiles(void* _object, const char* _path, void(*_func)(void *_
 			if (strncmp(data.cFileName, "..", 260) == 0)
 				continue;
 
-			_func(_object, data.cFileName);
+			if (!_func(_object, data.cFileName))
+				break;
 
 		} while (FindNextFile(hFind, &data));
 		FindClose(hFind);

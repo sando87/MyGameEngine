@@ -96,22 +96,35 @@ void jTexture::Release()
 
 bool jTexture::Load_FromRes(MyResBase * _res)
 {
+	if (_res == NULL)
+		return false;
+
 	MyRes_CreateTexture *pRes = (MyRes_CreateTexture *)_res;
 
-	D3D11_TEXTURE2D_DESC desc;
-	desc = pRes->desc;
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc = pRes->desc;
 
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = pRes->data;
-	data.SysMemPitch = pRes->head.reserve1;
-	data.SysMemSlicePitch = pRes->head.reserve2;
+	//textureDesc.Height = height;
+	//textureDesc.Width = width;
+	textureDesc.MipLevels = 0;
+	textureDesc.ArraySize = 1;
+	//textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
 	ID3D11Texture2D* texture = nullptr;
-	HRESULT hResult = jRenderer::GetInst().GetDevice()->CreateTexture2D(&desc, &data, &texture);
+	HRESULT hResult = jRenderer::GetInst().GetDevice()->CreateTexture2D(&textureDesc, NULL, &texture);
 	if (FAILED(hResult))
 	{
 		_warn();
 		return false;
 	}
+
+	jRenderer::GetInst().GetDeviceContext()->UpdateSubresource(texture, 0, NULL, pRes->data, pRes->head.reserve1, 0);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = pRes->desc.Format;

@@ -303,7 +303,7 @@ bool jRenderer::Initialize(HWND _hWnd, int _width, int _height, bool _isFullScre
 
 	// Setup the raster description which will determine how and what polygons will be drawn.
 	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.DepthClipEnable = true;
@@ -414,6 +414,16 @@ void jRenderer::BeginScene()
 	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f }; //Clear Color Gray
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	//ID3D11RasterizerState* state;
+	//ID3D11RasterizerState* stateNew;
+	//m_deviceContext->RSGetState(&state);
+	//D3D11_RASTERIZER_DESC desc;
+	//state->GetDesc(&desc);
+	//desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+	//desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
+	//jRenderer::GetInst().GetDevice()->CreateRasterizerState(&desc, &stateNew);
+	//m_deviceContext->RSSetState(stateNew);
 }
 void jRenderer::EndScene()
 {

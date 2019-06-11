@@ -3,7 +3,7 @@
 #include "jRenderer.h"
 #include "jLoader.h"
 #include "jUtils.h"
-#include "jGlobalStruct.h"
+#include "jGameObjectMgr.h"
 
 jModel::jModel()
 {
@@ -535,8 +535,8 @@ bool jModel::LoadDiablo_FromRes(MyResBase* _res, MyResBase* _layout)
 		unsigned char* tex = nullptr;
 		Matrix4 matTex;
 		memset(&matTex, 0x00, sizeof(Matrix4));
-		matTex[0] = 5.0f;
-		matTex[5] = 5.0f;
+		matTex[0] = 0.5f;
+		matTex[5] = 1.0f;
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
 			VertexType_Texture vert;
@@ -603,7 +603,23 @@ bool jModel::LoadDiablo_FromRes(MyResBase* _res, MyResBase* _layout)
 
 	return true;
 }
+void jModel::SetModel(void *vb_addr, void *ib_addr, void *layout_addr)
+{
+	ID3D11Buffer* pIFVB = (ID3D11Buffer*)jGameObjectMgr::GetInst().mGPURes[vb_addr].second;
+	ID3D11Buffer* pIFIB = (ID3D11Buffer*)jGameObjectMgr::GetInst().mGPURes[ib_addr].second;
+	MyRes_CreateLayout* playoutData = (MyRes_CreateLayout*)jGameObjectMgr::GetInst().mGPURes[layout_addr].first;
+	m_vertexBuffer = (ID3D11Buffer*)pIFVB;
+	m_indexBuffer = (ID3D11Buffer*)pIFIB;
+	m_sizeVertex = sizeof(VertexType_Texture);
+	m_sizeIndex = 2;
 
+	D3D11_BUFFER_DESC desc;
+	pIFVB->GetDesc(&desc);
+	m_vertexCount = desc.ByteWidth / playoutData->GetStride(0);
+
+	pIFIB->GetDesc(&desc);
+	m_indexCount = desc.ByteWidth / m_sizeIndex;
+}
 bool jModel::LoadDiablo_color()
 {
 	FILE *pFileVert = NULL, *pFileIndex = NULL;

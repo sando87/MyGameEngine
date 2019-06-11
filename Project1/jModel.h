@@ -19,6 +19,7 @@ public:
 	bool LoadDiablo_FromRes(MyResBase* _res, MyResBase* _layout);
 	bool LoadDiablo();
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
+	void SetModel(void *vb_addr, void *ib_addr, void *layout_addr);
 	void Release();
 
 	int GetVertexTypeSize() { return m_sizeVertex; }
@@ -27,6 +28,7 @@ public:
 	ID3D11Buffer* GetVertexBuffer2() { return m_vertexBuffer2; }
 	ID3D11Buffer* GetIndexBuffer() { return m_indexBuffer; }
 	bool IsIndiciesStrideTwo() { return m_sizeIndex == 2 ? true : false; }
+	
 
 private:
 	//void RenderBuffers(ID3D11DeviceContext*);

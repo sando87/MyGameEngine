@@ -128,16 +128,6 @@ bool jShaderColor::Render()
 	unsigned int stride = mVertTypeSize;
 	unsigned int offset = 0;
 
-	ID3D11RasterizerState* state;
-	ID3D11RasterizerState* stateNew;
-	pDevContext->RSGetState(&state);
-	D3D11_RASTERIZER_DESC desc;
-	state->GetDesc(&desc);
-	desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-	desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
-	jRenderer::GetInst().GetDevice()->CreateRasterizerState(&desc, &stateNew);
-	pDevContext->RSSetState(stateNew);
-
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
 

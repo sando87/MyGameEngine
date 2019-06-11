@@ -14,126 +14,6 @@
 #define MYRES_TYPE_CreateTex	't'
 #define MYRES_TYPE_CreateSample	's'
 
-struct MyResBase
-{
-	unsigned int type;
-	void * addr;
-	unsigned int crc;
-	unsigned int onlyDataSize;
-	unsigned int reserve1;
-	unsigned int reserve2;
-	unsigned int reserve3;
-};
-
-struct MyRes_CreateBuffer
-{
-	MyResBase head; // reserve1 = vertexstride;
-	D3D11_BUFFER_DESC desc;
-	char data[];
-};
-
-struct MyRes_CreateLayout
-{
-	MyResBase head; // reserve1 = numElements;
-	char data[];
-	unsigned int GetStride(int slotIndex);
-	unsigned int GetTextureOffset(int _index);
-};
-
-struct MyRes_CreateShader
-{
-	MyResBase head;
-	char data[];
-};
-
-struct MyRes_CreateTexture
-{
-	MyResBase head;
-	D3D11_TEXTURE2D_DESC desc;
-	char data[];
-};
-
-
-
-
-
-
-struct VertexType_Texture
-{
-	Vector3f p;
-	Vector2f t;
-};
-struct VertexType_Weight
-{
-	Vector3f p;
-	Vector2f t;
-	Vector3f n;
-	Vector4n index;
-	Vector4f weight;
-};
-struct VertexType_Sprite
-{
-	Vector3f p;
-	Vector2f t;
-};
-struct VertexType_Color
-{
-	Vector3f p;
-	Vector4f c;
-};
-struct VertexType_Diablo
-{
-	Vector3f p;
-	char n[4];
-	char c1[4];
-	char c2[4];
-	char t1[4];
-	char t2[4];
-};
-
-struct MyBuffer {
-	char type;
-	D3D11_BUFFER_DESC desc;
-	char data[];
-};
-struct MyShader {
-	char type;
-	char data[];
-};
-struct MyLayout {
-	char type;
-	char numEle;
-	D3D11_INPUT_ELEMENT_DESC desc[];
-};
-
-
-struct MatrixBufferType //should be 16byte aligned
-{
-	Matrix4f world;
-	Matrix4f view;
-	Matrix4f projection;
-};
-struct MatrixBoneBufferType //should be 16byte aligned
-{
-	Matrix4f world;
-	Matrix4f view;
-	Matrix4f projection;
-	Matrix4f bones[43];
-};
-struct MaterialBufferType //should be 16byte aligned
-{
-	Vector4f ambient;
-	Vector4f diffuse;
-	Vector4f specular;
-	Vector4f shininess;
-};
-struct LightBufferType //should be 16byte aligned
-{
-	Vector4f position;
-	Vector4f direction;
-	Vector4f color;
-	Vector4f reserve;
-};
 
 struct CBMain
 {
@@ -217,4 +97,213 @@ struct CBMain
 
 };
 
+
+
+struct MyResBase
+{
+	unsigned int type;
+	void * addr;
+	unsigned int crc;
+	unsigned int totalSize;
+	unsigned int reserve1;
+	unsigned int reserve2;
+	unsigned int reserve3;
+};
+
+struct MyRes_CreateBuffer
+{
+	MyResBase head; // reserve1 = vertexstride;
+	D3D11_BUFFER_DESC desc;
+	char data[];
+	void* CreateResource(MyResBase* _layoutInfo, CBMain* _cb);
+};
+
+struct MyRes_CreateLayout
+{
+	MyResBase head; // reserve1 = numElements;
+	char data[];
+	void SetNameOffset();
+	unsigned int GetStride(int slotIndex);
+	unsigned int GetTextureOffset(int _index);
+	void* CreateResource(void* _bolb, int _size);
+};
+
+struct MyRes_CreateShader
+{
+	MyResBase head;
+	char data[];
+	void* CreateResource();
+};
+
+struct MyRes_CreateTexture
+{
+	MyResBase head;
+	//pData->head.reserve1 = pInitialData->SysMemPitch;
+	//pData->head.reserve2 = pInitialData->SysMemSlicePitch;
+
+	D3D11_TEXTURE2D_DESC desc;
+	char data[];
+	void* CreateResource(int width, int height, char *imgTGA);
+};
+
+struct MyRes_CreateSS
+{
+	MyResBase head;
+	D3D11_SAMPLER_DESC desc;
+	void* CreateResource();
+};
+
+
+
+
+
+
+
+
+struct VertexType_Texture
+{
+	Vector3f p;
+	Vector2f t;
+};
+struct VertexType_Weight
+{
+	Vector3f p;
+	Vector2f t;
+	Vector3f n;
+	Vector4n index;
+	Vector4f weight;
+};
+struct VertexType_Sprite
+{
+	Vector3f p;
+	Vector2f t;
+};
+struct VertexType_Color
+{
+	Vector3f p;
+	Vector4f c;
+};
+struct VertexType_Diablo
+{
+	Vector3f p;
+	char n[4];
+	char c1[4];
+	char c2[4];
+	char t1[4];
+	char t2[4];
+};
+
+struct MyBuffer {
+	char type;
+	D3D11_BUFFER_DESC desc;
+	char data[];
+};
+struct MyShader {
+	char type;
+	char data[];
+};
+struct MyLayout {
+	char type;
+	char numEle;
+	D3D11_INPUT_ELEMENT_DESC desc[];
+};
+
+
+struct MatrixBufferType //should be 16byte aligned
+{
+	Matrix4f world;
+	Matrix4f view;
+	Matrix4f projection;
+};
+struct MatrixBoneBufferType //should be 16byte aligned
+{
+	Matrix4f world;
+	Matrix4f view;
+	Matrix4f projection;
+	Matrix4f bones[43];
+};
+struct MaterialBufferType //should be 16byte aligned
+{
+	Vector4f ambient;
+	Vector4f diffuse;
+	Vector4f specular;
+	Vector4f shininess;
+};
+struct LightBufferType //should be 16byte aligned
+{
+	Vector4f position;
+	Vector4f direction;
+	Vector4f color;
+	Vector4f reserve;
+};
+
 #pragma pack(pop)
+
+struct VBInfo
+{
+	void *addr;
+	UINT numBuf;
+	UINT strides[32]; //numBuffers
+	UINT offset[32]; //numBuffers
+	bool isDirty;
+};
+struct TEXInfo
+{
+	void *addr;
+	UINT NumViews;
+	bool isDirty;
+};
+struct SSInfo
+{
+	void *addr;
+	UINT NumSamplers;
+	bool isDirty;
+};
+struct MapInfo
+{
+	void *addr;
+	UINT subRes;
+	UINT type;
+	UINT flags;
+	D3D11_MAPPED_SUBRESOURCE mappedSubRes;
+	bool isDirty;
+};
+struct RenderContext
+{
+	VBInfo vb[32];
+
+	void *ib_addr;
+	UINT ib_format;
+	UINT ib_offset;
+	bool ib_isDirty;
+
+	UINT prim_topology;
+	bool prim_isDirty;
+
+	MapInfo mapUnmap[8];
+
+	TEXInfo tex[32];
+
+	void *layout_addr;
+	bool layout_isDirty;
+
+	void *vs_addr;
+	UINT vs_NumClassInstances;
+	void *vs_pClassInstances;
+	bool vs_isDirty;
+
+	void *ps_addr;
+	UINT ps_NumClassInstances;
+	void *ps_pClassInstances;
+	bool ps_isDirty;
+
+	SSInfo ss[32];
+
+	UINT draw_IndexCount;
+	UINT draw_StartIndex;
+	UINT draw_BaseVertex;
+	bool draw_isDirty;
+	string Find(void * addr);
+	void CreateResources(int _idx);
+	CBMain FindCBMain(int _idx);
+};

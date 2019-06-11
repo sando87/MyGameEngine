@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jGameObject.h"
+#include "jGlobalStruct.h"
 #include <vector>
 using namespace std;
 
@@ -16,6 +17,7 @@ struct DrawingInfo
 {
 	MyResBase *vertexBuffer[32];
 	MyResBase *indexBuffer;
+	MyResBase *ConstBuffer;
 	MyResBase *vertexShader;
 	MyResBase *pixelShader;
 	MyResBase *texture[32];
@@ -38,12 +40,15 @@ private:
 	void OnUpdate();
 	void OnDraw();
 
-	DrawingInfo DoDrawingInfo(int _idx);
+	DrawingInfo DoDrawingInfo();
+	void DoRenderingContext(int _index);
 
 	jModel* mModel;
 	jShaderTexture * mShader;
 	jTexture * mTexture;
 
+public:
 	DrawingInfo mDrawInfos;
+	RenderContext mRenderingContext;
 };
 

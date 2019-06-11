@@ -10,6 +10,7 @@
 #include "jUtils.h"
 #include <sstream>
 #include <iostream>
+#include "jLog.h"
 
 ObjDiablo::ObjDiablo()
 {
@@ -33,17 +34,36 @@ ObjDiablo::~ObjDiablo()
 		mModel = nullptr;
 	}
 }
+bool SetDrawInfo(void *_this, char *_filename)
+{
+	ObjDiablo* pObj = (ObjDiablo*)_this;
+	vector<string> rets;
+	jUtils::Split(string(_filename), "_", rets);
+	if (stoi(rets[0]) != jGameObjectMgr::GetInst().mFileIndex)
+		return true;
 
+	if (rets[1] == "Draw")
+	{
+		pObj->mDrawInfos.IndexCount = stoi(rets[2]);
+		pObj->mDrawInfos.StartIndex = stoi(rets[3]);
+		pObj->mDrawInfos.VertexOffset = stoi(rets[4]);
+	}
+	if (rets[1] == "Primitive")
+	{
+		pObj->mDrawInfos.primitive = stoi(rets[2]);
+	}
+	return true;
+}
 void ObjDiablo::OnStart()
 {
-	mDrawInfos = DoDrawingInfo(1);
+	DoRenderingContext(43);
 
 	mModel = new jModel();
-	mModel->LoadDiablo_FromRes(mDrawInfos.vertexBuffer[0], mDrawInfos.layout);
-	mModel->LoadDiablo_FromRes(mDrawInfos.indexBuffer, mDrawInfos.layout);
+	mModel->SetModel(mRenderingContext.vb[0].addr, mRenderingContext.ib_addr, mRenderingContext.layout_addr);
 
+	void* pIF = jGameObjectMgr::GetInst().mGPURes[mRenderingContext.tex[0].addr].second;
 	mTexture = new jTexture();
-	mTexture->Load_FromRes(mDrawInfos.texture[0]);
+	mTexture->SetShaderResourceView((ID3D11ShaderResourceView *)pIF);
 
 	mShader = new jShaderTexture();
 	mShader->Initialize("./texture.vs", "./texture.ps");
@@ -74,147 +94,69 @@ void ObjDiablo::OnDraw()
 	//mShader->Render();
 
 	mShader->SetParams(mModel, mat, mTexture);
-	mShader->mIndexCount = mDrawInfos.IndexCount;
-	mShader->mStartIndex = mDrawInfos.StartIndex;
-	mShader->mVertexOff = mDrawInfos.VertexOffset;
+	mShader->mIndexCount = mRenderingContext.draw_IndexCount;
+	mShader->mStartIndex = mRenderingContext.draw_StartIndex;
+	mShader->mVertexOff = mRenderingContext.draw_BaseVertex;
 	mShader->Render();
 }
 
-DrawingInfo ObjDiablo::DoDrawingInfo(int _idx)
+void ObjDiablo::DoRenderingContext(int _index)
+{
+	string name = PATH_RESOURCE + to_string(_index) + "_RenderingContext.bin";
+	int size = 0;
+	char* pBuf = NULL;
+	jUtils::LoadFile(name, &size, &pBuf);
+	memcpy(&mRenderingContext, pBuf, size);
+	mRenderingContext.CreateResources(_index);
+}
+DrawingInfo ObjDiablo::DoDrawingInfo()
 {
 	DrawingInfo ret = { 0, };
-	string path = "D:\\last\\DrawingInfo.txt";
-
-	FILE *pFile = NULL;
-	fopen_s(&pFile, path.c_str(), "rb");
-	if (pFile == NULL)
-		return ret;
-
-	fseek(pFile, 0, SEEK_END);
-	int filesize = ftell(pFile);
-	fseek(pFile, 0, SEEK_SET);
-
-	char *pData = (char*)malloc(filesize);
-	fread_s(pData, filesize, filesize, 1, pFile);
-
-	string data = pData;
-	vector<string> lines;
-	jUtils::Split(data, "\r\n", lines);
-	int cnt = lines.size();
-	bool find = false;
-	for (int i = 0; i < cnt; ++i)
+	unordered_map<void *, MyResBase*>& res = jGameObjectMgr::GetInst().mResources;
+	for (auto iter = res.begin(); iter != res.end(); ++iter)
 	{
-		string line = lines[i];
-		if (find)
+		void* addr = iter->first;
+		MyResBase* pData = iter->second;
+		if (pData->type == MYRES_TYPE_CreateVS)
 		{
-			if (line.c_str()[0] == '=')
-				break;
-
-			vector<string> infos;
-			jUtils::Split(line, "_", infos);
-			if (infos[0] == "VertexShader")
+			ret.vertexShader = pData;
+		}
+		else if (pData->type == MYRES_TYPE_CreatePS)
+		{
+			ret.pixelShader = pData;
+		}
+		else if (pData->type == MYRES_TYPE_CreateTex)
+		{
+			ret.texture[0] = pData;
+		}
+		else if (pData->type == MYRES_TYPE_CreateBuffer)
+		{
+			if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER)
 			{
-				string addr = infos[3];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.vertexShader = pData;
-			}
-			else if (infos[0] == "PixelShader")
-			{
-				string addr = infos[3];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.pixelShader = pData;
-			}
-			else if (infos[0] == "texture")
-			{
-				string slot = infos[3];
-				string addr = infos[5];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.texture[stoi(slot)] = pData;
-			}
-			else if (infos[0] == "IB")
-			{
-				string addr = infos[3];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
 				ret.indexBuffer = pData;
 			}
-			else if (infos[0] == "VB")
+			else if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER)
 			{
-				string slot = infos[3];
-				string addr = infos[5];
-				string stride = infos[6];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.vertexBuffer[stoi(slot)] = pData;
+				ret.vertexBuffer[0] = pData;
 			}
-			else if (infos[0] == "layout")
+			else if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER)
 			{
-				string addr = infos[3];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.layout = pData;
-			}
-			else if (infos[0] == "Primitive")
-			{
-				string num = infos[1];
-				ret.primitive = stoi(num);
-			}
-			else if (infos[0] == "Draw")
-			{
-				ret.IndexCount = stoi(infos[1]);
-				ret.StartIndex = stoi(infos[2]);
-				ret.VertexOffset = stoi(infos[3]);
-			}
-			else if (infos[0] == "Sampler")
-			{
-				string slot = infos[3];
-				string addr = infos[5];
-				unsigned long long nAddr = 0;
-				stringstream ss;
-				ss << std::hex << addr;
-				ss >> nAddr;
-				MyResBase* pData = jGameObjectMgr::GetInst().GetResource((void*)nAddr);
-				ret.sampler[stoi(slot)] = pData;
+				ret.ConstBuffer = pData;
 			}
 		}
-		else if (!find && line.c_str()[0] == '=')
+		else if (pData->type == MYRES_TYPE_CreateLayout)
 		{
-			vector<string> infos;
-			jUtils::Split(line, " ", infos);
-			string idx = infos[1];
-			if (stoi(idx) == _idx)
-			{
-				find = true;
-				continue;
-			}
+			ret.layout = pData;
+		}
+		else if (pData->type == MYRES_TYPE_CreateSample)
+		{
+			ret.sampler[0] = pData;
+		}
+		else
+		{
+			_warn();
 		}
 	}
-
-	if (pFile)
-		fclose(pFile);
-	if (pData)
-		free(pData);
 
 	return ret;
 }

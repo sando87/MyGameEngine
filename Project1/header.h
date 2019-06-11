@@ -25,6 +25,8 @@ using namespace std;
 
 #pragma warning(disable: 4200)
 
+#define PATH_RESOURCE "D:\\temp\\"
+
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <d3d11.h>
