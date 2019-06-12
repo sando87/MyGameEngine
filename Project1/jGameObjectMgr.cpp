@@ -23,8 +23,8 @@ bool jGameObjectMgr::Initialize()
 {
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
-	//ObjGroundAxis* obj = new ObjGroundAxis();
-	//obj->AddToMgr();
+	ObjGroundAxis* obj = new ObjGroundAxis();
+	obj->AddToMgr();
 	//ObjTutorial1* obj2 = new ObjTutorial1();
 	//obj2->AddToMgr();
 	ObjDiablo* obj3 = new ObjDiablo();

@@ -14,6 +14,9 @@ jShaderSkinned::jShaderSkinned()
 	mIdxBuf = nullptr;
 	mIndexCount = 0;
 	mVertTypeSize = 0;
+	mStartIndex = 0;
+	mVertexOff = 0;
+	mOffVertexOff = 0;
 }
 
 jShaderSkinned::~jShaderSkinned()
@@ -249,10 +252,9 @@ bool jShaderSkinned::Render()
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int stride = mVertTypeSize;
-	unsigned int offset = 0;
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
+	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, (UINT*)&mOffVertexOff);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	if(mModel->IsIndiciesStrideTwo())
@@ -273,7 +275,7 @@ bool jShaderSkinned::Render()
 	dataPtr->world = mWorld;
 	dataPtr->view = mView;
 	dataPtr->projection = mProj;
-	for (int i = 0; i<43; ++i)
+	for (int i = 0; i<45; ++i)
 		dataPtr->bones[i] = mBoneMats[i];
 	pDevContext->Unmap(mMatrixBuffer, 0);
 	pDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
@@ -328,7 +330,7 @@ bool jShaderSkinned::Render()
 	pDevContext->PSSetSamplers(0, 1, &mSampleState);
 
 	// 삼각형을 그립니다.
-	pDevContext->DrawIndexed(mIndexCount, 0, 0);
+	pDevContext->DrawIndexed(mIndexCount, mStartIndex, mVertexOff);
 	return true;
 }
 

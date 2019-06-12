@@ -14,6 +14,16 @@
 #define MYRES_TYPE_CreateTex	't'
 #define MYRES_TYPE_CreateSample	's'
 
+struct Matrix3x4f
+{
+	Vector4f a;
+	Vector4f b;
+	Vector4f c;
+};
+struct CBMatrix
+{
+	Matrix3x4f mat[45];
+};
 
 struct CBMain
 {
@@ -115,7 +125,7 @@ struct MyRes_CreateBuffer
 	MyResBase head; // reserve1 = vertexstride;
 	D3D11_BUFFER_DESC desc;
 	char data[];
-	void* CreateResource(MyResBase* _layoutInfo, CBMain* _cb);
+	void* CreateResource();
 };
 
 struct MyRes_CreateLayout
@@ -125,6 +135,8 @@ struct MyRes_CreateLayout
 	void SetNameOffset();
 	unsigned int GetStride(int slotIndex);
 	unsigned int GetTextureOffset(int _index);
+	unsigned int GetMatIdxOffset();
+	unsigned int GetMatWeightOffset();
 	void* CreateResource(void* _bolb, int _size);
 };
 
@@ -220,7 +232,7 @@ struct MatrixBoneBufferType //should be 16byte aligned
 	Matrix4f world;
 	Matrix4f view;
 	Matrix4f projection;
-	Matrix4f bones[43];
+	Matrix4f bones[45];
 };
 struct MaterialBufferType //should be 16byte aligned
 {

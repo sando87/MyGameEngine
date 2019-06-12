@@ -33,5 +33,6 @@ public:
 	int mIndexCount = 0;
 	int mStartIndex = 0;
 	int mVertexOff = 0;
+	int mOffVertexOff = 0;
 };
 

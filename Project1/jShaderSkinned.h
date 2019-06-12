@@ -37,6 +37,9 @@ public:
 	ID3D11Buffer* mIdxBuf;
 	int mIndexCount;
 	int mVertTypeSize;
+	int mStartIndex;
+	int mVertexOff;
+	int mOffVertexOff;
 
 	Matrix4 mWorld;
 	Matrix4 mView;
@@ -45,6 +48,6 @@ public:
 	Vector4f mDiffuse;
 	Vector4f mLight;
 
-	Matrix4f mBoneMats[43];
+	Matrix4f mBoneMats[45];
 };
 

@@ -12,6 +12,7 @@ class jShaderSkinned;
 class jShaderTexture;
 class jTexture;
 struct MyResBase;
+struct CBMatrix;
 
 struct DrawingInfo
 {
@@ -42,13 +43,17 @@ private:
 
 	DrawingInfo DoDrawingInfo();
 	void DoRenderingContext(int _index);
+	bool LoadCBMatrix();
+	CBMatrix* GetCBMatrix(int _idx);
 
 	jModel* mModel;
-	jShaderTexture * mShader;
+	jShaderSkinned * mShader;
 	jTexture * mTexture;
 
 public:
 	DrawingInfo mDrawInfos;
 	RenderContext mRenderingContext;
+	int mCBMainCount;
+	char* mCBMains;
 };
 

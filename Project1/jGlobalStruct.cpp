@@ -48,7 +48,34 @@ unsigned int MyRes_CreateLayout::GetStride(int slotIndex)
 	}
 	return stride;
 }
+unsigned int MyRes_CreateLayout::GetMatWeightOffset()
+{
+	D3D11_INPUT_ELEMENT_DESC *pLayout = (D3D11_INPUT_ELEMENT_DESC *)data;
+	int numEle = head.reserve1;
 
+	for (int i = 0; i < numEle; ++i)
+	{
+		if (strncmp(pLayout[i].SemanticName, "BLENDWEIGHT", 260))
+			continue;
+
+		return pLayout[i].AlignedByteOffset;
+	}
+	return 0;
+}
+unsigned int MyRes_CreateLayout::GetMatIdxOffset()
+{
+	D3D11_INPUT_ELEMENT_DESC *pLayout = (D3D11_INPUT_ELEMENT_DESC *)data;
+	int numEle = head.reserve1;
+
+	for (int i = 0; i < numEle; ++i)
+	{
+		if (strncmp(pLayout[i].SemanticName, "BLENDINDICES", 260))
+			continue;
+
+		return pLayout[i].AlignedByteOffset;
+	}
+	return 0;
+}
 unsigned int MyRes_CreateLayout::GetTextureOffset(int _index)
 {
 	D3D11_INPUT_ELEMENT_DESC *pLayout = (D3D11_INPUT_ELEMENT_DESC *)data;
@@ -158,7 +185,7 @@ void RenderContext::CreateResources(int _idx)
 		fileSize = 0;
 		pData = nullptr;
 		jUtils::LoadFile(PATH_RESOURCE + filename, &fileSize, (char**)&pData);
-		void *pIF = ((MyRes_CreateBuffer*) pData)->CreateResource(nullptr, nullptr);
+		void *pIF = ((MyRes_CreateBuffer*) pData)->CreateResource();
 		jGameObjectMgr::GetInst().AddGPURes(pData, pIF);
 	}
 
@@ -170,9 +197,7 @@ void RenderContext::CreateResources(int _idx)
 			fileSize = 0;
 			pData = nullptr;
 			jUtils::LoadFile(PATH_RESOURCE + filename, &fileSize, (char**)&pData);
-			MyResBase* layoutData = jGameObjectMgr::GetInst().mGPURes[layout_addr].first;
-			CBMain cbMain = FindCBMain(_idx);
-			void *pIF = ((MyRes_CreateBuffer *)pData)->CreateResource(layoutData, &cbMain);
+			void *pIF = ((MyRes_CreateBuffer *)pData)->CreateResource();
 			jGameObjectMgr::GetInst().AddGPURes(pData, pIF);
 		}
 
@@ -207,78 +232,17 @@ void RenderContext::CreateResources(int _idx)
 		}
 	}
 }
-void* MyRes_CreateBuffer::CreateResource(MyResBase* _layoutInfo, CBMain* _cb)
+void* MyRes_CreateBuffer::CreateResource()
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
 	ID3D11Buffer *pBuf = nullptr;
 
-	if (desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER)
-	{
-		MyRes_CreateLayout* pLayout = (MyRes_CreateLayout*)_layoutInfo;
-		unsigned int stride = pLayout->GetStride(0);
-		unsigned int textureOff = pLayout->GetTextureOffset(0);
-		int vertexCount = desc.ByteWidth / stride;
-
-		vector<VertexType_Texture> verticies;
-		char* tmp = data;
-		unsigned char* tex = nullptr;
-		Matrix4 matTex = _cb->matTex0;
-		for (int i = 0; i < vertexCount; ++i)
-		{
-			VertexType_Texture vert;
-			memcpy(&vert.p, tmp, sizeof(Vector3f));
-			tex = (unsigned char*)(tmp + textureOff);
-
-			Vector4f tmp1;
-			tmp1.x = (unsigned char)tex[1];
-			tmp1.y = (unsigned char)tex[0];
-			tmp1.z = (unsigned char)tex[3];
-			tmp1.w = (unsigned char)tex[2];
-
-			Vector4f tmp2;
-			tmp2.x = tmp1.y * 0.003906f + tmp1.x;
-			tmp2.y = tmp1.w * 0.003906f + tmp1.z;
-			tmp2.x = tmp2.x * 0.5f - 64.0f;
-			tmp2.y = tmp2.y * 0.5f - 64.0f;
-			tmp2.z = 1.0f;
-
-			Vector4f tmp3;
-			tmp3.x = tmp2.x * matTex[0] + tmp2.y * matTex[1] + tmp2.z * matTex[3];
-			tmp3.y = tmp2.x * matTex[4] + tmp2.y * matTex[5] + tmp2.z * matTex[7];
-			tmp3.z = tmp2.x * matTex[8] + tmp2.y * matTex[9] + tmp2.z * matTex[11];
-			tmp3.w = tmp2.x * matTex[12] + tmp2.y * matTex[13] + tmp2.z * matTex[15];
-
-			vert.t.x = tmp3.x;
-			vert.t.y = tmp3.y;
-
-			tmp += stride;
-			verticies.push_back(vert);
-		}
-
-		D3D11_BUFFER_DESC vertexBufferDesc;
-		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		vertexBufferDesc.ByteWidth = sizeof(VertexType_Texture) * vertexCount;
-		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vertexBufferDesc.CPUAccessFlags = 0;
-		vertexBufferDesc.MiscFlags = 0;
-		vertexBufferDesc.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA subRes;
-		subRes.pSysMem = &verticies[0];
-		subRes.SysMemPitch = 0;
-		subRes.SysMemSlicePitch = 0;
-		if (FAILED(pDev->CreateBuffer(&vertexBufferDesc, &subRes, &pBuf)))
-			return nullptr;
-	}
-	else
-	{
-		D3D11_SUBRESOURCE_DATA subRes;
-		subRes.pSysMem = data;
-		subRes.SysMemPitch = 0;
-		subRes.SysMemSlicePitch = 0;
-		if (FAILED(pDev->CreateBuffer(&desc, &subRes, &pBuf)))
-			return nullptr;
-	}
+	D3D11_SUBRESOURCE_DATA subRes;
+	subRes.pSysMem = data;
+	subRes.SysMemPitch = 0;
+	subRes.SysMemSlicePitch = 0;
+	if (FAILED(pDev->CreateBuffer(&desc, &subRes, &pBuf)))
+		return nullptr;
 
 	return pBuf;
 }

@@ -338,11 +338,6 @@ bool jShaderDiablo::Render()
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, &offset);
 
-	ID3D11Buffer * mVertBuf2 = mModel->GetVertexBuffer2();
-	stride = 8;
-	offset = 0;
-	pDevContext->IASetVertexBuffers(1, 1, &mVertBuf2, &stride, &offset);
-
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	pDevContext->IASetIndexBuffer(mIdxBuf, mIsIndexTwo ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0);
 

@@ -100,13 +100,12 @@ bool jShaderTexture::Render()
 {
 	ObjCamera& cam = jGameObjectMgr::GetInst().GetCamera();
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
-	unsigned int offset = 0;
 	unsigned int stride = mModel->GetVertexTypeSize();
 	ID3D11Buffer *pVertBuffer = mModel->GetVertexBuffer();
 	ID3D11Buffer *pIndexBuffer = mModel->GetIndexBuffer();
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetVertexBuffers(0, 1, &pVertBuffer, &stride, &offset);
+	pDevContext->IASetVertexBuffers(0, 1, &pVertBuffer, &stride, (const UINT *)&mOffVertexOff);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	if (mModel->IsIndiciesStrideTwo())

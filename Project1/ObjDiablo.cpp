@@ -16,6 +16,8 @@ ObjDiablo::ObjDiablo()
 {
 	mShader = nullptr;
 	mModel = nullptr;
+	mCBMainCount = 0;
+	mCBMains = nullptr;
 }
 
 
@@ -56,21 +58,22 @@ bool SetDrawInfo(void *_this, char *_filename)
 }
 void ObjDiablo::OnStart()
 {
-	DoRenderingContext(43);
+	LoadCBMatrix();
+	DoRenderingContext(0);
 
 	mModel = new jModel();
-	mModel->SetModel(mRenderingContext.vb[0].addr, mRenderingContext.ib_addr, mRenderingContext.layout_addr);
+	mModel->LoadDiablo_ForSkkinedShader(&mRenderingContext);
 
 	void* pIF = jGameObjectMgr::GetInst().mGPURes[mRenderingContext.tex[0].addr].second;
 	mTexture = new jTexture();
 	mTexture->SetShaderResourceView((ID3D11ShaderResourceView *)pIF);
 
-	mShader = new jShaderTexture();
-	mShader->Initialize("./texture.vs", "./texture.ps");
+	//mShader = new jShaderTexture();
+	//mShader->Initialize("./texture.vs", "./texture.ps");
 
-	//mShader = new jShaderSkinned();
-	//mShader->Initialize("./test.vs", "./test.ps");
-	//
+	mShader = new jShaderSkinned();
+	mShader->Initialize("./test.vs", "./test.ps");
+	
 	//mTexture = new jTexture();
 	//mTexture->Initialize("./Texture2D_0_1_0000015D1A1E9468.tga");
 }
@@ -88,16 +91,57 @@ void ObjDiablo::OnDraw()
 	//mShader->SetParams(mModel, mat, &GetCamera(), false);
 	//mShader->Render();
 
-	//vector<Matrix4> mats;
-	//mats.push_back(mat);
-	//mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
-	//mShader->Render();
+	static int drawIndx = 0;
+	CBMatrix* animMats = GetCBMatrix(drawIndx);
+	drawIndx++;
 
-	mShader->SetParams(mModel, mat, mTexture);
+	vector<Matrix4> mats;
+	if (animMats != nullptr)
+	{
+		for (int i = 0; i < 45; ++i)
+		{
+			Matrix4 curMat;
+			curMat[0] = animMats->mat[i].a.x;
+			curMat[1] = animMats->mat[i].b.x;
+			curMat[2] = animMats->mat[i].c.x;
+			curMat[3] = 0;
+
+			curMat[4] = animMats->mat[i].a.y;
+			curMat[5] = animMats->mat[i].b.y;
+			curMat[6] = animMats->mat[i].c.y;
+			curMat[7] = 0;
+
+			curMat[8] = animMats->mat[i].a.z;
+			curMat[9] = animMats->mat[i].b.z;
+			curMat[10] = animMats->mat[i].c.z;
+			curMat[11] = 0;
+
+			curMat[12] = animMats->mat[i].a.w;
+			curMat[13] = animMats->mat[i].b.w;
+			curMat[14] = animMats->mat[i].c.w;
+			curMat[15] = 1;
+
+			mats.push_back(curMat);
+		}
+	}
+	else
+	{
+		mats.push_back(Matrix4().identity());
+	}
+
+	mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
 	mShader->mIndexCount = mRenderingContext.draw_IndexCount;
 	mShader->mStartIndex = mRenderingContext.draw_StartIndex;
 	mShader->mVertexOff = mRenderingContext.draw_BaseVertex;
+	mShader->mOffVertexOff = (mRenderingContext.vb[0].offset[0] / 48) * 20;
 	mShader->Render();
+
+	//mShader->SetParams(mModel, mat, mTexture);
+	//mShader->mIndexCount = mRenderingContext.draw_IndexCount;
+	//mShader->mStartIndex = mRenderingContext.draw_StartIndex;
+	//mShader->mVertexOff = mRenderingContext.draw_BaseVertex;
+	//mShader->mOffVertexOff = (mRenderingContext.vb[0].offset[0] / 48) * 20;
+	//mShader->Render();
 }
 
 void ObjDiablo::DoRenderingContext(int _index)
@@ -108,6 +152,27 @@ void ObjDiablo::DoRenderingContext(int _index)
 	jUtils::LoadFile(name, &size, &pBuf);
 	memcpy(&mRenderingContext, pBuf, size);
 	mRenderingContext.CreateResources(_index);
+}
+CBMatrix* ObjDiablo::GetCBMatrix(int _idx)
+{
+	if (mCBMains == nullptr)
+		return nullptr;
+
+	int index = _idx % mCBMainCount;
+	int off = 2216 * index;
+	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)(mCBMains + off);
+	return (CBMatrix*)pData->data;
+}
+bool ObjDiablo::LoadCBMatrix()
+{
+	int fileSize = 0;
+	char* pBuf = nullptr;
+	string filename = PATH_RESOURCE;
+	filename += "CBMatrix.bin";
+	jUtils::LoadFile(filename, &fileSize, &pBuf);
+	mCBMainCount = fileSize / 2216;
+	mCBMains = pBuf;
+	return true;
 }
 DrawingInfo ObjDiablo::DoDrawingInfo()
 {
