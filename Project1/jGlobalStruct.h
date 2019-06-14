@@ -34,18 +34,18 @@ struct CBMain
 	Matrix4f matWorldView;   // Offset:  160 Size:    64
 	Matrix4f matWorldViewProj;// Offset:  224 Size:    64
 	Vector4f fogParams;                  // Offset:  288 Size:    16
-	Matrix4f matTex0;        // Offset:  304 Size:    64 [unused]
-	Matrix4f matTex1;        // Offset:  368 Size:    64
-	Matrix4f matTex2;        // Offset:  432 Size:    64
-	Matrix4f matTex3;        // Offset:  496 Size:    64
-	Matrix4f matTex4;        // Offset:  560 Size:    64
-	Matrix4f matTex5;        // Offset:  624 Size:    64
-	Matrix4f matTex6;        // Offset:  688 Size:    64
-	Matrix4f matTex7;        // Offset:  752 Size:    64
-	Matrix4f matTex8;        // Offset:  816 Size:    64 [unused]
-	Matrix4f matTex9;        // Offset:  880 Size:    64
-	Matrix4f matTex10;       // Offset:  944 Size:    64 [unused]
-	Matrix4f matTex11;       // Offset: 1008 Size:    64 [unused]
+	Matrix4f matTex[12];        // Offset:  304 Size:    64 [unused]
+	//Matrix4f matTex1;        // Offset:  368 Size:    64
+	//Matrix4f matTex2;        // Offset:  432 Size:    64
+	//Matrix4f matTex3;        // Offset:  496 Size:    64
+	//Matrix4f matTex4;        // Offset:  560 Size:    64
+	//Matrix4f matTex5;        // Offset:  624 Size:    64
+	//Matrix4f matTex6;        // Offset:  688 Size:    64
+	//Matrix4f matTex7;        // Offset:  752 Size:    64
+	//Matrix4f matTex8;        // Offset:  816 Size:    64 [unused]
+	//Matrix4f matTex9;        // Offset:  880 Size:    64
+	//Matrix4f matTex10;       // Offset:  944 Size:    64 [unused]
+	//Matrix4f matTex11;       // Offset: 1008 Size:    64 [unused]
 	Vector4f viewport;                   // Offset: 1072 Size:    16 [unused]
 	Vector4f windowResolution;           // Offset: 1088 Size:    16 [unused]
 	Vector4f waveParams;                 // Offset: 1104 Size:    16 [unused]
@@ -315,7 +315,4 @@ struct RenderContext
 	UINT draw_StartIndex;
 	UINT draw_BaseVertex;
 	bool draw_isDirty;
-	string Find(void * addr);
-	void CreateResources(int _idx);
-	CBMain FindCBMain(int _idx);
 };

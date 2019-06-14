@@ -30,9 +30,5 @@ public:
 	jModel * mModel;
 	ID3D11ShaderResourceView * mTexture;
 	Matrix4 mWorld;
-	int mIndexCount = 0;
-	int mStartIndex = 0;
-	int mVertexOff = 0;
-	int mOffVertexOff = 0;
 };
 

@@ -12,11 +12,6 @@ jShaderSkinned::jShaderSkinned()
 	mLightBuffer = nullptr;
 	mVertBuf = nullptr;
 	mIdxBuf = nullptr;
-	mIndexCount = 0;
-	mVertTypeSize = 0;
-	mStartIndex = 0;
-	mVertexOff = 0;
-	mOffVertexOff = 0;
 }
 
 jShaderSkinned::~jShaderSkinned()
@@ -215,8 +210,6 @@ void jShaderSkinned::Release()
 	mMatrixBuffer = nullptr;
 	mVertBuf = nullptr;
 	mIdxBuf = nullptr;
-	mIndexCount = 0;
-	mVertTypeSize = 0;
 	mWorld.identity();
 	mView.identity();
 	mProj.identity();
@@ -229,8 +222,6 @@ void jShaderSkinned::SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _
 	mTexture = _texture->mTextureView;
 	mVertBuf = _model->GetVertexBuffer();;
 	mIdxBuf = _model->GetIndexBuffer();
-	mIndexCount = _model->GetIndexCount();
-	mVertTypeSize = _model->GetVertexTypeSize();
 
 	mWorld = _worldMat.transpose();
 	mView = _camera->getPosMat_D3D().transpose();
@@ -251,10 +242,10 @@ bool jShaderSkinned::Render()
 {
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
-	unsigned int stride = mVertTypeSize;
+	unsigned int stride = mModel->GetVertexTypeSize();
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, (UINT*)&mOffVertexOff);
+	pDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &stride, (UINT*)&mModel->mOffVertexOff);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	if(mModel->IsIndiciesStrideTwo())
@@ -330,7 +321,7 @@ bool jShaderSkinned::Render()
 	pDevContext->PSSetSamplers(0, 1, &mSampleState);
 
 	// 삼각형을 그립니다.
-	pDevContext->DrawIndexed(mIndexCount, mStartIndex, mVertexOff);
+	pDevContext->DrawIndexed(mModel->GetIndexCount(), mModel->mStartIndex, mModel->mVertexOff);
 	return true;
 }
 

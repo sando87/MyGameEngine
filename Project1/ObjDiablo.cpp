@@ -59,23 +59,21 @@ bool SetDrawInfo(void *_this, char *_filename)
 void ObjDiablo::OnStart()
 {
 	LoadCBMatrix();
-	DoRenderingContext(0);
+	//DoRenderingContext(0);
+	mRenderIfno.Init(0);
 
 	mModel = new jModel();
-	mModel->LoadDiablo_ForSkkinedShader(&mRenderingContext);
+	mModel->LoadDiablo_ForSkkinedShader(&mRenderIfno);
 
-	void* pIF = jGameObjectMgr::GetInst().mGPURes[mRenderingContext.tex[0].addr].second;
+	ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView(0);
 	mTexture = new jTexture();
-	mTexture->SetShaderResourceView((ID3D11ShaderResourceView *)pIF);
+	mTexture->SetShaderResourceView(pIF);
 
 	//mShader = new jShaderTexture();
 	//mShader->Initialize("./texture.vs", "./texture.ps");
 
 	mShader = new jShaderSkinned();
 	mShader->Initialize("./test.vs", "./test.ps");
-	
-	//mTexture = new jTexture();
-	//mTexture->Initialize("./Texture2D_0_1_0000015D1A1E9468.tga");
 }
 
 void ObjDiablo::OnUpdate()
@@ -96,9 +94,9 @@ void ObjDiablo::OnDraw()
 	drawIndx++;
 
 	vector<Matrix4> mats;
-	if (animMats != nullptr)
+	for (int i = 0; i < 45; ++i)
 	{
-		for (int i = 0; i < 45; ++i)
+		if (animMats != nullptr)
 		{
 			Matrix4 curMat;
 			curMat[0] = animMats->mat[i].a.x;
@@ -123,36 +121,19 @@ void ObjDiablo::OnDraw()
 
 			mats.push_back(curMat);
 		}
-	}
-	else
-	{
-		mats.push_back(Matrix4().identity());
+		else
+		{
+			mats.push_back(Matrix4().identity());
+		}
 	}
 
 	mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
-	mShader->mIndexCount = mRenderingContext.draw_IndexCount;
-	mShader->mStartIndex = mRenderingContext.draw_StartIndex;
-	mShader->mVertexOff = mRenderingContext.draw_BaseVertex;
-	mShader->mOffVertexOff = (mRenderingContext.vb[0].offset[0] / 48) * 20;
 	mShader->Render();
 
 	//mShader->SetParams(mModel, mat, mTexture);
-	//mShader->mIndexCount = mRenderingContext.draw_IndexCount;
-	//mShader->mStartIndex = mRenderingContext.draw_StartIndex;
-	//mShader->mVertexOff = mRenderingContext.draw_BaseVertex;
-	//mShader->mOffVertexOff = (mRenderingContext.vb[0].offset[0] / 48) * 20;
 	//mShader->Render();
 }
 
-void ObjDiablo::DoRenderingContext(int _index)
-{
-	string name = PATH_RESOURCE + to_string(_index) + "_RenderingContext.bin";
-	int size = 0;
-	char* pBuf = NULL;
-	jUtils::LoadFile(name, &size, &pBuf);
-	memcpy(&mRenderingContext, pBuf, size);
-	mRenderingContext.CreateResources(_index);
-}
 CBMatrix* ObjDiablo::GetCBMatrix(int _idx)
 {
 	if (mCBMains == nullptr)
@@ -173,55 +154,4 @@ bool ObjDiablo::LoadCBMatrix()
 	mCBMainCount = fileSize / 2216;
 	mCBMains = pBuf;
 	return true;
-}
-DrawingInfo ObjDiablo::DoDrawingInfo()
-{
-	DrawingInfo ret = { 0, };
-	unordered_map<void *, MyResBase*>& res = jGameObjectMgr::GetInst().mResources;
-	for (auto iter = res.begin(); iter != res.end(); ++iter)
-	{
-		void* addr = iter->first;
-		MyResBase* pData = iter->second;
-		if (pData->type == MYRES_TYPE_CreateVS)
-		{
-			ret.vertexShader = pData;
-		}
-		else if (pData->type == MYRES_TYPE_CreatePS)
-		{
-			ret.pixelShader = pData;
-		}
-		else if (pData->type == MYRES_TYPE_CreateTex)
-		{
-			ret.texture[0] = pData;
-		}
-		else if (pData->type == MYRES_TYPE_CreateBuffer)
-		{
-			if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER)
-			{
-				ret.indexBuffer = pData;
-			}
-			else if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER)
-			{
-				ret.vertexBuffer[0] = pData;
-			}
-			else if (((MyRes_CreateBuffer*)pData)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER)
-			{
-				ret.ConstBuffer = pData;
-			}
-		}
-		else if (pData->type == MYRES_TYPE_CreateLayout)
-		{
-			ret.layout = pData;
-		}
-		else if (pData->type == MYRES_TYPE_CreateSample)
-		{
-			ret.sampler[0] = pData;
-		}
-		else
-		{
-			_warn();
-		}
-	}
-
-	return ret;
 }

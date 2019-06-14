@@ -3,8 +3,7 @@
 
 #include "header.h"
 #include "Vectors.h"
-struct MyResBase;
-struct RenderContext;
+class jParserD3;
 
 class jModel
 {
@@ -18,8 +17,8 @@ public:
 	bool LoadAxis(int _len);
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
 
-	bool LoadDiablo_ForTextureShader(RenderContext *_context);
-	bool LoadDiablo_ForSkkinedShader(RenderContext *_context);
+	bool LoadDiablo_ForTextureShader(jParserD3 *_context);
+	bool LoadDiablo_ForSkkinedShader(jParserD3 *_context);
 
 	void Release();
 
@@ -30,8 +29,10 @@ public:
 	bool IsIndiciesStrideTwo() { return m_sizeIndex == 2 ? true : false; }
 	
 
-private:
-	//void RenderBuffers(ID3D11DeviceContext*);
+public:
+	int mStartIndex;
+	int mVertexOff;
+	int mOffVertexOff;
 
 private:
 	ID3D11Buffer* m_vertexBuffer;
@@ -40,6 +41,7 @@ private:
 	int m_indexCount;
 	int m_sizeVertex;
 	int m_sizeIndex;
+
 };
 
 #endif

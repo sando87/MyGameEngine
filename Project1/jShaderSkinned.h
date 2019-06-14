@@ -35,11 +35,6 @@ public:
 	ID3D11ShaderResourceView * mTexture;
 	ID3D11Buffer* mVertBuf;
 	ID3D11Buffer* mIdxBuf;
-	int mIndexCount;
-	int mVertTypeSize;
-	int mStartIndex;
-	int mVertexOff;
-	int mOffVertexOff;
 
 	Matrix4 mWorld;
 	Matrix4 mView;

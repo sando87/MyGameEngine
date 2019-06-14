@@ -2,6 +2,7 @@
 
 #include "jGameObject.h"
 #include "jGlobalStruct.h"
+#include "jParserD3.h"
 #include <vector>
 using namespace std;
 
@@ -41,18 +42,17 @@ private:
 	void OnUpdate();
 	void OnDraw();
 
-	DrawingInfo DoDrawingInfo();
-	void DoRenderingContext(int _index);
 	bool LoadCBMatrix();
 	CBMatrix* GetCBMatrix(int _idx);
 
 	jModel* mModel;
 	jShaderSkinned * mShader;
+	//jShaderTexture * mShader;
 	jTexture * mTexture;
 
 public:
 	DrawingInfo mDrawInfos;
-	RenderContext mRenderingContext;
+	jParserD3 mRenderIfno;
 	int mCBMainCount;
 	char* mCBMains;
 };

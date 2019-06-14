@@ -4,6 +4,7 @@
 #include "jLoader.h"
 #include "jUtils.h"
 #include "jGameObjectMgr.h"
+#include "jParserD3.h"
 
 jModel::jModel()
 {
@@ -13,6 +14,10 @@ jModel::jModel()
 	m_indexCount = 0;
 	m_sizeVertex = 0;
 	m_sizeIndex = 0;
+
+	mStartIndex		= 0;
+	mVertexOff		= 0;
+	mOffVertexOff	= 0;
 }
 
 jModel::~jModel()
@@ -512,58 +517,20 @@ bool jModel::LoadAxis(int _len)
 	return true;
 }
 
-bool jModel::LoadDiablo_ForTextureShader(RenderContext *_context)
+bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
-	ID3D11Buffer *pBuf = nullptr;
-	jGameObjectMgr& mgr = jGameObjectMgr::GetInst();
 
 	//CreateVertexBuffer
 	{
-		void* vbAddr = _context->vb[0].addr;
-		void* vbLayout = _context->layout_addr;
-		void* cbAddr = _context->layout_addr;
-		CBMain cbMain = _context->FindCBMain(0);
-		MyRes_CreateBuffer* pData_VB = (MyRes_CreateBuffer*)mgr.mGPURes[vbAddr].first;
-		MyRes_CreateLayout* pData_Layout = (MyRes_CreateLayout*)mgr.mGPURes[vbLayout].first;
-		unsigned int stride = pData_Layout->GetStride(0);
-		unsigned int textureOff = pData_Layout->GetTextureOffset(0);
-		m_vertexCount = pData_VB->desc.ByteWidth / stride;
-
+		m_vertexCount = _context->mVertexCount;
 		m_sizeVertex = sizeof(VertexType_Texture);
 		vector<VertexType_Texture> verticies;
-		char* tmp = pData_VB->data;
-		unsigned char* tex = nullptr;
-		Matrix4 matTex = cbMain.matTex0;
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
 			VertexType_Texture vert;
-			memcpy(&vert.p, tmp, sizeof(Vector3f));
-			tex = (unsigned char*)(tmp + textureOff);
-
-			Vector4f tmp1;
-			tmp1.x = (unsigned char)tex[1];
-			tmp1.y = (unsigned char)tex[0];
-			tmp1.z = (unsigned char)tex[3];
-			tmp1.w = (unsigned char)tex[2];
-
-			Vector4f tmp2;
-			tmp2.x = tmp1.y * 0.003906f + tmp1.x;
-			tmp2.y = tmp1.w * 0.003906f + tmp1.z;
-			tmp2.x = tmp2.x * 0.5f - 64.0f;
-			tmp2.y = tmp2.y * 0.5f - 64.0f;
-			tmp2.z = 1.0f;
-
-			Vector4f tmp3;
-			tmp3.x = tmp2.x * matTex[0] + tmp2.y * matTex[1] + tmp2.z * matTex[3];
-			tmp3.y = tmp2.x * matTex[4] + tmp2.y * matTex[5] + tmp2.z * matTex[7];
-			tmp3.z = tmp2.x * matTex[8] + tmp2.y * matTex[9] + tmp2.z * matTex[11];
-			tmp3.w = tmp2.x * matTex[12] + tmp2.y * matTex[13] + tmp2.z * matTex[15];
-
-			vert.t.x = tmp3.x;
-			vert.t.y = tmp3.y;
-
-			tmp += stride;
+			vert.p = _context->GetPos(i);
+			vert.t = _context->GetTex(i);
 			verticies.push_back(vert);
 		}
 
@@ -585,86 +552,34 @@ bool jModel::LoadDiablo_ForTextureShader(RenderContext *_context)
 
 	//CreateIndexBuffer
 	{
-		void* ibAddr = _context->ib_addr;
-		MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mgr.mGPURes[ibAddr].first;
-		m_indexBuffer = (ID3D11Buffer*)mgr.mGPURes[ibAddr].second;
-
 		m_sizeIndex = 2;
-		m_indexCount = pData->desc.ByteWidth / m_sizeIndex;
+		m_indexCount = _context->mContext.draw_IndexCount;
+		m_indexBuffer = _context->GetResIndexBuffer();
 	}
+
+	mStartIndex = _context->mContext.draw_StartIndex;
+	mVertexOff = _context->mContext.draw_BaseVertex;
+	mOffVertexOff = (_context->mVertexOffset / _context->mVertexStride) * m_sizeVertex;
 
 	return true;
 }
-bool jModel::LoadDiablo_ForSkkinedShader(RenderContext *_context)
+bool jModel::LoadDiablo_ForSkkinedShader(jParserD3 *_context)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
-	ID3D11Buffer *pBuf = nullptr;
-	jGameObjectMgr& mgr = jGameObjectMgr::GetInst();
 
 	//CreateVertexBuffer
 	{
-		void* vbAddr = _context->vb[0].addr;
-		void* vbLayout = _context->layout_addr;
-		void* cbAddr = _context->layout_addr;
-		CBMain cbMain = _context->FindCBMain(0);
-		MyRes_CreateBuffer* pData_VB = (MyRes_CreateBuffer*)mgr.mGPURes[vbAddr].first;
-		MyRes_CreateLayout* pData_Layout = (MyRes_CreateLayout*)mgr.mGPURes[vbLayout].first;
-		unsigned int stride = pData_Layout->GetStride(0);
-		unsigned int textureOff = pData_Layout->GetTextureOffset(0);
-		unsigned int MatIdxOff = pData_Layout->GetMatIdxOffset();
-		unsigned int MatWeightOff = pData_Layout->GetMatWeightOffset();
-		m_vertexCount = pData_VB->desc.ByteWidth / stride;
-
+		m_vertexCount = _context->mVertexCount;
 		m_sizeVertex = sizeof(VertexType_Weight);
 		vector<VertexType_Weight> verticies;
-		char* tmp = pData_VB->data;
-		unsigned char* tex = nullptr;
-		unsigned char* indi = nullptr;
-		float* weight = nullptr;
-		Matrix4 matTex = cbMain.matTex0;
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
 			VertexType_Weight vert;
-			memcpy(&vert.p, tmp, sizeof(Vector3f));
-			vert.n = Vector3f(1, 0, 0);
-			vert.weight = Vector4f(1, 0, 0, 0);
-
-			indi = (unsigned char*)(tmp + MatIdxOff);
-			vert.index.x = indi[0];
-			vert.index.y = indi[1];
-			vert.index.z = indi[2];
-			vert.index.w = indi[3];
-
-			weight = (float*)(tmp + MatWeightOff);
-			vert.weight.x = weight[0];
-			vert.weight.y = weight[1];
-			vert.weight.z = weight[2];
-			vert.weight.w = 0;
-
-			tex = (unsigned char*)(tmp + textureOff);
-			Vector4f tmp1;
-			tmp1.x = (unsigned char)tex[1];
-			tmp1.y = (unsigned char)tex[0];
-			tmp1.z = (unsigned char)tex[3];
-			tmp1.w = (unsigned char)tex[2];
-
-			Vector4f tmp2;
-			tmp2.x = tmp1.y * 0.003906f + tmp1.x;
-			tmp2.y = tmp1.w * 0.003906f + tmp1.z;
-			tmp2.x = tmp2.x * 0.5f - 64.0f;
-			tmp2.y = tmp2.y * 0.5f - 64.0f;
-			tmp2.z = 1.0f;
-
-			Vector4f tmp3;
-			tmp3.x = tmp2.x * matTex[0] + tmp2.y * matTex[1] + tmp2.z * matTex[3];
-			tmp3.y = tmp2.x * matTex[4] + tmp2.y * matTex[5] + tmp2.z * matTex[7];
-			tmp3.z = tmp2.x * matTex[8] + tmp2.y * matTex[9] + tmp2.z * matTex[11];
-			tmp3.w = tmp2.x * matTex[12] + tmp2.y * matTex[13] + tmp2.z * matTex[15];
-
-			vert.t.x = tmp3.x;
-			vert.t.y = tmp3.y;
-
-			tmp += stride;
+			vert.p = _context->GetPos(i);
+			vert.n = _context->GetNor(i);
+			vert.t = _context->GetTex(i);
+			vert.index = _context->GetMatIdx(i);
+			vert.weight = _context->GetMatWeight(i);
 			verticies.push_back(vert);
 		}
 
@@ -686,13 +601,14 @@ bool jModel::LoadDiablo_ForSkkinedShader(RenderContext *_context)
 
 	//CreateIndexBuffer
 	{
-		void* ibAddr = _context->ib_addr;
-		MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mgr.mGPURes[ibAddr].first;
-		m_indexBuffer = (ID3D11Buffer*)mgr.mGPURes[ibAddr].second;
-
 		m_sizeIndex = 2;
-		m_indexCount = pData->desc.ByteWidth / m_sizeIndex;
+		m_indexCount = _context->mContext.draw_IndexCount;
+		m_indexBuffer = _context->GetResIndexBuffer();
 	}
+
+	mStartIndex = _context->mContext.draw_StartIndex;
+	mVertexOff = _context->mContext.draw_BaseVertex;
+	mOffVertexOff = (_context->mVertexOffset / _context->mVertexStride) * m_sizeVertex;
 
 	return true;
 }

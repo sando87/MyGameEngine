@@ -111,6 +111,9 @@
     <ClCompile Include="jGlobalStruct.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jParserD3.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -213,6 +216,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jShaderTexture.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserD3.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
