@@ -46,8 +46,8 @@ private:
 	CBMatrix* GetCBMatrix(int _idx);
 
 	jModel* mModel;
-	jShaderSkinned * mShader;
-	//jShaderTexture * mShader;
+	//jShaderSkinned * mShader;
+	jShaderTexture * mShader;
 	jTexture * mTexture;
 
 public:

@@ -18,7 +18,7 @@ struct Layout_59_167
 	unsigned char i[4];
 	float w[3];
 };
-struct Layout_A_10E
+struct Layout_A_10E //same as 5D_15F
 {
 	float p[3];
 	unsigned char n[4];
@@ -30,6 +30,8 @@ struct Layout_A_10E
 
 jParserD3::jParserD3()
 {
+	mTexCoordIndex = 0;
+	mTextureIndex = 0;
 	mMapRes.clear();
 }
 
@@ -103,6 +105,9 @@ void jParserD3::Init(int _fileIdx)
 	mVertexStride = mContext.vb[mVertBufIdx].strides[0];
 	mVertexOffset = mContext.vb[mVertBufIdx].offset[0];
 	mVertexCount = vertexBufSize / mVertexStride;
+
+	SetTexCoordIndex();
+	SetTextureIndex();
 }
 void jParserD3::CreateD3DRescource(void* addr)
 {
@@ -137,19 +142,23 @@ void jParserD3::CreateD3DRescource(void* addr)
 	case MYRES_TYPE_CreateTex:
 	{
 		stringstream ss;
-		ss << addr << "_" << addr << "_t.dump.tga";
+		ss << PATH_RESOURCE << "*_" << addr << "_t.dump.tga";
+
 		int width = 0;
 		int height = 0;
 		int bufSize = 0;
 		unsigned char* imgbuf = nullptr;
-		if (!jUtils::LoadTarga(PATH_RESOURCE + ss.str(), height, width, bufSize, imgbuf))
-		{
-			_warn();
-			return;
-		}
+		jUtils::ForEachFiles2(nullptr, ss.str().c_str(), [&](void *_obj, string _filename) {
+			if (!jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width, bufSize, imgbuf))
+				_warn();
+			return false;
+		});
 
-		pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, (char*)imgbuf);
-		delete[] imgbuf;
+		if (imgbuf != nullptr)
+		{
+			pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, (char*)imgbuf);
+			delete[] imgbuf;
+		}
 	}
 		break;
 	default:
@@ -184,12 +193,46 @@ ID3D11Buffer* jParserD3::GetResIndexBuffer()
 	CreateD3DRescource(mContext.ib_addr);
 	return (ID3D11Buffer*)mMapRes[mContext.ib_addr].second;
 }
-ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView(int _idx)
+ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView()
 {
-	CreateD3DRescource(mContext.tex[_idx].addr);
-	return (ID3D11ShaderResourceView*)mMapRes[mContext.tex[_idx].addr].second;
+	CreateD3DRescource(mContext.tex[mTextureIndex].addr);
+	return (ID3D11ShaderResourceView*)mMapRes[mContext.tex[mTextureIndex].addr].second;
 }
-
+void jParserD3::SetTexCoordIndex()
+{
+	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.vs_addr].first;
+	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
+	switch (resID)
+	{
+	case RES_ID(0xCB, 0x11BC):
+	case RES_ID(0x53, 0x1318):
+		mTexCoordIndex = 0;
+		break;
+	case RES_ID(0x84, 0x1A30):
+		mTexCoordIndex = 1;
+		break;
+	default:
+		_warn();
+		break;
+	}
+}
+void jParserD3::SetTextureIndex()
+{
+	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.ps_addr].first;
+	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
+	switch (resID)
+	{
+	case RES_ID(0xF2, 0x1044):
+		mTextureIndex = 0;
+		break;
+	case RES_ID(0x1C, 0x2B70):
+		mTextureIndex = 1;
+		break;
+	default:
+		_warn();
+		break;
+	}
+}
 Vector3f jParserD3::GetPos(int _idx)
 {
 	_warnif(_idx >= mVertexCount);
@@ -205,6 +248,7 @@ Vector3f jParserD3::GetPos(int _idx)
 		Layout_59_167* pVert = (Layout_59_167*)pData->data;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
+	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	{
 		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
@@ -235,6 +279,7 @@ Vector3f jParserD3::GetNor(int _idx)
 		ret.z = ((float)pVert[_idx].n[2] / 128.0f) - 1.0f;
 		return ret;
 	}
+	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	{
 		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
@@ -248,11 +293,11 @@ Vector3f jParserD3::GetNor(int _idx)
 		_warn();
 		break;
 	}
-	return Vector3f();
+	return Vector3f(0, 1, 0);
 }
 Vector2f jParserD3::ConvertTex(unsigned char *_p)
 {
-	Matrix4 matTex = GetCBMain().matTex[0];
+	Matrix4 matTex = GetCBMain().matTex[mTexCoordIndex];
 	Vector4f tmp1;
 	tmp1.x = _p[1];
 	tmp1.y = _p[0];
@@ -290,6 +335,7 @@ Vector2f jParserD3::GetTex(int _idx)
 		Vector2f ret = ConvertTex(pVert[_idx].t0);
 		return ret;
 	}
+	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	{
 		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
@@ -300,7 +346,7 @@ Vector2f jParserD3::GetTex(int _idx)
 		_warn();
 		break;
 	}
-	return Vector2f();
+	return Vector2f(0, 0);
 }
 Vector4n jParserD3::GetMatIdx(int _idx)
 {
@@ -318,12 +364,13 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 		Vector4n ret = Vector4n(pVert[_idx].i[0], pVert[_idx].i[1], pVert[_idx].i[2], pVert[_idx].i[3]);
 		return ret;
 	}
+	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	default:
 		_warn();
 		break;
 	}
-	return Vector4n();
+	return Vector4n(0, 0, 0, 0);
 }
 Vector4f jParserD3::GetMatWeight(int _idx)
 {
@@ -341,10 +388,11 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 		Vector4f ret = Vector4f(pVert[_idx].w[0], pVert[_idx].w[1], pVert[_idx].w[2], 0);
 		return ret;
 	}
+	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	default:
 		_warn();
 		break;
 	}
-	return Vector4f();
+	return Vector4f(1, 0, 0, 0);
 }

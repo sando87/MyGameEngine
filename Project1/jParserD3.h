@@ -23,14 +23,19 @@ public:
 	int mVertexStride;
 	int mVertexOffset;
 	int mVertexCount;
+
+	int mTexCoordIndex;
+	int mTextureIndex;
 	
 	void Init(int _fileIdx);
 	void CreateD3DRescource(void* addr);
 	CBMain GetCBMain();
 
 	ID3D11Buffer* GetResIndexBuffer();
-	ID3D11ShaderResourceView* GetResShaderResourceView(int _idx);
+	ID3D11ShaderResourceView* GetResShaderResourceView();
 	
+	void SetTexCoordIndex();
+	void SetTextureIndex();
 	void SetVertexBuffer(int _idx) { mVertBufIdx = _idx; }
 	Vector3f GetPos(int _idx);
 	Vector3f GetNor(int _idx);

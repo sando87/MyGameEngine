@@ -58,22 +58,22 @@ bool SetDrawInfo(void *_this, char *_filename)
 }
 void ObjDiablo::OnStart()
 {
-	LoadCBMatrix();
+	//LoadCBMatrix();
 	//DoRenderingContext(0);
-	mRenderIfno.Init(0);
+	mRenderIfno.Init(53);
 
 	mModel = new jModel();
-	mModel->LoadDiablo_ForSkkinedShader(&mRenderIfno);
+	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
 
-	ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView(0);
+	ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView();
 	mTexture = new jTexture();
 	mTexture->SetShaderResourceView(pIF);
 
-	//mShader = new jShaderTexture();
-	//mShader->Initialize("./texture.vs", "./texture.ps");
+	mShader = new jShaderTexture();
+	mShader->Initialize("./texture.vs", "./texture.ps");
 
-	mShader = new jShaderSkinned();
-	mShader->Initialize("./test.vs", "./test.ps");
+	//mShader = new jShaderSkinned();
+	//mShader->Initialize("./test.vs", "./test.ps");
 }
 
 void ObjDiablo::OnUpdate()
@@ -127,11 +127,11 @@ void ObjDiablo::OnDraw()
 		}
 	}
 
-	mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
-	mShader->Render();
-
-	//mShader->SetParams(mModel, mat, mTexture);
+	//mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
 	//mShader->Render();
+
+	mShader->SetParams(mModel, mat, mTexture);
+	mShader->Render();
 }
 
 CBMatrix* ObjDiablo::GetCBMatrix(int _idx)
