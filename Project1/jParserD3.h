@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <map>
+#include <functional>
 
 #include "jGlobalStruct.h"
 using namespace std;
@@ -19,29 +20,38 @@ public:
 
 	int mFileIndex;
 	RenderContext mContext;
-	int mVertBufIdx;
 	int mVertexStride;
 	int mVertexOffset;
 	int mVertexCount;
+	function< Vector2f(int _idx, unsigned char *_p) > mFuncConvertTex;
+	vector<int> mTextures;
+	CBMain mCBMain;
+	MyRes_CreateBuffer* mpVerticies;
+	int mLayoutFileID;
 
-	int mTexCoordIndex;
-	int mTextureIndex;
+	bool Init(int _fileIdx);
+	void InitFuncConvTex();
+	void ReadyForData();
+	void InitTextureList();
+	void InitCBMain();
+	bool IsValid();
 	
-	void Init(int _fileIdx);
 	void CreateD3DRescource(void* addr);
-	CBMain GetCBMain();
-
 	ID3D11Buffer* GetResIndexBuffer();
 	ID3D11ShaderResourceView* GetResShaderResourceView();
 	
-	void SetTexCoordIndex();
-	void SetTextureIndex();
-	void SetVertexBuffer(int _idx) { mVertBufIdx = _idx; }
 	Vector3f GetPos(int _idx);
 	Vector3f GetNor(int _idx);
-	Vector2f GetTex(int _idx);
-	Vector2f ConvertTex(unsigned char *_p);
+	int GetTex(int _idx, Vector2f* _t);
 	Vector4n GetMatIdx(int _idx);
 	Vector4f GetMatWeight(int _idx);
+
+	Vector2f CalcTexCoord(unsigned char* _p)
+	{
+		Vector2f ret;
+		ret.x = ((float)_p[0] * 0.003906f + (float)_p[1]) * 0.5f - 64.0f;
+		ret.y = ((float)_p[2] * 0.003906f + (float)_p[3]) * 0.5f - 64.0f;
+		return ret;
+	}
 };
 

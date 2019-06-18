@@ -51,6 +51,7 @@ private:
 	jTexture * mTexture;
 
 public:
+	int mFileIndex;
 	DrawingInfo mDrawInfos;
 	jParserD3 mRenderIfno;
 	int mCBMainCount;

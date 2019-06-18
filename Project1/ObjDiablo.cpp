@@ -58,9 +58,25 @@ bool SetDrawInfo(void *_this, char *_filename)
 }
 void ObjDiablo::OnStart()
 {
+	//jUtils::ForEachFiles2(nullptr, "D:\\temp\\*_p.dump", [&](void* ptr, string name) {
+	//	vector<string> rets;
+	//	jUtils::Split(name, "_", rets);
+	//	int num = stoi(rets[0]);
+	//	char* pBuf = nullptr;
+	//	int size = 0;
+	//	jUtils::LoadFile("D:\\temp\\" + name, &size, &pBuf);
+	//	MyResBase* pData = (MyResBase*)pBuf;
+	//	printf("[%d] 0x%x, 0x%x\n", num, pData->crc, pData->totalSize);
+	//	return true;
+	//});
+
 	//LoadCBMatrix();
-	//DoRenderingContext(0);
-	mRenderIfno.Init(53);
+	if (!mRenderIfno.Init(mFileIndex))
+	{
+		_printlog("fail to load [%d]\n", mFileIndex);
+		DeleteFromMgr();
+		return;
+	}
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);

@@ -3,11 +3,12 @@
 #include "jLog.h"
 #include <sstream>
 
+#define REV_V(v) (1.0f - (v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
 
 map<void*, pair<MyResBase*, void*>> jParserD3::mMapRes;
 
-struct Layout_59_167
+struct LayoutA
 {
 	float p[3];
 	unsigned char n[4];
@@ -18,7 +19,7 @@ struct Layout_59_167
 	unsigned char i[4];
 	float w[3];
 };
-struct Layout_A_10E //same as 5D_15F
+struct LayoutB
 {
 	float p[3];
 	unsigned char n[4];
@@ -27,11 +28,44 @@ struct Layout_A_10E //same as 5D_15F
 	unsigned char t0[4];
 	unsigned char t1[4];
 };
+struct LayoutC
+{
+	float p[3];
+	unsigned char c0[4];
+	unsigned char c1[4];
+	unsigned char t0[4];
+	unsigned char t1[4];
+	unsigned char t2[4];
+	unsigned char t3[4];
+	unsigned char t4[4];
+	float t5[4];
+};
+struct LayoutD
+{
+	float p[3];
+	unsigned char c0[4];
+	unsigned char c1[4];
+	float t0[2];
+	float t1[2];
+	float t2[2];
+};
+struct LayoutE
+{
+	float p[3];
+	unsigned char n[4];
+	unsigned char c0[4];
+	unsigned char c1[4];
+	unsigned char t0[4];
+	unsigned char t1[4];
+	float t2[3];
+};
+//D3D11_INPUT_ELEMENT_DESC
+
 
 jParserD3::jParserD3()
 {
-	mTexCoordIndex = 0;
-	mTextureIndex = 0;
+	mpVerticies = nullptr;
+	mLayoutFileID = 0;
 	mMapRes.clear();
 }
 
@@ -79,7 +113,8 @@ void jParserD3::Release()
 }
 
 
-void jParserD3::Init(int _fileIdx)
+
+bool jParserD3::Init(int _fileIdx)
 {
 	LoadResources();
 
@@ -90,25 +125,275 @@ void jParserD3::Init(int _fileIdx)
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
 	memcpy(&mContext, pBuf, sizeof(mContext));
 
-	void * addr = mContext.layout_addr;
-	MyRes_CreateLayout* pData = (MyRes_CreateLayout*)mMapRes[addr].first;
-	pData->SetNameOffset();
-	//D3D11_INPUT_ELEMENT_DESC* pLayout = (D3D11_INPUT_ELEMENT_DESC*)pData->data;
-	//int num = pData->head.reserve1;
-	//for (int i = 0; i < num; ++i) {}
+	InitCBMain();
+	ReadyForData();
+	InitFuncConvTex();
+	InitTextureList();
 
+	if (!IsValid())
+	{
+		_warn();
+		return false;
+	}
 
-	if (mContext.vb[mVertBufIdx].numBuf != 1)
+	return true;
+}
+void jParserD3::InitFuncConvTex()
+{
+	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.vs_addr].first;
+	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
+	switch (resID)
+	{
+	case RES_ID(0x53, 0x1318):	//0  
+	case RES_ID(0x1f, 0x1948):	//122
+	case RES_ID(0xd5, 0x1bd0):	//125
+	case RES_ID(0x1a, 0x17a4):	//126
+	case RES_ID(0xd1, 0x1848):	//127
+	case RES_ID(0x77, 0x1804):	//130
+	case RES_ID(0xa0, 0x23a4):	//16 
+	case RES_ID(0xd7, 0x1704):	//17 
+	case RES_ID(0xCB, 0x11BC): //1  
+	case RES_ID(0x80, 0x2264):	//48 
+	case RES_ID(0x6a, 0x1c64):	//72 
+	case RES_ID(0x16, 0x1f5c):	//75 
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Matrix4 matTex = mCBMain.matTex[0];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
+			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0xfc, 0x25b4):	//42 
+	case RES_ID(0x9d, 0x22a8):	//43 
+	case RES_ID(0x86, 0x22c4):	//44 
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) { 
+			Matrix4 matTex = mCBMain.matTex[0];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1];
+			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x67, 0x1e34):	//138
+	case RES_ID(0x79, 0x13c8):	//150
+	case RES_ID(0x63, 0x18a8):	//21 	
+	case RES_ID(0x9a, 0x200c):	//34 
+	case RES_ID(0x41, 0x237c):	//38 
+	case RES_ID(0xff, 0x18a8):	//82 
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Matrix4 matTex = mCBMain.matTex[1];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
+			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x89, 0xfe4):	//108
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Vector2f *pfactor = (Vector2f *)&mCBMain.Constant0;
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			ret.x = tmp.x + pfactor[_idx].x;
+			ret.y = tmp.y + pfactor[_idx].y;
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0xd0, 0xf10):	//109
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Vector2f ret = CalcTexCoord(_p);
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x7a, 0x1468):	//151
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Vector4f factor = mCBMain.viewport;
+			Matrix4 matTex = mCBMain.matTex[0];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f tmp2;
+			tmp2.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
+			tmp2.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			Vector2f ret;
+			ret.x = tmp2.x * factor.x + factor.y;
+			ret.x = tmp2.y * factor.z + factor.w;
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x80, 0x1158):	//18 
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			float *p = (float *)_p;
+			Vector2f ret;
+			ret.x = p[0];
+			ret.x = p[1];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x84, 0x1A30): //19 
+	case RES_ID(0xed, 0x1b8c):	//20 
+	case RES_ID(0x51, 0x1a30):	//84 
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Matrix4f matTex = mCBMain.matTex[_idx + 1];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
+			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+
+	case RES_ID(0x92, 0x1378):	//90 => skip
+	case RES_ID(0xd1, 0x2150):	//80 => hard
+	case RES_ID(0x18, 0x22ac):	//41 => hard
+	case RES_ID(0x28, 0x121c):	//152
+	case RES_ID(0x2c, 0x1240):	//157
+	case RES_ID(0x8e, 0x1168):	//159
+	case RES_ID(0x85, 0x150c):	//184
+	case RES_ID(0x3a, 0x1564):	//186
+	case RES_ID(0xe3, 0x11dc):	//191
+	case RES_ID(0xff, 0xfcc):		//220
+	default:
+		_warn();
+		mFuncConvertTex = nullptr;
+		break;
+	}
+
+}
+void jParserD3::ReadyForData()
+{
+	int vertBufIdx = 0;
+	void *pAddr = mContext.vb[vertBufIdx].addr;
+	if (mMapRes.find(pAddr) == mMapRes.end())
+		mpVerticies = nullptr;
+	else
+		mpVerticies = (MyRes_CreateBuffer*)mMapRes[pAddr].first;
+
+	if (mContext.vb[vertBufIdx].numBuf != 1)
 		_warn();
 
-	int vertexBufSize = mMapRes[mContext.vb[mVertBufIdx].addr].first->totalSize - sizeof(MyRes_CreateBuffer);
-	mVertexStride = mContext.vb[mVertBufIdx].strides[0];
-	mVertexOffset = mContext.vb[mVertBufIdx].offset[0];
-	mVertexCount = vertexBufSize / mVertexStride;
+	if (mpVerticies != nullptr)
+	{
+		int vertexBufSize = mpVerticies->head.totalSize - sizeof(MyRes_CreateBuffer);
+		mVertexStride = mContext.vb[vertBufIdx].strides[0];
+		mVertexOffset = mContext.vb[vertBufIdx].offset[0];
+		mVertexCount = vertexBufSize / mVertexStride;
+	}
 
-	SetTexCoordIndex();
-	SetTextureIndex();
+	MyResBase* pDataLayout = mMapRes[mContext.layout_addr].first;
+	((MyRes_CreateLayout*)pDataLayout)->SetNameOffset();
+	mLayoutFileID = RES_ID(pDataLayout->crc, pDataLayout->totalSize);
 }
+void jParserD3::InitTextureList()
+{
+	mTextures.clear();
+	MyResBase* pData = (MyResBase*)mMapRes[mContext.ps_addr].first;
+	int FileID = RES_ID(pData->crc, pData->totalSize);
+	switch (FileID)
+	{
+	case RES_ID(0xF2, 0x1044): //0
+	case RES_ID(0x34, 0x2E0): //108
+	case RES_ID(0x88, 0x288): //109
+	case RES_ID(0x85, 0x1094): //122
+	case RES_ID(0x7F, 0x124C): //125
+	case RES_ID(0x26, 0x102c): //127
+	case RES_ID(0x59, 0xfa4): //130
+	case RES_ID(0xb4, 0x14e0): //151
+	case RES_ID(0x59, 0x448): //16
+	case RES_ID(0xd5, 0x368): //17
+	case RES_ID(0xa8, 0x410): //18
+	case RES_ID(0xe6, 0x178c): //42
+	case RES_ID(0x6d, 0xee4): //72
+	case RES_ID(0x58, 0x1428): //75
+	case RES_ID(0x30, 0x3a8):	//143
+	case RES_ID(0x6f, 0x10e8):	//144
+	case RES_ID(0xf3, 0x1554):	//55
+	case RES_ID(0x82, 0x14f8):	//56
+	case RES_ID(0xec, 0x15b4):	//71
+		mTextures.push_back(0);
+		break;
+	case RES_ID(0xe3, 0x10e8): //126
+	case RES_ID(0x77, 0xff4): //138
+	case RES_ID(0x5, 0x424): //150
+	case RES_ID(0x39, 0x2198): //21
+	case RES_ID(0x32, 0x1468): //34
+	case RES_ID(0x75, 0x1418): //38
+	case RES_ID(0xe5, 0x1310): //41
+	case RES_ID(0x4a, 0x20cc): //82
+	case RES_ID(0x3d, 0x1468):	//79
+		mTextures.push_back(1);
+		break;
+	case RES_ID(0x1c, 0x2b70): //19
+	case RES_ID(0xaf, 0x2ca4): //20
+	case RES_ID(0xfa, 0x2ab8): //84
+		mTextures.push_back(1);
+		mTextures.push_back(2);
+		mTextures.push_back(3);
+		mTextures.push_back(4);
+		mTextures.push_back(5);
+		break;
+
+	case RES_ID(0xf4, 0x136c):	//51 => hard
+	case RES_ID(0x50, 0x2140): //80 => hard
+	case RES_ID(0x25, 0x130c): //90 => skip
+	case RES_ID(0x5a, 0x1418):  //124
+	case RES_ID(0x23, 0xf28):	//135
+	case RES_ID(0x32, 0x10a0):	//136
+	case RES_ID(0x6a, 0x102c):	//140
+	case RES_ID(0x3d, 0x10e8):	//145
+	case RES_ID(0xe7, 0x4d0):	//152
+	case RES_ID(0x70, 0x1010):	//157
+	case RES_ID(0x42, 0xf3c):	//162
+	case RES_ID(0xc6, 0x12e4):	//184
+	case RES_ID(0x64, 0x1290):	//185
+	case RES_ID(0x18, 0x1348):	//186
+	case RES_ID(0x50, 0x330):	//203
+	case RES_ID(0xb3, 0x358):	//204
+	case RES_ID(0x8c, 0x10bc):	//218
+	case RES_ID(0x53, 0x10b0):	//219
+	case RES_ID(0x8e, 0xfd8):	//220
+	default:
+		_warn();
+		break;
+	}
+}
+void jParserD3::InitCBMain()
+{
+	CBMain ret;
+	for (int i = 0; i < 8; ++i)
+	{
+		stringstream ss;
+		ss << mFileIndex << "_" << mContext.mapUnmap[i].addr << "_b.dump";
+
+		int fileSize = 0;
+		MyRes_CreateBuffer* pData = nullptr;
+		jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
+		if (pData->head.totalSize == sizeof(MyRes_CreateBuffer) + sizeof(CBMain))
+		{
+			memcpy(&ret, pData->data, sizeof(ret));
+			free(pData);
+			break;
+		}
+		free(pData);
+	}
+	mCBMain = ret;
+}
+bool jParserD3::IsValid()
+{
+	if( mpVerticies == nullptr )
+		return false;
+	if (mLayoutFileID == 0)
+		return false;
+	if (mTextures.size() == 0)
+		return false;
+	if (mFuncConvertTex == nullptr)
+		return false;
+
+	return true;
+}
+
+
 void jParserD3::CreateD3DRescource(void* addr)
 {
 	if (mMapRes.find(addr) == mMapRes.end())
@@ -131,7 +416,7 @@ void jParserD3::CreateD3DRescource(void* addr)
 		void *bolb = pShaderData->data;
 		pIF = ((MyRes_CreateLayout*)pData)->CreateResource(bolb, size);
 	}
-		break;
+	break;
 	case MYRES_TYPE_CreatePS:
 	case MYRES_TYPE_CreateVS:
 		pIF = ((MyRes_CreateShader*)pData)->CreateResource();
@@ -160,34 +445,12 @@ void jParserD3::CreateD3DRescource(void* addr)
 			delete[] imgbuf;
 		}
 	}
-		break;
+	break;
 	default:
 		break;
 	}
 	mMapRes[addr].second = pIF;
 }
-CBMain jParserD3::GetCBMain()
-{
-	CBMain ret;
-	for (int i = 0; i < 8; ++i)
-	{
-		stringstream ss;
-		ss << mFileIndex << "_" << mContext.mapUnmap[i].addr << "_b.dump";
-
-		int fileSize = 0;
-		MyRes_CreateBuffer* pData = nullptr;
-		jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
-		if (pData->head.totalSize == sizeof(MyRes_CreateBuffer) + sizeof(CBMain))
-		{
-			memcpy(&ret, pData->data, sizeof(ret));
-			free(pData);
-			break;
-		}
-		free(pData);
-	}
-	return ret;
-}
-
 ID3D11Buffer* jParserD3::GetResIndexBuffer()
 {
 	CreateD3DRescource(mContext.ib_addr);
@@ -195,63 +458,31 @@ ID3D11Buffer* jParserD3::GetResIndexBuffer()
 }
 ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView()
 {
-	CreateD3DRescource(mContext.tex[mTextureIndex].addr);
-	return (ID3D11ShaderResourceView*)mMapRes[mContext.tex[mTextureIndex].addr].second;
+	if (mTextures.size() == 0)
+		return nullptr;
+
+	int idx = mTextures[0];
+	CreateD3DRescource(mContext.tex[idx].addr);
+	return (ID3D11ShaderResourceView*)mMapRes[mContext.tex[idx].addr].second;
 }
-void jParserD3::SetTexCoordIndex()
-{
-	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.vs_addr].first;
-	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
-	switch (resID)
-	{
-	case RES_ID(0xCB, 0x11BC):
-	case RES_ID(0x53, 0x1318):
-		mTexCoordIndex = 0;
-		break;
-	case RES_ID(0x84, 0x1A30):
-		mTexCoordIndex = 1;
-		break;
-	default:
-		_warn();
-		break;
-	}
-}
-void jParserD3::SetTextureIndex()
-{
-	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.ps_addr].first;
-	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
-	switch (resID)
-	{
-	case RES_ID(0xF2, 0x1044):
-		mTextureIndex = 0;
-		break;
-	case RES_ID(0x1C, 0x2B70):
-		mTextureIndex = 1;
-		break;
-	default:
-		_warn();
-		break;
-	}
-}
+
+
 Vector3f jParserD3::GetPos(int _idx)
 {
 	_warnif(_idx >= mVertexCount);
 
-	void * addr = mContext.vb[mVertBufIdx].addr;
-	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mMapRes[addr].first;
-	MyRes_CreateLayout* pDataLayout = (MyRes_CreateLayout*)mMapRes[mContext.layout_addr].first;
-	int resID = RES_ID(pDataLayout->head.crc, pDataLayout->head.totalSize);
-	switch (resID)
+	MyRes_CreateBuffer* pData = mpVerticies;
+	switch (mLayoutFileID)
 	{
 	case RES_ID(0x59, 0x167):
 	{
-		Layout_59_167* pVert = (Layout_59_167*)pData->data;
+		LayoutA* pVert = (LayoutA*)pData->data;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	{
-		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
+		LayoutB* pVert = (LayoutB*)pData->data;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	default:
@@ -264,15 +495,12 @@ Vector3f jParserD3::GetNor(int _idx)
 {
 	_warnif(_idx >= mVertexCount);
 
-	void * addr = mContext.vb[mVertBufIdx].addr;
-	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mMapRes[addr].first;
-	MyRes_CreateLayout* pDataLayout = (MyRes_CreateLayout*)mMapRes[mContext.layout_addr].first;
-	int resID = RES_ID(pDataLayout->head.crc, pDataLayout->head.totalSize);
-	switch (resID)
+	MyRes_CreateBuffer* pData = mpVerticies;
+	switch (mLayoutFileID)
 	{
 	case RES_ID(0x59, 0x167):
 	{
-		Layout_59_167* pVert = (Layout_59_167*)pData->data;
+		LayoutA* pVert = (LayoutA*)pData->data;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -282,7 +510,7 @@ Vector3f jParserD3::GetNor(int _idx)
 	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	{
-		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
+		LayoutB* pVert = (LayoutB*)pData->data;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -295,72 +523,68 @@ Vector3f jParserD3::GetNor(int _idx)
 	}
 	return Vector3f(0, 1, 0);
 }
-Vector2f jParserD3::ConvertTex(unsigned char *_p)
-{
-	Matrix4 matTex = GetCBMain().matTex[mTexCoordIndex];
-	Vector4f tmp1;
-	tmp1.x = _p[1];
-	tmp1.y = _p[0];
-	tmp1.z = _p[3];
-	tmp1.w = _p[2];
-
-	Vector4f tmp2;
-	tmp2.x = tmp1.y * 0.003906f + tmp1.x;
-	tmp2.y = tmp1.w * 0.003906f + tmp1.z;
-	tmp2.x = tmp2.x * 0.5f - 64.0f;
-	tmp2.y = tmp2.y * 0.5f - 64.0f;
-	tmp2.z = 1.0f;
-
-	Vector4f tmp3;
-	tmp3.x = tmp2.x * matTex[0] + tmp2.y * matTex[1] + tmp2.z * matTex[3];
-	tmp3.y = tmp2.x * matTex[4] + tmp2.y * matTex[5] + tmp2.z * matTex[7];
-	//tmp3.z = tmp2.x * matTex[8] + tmp2.y * matTex[9] + tmp2.z * matTex[11];
-	//tmp3.w = tmp2.x * matTex[12] + tmp2.y * matTex[13] + tmp2.z * matTex[15];
-
-	return Vector2f(tmp3.x, tmp3.y);
-}
-Vector2f jParserD3::GetTex(int _idx)
+int jParserD3::GetTex(int _idx, Vector2f* _t)
 {
 	_warnif(_idx >= mVertexCount);
 
-	void * addr = mContext.vb[mVertBufIdx].addr;
-	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mMapRes[addr].first;
-	MyRes_CreateLayout* pDataLayout = (MyRes_CreateLayout*)mMapRes[mContext.layout_addr].first;
-	int resID = RES_ID(pDataLayout->head.crc, pDataLayout->head.totalSize);
-	switch (resID)
+	switch (mLayoutFileID)
 	{
-	case RES_ID(0x59, 0x167):
+	case RES_ID(0x59, 0x167): //0
 	{
-		Layout_59_167* pVert = (Layout_59_167*)pData->data;
-		Vector2f ret = ConvertTex(pVert[_idx].t0);
-		return ret;
+		LayoutA* pVert = (LayoutA*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, pVert[_idx].t0);
+		return 1;
 	}
-	case RES_ID(0x5D, 0x15F):
-	case RES_ID(0xA, 0x10E):
+	case RES_ID(0xA, 0x10E): //108, 109, 138, 150, 1, 34, 90
 	{
-		Layout_A_10E* pVert = (Layout_A_10E*)pData->data;
-		Vector2f ret = ConvertTex(pVert[_idx].t0);
-		return ret;
+		LayoutB* pVert = (LayoutB*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, pVert[_idx].t0);
+		return 1;
+	}
+	case RES_ID(0xC8, 0x18B): //122, 125
+	{
+		LayoutC* pVert = (LayoutC*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, pVert[_idx].t0);
+		return 1;
+	}
+	case RES_ID(0x1, 0x110): //18
+	{
+		LayoutD* pVert = (LayoutD*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
+		return 1;
+	}
+	case RES_ID(0x5d, 0x15f): //19, 21, 84
+	{
+		LayoutB* pVert = (LayoutB*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
+		_t[1] = mFuncConvertTex(1, (unsigned char*)pVert[_idx].t0);
+		_t[2] = mFuncConvertTex(2, (unsigned char*)pVert[_idx].t0);
+		_t[3] = mFuncConvertTex(3, (unsigned char*)pVert[_idx].t0);
+		_t[4] = mFuncConvertTex(4, (unsigned char*)pVert[_idx].t0);
+		return 5;
+	}
+	case RES_ID(0xdb, 0x137): //43
+	{
+		LayoutE* pVert = (LayoutE*)mpVerticies->data;
+		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
+		return 1;
 	}
 	default:
 		_warn();
 		break;
 	}
-	return Vector2f(0, 0);
+	return 0;
 }
 Vector4n jParserD3::GetMatIdx(int _idx)
 {
 	_warnif(_idx >= mVertexCount);
 
-	void * addr = mContext.vb[mVertBufIdx].addr;
-	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mMapRes[addr].first;
-	MyRes_CreateLayout* pDataLayout = (MyRes_CreateLayout*)mMapRes[mContext.layout_addr].first;
-	int resID = RES_ID(pDataLayout->head.crc, pDataLayout->head.totalSize);
-	switch (resID)
+	MyRes_CreateBuffer* pData = mpVerticies;
+	switch (mLayoutFileID)
 	{
 	case RES_ID(0x59, 0x167):
 	{
-		Layout_59_167* pVert = (Layout_59_167*)pData->data;
+		LayoutA* pVert = (LayoutA*)pData->data;
 		Vector4n ret = Vector4n(pVert[_idx].i[0], pVert[_idx].i[1], pVert[_idx].i[2], pVert[_idx].i[3]);
 		return ret;
 	}
@@ -376,15 +600,12 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 {
 	_warnif(_idx >= mVertexCount);
 
-	void * addr = mContext.vb[mVertBufIdx].addr;
-	MyRes_CreateBuffer* pData = (MyRes_CreateBuffer*)mMapRes[addr].first;
-	MyRes_CreateLayout* pDataLayout = (MyRes_CreateLayout*)mMapRes[mContext.layout_addr].first;
-	int resID = RES_ID(pDataLayout->head.crc, pDataLayout->head.totalSize);
-	switch (resID)
+	MyRes_CreateBuffer* pData = mpVerticies;
+	switch (mLayoutFileID)
 	{
 	case RES_ID(0x59, 0x167):
 	{
-		Layout_59_167* pVert = (Layout_59_167*)pData->data;
+		LayoutA* pVert = (LayoutA*)pData->data;
 		Vector4f ret = Vector4f(pVert[_idx].w[0], pVert[_idx].w[1], pVert[_idx].w[2], 0);
 		return ret;
 	}

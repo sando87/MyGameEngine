@@ -27,8 +27,17 @@ bool jGameObjectMgr::Initialize()
 	obj->AddToMgr();
 	//ObjTutorial1* obj2 = new ObjTutorial1();
 	//obj2->AddToMgr();
-	ObjDiablo* obj3 = new ObjDiablo();
-	obj3->AddToMgr();
+	//{
+	//	ObjDiablo* obj0 = new ObjDiablo();
+	//	obj0->mFileIndex = 21;
+	//	obj0->AddToMgr();
+	//}
+	for(int i = 34; i < 80; ++i)
+	{
+		ObjDiablo* obj0 = new ObjDiablo();
+		obj0->mFileIndex = i;
+		obj0->AddToMgr();
+	}
 	return true;
 }
 
@@ -56,11 +65,13 @@ void jGameObjectMgr::RunObjects()
 	}
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-		(*it)->OnUpdate();
+		if(!(*it)->mIsRemoved)
+			(*it)->OnUpdate();
 
 	jRenderer::GetInst().BeginScene();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-		(*it)->OnDraw();
+		if (!(*it)->mIsRemoved)
+			(*it)->OnDraw();
 	jRenderer::GetInst().EndScene();
 }
 

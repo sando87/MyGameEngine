@@ -526,11 +526,13 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 		m_vertexCount = _context->mVertexCount;
 		m_sizeVertex = sizeof(VertexType_Texture);
 		vector<VertexType_Texture> verticies;
+		Vector2f tex[10];
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
 			VertexType_Texture vert;
 			vert.p = _context->GetPos(i);
-			vert.t = _context->GetTex(i);
+			 int cnt = _context->GetTex(i, tex);
+			 vert.t = tex[0];
 			verticies.push_back(vert);
 		}
 
@@ -572,12 +574,14 @@ bool jModel::LoadDiablo_ForSkkinedShader(jParserD3 *_context)
 		m_vertexCount = _context->mVertexCount;
 		m_sizeVertex = sizeof(VertexType_Weight);
 		vector<VertexType_Weight> verticies;
+		Vector2f tex[10];
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
 			VertexType_Weight vert;
 			vert.p = _context->GetPos(i);
 			vert.n = _context->GetNor(i);
-			vert.t = _context->GetTex(i);
+			int cnt = _context->GetTex(i, tex);
+			vert.t = tex[0];
 			vert.index = _context->GetMatIdx(i);
 			vert.weight = _context->GetMatWeight(i);
 			verticies.push_back(vert);
