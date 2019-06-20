@@ -9,22 +9,11 @@ void MyRes_CreateLayout::SetNameOffset()
 {
 	int numEle = head.reserve1;
 	D3D11_INPUT_ELEMENT_DESC* layouts = (D3D11_INPUT_ELEMENT_DESC *)data;
-	char* nameList = data + sizeof(D3D11_INPUT_ELEMENT_DESC) * numEle;
-	int stringLen = head.totalSize - (sizeof(D3D11_INPUT_ELEMENT_DESC) * numEle) - sizeof(head);
-
-	int currentIndex = 1;
-	layouts[0].SemanticName = nameList;
-	for (int i = 0; i < stringLen; ++i)
+	for (int i = 0; i < numEle; ++i)
 	{
-		if (nameList[i] == '_')
-		{
-			nameList[i] = '\0';
-			if (currentIndex < numEle)
-			{
-				layouts[currentIndex].SemanticName = &nameList[i + 1];
-				currentIndex++;
-			}
-		}
+		char* pBase = (char*)this;
+		int pOff = (int)layouts[i].SemanticName;
+		layouts[i].SemanticName = (LPCSTR)(pBase + pOff);
 	}
 }
 
@@ -223,4 +212,13 @@ void* MyRes_CreateSS::CreateResource()
 		return nullptr;
 
 	return pSamplerState;
+}
+void* MyRes_CreateBS::CreateResource()
+{
+	auto pDev = jRenderer::GetInst().GetDevice();
+	ID3D11BlendState *pBlendState = NULL;
+	if (FAILED(pDev->CreateBlendState(&desc, &pBlendState)))
+		return nullptr;
+
+	return pBlendState;
 }

@@ -2,6 +2,8 @@
 #include "jUtils.h"
 #include "jInput.h"
 #include "jMath.h"
+#include "jLog.h"
+#include "jLine3D.h"
 
 ObjCamera::ObjCamera()
 {
@@ -40,7 +42,30 @@ void ObjCamera::OnStart()
 	
 		if (info.middle & 0x80 && info.x != 0)
 		{
-			mPos.rotateAxis(Vector3(0, 0, 0), Vector3(0, 0, 1), info.x);
+			jLine3D line(mPos.getPos(), mPos.getView());
+			Position2 pos = line.GetXY(0);
+			mPos.rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), info.x);
+		}
+
+		if (info.left & 0x80)
+		{
+			if (info.x != 0)
+			{
+				float sensX = -info.x * 0.01f * mPos.getPos().z;
+				Vector3 cross = mPos.getCross();
+				cross.normalize();
+				Vector3 newPos = mPos.getPos() + (cross * sensX);
+				mPos.moveTo(newPos);
+			}
+			if (info.y != 0)
+			{
+				float sensY = info.y * 0.01f * mPos.getPos().z;
+				Vector3 up = mPos.getUp();
+				up.z = 0;
+				up.normalize();
+				Vector3 newPos = mPos.getPos() + (up * sensY);
+				mPos.moveTo(newPos);
+			}
 		}
 	};
 }

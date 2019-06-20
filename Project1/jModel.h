@@ -33,6 +33,7 @@ public:
 	int mStartIndex;
 	int mVertexOff;
 	int mOffVertexOff;
+	int mPrimitiveTopology;
 
 private:
 	ID3D11Buffer* m_vertexBuffer;

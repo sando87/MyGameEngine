@@ -30,5 +30,6 @@ public:
 	jModel * mModel;
 	ID3D11ShaderResourceView * mTexture;
 	Matrix4 mWorld;
+	
 };
 

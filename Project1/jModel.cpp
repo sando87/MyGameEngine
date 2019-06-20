@@ -14,6 +14,7 @@ jModel::jModel()
 	m_indexCount = 0;
 	m_sizeVertex = 0;
 	m_sizeIndex = 0;
+	mPrimitiveTopology = 0;
 
 	mStartIndex		= 0;
 	mVertexOff		= 0;
@@ -562,6 +563,7 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 	mStartIndex = _context->mContext.draw_StartIndex;
 	mVertexOff = _context->mContext.draw_BaseVertex;
 	mOffVertexOff = (_context->mVertexOffset / _context->mVertexStride) * m_sizeVertex;
+	mPrimitiveTopology = _context->mContext.prim_topology;
 
 	return true;
 }

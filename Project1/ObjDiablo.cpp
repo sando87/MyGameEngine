@@ -58,7 +58,8 @@ bool SetDrawInfo(void *_this, char *_filename)
 }
 void ObjDiablo::OnStart()
 {
-	//jUtils::ForEachFiles2(nullptr, "D:\\temp\\*_p.dump", [&](void* ptr, string name) {
+	//printf("[vs]\n");
+	//jUtils::ForEachFiles2(nullptr, "D:\\temp\\*_v.dump", [&](void* ptr, string name) {
 	//	vector<string> rets;
 	//	jUtils::Split(name, "_", rets);
 	//	int num = stoi(rets[0]);
@@ -66,7 +67,7 @@ void ObjDiablo::OnStart()
 	//	int size = 0;
 	//	jUtils::LoadFile("D:\\temp\\" + name, &size, &pBuf);
 	//	MyResBase* pData = (MyResBase*)pBuf;
-	//	printf("[%d] 0x%x, 0x%x\n", num, pData->crc, pData->totalSize);
+	//	printf("case RES_ID(0x%x, 0x%x): //%d\n", pData->crc, pData->totalSize, num);
 	//	return true;
 	//});
 
@@ -146,6 +147,10 @@ void ObjDiablo::OnDraw()
 	//mShader->SetParams(mModel, mat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1, 1, -1, 0), mats);
 	//mShader->Render();
 
+	//ID3D11BlendState* state = mRenderIfno.GetResBlendState();
+	//if (state != nullptr)
+	//	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(state, mRenderIfno.mContext.bs_factor, mRenderIfno.mContext.bs_mask);
+	
 	mShader->SetParams(mModel, mat, mTexture);
 	mShader->Render();
 }

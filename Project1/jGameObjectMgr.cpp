@@ -32,7 +32,7 @@ bool jGameObjectMgr::Initialize()
 	//	obj0->mFileIndex = 21;
 	//	obj0->AddToMgr();
 	//}
-	for(int i = 34; i < 80; ++i)
+	for(int i = 137; i < 138; ++i)
 	{
 		ObjDiablo* obj0 = new ObjDiablo();
 		obj0->mFileIndex = i;

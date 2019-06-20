@@ -13,6 +13,7 @@
 #define MYRES_TYPE_CreatePS		'p'
 #define MYRES_TYPE_CreateTex	't'
 #define MYRES_TYPE_CreateSample	's'
+#define MYRES_TYPE_CreateBlend		'a'
 
 struct Matrix3x4f
 {
@@ -165,6 +166,12 @@ struct MyRes_CreateSS
 	void* CreateResource();
 };
 
+struct MyRes_CreateBS
+{
+	MyResBase head;
+	D3D11_BLEND_DESC desc;
+	void* CreateResource();
+};
 
 
 
@@ -308,6 +315,15 @@ struct RenderContext
 	UINT ps_NumClassInstances;
 	void *ps_pClassInstances;
 	bool ps_isDirty;
+
+	void *bs_addr;
+	float bs_factor[4];
+	UINT bs_mask;
+	bool bs_isDirty;
+
+	void *ds_addr;
+	UINT ds_ref;
+	bool ds_isDirty;
 
 	SSInfo ss[32];
 

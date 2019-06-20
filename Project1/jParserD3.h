@@ -36,8 +36,9 @@ public:
 	void InitCBMain();
 	bool IsValid();
 	
-	void CreateD3DRescource(void* addr);
+	void* CreateD3DRescource(void* addr);
 	ID3D11Buffer* GetResIndexBuffer();
+	ID3D11BlendState* GetResBlendState();
 	ID3D11ShaderResourceView* GetResShaderResourceView();
 	
 	Vector3f GetPos(int _idx);

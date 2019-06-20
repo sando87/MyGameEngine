@@ -114,7 +114,8 @@ bool jShaderTexture::Render()
 		pDevContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
-	pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	int primitive = mModel->mPrimitiveTopology == 0 ? D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST : mModel->mPrimitiveTopology;
+	pDevContext->IASetPrimitiveTopology((D3D_PRIMITIVE_TOPOLOGY)primitive);
 
 	// 상수 버퍼의 내용을 쓸 수 있도록 잠급니다.
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
