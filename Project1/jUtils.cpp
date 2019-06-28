@@ -46,7 +46,7 @@ void jUtils::Split(string _str, const char* _del, vector<string>& _vec)
 }
 
 
-bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf)
+bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf, bool _isInvert)
 {
 	// targa 파일을 바이너리 모드로 파일을 엽니다.
 	FILE* filePtr;
@@ -109,10 +109,10 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 	int index = 0;
 
 	// targa 이미지 데이터에 인덱스를 초기화합니다.
-	int k = (width * height * 4) - (width * 4);
+	int k = _isInvert ? ((width * height * 4) - (width * 4)) : 0;
 
 	// 이제 targa 형식이 거꾸로 저장되었으므로 올바른 순서로 targa 이미지 데이터를 targa 대상 배열에 복사합니다.
-	for (int j = 0; j<height; j++)
+	for (int j = 0; j < height; j++)
 	{
 		for (int i = 0; i<width; i++)
 		{
@@ -127,7 +127,8 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 		}
 
 		// targa 이미지 데이터 인덱스를 역순으로 읽은 후 열의 시작 부분에서 이전 행으로 다시 설정합니다.
-		k -= (width * 8);
+		if(_isInvert)
+			k -= (width * 8);
 	}
 
 	// 대상 배열에 복사 된 targa 이미지 데이터를 해제합니다.

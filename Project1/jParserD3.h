@@ -39,7 +39,11 @@ public:
 	void* CreateD3DRescource(void* addr);
 	ID3D11Buffer* GetResIndexBuffer();
 	ID3D11BlendState* GetResBlendState();
+	ID3D11DepthStencilState* GetResDepthStencilState();
 	ID3D11ShaderResourceView* GetResShaderResourceView();
+	bool SetContantBuffer(MapInfo& cb, int slotIdx);
+	bool Render();
+	
 	
 	Vector3f GetPos(int _idx);
 	Vector3f GetNor(int _idx);

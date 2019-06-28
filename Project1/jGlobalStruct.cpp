@@ -11,8 +11,11 @@ void MyRes_CreateLayout::SetNameOffset()
 	D3D11_INPUT_ELEMENT_DESC* layouts = (D3D11_INPUT_ELEMENT_DESC *)data;
 	for (int i = 0; i < numEle; ++i)
 	{
+		unsigned int pOff = (unsigned int)layouts[i].SemanticName;
+		if (pOff > head.totalSize)
+			return; //here means already fixed.. so return this function
+
 		char* pBase = (char*)this;
-		int pOff = (int)layouts[i].SemanticName;
 		layouts[i].SemanticName = (LPCSTR)(pBase + pOff);
 	}
 }
@@ -102,15 +105,6 @@ void* MyRes_CreateLayout::CreateResource(void* _bolb, int _size)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
 	ID3D11InputLayout *pLayout = NULL;
-	SetNameOffset();
-	//int numElements = head.reserve1;
-	//int stringOffset = sizeof(D3D11_INPUT_ELEMENT_DESC) * numElements;
-	//char* nameInfos = data + stringOffset;
-	//vector<string> rets;
-	//jUtils::Split(string(nameInfos), "_", rets);
-	//for (int i = 0; i < rets.size(); ++i)
-	//	pLayouts[i].SemanticName = rets[i].c_str();
-
 	if (FAILED(pDev->CreateInputLayout((D3D11_INPUT_ELEMENT_DESC *)data, head.reserve1, _bolb, _size, &pLayout)))
 		return nullptr;
 
@@ -137,6 +131,16 @@ void* MyRes_CreateShader::CreateResource()
 	}
 	return nullptr;
 }
+void MyRes_CreateTexture::SetSubResMem()
+{
+	int cnt = min(GetCount(), desc.MipLevels * desc.ArraySize);
+	int off = 0;
+	for (int i = 0; i < cnt; ++i)
+	{
+		subRes[i].pSysMem = data + off;
+		off += subRes[i].SysMemSlicePitch;
+	}
+}
 void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
@@ -145,24 +149,25 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 
 	if (imgTGA == nullptr)
 	{
-		D3D11_SUBRESOURCE_DATA subRes;
-		subRes.pSysMem = data;
-		subRes.SysMemPitch = 0;
-		subRes.SysMemSlicePitch = 0;
-		HRESULT hResult = pDev->CreateTexture2D(&desc, &subRes, &texture);
+		if (desc.ArraySize * desc.MipLevels > GetCount())
+			return nullptr;
+
+		D3D11_SUBRESOURCE_DATA *pSubRes =
+			head.totalSize == sizeof(MyRes_CreateTexture) ? nullptr : subRes;
+
+		HRESULT hResult = pDev->CreateTexture2D(&desc, pSubRes, &texture);
 		if (FAILED(hResult))
 			return nullptr;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		srvDesc.Format = desc.Format;
-		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = 0;
+		D3D11_SHADER_RESOURCE_VIEW_DESC *pSrvDesc = 
+			viewDesc.ViewDimension == -1 ? nullptr : &viewDesc;
 
-		// ÅØ½ºÃ³ÀÇ ¼ÎÀÌ´õ ¸®¼Ò½º ºä¸¦ ¸¸µì´Ï´Ù.
-		hResult = pDev->CreateShaderResourceView(texture, &srvDesc, &pTex);
+		hResult = pDev->CreateShaderResourceView(texture, nullptr, &pTex);
 		if (FAILED(hResult))
+		{
+			texture->Release();
 			return nullptr;
+		}
 
 	}
 	else
@@ -195,7 +200,11 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 
 		hResult = jRenderer::GetInst().GetDevice()->CreateShaderResourceView(texture, &srvDesc, &pTex);
 		if (FAILED(hResult))
+		{
+			texture->Release();
 			return nullptr;
+		}
+			
 
 		jRenderer::GetInst().GetDeviceContext()->GenerateMips(pTex);
 
@@ -221,4 +230,14 @@ void* MyRes_CreateBS::CreateResource()
 		return nullptr;
 
 	return pBlendState;
+}
+
+void * MyRes_CreateDS::CreateResource()
+{
+	auto pDev = jRenderer::GetInst().GetDevice();
+	ID3D11DepthStencilState *pState = NULL;
+	if (FAILED(pDev->CreateDepthStencilState(&desc, &pState)))
+		return nullptr;
+
+	return pState;
 }

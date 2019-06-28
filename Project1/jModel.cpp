@@ -213,6 +213,83 @@ bool jModel::LoadSprite(Vector3 _point, Vector2f _uvStep)
 	return true;
 
 }
+bool jModel::LoadSimpleRect(int _len)
+{
+
+	auto pDev = jRenderer::GetInst().GetDevice();
+	float z = _len == 0 ? 1.0f : (1.0f / (float)_len);
+
+	//CreateVertexBuffer
+	{
+		m_vertexCount = 4;
+		m_sizeVertex = sizeof(VertexType_Texture);
+
+		vector<VertexType_Texture> verticies;
+		VertexType_Texture vert;
+		vert.p = Vector3f(0, 0, z);
+		vert.t = Vector2f(0, 0);
+		verticies.push_back(vert);
+		vert.p = Vector3f(0, _len, z);
+		vert.t = Vector2f(0, 1);
+		verticies.push_back(vert);
+		vert.p = Vector3f(_len, 0, z);
+		vert.t = Vector2f(1, 0);
+		verticies.push_back(vert);
+		vert.p = Vector3f(_len, _len, z);
+		vert.t = Vector2f(1, 1);
+		verticies.push_back(vert);
+
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA subRes;
+		subRes.pSysMem = &verticies[0];
+		subRes.SysMemPitch = 0;
+		subRes.SysMemSlicePitch = 0;
+		if (FAILED(pDev->CreateBuffer(&vertexBufferDesc, &subRes, &m_vertexBuffer)))
+			return false;
+	}
+
+	//CreateIndexBuffer
+	{
+		unsigned short idxBuf[6] = { 0,1,2,2,1,3 };
+		m_sizeIndex = 2;
+		m_indexCount = 6;
+
+		// 정적 인덱스 버퍼의 구조체를 설정합니다.
+		D3D11_BUFFER_DESC indexBufferDesc;
+		indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		indexBufferDesc.ByteWidth = sizeof(unsigned short) * m_indexCount;
+		indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		indexBufferDesc.CPUAccessFlags = 0;
+		indexBufferDesc.MiscFlags = 0;
+		indexBufferDesc.StructureByteStride = 0;
+
+		// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
+		D3D11_SUBRESOURCE_DATA indexData;
+		indexData.pSysMem = &idxBuf[0];
+		indexData.SysMemPitch = 0;
+		indexData.SysMemSlicePitch = 0;
+
+		// 인덱스 버퍼를 생성합니다.
+		if (FAILED(pDev->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)))
+		{
+			return false;
+		}
+	}
+
+	mStartIndex = 0;
+	mVertexOff = 0;
+	mOffVertexOff = 0;
+	mPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	return true;
+}
 bool jModel::LoadPointList(vector<Vector3>& vec, float size)
 {
 	vector<VertexType_Weight> vertices;

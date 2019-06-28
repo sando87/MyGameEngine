@@ -6,6 +6,9 @@
 
 #pragma pack(push, 1)
 
+#define SIZE_CBMAIN 2440
+#define SIZE_CBBONES 2216
+#define SIZE_CBLIGHTS 6248
 
 #define MYRES_TYPE_CreateBuffer	'b'
 #define MYRES_TYPE_CreateLayout	'l'
@@ -14,6 +17,7 @@
 #define MYRES_TYPE_CreateTex	't'
 #define MYRES_TYPE_CreateSample	's'
 #define MYRES_TYPE_CreateBlend		'a'
+#define MYRES_TYPE_CreateDapth	'd'
 
 struct Matrix3x4f
 {
@@ -155,7 +159,11 @@ struct MyRes_CreateTexture
 	//pData->head.reserve2 = pInitialData->SysMemSlicePitch;
 
 	D3D11_TEXTURE2D_DESC desc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	D3D11_SUBRESOURCE_DATA subRes[64];
 	char data[];
+	void SetSubResMem();
+	int GetCount() { return 64; }
 	void* CreateResource(int width, int height, char *imgTGA);
 };
 
@@ -173,6 +181,12 @@ struct MyRes_CreateBS
 	void* CreateResource();
 };
 
+struct MyRes_CreateDS
+{
+	MyResBase head;
+	D3D11_DEPTH_STENCIL_DESC desc;
+	void* CreateResource();
+};
 
 
 
@@ -299,7 +313,9 @@ struct RenderContext
 	UINT prim_topology;
 	bool prim_isDirty;
 
-	MapInfo mapUnmap[8];
+	MapInfo CBMain;
+	MapInfo CBBones;
+	MapInfo CBLights;
 
 	TEXInfo tex[32];
 

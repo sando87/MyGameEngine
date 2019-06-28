@@ -413,7 +413,7 @@ void jRenderer::BeginScene()
 {
 	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f }; //Clear Color Gray
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL | D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	//ID3D11RasterizerState* state;
 	//ID3D11RasterizerState* stateNew;

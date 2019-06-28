@@ -16,6 +16,7 @@ public:
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);
 	bool LoadAxis(int _len);
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
+	bool LoadSimpleRect(int _len);
 
 	bool LoadDiablo_ForTextureShader(jParserD3 *_context);
 	bool LoadDiablo_ForSkkinedShader(jParserD3 *_context);

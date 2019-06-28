@@ -1,9 +1,10 @@
 #include "jParserD3.h"
 #include "jUtils.h"
 #include "jLog.h"
+#include "jRenderer.h"
 #include <sstream>
 
-#define REV_V(v) (1.0f - (v))
+#define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
 
 map<void*, pair<MyResBase*, void*>> jParserD3::mMapRes;
@@ -108,32 +109,23 @@ void jParserD3::LoadResources()
 			return true;
 		}
 
-		//if (pBuf->type == MYRES_TYPE_CreateBuffer)
-		//{
-		//	int idx = stoi(rets[0]);
-		//	if (((MyRes_CreateBuffer*)pBuf)->desc.BindFlags == D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER &&
-		//		((MyRes_CreateBuffer*)pBuf)->desc.Usage == D3D11_USAGE::D3D11_USAGE_DYNAMIC)
-		//		printf(".....%d....%p....\n", idx, id);
-		//}
-
 		mMapRes[id] = make_pair(pBuf, nullptr);
 		return true;
 	});
 
 
 	//path = PATH_RESOURCE;
-	//filter = "*.bin";
+	//filter = "*_t.dump";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
 	//	vector<string> rets;
 	//	jUtils::Split(_str, "_.", rets);
 	//
 	//	int filesize = 0;
-	//	RenderContext* pBuf = nullptr;
+	//	MyRes_CreateTexture* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
-	//	MyResBase* pData = mMapRes[pBuf->vs_addr].first;
-	//	if(pBuf->ds_isDirty)
-	//		printf(".....%d....\n", stoi(rets[0]));
+	//
+	//	printf("%d, %d\n", pBuf->viewDesc.Format, pBuf->viewDesc.ViewDimension);
 	//
 	//	return true;
 	//});
@@ -235,6 +227,8 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0x41, 0x237c):	//38 
 	case RES_ID(0xff, 0x18a8):	//82 
 	case RES_ID(0xd2, 0x1a48): //13-1
+	case RES_ID(0xad, 0x23e8):
+	case RES_ID(0xd5, 0x2014):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[1];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -365,6 +359,16 @@ void jParserD3::ReadyForData()
 	MyResBase* pDataLayout = mMapRes[mContext.layout_addr].first;
 	((MyRes_CreateLayout*)pDataLayout)->SetNameOffset();
 	mLayoutFileID = RES_ID(pDataLayout->crc, pDataLayout->totalSize);
+
+	for (int i = 0; i < 32; ++i)
+	{
+		void* pAddr = mContext.tex[i].addr;
+		if (mMapRes.find(pAddr) != mMapRes.end())
+		{
+			MyResBase* pDataTex = mMapRes[pAddr].first;
+			((MyRes_CreateTexture*)pDataTex)->SetSubResMem();
+		}
+	}
 }
 void jParserD3::InitTextureList()
 {
@@ -411,6 +415,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x3d, 0x1468):	//79
 	case RES_ID(0x87, 0x261c): //13-1
 	case RES_ID(0x1b, 0x1168): //65-1
+	case RES_ID(0xF3, 0x16cc):
 		mTextures.push_back(1);
 		break;
 	case RES_ID(0xf4, 0x11a4): //171-2
@@ -479,24 +484,14 @@ void jParserD3::InitTextureList()
 }
 void jParserD3::InitCBMain()
 {
-	CBMain ret;
-	for (int i = 0; i < 8; ++i)
-	{
-		stringstream ss;
-		ss << mFileIndex << "_" << mContext.mapUnmap[i].addr << "_b.dump";
+	stringstream ss;
+	ss << mFileIndex << "_" << mContext.CBMain.addr << "_b.dump";
 
-		int fileSize = 0;
-		MyRes_CreateBuffer* pData = nullptr;
-		jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
-		if (pData->head.totalSize == sizeof(MyRes_CreateBuffer) + sizeof(CBMain))
-		{
-			memcpy(&ret, pData->data, sizeof(ret));
-			free(pData);
-			break;
-		}
-		free(pData);
-	}
-	mCBMain = ret;
+	int fileSize = 0;
+	MyRes_CreateBuffer* pData = nullptr;
+	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
+	memcpy(&mCBMain, pData->data, sizeof(mCBMain));
+	free(pData);
 }
 bool jParserD3::IsValid()
 {
@@ -546,6 +541,9 @@ void* jParserD3::CreateD3DRescource(void* addr)
 	case MYRES_TYPE_CreateBlend:
 		pIF = ((MyRes_CreateBS*)pData)->CreateResource();
 		break;
+	case MYRES_TYPE_CreateDapth:
+		pIF = ((MyRes_CreateDS*)pData)->CreateResource();
+		break;
 	case MYRES_TYPE_CreateTex:
 	{
 		stringstream ss;
@@ -561,11 +559,9 @@ void* jParserD3::CreateD3DRescource(void* addr)
 			return false;
 		});
 
-		if (imgbuf != nullptr)
-		{
-			pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, (char*)imgbuf);
-			delete[] imgbuf;
-		}
+		//pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, nullptr);
+		pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, (char*)imgbuf);
+		delete[] imgbuf;
 	}
 	break;
 	default:
@@ -585,6 +581,13 @@ ID3D11BlendState * jParserD3::GetResBlendState()
 
 	return (ID3D11BlendState *)CreateD3DRescource(mContext.bs_addr);
 }
+ID3D11DepthStencilState * jParserD3::GetResDepthStencilState()
+{
+	if (mMapRes.find(mContext.ds_addr) == mMapRes.end())
+		return nullptr;
+
+	return (ID3D11DepthStencilState *)CreateD3DRescource(mContext.ds_addr);
+}
 ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView()
 {
 	if (mTextures.size() == 0)
@@ -592,6 +595,105 @@ ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView()
 
 	int idx = mTextures[0];
 	return (ID3D11ShaderResourceView *)CreateD3DRescource(mContext.tex[idx].addr);
+}
+bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
+{
+	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
+	ID3D11Buffer *pConstBuf = (ID3D11Buffer *)CreateD3DRescource(cb.addr);
+	if (pConstBuf == nullptr)
+		return false;
+
+	stringstream ss;
+	ss << mFileIndex << "_" << cb.addr << "_b.dump";
+
+	int fileSize = 0;
+	MyRes_CreateBuffer* pConstData = nullptr;
+	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pConstData);
+	if (pConstData == nullptr)
+		return false;
+
+	D3D11_MAPPED_SUBRESOURCE mappedRes;
+	if (FAILED(pDevContext->Map(pConstBuf, cb.subRes, (D3D11_MAP)cb.type, cb.flags, &mappedRes)))
+	{
+		_warn();
+		return false;
+	}
+	memcpy(mappedRes.pData, pConstData->data, pConstData->head.totalSize - sizeof(MyRes_CreateBuffer));
+	pDevContext->Unmap(pConstBuf, cb.subRes);
+
+	pDevContext->VSSetConstantBuffers(slotIdx, 1, &pConstBuf);
+	pDevContext->PSSetConstantBuffers(slotIdx, 1, &pConstBuf);
+
+	free(pConstData);
+
+	return true;
+}
+//ID3D11InputLayout*
+//ID3D11VertexShader*
+//ID3D11PixelShader*
+
+bool jParserD3::Render()
+{
+	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
+	for (int i = 0; i < 32; ++i)
+	{
+		VBInfo& vb = mContext.vb[i];
+		ID3D11Buffer *pVertBuf = (ID3D11Buffer *)CreateD3DRescource(vb.addr);
+		if (pVertBuf != nullptr)
+			pDevContext->IASetVertexBuffers(i, vb.numBuf, &pVertBuf, vb.strides, vb.offset);
+	}
+
+	ID3D11Buffer *pIdxBuf = (ID3D11Buffer *)CreateD3DRescource(mContext.ib_addr);
+	if (pIdxBuf != nullptr)
+		pDevContext->IASetIndexBuffer(pIdxBuf, (DXGI_FORMAT)mContext.ib_format, mContext.ib_offset);
+	
+	pDevContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)mContext.prim_topology);
+
+	SetContantBuffer(mContext.CBMain, 0);
+	SetContantBuffer(mContext.CBBones, 1);
+	SetContantBuffer(mContext.CBLights, 2);
+
+	for (int i = 0; i < 32; ++i)
+	{
+		if (i == 4)
+			continue;
+
+		TEXInfo& tb = mContext.tex[i];
+		ID3D11ShaderResourceView *pTexBuf = (ID3D11ShaderResourceView *)CreateD3DRescource(tb.addr);
+		if (pTexBuf != nullptr)
+			pDevContext->PSSetShaderResources(i, tb.NumViews, &pTexBuf);
+	}
+
+	ID3D11InputLayout *pLayoutIF = (ID3D11InputLayout *)CreateD3DRescource(mContext.layout_addr);
+	if (pLayoutIF != nullptr)
+		pDevContext->IASetInputLayout(pLayoutIF);
+
+	ID3D11VertexShader *pVertexShaderIF = (ID3D11VertexShader *)CreateD3DRescource(mContext.vs_addr);
+	if (pVertexShaderIF != nullptr)
+		pDevContext->VSSetShader(pVertexShaderIF, NULL, 0);
+	ID3D11PixelShader *pPixelShaderIF = (ID3D11PixelShader *)CreateD3DRescource(mContext.ps_addr);
+	if (pPixelShaderIF != nullptr)
+		pDevContext->PSSetShader(pPixelShaderIF, NULL, 0);
+
+	ID3D11BlendState *pBS = (ID3D11BlendState *)CreateD3DRescource(mContext.bs_addr);
+	if (pBS != nullptr)
+		pDevContext->OMSetBlendState(pBS, mContext.bs_factor, mContext.bs_mask);
+	
+	ID3D11DepthStencilState *pDSS = (ID3D11DepthStencilState *)CreateD3DRescource(mContext.ds_addr);
+	if (pDSS != nullptr)
+		pDevContext->OMSetDepthStencilState(pDSS, mContext.ds_ref);
+
+	for (int i = 0; i < 32; ++i)
+	{
+		SSInfo& ss = mContext.ss[i];
+		ID3D11SamplerState *pSS = (ID3D11SamplerState *)CreateD3DRescource(ss.addr);
+		if (pSS != nullptr)
+			pDevContext->PSSetSamplers(i, ss.NumSamplers, &pSS);
+	}
+
+	pDevContext->DrawIndexed(mContext.draw_IndexCount, mContext.draw_StartIndex, mContext.draw_BaseVertex);
+
+	return true;
 }
 
 
