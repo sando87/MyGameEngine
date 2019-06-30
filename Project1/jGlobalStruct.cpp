@@ -162,7 +162,7 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 		D3D11_SHADER_RESOURCE_VIEW_DESC *pSrvDesc = 
 			viewDesc.ViewDimension == -1 ? nullptr : &viewDesc;
 
-		hResult = pDev->CreateShaderResourceView(texture, nullptr, &pTex);
+		hResult = pDev->CreateShaderResourceView(texture, pSrvDesc, &pTex);
 		if (FAILED(hResult))
 		{
 			texture->Release();

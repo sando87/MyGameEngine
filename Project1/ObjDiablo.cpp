@@ -105,8 +105,8 @@ void ObjDiablo::OnUpdate()
 void ObjDiablo::OnDraw()
 {
 	Matrix4 mat = Matrix4().identity();
-	mat = mRenderIfno.mCBMain.matWorld;
-	mat.transpose();
+	//mat = mRenderIfno.mCBMain.matWorld;
+	//mat.transpose();
 	//printf("[%d] x: %f, y: %f, z: %f\n", mFileIndex, mat[12], mat[13], mat[14]);
 
 	static int drawIndx = 0;
