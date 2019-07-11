@@ -56,8 +56,11 @@ bool SetDrawInfo(void *_this, char *_filename)
 	}
 	return true;
 }
+float gg_x = 0;
 void ObjDiablo::OnStart()
 {
+	mm_x = gg_x;
+	gg_x += 10.0f;
 	//printf("[vs]\n");
 	//jUtils::ForEachFiles2(nullptr, "D:\\temp\\*_v.dump", [&](void* ptr, string name) {
 	//	vector<string> rets;
@@ -78,6 +81,10 @@ void ObjDiablo::OnStart()
 		DeleteFromMgr();
 		return;
 	}
+
+	//mRenderIfno.ExportToObjectFormat();
+	//DeleteFromMgr();
+	//return;
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
@@ -101,10 +108,10 @@ void ObjDiablo::OnStart()
 void ObjDiablo::OnUpdate()
 {
 }
-
 void ObjDiablo::OnDraw()
 {
 	Matrix4 mat = Matrix4().identity();
+	mat[12] = mm_x;
 	//mat = mRenderIfno.mCBMain.matWorld;
 	//mat.transpose();
 	//printf("[%d] x: %f, y: %f, z: %f\n", mFileIndex, mat[12], mat[13], mat[14]);

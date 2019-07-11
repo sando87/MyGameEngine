@@ -18,6 +18,8 @@
 #define MYRES_TYPE_CreateSample	's'
 #define MYRES_TYPE_CreateBlend		'a'
 #define MYRES_TYPE_CreateDapth	'd'
+#define MYRES_TYPE_D3D9_VB		'k'
+#define MYRES_TYPE_D3D9_IB			'm'
 
 struct Matrix3x4f
 {
@@ -123,6 +125,102 @@ struct MyResBase
 	unsigned int reserve1;
 	unsigned int reserve2;
 	unsigned int reserve3;
+};
+
+typedef enum _MyD3DDECLUSAGE {
+	D3DDECLUSAGE_POSITION = 0,
+	D3DDECLUSAGE_BLENDWEIGHT = 1,
+	D3DDECLUSAGE_BLENDINDICES = 2,
+	D3DDECLUSAGE_NORMAL = 3,
+	D3DDECLUSAGE_PSIZE = 4,
+	D3DDECLUSAGE_TEXCOORD = 5,
+	D3DDECLUSAGE_TANGENT = 6,
+	D3DDECLUSAGE_BINORMAL = 7,
+	D3DDECLUSAGE_TESSFACTOR = 8,
+	D3DDECLUSAGE_POSITIONT = 9,
+	D3DDECLUSAGE_COLOR = 10,
+	D3DDECLUSAGE_FOG = 11,
+	D3DDECLUSAGE_DEPTH = 12,
+	D3DDECLUSAGE_SAMPLE = 13
+} MyD3DDECLUSAGE;
+typedef enum _MyD3DDECLTYPE
+{
+	D3DDECLTYPE_FLOAT1 = 0,  // 1D float expanded to (value, 0., 0., 1.)
+	D3DDECLTYPE_FLOAT2 = 1,  // 2D float expanded to (value, value, 0., 1.)
+	D3DDECLTYPE_FLOAT3 = 2,  // 3D float expanded to (value, value, value, 1.)
+	D3DDECLTYPE_FLOAT4 = 3,  // 4D float
+	D3DDECLTYPE_D3DCOLOR = 4,  // 4D packed unsigned bytes mapped to 0. to 1. range
+	// Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
+	D3DDECLTYPE_UBYTE4 = 5,  // 4D unsigned byte
+	D3DDECLTYPE_SHORT2 = 6,  // 2D signed short expanded to (value, value, 0., 1.)
+	D3DDECLTYPE_SHORT4 = 7,  // 4D signed short
+
+// The following types are valid only with vertex shaders >= 2.0
+
+
+D3DDECLTYPE_UBYTE4N = 8,  // Each of 4 bytes is normalized by dividing to 255.0
+D3DDECLTYPE_SHORT2N = 9,  // 2D signed short normalized (v[0]/32767.0,v[1]/32767.0,0,1)
+D3DDECLTYPE_SHORT4N = 10,  // 4D signed short normalized (v[0]/32767.0,v[1]/32767.0,v[2]/32767.0,v[3]/32767.0)
+D3DDECLTYPE_USHORT2N = 11,  // 2D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,0,1)
+D3DDECLTYPE_USHORT4N = 12,  // 4D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,v[2]/65535.0,v[3]/65535.0)
+D3DDECLTYPE_UDEC3 = 13,  // 3D unsigned 10 10 10 format expanded to (value, value, value, 1)
+D3DDECLTYPE_DEC3N = 14,  // 3D signed 10 10 10 format normalized and expanded to (v[0]/511.0, v[1]/511.0, v[2]/511.0, 1)
+D3DDECLTYPE_FLOAT16_2 = 15,  // Two 16-bit floating point values, expanded to (value, value, 0, 1)
+D3DDECLTYPE_FLOAT16_4 = 16,  // Four 16-bit floating point values
+D3DDECLTYPE_UNUSED = 17,  // When the type field in a decl is unused.
+} MyD3DDECLTYPE;
+typedef struct _MyD3DVERTEXELEMENT9
+{
+	WORD    Stream;     // Stream index
+	WORD    Offset;     // Offset in the stream in bytes
+	BYTE    Type;       // Data type
+	BYTE    Method;     // Processing method
+	BYTE    Usage;      // Semantics
+	BYTE    UsageIndex; // Semantic index
+} MyD3DVERTEXELEMENT9;
+typedef struct _MyD3DSURFACE_DESC
+{
+	UINT				Format;
+	UINT				Type;
+	DWORD         Usage;
+	UINT             Pool;
+
+	UINT				MultiSampleType;
+	DWORD         MultiSampleQuality;
+	UINT              Width;
+	UINT              Height;
+} MyD3DSURFACE_DESC;
+typedef struct _MyD3DVERTEXBUFFER_DESC
+{
+	UINT           Format;
+	UINT     Type;
+	DWORD               Usage;
+	UINT             Pool;
+	UINT                Size;
+
+	DWORD               FVF;
+
+} MyD3DVERTEXBUFFER_DESC;
+struct MyRes_D3D9_VB
+{
+	MyResBase head;
+	MyD3DVERTEXBUFFER_DESC desc;
+	char data[];
+};
+typedef struct _MyD3DINDEXBUFFER_DESC
+{
+	UINT           Format;
+	UINT     Type;
+	DWORD               Usage;
+	UINT             Pool;
+	UINT                Size;
+} MyD3DINDEXBUFFER_DESC;
+struct MyRes_D3D9_IB
+{
+	MyResBase head;
+	MyD3DINDEXBUFFER_DESC desc;
+	char data[];
+	void* CreateResource();
 };
 
 struct MyRes_CreateBuffer
@@ -347,4 +445,42 @@ struct RenderContext
 	UINT draw_StartIndex;
 	UINT draw_BaseVertex;
 	bool draw_isDirty;
+};
+struct D3D9_RenderContext
+{
+	UINT context_Index;
+	char context_filename[64];
+	UINT decl_count;
+	MyD3DVERTEXELEMENT9 decl_eles[32];
+
+	void* vb_addr;
+	UINT vb_streamNum;
+	UINT vb_OffsetBytes;
+	UINT vb_stride;
+	MyD3DVERTEXBUFFER_DESC vb_desc;
+	bool vb_isDirty;
+
+	void* ib_addr;
+	MyD3DINDEXBUFFER_DESC ib_desc;
+	bool ib_isDirty;
+
+	DWORD fvf_fvf;
+	bool fvf_isDirty;
+
+	UINT draw_primitiveType;
+	INT draw_BaseVertexIndex;
+	UINT draw_MinVertexIndex;
+	UINT draw_NumVertices;
+	UINT draw_startIndex;
+	UINT draw_primCount;
+	bool draw_isDirty;
+
+	void* tex_addr[32];
+	MyD3DSURFACE_DESC tex_desc[32];
+	bool tex_isDirty[32];
+
+	int GetStride();
+	int GetPositionOffset(MyD3DDECLTYPE& type);
+	int GetTexelOffset(int idx, MyD3DDECLTYPE& type);
+	int GetNormalOffset(MyD3DDECLTYPE& type);
 };

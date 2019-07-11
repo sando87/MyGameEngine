@@ -33,7 +33,7 @@ public:
 public:
 	int mStartIndex;
 	int mVertexOff;
-	int mOffVertexOff;
+	int mVertexOff_setting;
 	int mPrimitiveTopology;
 
 private:

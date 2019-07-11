@@ -84,7 +84,7 @@ jParserD3::~jParserD3()
 }
 
 
-void jParserD3::LoadResources()
+void jParserD3::LoadResources(int idx)
 {
 	string path = PATH_RESOURCE;
 	string filter = "*.dump";
@@ -94,7 +94,7 @@ void jParserD3::LoadResources()
 		jUtils::Split(_str, "_.", rets);
 		unsigned long long nAddr = 0;
 		stringstream ss;
-		ss << std::hex << rets[1];
+		ss << std::hex << rets[idx];
 		ss >> nAddr;
 		void* id = (void*)nAddr;
 		if (mMapRes.find(id) != mMapRes.end())
@@ -115,19 +115,18 @@ void jParserD3::LoadResources()
 
 
 	//path = PATH_RESOURCE;
-	//filter = "*_t.dump";
+	//filter = "*_D3D9RenderContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
 	//	vector<string> rets;
 	//	jUtils::Split(_str, "_.", rets);
 	//
 	//	int filesize = 0;
-	//	MyRes_CreateTexture* pBuf = nullptr;
+	//	D3D9_RenderContext* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
+	//	printf("%s : %d %d %d %d\n", _str.c_str(), pBuf->draw_BaseVertexIndex, pBuf->draw_startIndex, pBuf->draw_NumVertices, pBuf->draw_primCount);
 	//
-	//	printf("%d, %d\n", pBuf->viewDesc.Format, pBuf->viewDesc.ViewDimension);
-	//
-	//	return true;
+	//	return KEEPGOING;
 	//});
 }
 void jParserD3::Release()
@@ -147,7 +146,7 @@ void jParserD3::Release()
 
 bool jParserD3::Init(int _fileIdx)
 {
-	LoadResources();
+	LoadResources(1);
 
 	mFileIndex = _fileIdx;
 	string name = PATH_RESOURCE + to_string(_fileIdx) + "_RenderingContext.bin";
@@ -160,6 +159,7 @@ bool jParserD3::Init(int _fileIdx)
 	ReadyForData();
 	InitFuncConvTex();
 	InitTextureList();
+	InitGeoInfo();
 
 	if (!IsValid())
 	{
@@ -167,6 +167,29 @@ bool jParserD3::Init(int _fileIdx)
 		return false;
 	}
 
+	return true;
+}
+bool jParserD3::InitGeoInfo()
+{
+	if (mpVerticies == nullptr)
+		return false;
+	
+	int vertexBufSize = mpVerticies->head.totalSize - sizeof(MyRes_CreateBuffer);
+	mGeoInfo.vertexStride = mContext.vb[0].strides[0];
+	mGeoInfo.vertexVertexByteOffset = mContext.vb[0].offset[0];
+	mGeoInfo.vertexTotalCount = vertexBufSize / mGeoInfo.vertexStride;
+
+	void *pAddr = mContext.ib_addr;
+	MyRes_CreateBuffer *pIndicies = (MyRes_CreateBuffer*)mMapRes[pAddr].first;
+	mGeoInfo.indiciesIndexUnit = 2;
+	mGeoInfo.indiciesCntPerPoly = 3;
+	mGeoInfo.indiciesTotalSize = pIndicies->desc.ByteWidth;
+	mGeoInfo.primitiveType = mContext.prim_topology; // D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	mGeoInfo.drawIndexCount = mContext.draw_IndexCount;
+	mGeoInfo.drawVertCount = 0;
+	mGeoInfo.drawIndexOffset = mContext.draw_StartIndex;
+	mGeoInfo.drawVertOffset = mContext.draw_BaseVertex;
 	return true;
 }
 void jParserD3::InitFuncConvTex()
@@ -347,15 +370,7 @@ void jParserD3::ReadyForData()
 
 	if (mContext.vb[vertBufIdx].numBuf != 1)
 		_warn();
-
-	if (mpVerticies != nullptr)
-	{
-		int vertexBufSize = mpVerticies->head.totalSize - sizeof(MyRes_CreateBuffer);
-		mVertexStride = mContext.vb[vertBufIdx].strides[0];
-		mVertexOffset = mContext.vb[vertBufIdx].offset[0];
-		mVertexCount = vertexBufSize / mVertexStride;
-	}
-
+	
 	MyResBase* pDataLayout = mMapRes[mContext.layout_addr].first;
 	((MyRes_CreateLayout*)pDataLayout)->SetNameOffset();
 	mLayoutFileID = RES_ID(pDataLayout->crc, pDataLayout->totalSize);
@@ -520,6 +535,9 @@ void* jParserD3::CreateD3DRescource(void* addr)
 
 	switch (pData->type)
 	{
+	case MYRES_TYPE_D3D9_IB:
+		pIF = ((MyRes_D3D9_IB*)pData)->CreateResource();
+		break;
 	case MYRES_TYPE_CreateBuffer:
 		pIF = ((MyRes_CreateBuffer*)pData)->CreateResource();
 		break;
@@ -697,42 +715,43 @@ bool jParserD3::Render()
 }
 
 
-Vector3f jParserD3::GetPos(int _idx)
+Vector3f jParserD3::GetPos(int _idx, int byteOffset)
 {
-	_warnif(_idx >= mVertexCount);
+	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
 	MyRes_CreateBuffer* pData = mpVerticies;
+	char* pStreamOff = pData->data + byteOffset;
 	switch (mLayoutFileID)
 	{
 	case RES_ID(0x3e, 0x167):
 	{
-		LayoutA* pVert = (LayoutA*)pData->data;
+		LayoutA* pVert = (LayoutA*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0x2f, 0x15f):
 	case RES_ID(0xe9, 0x10e):
 	{
-		LayoutB* pVert = (LayoutB*)pData->data;
+		LayoutB* pVert = (LayoutB*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0x83, 0x18b):
 	{
-		LayoutC* pVert = (LayoutC*)mpVerticies->data;
+		LayoutC* pVert = (LayoutC*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0xca, 0x110):
 	{
-		LayoutD* pVert = (LayoutD*)mpVerticies->data;
+		LayoutD* pVert = (LayoutD*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0x1d, 0x137):
 	{
-		LayoutE* pVert = (LayoutE*)mpVerticies->data;
+		LayoutE* pVert = (LayoutE*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	case RES_ID(0xd2, 0xe5):
 	{
-		LayoutF* pVert = (LayoutF*)mpVerticies->data;
+		LayoutF* pVert = (LayoutF*)pStreamOff;
 		return Vector3f(pVert[_idx].p[0], pVert[_idx].p[1], pVert[_idx].p[2]);
 	}
 	default:
@@ -741,16 +760,17 @@ Vector3f jParserD3::GetPos(int _idx)
 	}
 	return Vector3f();
 }
-Vector3f jParserD3::GetNor(int _idx)
+Vector3f jParserD3::GetNor(int _idx, int byteOffset)
 {
-	_warnif(_idx >= mVertexCount);
+	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
 	MyRes_CreateBuffer* pData = mpVerticies;
+	char* pStreamOff = pData->data + byteOffset;
 	switch (mLayoutFileID)
 	{
 	case RES_ID(0x3e, 0x167):
 	{
-		LayoutA* pVert = (LayoutA*)pData->data;
+		LayoutA* pVert = (LayoutA*)pStreamOff;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -760,7 +780,7 @@ Vector3f jParserD3::GetNor(int _idx)
 	case RES_ID(0x2f, 0x15f):
 	case RES_ID(0xe9, 0x10e):
 	{
-		LayoutB* pVert = (LayoutB*)pData->data;
+		LayoutB* pVert = (LayoutB*)pStreamOff;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -777,7 +797,7 @@ Vector3f jParserD3::GetNor(int _idx)
 	}
 	case RES_ID(0x1d, 0x137):
 	{
-		LayoutE* pVert = (LayoutE*)mpVerticies->data;
+		LayoutE* pVert = (LayoutE*)pStreamOff;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -786,7 +806,7 @@ Vector3f jParserD3::GetNor(int _idx)
 	}
 	case RES_ID(0xd2, 0xe5):
 	{
-		LayoutF* pVert = (LayoutF*)mpVerticies->data;
+		LayoutF* pVert = (LayoutF*)pStreamOff;
 		Vector3f ret;
 		ret.x = ((float)pVert[_idx].n[0] / 128.0f) - 1.0f;
 		ret.y = ((float)pVert[_idx].n[1] / 128.0f) - 1.0f;
@@ -799,21 +819,23 @@ Vector3f jParserD3::GetNor(int _idx)
 	}
 	return Vector3f(0, 1, 0);
 }
-int jParserD3::GetTex(int _idx, Vector2f* _t)
+int jParserD3::GetTex(int _idx, Vector2f* _t, int byteOffset)
 {
-	_warnif(_idx >= mVertexCount);
+	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
+	MyRes_CreateBuffer* pData = mpVerticies;
+	char* pStreamOff = pData->data + byteOffset;
 	switch (mLayoutFileID)
 	{
 	case RES_ID(0x3e, 0x167):
 	{
-		LayoutA* pVert = (LayoutA*)mpVerticies->data;
+		LayoutA* pVert = (LayoutA*)pStreamOff;
 		_t[0] = mFuncConvertTex(0, pVert[_idx].t0);
 		return 1;
 	}
 	case RES_ID(0xe9, 0x10e):
 	{
-		LayoutB* pVert = (LayoutB*)mpVerticies->data;
+		LayoutB* pVert = (LayoutB*)pStreamOff;
 		int cnt = mTextures.size();
 		for (int i = 0; i < cnt; ++i)
 			_t[i] = mFuncConvertTex(i, pVert[_idx].t0);
@@ -821,7 +843,7 @@ int jParserD3::GetTex(int _idx, Vector2f* _t)
 	}
 	case RES_ID(0x83, 0x18b):
 	{
-		LayoutC* pVert = (LayoutC*)mpVerticies->data;
+		LayoutC* pVert = (LayoutC*)pStreamOff;
 		int cnt = mTextures.size();
 		for (int i = 0; i < cnt; ++i)
 			_t[i] = mFuncConvertTex(i, pVert[_idx].t0 + 4*i );
@@ -829,13 +851,13 @@ int jParserD3::GetTex(int _idx, Vector2f* _t)
 	}
 	case RES_ID(0xca, 0x110):
 	{
-		LayoutD* pVert = (LayoutD*)mpVerticies->data;
+		LayoutD* pVert = (LayoutD*)pStreamOff;
 		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
 		return 1;
 	}
 	case RES_ID(0x2f, 0x15f):
 	{
-		LayoutB* pVert = (LayoutB*)mpVerticies->data;
+		LayoutB* pVert = (LayoutB*)pStreamOff;
 		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
 		_t[1] = mFuncConvertTex(1, (unsigned char*)pVert[_idx].t0);
 		_t[2] = mFuncConvertTex(2, (unsigned char*)pVert[_idx].t0);
@@ -845,13 +867,13 @@ int jParserD3::GetTex(int _idx, Vector2f* _t)
 	}
 	case RES_ID(0x1d, 0x137):
 	{
-		LayoutE* pVert = (LayoutE*)mpVerticies->data;
+		LayoutE* pVert = (LayoutE*)pStreamOff;
 		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
 		return 1;
 	}
 	case RES_ID(0xd2, 0xe5):
 	{
-		LayoutF* pVert = (LayoutF*)mpVerticies->data;
+		LayoutF* pVert = (LayoutF*)pStreamOff;
 		int cnt = mTextures.size();
 		for (int i = 0; i < cnt; ++i)
 			_t[i] = mFuncConvertTex(i, pVert[_idx].t0);
@@ -865,7 +887,7 @@ int jParserD3::GetTex(int _idx, Vector2f* _t)
 }
 Vector4n jParserD3::GetMatIdx(int _idx)
 {
-	_warnif(_idx >= mVertexCount);
+	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
 	MyRes_CreateBuffer* pData = mpVerticies;
 	switch (mLayoutFileID)
@@ -886,7 +908,7 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 }
 Vector4f jParserD3::GetMatWeight(int _idx)
 {
-	_warnif(_idx >= mVertexCount);
+	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
 	MyRes_CreateBuffer* pData = mpVerticies;
 	switch (mLayoutFileID)
@@ -904,4 +926,154 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 		break;
 	}
 	return Vector4f(1, 0, 0, 0);
+}
+
+/*
+
+
+v  -5.6743 -33.6384 0.0000
+v  -5.6743 31.9024 0.0000
+v  5.4042 31.9024 0.0000
+v  5.4042 -33.6384 0.0000
+v  -10.0057 -41.3635 75.6108
+v  10.4310 -41.3635 75.6108
+v  10.4310 41.5751 75.6108
+v  -10.0057 41.5751 75.6108
+
+vn 0.0000 0.0000 -1.0000
+vn 0.0000 0.0000 1.0000
+vn 0.0000 -0.9948 -0.1016
+vn 0.9978 0.0000 -0.0663
+vn 0.0000 0.9919 -0.1269
+vn -0.9984 -0.0000 -0.0572
+vn -0.9984 0.0000 -0.0572
+
+vt 0.8578 0.6842 0.0000
+vt 0.8578 0.8290 0.0000
+vt 0.2803 0.8290 0.0000
+vt 0.2803 0.6842 0.0000
+vt 0.0680 0.1566 0.0000
+vt 0.2354 0.1566 0.0000
+vt 0.2354 0.8228 0.0000
+vt 0.0680 0.8228 0.0000
+vt 0.2865 0.1752 0.0000
+vt 0.8516 0.1752 0.0000
+vt 0.8516 0.6332 0.0000
+vt 0.2865 0.6332 0.0000
+
+o Box001
+g Box001
+f 1/1/1 2/2/1 3/3/1
+f 5/4/2 6/1/2 7/2/2
+f 1/5/3 4/6/3 6/7/3
+f 4/9/4 3/10/4 7/11/4
+f 7/11/4 6/12/4 4/9/4
+f 8/7/5 7/8/5 3/5/5
+f 5/11/6 8/12/6 2/9/6
+
+*/
+
+
+bool jParserD3::ExportToObjectFormat()
+{
+	void* vbAddr = mContext.vb[0].addr;
+	void* ibAddr = mContext.ib_addr;
+	MyRes_CreateBuffer* pDataVB = (MyRes_CreateBuffer*)mMapRes[vbAddr].first;
+	MyRes_CreateBuffer* pDataIB = (MyRes_CreateBuffer*)mMapRes[ibAddr].first;
+
+	int vertCount = mGeoInfo.vertexTotalCount;
+	int vertByteOffset = mGeoInfo.vertexVertexByteOffset + (mGeoInfo.vertexStride * mGeoInfo.drawVertOffset);
+	int polyCount = mGeoInfo.drawIndexCount / mGeoInfo.indiciesCntPerPoly;
+	int indexOff = mGeoInfo.drawIndexOffset;
+	mMaxKey = 0;
+
+	string indicies;
+	indicies = "o Box001\n";
+	indicies += "g Box001\n";
+	short* pIndicies = (short*)pDataIB->data + indexOff;
+	for (int i = 0; i < polyCount; ++i)
+	{
+		Vector3n index;
+		index.x = pIndicies[i * 3 + 0];
+		index.y = pIndicies[i * 3 + 1];
+		index.z = pIndicies[i * 3 + 2];
+
+		AddVertInfo(index.x, vertByteOffset);
+		AddVertInfo(index.y, vertByteOffset);
+		AddVertInfo(index.z, vertByteOffset);
+
+		char tmp[64] = { 0, };
+		sprintf_s(tmp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
+			index.x+1, index.x+1, index.x+1,
+			index.y+1, index.y+1, index.y+1,
+			index.z+1, index.z+1, index.z+1 );
+		indicies += tmp;
+	}
+
+	string positions;
+	string normals;
+	string texels;
+	positions.reserve(32 * mMaxKey);
+	normals.reserve(32 * mMaxKey);
+	texels.reserve(32 * mMaxKey);
+	char tmpbuf[64] = { 0, };
+	for (int i = 0; i < mMaxKey + 1; ++i)
+	{
+		if (mMapExpVertInfo.find(i) == mMapExpVertInfo.end()) 
+		{
+			memset(tmpbuf, 0x00, 64);
+			sprintf_s(tmpbuf, "v %.4f %.4f %.4f\n", 0, 0, 0);
+			positions += tmpbuf;
+			memset(tmpbuf, 0x00, 64);
+			sprintf_s(tmpbuf, "vn %.4f %.4f %.4f\n", 0, 0, 0);
+			normals += tmpbuf;
+			memset(tmpbuf, 0x00, 64);
+			sprintf_s(tmpbuf, "vt %.4f %.4f %.4f\n", 0, 0, 0);
+			texels += tmpbuf;
+		}
+		else
+		{
+			positions += mMapExpVertInfo[i].p;
+			normals += mMapExpVertInfo[i].n;
+			texels += mMapExpVertInfo[i].t;
+		}
+	}
+
+	string ret = positions;
+	ret += normals;
+	ret += texels;
+	ret += indicies;
+	jUtils::SaveToFile("D:\export", "myBox001.obj", ret);
+
+	return true;
+}
+
+bool jParserD3::AddVertInfo(int index, int offset)
+{
+	if (mMapExpVertInfo.find(index) != mMapExpVertInfo.end())
+		return false;
+
+	char tmp[64] = { 0, };
+	ExpVertInfo data;
+
+	Vector3f pos = GetPos(index, offset);
+	memset(tmp, 0x00, 64);
+	sprintf_s(tmp, "v %.4f %.4f %.4f\n", pos.x, pos.y, pos.z);
+	data.p = tmp;
+
+	Vector3f normal = GetNor(index, offset);
+	memset(tmp, 0x00, 64);
+	sprintf_s(tmp, "vn %.4f %.4f %.4f\n", normal.x, normal.y, normal.z);
+	data.n = tmp;
+
+	Vector2f texel[10];
+	GetTex(index, texel, offset);
+	memset(tmp, 0x00, 64);
+	sprintf_s(tmp, "vt %.4f %.4f %.4f\n", texel[0].x, texel[0].y, 0.0f);
+	data.t = tmp;
+
+	mMapExpVertInfo[index] = data;
+	mMaxKey = index > mMaxKey ? index : mMaxKey;
+
+	return true;
 }

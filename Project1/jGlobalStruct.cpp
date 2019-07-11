@@ -155,6 +155,8 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 		D3D11_SUBRESOURCE_DATA *pSubRes =
 			head.totalSize == sizeof(MyRes_CreateTexture) ? nullptr : subRes;
 
+		//desc.SampleDesc.Count = 1;
+		//desc.BindFlags = D3D10_BIND_FLAG::D3D10_BIND_SHADER_RESOURCE;
 		HRESULT hResult = pDev->CreateTexture2D(&desc, pSubRes, &texture);
 		if (FAILED(hResult))
 			return nullptr;
@@ -241,3 +243,85 @@ void * MyRes_CreateDS::CreateResource()
 
 	return pState;
 }
+
+void * MyRes_D3D9_IB::CreateResource()
+{
+	auto pDev = jRenderer::GetInst().GetDevice();
+	ID3D11Buffer *pBuf = nullptr;
+
+	D3D11_BUFFER_DESC desc11;
+	desc11.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
+	desc11.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
+	desc11.ByteWidth = desc.Size;
+	desc11.CPUAccessFlags = 0;
+	desc11.MiscFlags = 0;
+	desc11.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA subRes;
+	subRes.pSysMem = data;
+	subRes.SysMemPitch = 0;
+	subRes.SysMemSlicePitch = 0;
+	if (FAILED(pDev->CreateBuffer(&desc11, &subRes, &pBuf)))
+		return nullptr;
+
+	return pBuf;
+}
+int D3D9_RenderContext::GetStride()
+{
+	int ret = decl_eles[decl_count - 2].Offset;
+	switch (decl_eles[decl_count - 2].Type)
+	{
+	case MyD3DDECLTYPE::D3DDECLTYPE_FLOAT3: ret += 12;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_D3DCOLOR: ret += 4;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_UBYTE4: ret += 4;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_SHORT2: ret += 8;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_SHORT4: ret += 8;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_UBYTE4N: ret += 4;	break;
+	case MyD3DDECLTYPE::D3DDECLTYPE_SHORT2N: ret += 4;	break;
+	default:
+		_warn();
+		break;
+	}
+	return ret;
+}
+
+int D3D9_RenderContext::GetPositionOffset(MyD3DDECLTYPE & type)
+{
+	for (int i = 0; i < decl_count - 1; ++i)
+	{
+		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_POSITION)
+		{
+			type = (MyD3DDECLTYPE)decl_eles[i].Type;
+			return decl_eles[i].Offset;
+		}
+	}
+	return -1;
+}
+
+int D3D9_RenderContext::GetTexelOffset(int idx, MyD3DDECLTYPE& type)
+{
+	for (int i = 0; i < decl_count - 1; ++i)
+	{
+		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_TEXCOORD
+			&& decl_eles[i].UsageIndex == idx)
+		{
+			type = (MyD3DDECLTYPE)decl_eles[i].Type;
+			return decl_eles[i].Offset;
+		}
+	}
+	return -1;
+}
+
+int D3D9_RenderContext::GetNormalOffset(MyD3DDECLTYPE & type)
+{
+	for (int i = 0; i < decl_count - 1; ++i)
+	{
+		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_NORMAL)
+		{
+			type = (MyD3DDECLTYPE)decl_eles[i].Type;
+			return decl_eles[i].Offset;
+		}
+	}
+	return -1;
+}
+

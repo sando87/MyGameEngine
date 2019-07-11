@@ -105,7 +105,7 @@ bool jShaderTexture::Render()
 	ID3D11Buffer *pIndexBuffer = mModel->GetIndexBuffer();
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	pDevContext->IASetVertexBuffers(0, 1, &pVertBuffer, &stride, (const UINT *)&mModel->mOffVertexOff);
+	pDevContext->IASetVertexBuffers(0, 1, &pVertBuffer, &stride, (const UINT *)&mModel->mVertexOff_setting);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	if (mModel->IsIndiciesStrideTwo())

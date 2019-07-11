@@ -135,6 +135,7 @@
     <ClCompile Include="jLine3D.cpp" />
     <ClCompile Include="jMatrixControl.cpp" />
     <ClCompile Include="jParserD3.cpp" />
+    <ClCompile Include="jParserS2.cpp" />
     <ClCompile Include="jShaderDiablo.cpp" />
     <ClCompile Include="jShaderSkinned.cpp" />
     <ClCompile Include="jGameObject.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="jLine3D.h" />
     <ClInclude Include="jMatrixControl.h" />
     <ClInclude Include="jParserD3.h" />
+    <ClInclude Include="jParserS2.h" />
     <ClInclude Include="jShaderDiablo.h" />
     <ClInclude Include="jShaderSkinned.h" />
     <ClInclude Include="jGameObject.h" />

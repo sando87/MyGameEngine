@@ -16,6 +16,9 @@ struct TargaHeader
 	unsigned char data2;
 };
 
+#define KEEPGOING true
+#define STOP false
+
 class jUtils
 {
 public:
@@ -28,6 +31,7 @@ public:
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
+	static void SaveToFile(string path, string filename, string data);
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <Windows.h>
+#include <stdio.h>
 
 jUtils::jUtils()
 {
@@ -137,6 +138,7 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 
 	return true;
 }
+
 bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
 {
 	FILE* filePtr = NULL;
@@ -177,6 +179,22 @@ void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*
 		} while (FindNextFile(hFind, &data));
 		FindClose(hFind);
 	}
+}
+void jUtils::SaveToFile(string path, string filename, string data)
+{
+	char name[260] = { 0, };
+	sprintf_s(name, "%s\\%s", path.c_str(), filename.c_str());
+
+	FILE *pFile = NULL;
+	fopen_s(&pFile, name, "wb");
+	if (pFile == NULL)
+		return;
+
+	int size = data.size();
+	fwrite(data.c_str(), 1, size, pFile);
+
+	fclose(pFile);
+	return;
 }
 void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))
 {

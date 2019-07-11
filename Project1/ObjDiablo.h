@@ -2,7 +2,7 @@
 
 #include "jGameObject.h"
 #include "jGlobalStruct.h"
-#include "jParserD3.h"
+#include "jParserS2.h"
 #include <vector>
 using namespace std;
 
@@ -38,6 +38,7 @@ public:
 	~ObjDiablo();
 
 private:
+	float mm_x;
 	void OnStart();
 	void OnUpdate();
 	void OnDraw();
@@ -53,7 +54,7 @@ private:
 public:
 	int mFileIndex;
 	DrawingInfo mDrawInfos;
-	jParserD3 mRenderIfno;
+	jParserS2 mRenderIfno;
 	int mCBMainCount;
 	char* mCBMains;
 };

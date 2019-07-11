@@ -18,7 +18,7 @@ jModel::jModel()
 
 	mStartIndex		= 0;
 	mVertexOff		= 0;
-	mOffVertexOff	= 0;
+	mVertexOff_setting	= 0;
 }
 
 jModel::~jModel()
@@ -285,7 +285,7 @@ bool jModel::LoadSimpleRect(int _len)
 
 	mStartIndex = 0;
 	mVertexOff = 0;
-	mOffVertexOff = 0;
+	mVertexOff_setting = 0;
 	mPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	return true;
@@ -598,10 +598,10 @@ bool jModel::LoadAxis(int _len)
 bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
-
+	GeometryInfo info = _context->GetGeometryInfo();
 	//CreateVertexBuffer
 	{
-		m_vertexCount = _context->mVertexCount;
+		m_vertexCount = info.vertexTotalCount;
 		m_sizeVertex = sizeof(VertexType_Texture);
 		vector<VertexType_Texture> verticies;
 		Vector2f tex[10];
@@ -632,25 +632,26 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 
 	//CreateIndexBuffer
 	{
-		m_sizeIndex = 2;
-		m_indexCount = _context->mContext.draw_IndexCount;
+		m_sizeIndex = info.indiciesIndexUnit;
+		m_indexCount = info.drawIndexCount;
 		m_indexBuffer = _context->GetResIndexBuffer();
 	}
 
-	mStartIndex = _context->mContext.draw_StartIndex;
-	mVertexOff = _context->mContext.draw_BaseVertex;
-	mOffVertexOff = (_context->mVertexOffset / _context->mVertexStride) * m_sizeVertex;
-	mPrimitiveTopology = _context->mContext.prim_topology;
+	mStartIndex = info.drawIndexOffset;
+	mVertexOff = info.drawVertOffset;
+	mVertexOff_setting = (info.vertexVertexByteOffset / info.vertexStride) * m_sizeVertex;
+	mPrimitiveTopology = info.primitiveType;
 
 	return true;
 }
 bool jModel::LoadDiablo_ForSkkinedShader(jParserD3 *_context)
 {
 	auto pDev = jRenderer::GetInst().GetDevice();
+	GeometryInfo info = _context->GetGeometryInfo();
 
 	//CreateVertexBuffer
 	{
-		m_vertexCount = _context->mVertexCount;
+		m_vertexCount = info.vertexTotalCount;
 		m_sizeVertex = sizeof(VertexType_Weight);
 		vector<VertexType_Weight> verticies;
 		Vector2f tex[10];
@@ -685,13 +686,13 @@ bool jModel::LoadDiablo_ForSkkinedShader(jParserD3 *_context)
 	//CreateIndexBuffer
 	{
 		m_sizeIndex = 2;
-		m_indexCount = _context->mContext.draw_IndexCount;
+		m_indexCount = info.drawIndexCount;
 		m_indexBuffer = _context->GetResIndexBuffer();
 	}
 
-	mStartIndex = _context->mContext.draw_StartIndex;
-	mVertexOff = _context->mContext.draw_BaseVertex;
-	mOffVertexOff = (_context->mVertexOffset / _context->mVertexStride) * m_sizeVertex;
+	mStartIndex = info.drawIndexOffset;
+	mVertexOff = info.drawVertOffset;
+	mVertexOff_setting = (info.vertexVertexByteOffset / info.vertexStride) * m_sizeVertex;
 
 	return true;
 }
