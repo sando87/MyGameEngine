@@ -60,19 +60,7 @@ float gg_x = 0;
 void ObjDiablo::OnStart()
 {
 	mm_x = gg_x;
-	gg_x += 10.0f;
-	//printf("[vs]\n");
-	//jUtils::ForEachFiles2(nullptr, "D:\\temp\\*_v.dump", [&](void* ptr, string name) {
-	//	vector<string> rets;
-	//	jUtils::Split(name, "_", rets);
-	//	int num = stoi(rets[0]);
-	//	char* pBuf = nullptr;
-	//	int size = 0;
-	//	jUtils::LoadFile("D:\\temp\\" + name, &size, &pBuf);
-	//	MyResBase* pData = (MyResBase*)pBuf;
-	//	printf("case RES_ID(0x%x, 0x%x): //%d\n", pData->crc, pData->totalSize, num);
-	//	return true;
-	//});
+	gg_x += 50.0f;
 
 	//LoadCBMatrix();
 	if (!mRenderIfno.Init(mFileIndex))
@@ -83,8 +71,8 @@ void ObjDiablo::OnStart()
 	}
 
 	//mRenderIfno.ExportToObjectFormat();
-	//DeleteFromMgr();
-	//return;
+	//if (mFileIndex == 39)
+	//	mRenderIfno.ExportTerrains();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
@@ -111,10 +99,23 @@ void ObjDiablo::OnUpdate()
 void ObjDiablo::OnDraw()
 {
 	Matrix4 mat = Matrix4().identity();
-	mat[12] = mm_x;
-	//mat = mRenderIfno.mCBMain.matWorld;
-	//mat.transpose();
-	//printf("[%d] x: %f, y: %f, z: %f\n", mFileIndex, mat[12], mat[13], mat[14]);
+	//mat[12] = mm_x;
+	Matrix4 CBmat = mRenderIfno.mCBMain.matWorld;
+	CBmat.transpose();
+	static map<Vector3f, int> mmTest;
+	Vector3f key;
+	key.x = CBmat[12];
+	key.y = CBmat[13];
+	key.z = CBmat[14];
+	if (mmTest.find(key) == mmTest.end())
+	{
+		printf("[%d] x: %f, y: %f, z: %f\n", mFileIndex, CBmat[12], CBmat[13], CBmat[14]);
+		mmTest[key] = 1;
+	}
+	mat[12] = CBmat[12];
+	mat[13] = CBmat[13];
+	mat[14] = CBmat[14];
+	
 
 	static int drawIndx = 0;
 	CBMatrix* animMats = GetCBMatrix(drawIndx);

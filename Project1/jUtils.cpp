@@ -180,15 +180,25 @@ void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*
 		FindClose(hFind);
 	}
 }
-void jUtils::SaveToFile(string path, string filename, string data)
+void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
 {
 	char name[260] = { 0, };
 	sprintf_s(name, "%s\\%s", path.c_str(), filename.c_str());
 
 	FILE *pFile = NULL;
-	fopen_s(&pFile, name, "wb");
-	if (pFile == NULL)
-		return;
+
+	if (!isAttach)
+	{
+		fopen_s(&pFile, name, "wb");
+		if (pFile == NULL)
+			return;
+	}
+	else
+	{
+		fopen_s(&pFile, name, "ab");
+		if (pFile == NULL)
+			return;
+	}
 
 	int size = data.size();
 	fwrite(data.c_str(), 1, size, pFile);

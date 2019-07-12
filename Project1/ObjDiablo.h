@@ -54,7 +54,7 @@ private:
 public:
 	int mFileIndex;
 	DrawingInfo mDrawInfos;
-	jParserS2 mRenderIfno;
+	jParserD3 mRenderIfno;
 	int mCBMainCount;
 	char* mCBMains;
 };

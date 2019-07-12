@@ -33,9 +33,7 @@ bool jGameObjectMgr::Initialize()
 	//	obj0->AddToMgr();
 	//}
 
-	//0 ~ 65 지형 바닥 깔끔
-	//65 ~ 256 지형 물체, 건물, 유닛 등등 대부분 깔끔
-	for(int i = 170; i < 190; ++i) 
+	for(int i = 20; i < 40; ++i) 
 	{
 		ObjDiablo* obj0 = new ObjDiablo();
 		obj0->mFileIndex = i;

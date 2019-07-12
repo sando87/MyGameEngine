@@ -190,84 +190,10 @@ Vector4f jParserS2::GetMatWeight(int _idx)
 	return Vector4f();
 }
 
-bool jParserS2::ExportToObjectFormat()
+char * jParserS2::GetIndiciesData()
 {
-	void* vbAddr = mContextD3D9.vb_addr;
 	void* ibAddr = mContextD3D9.ib_addr;
-	MyRes_D3D9_VB* pDataVB = (MyRes_D3D9_VB*)mMapRes[vbAddr].first;
 	MyRes_D3D9_IB* pDataIB = (MyRes_D3D9_IB*)mMapRes[ibAddr].first;
-
-	int vertCount = mGeoInfo.vertexTotalCount;
-	int vertByteOffset = mGeoInfo.vertexVertexByteOffset + (mGeoInfo.vertexStride * mGeoInfo.drawVertOffset);
-	int polyCount = mGeoInfo.drawIndexCount / mGeoInfo.indiciesCntPerPoly;
-	int indexOff = mGeoInfo.drawIndexOffset;
-	mMaxKey = 0;
-
-	vector<string> rets;
-	jUtils::Split(mContextD3D9.context_filename, ".", rets);
-	string modelName = rets[0];
-
-	string indicies;
-	indicies = "o ";
-	indicies += modelName;
-	indicies += "\n";
-	indicies += "g ";
-	indicies += modelName;
-	indicies += "\n";
-	short* pIndicies = (short*)pDataIB->data + indexOff;
-	for (int i = 0; i < polyCount; ++i)
-	{
-		Vector3n index;
-		index.x = pIndicies[i * 3 + 0];
-		index.y = pIndicies[i * 3 + 1];
-		index.z = pIndicies[i * 3 + 2];
-
-		AddVertInfo(index.x, vertByteOffset);
-		AddVertInfo(index.y, vertByteOffset);
-		AddVertInfo(index.z, vertByteOffset);
-
-		char tmp[64] = { 0, };
-		sprintf_s(tmp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
-			index.x + 1, index.x + 1, index.x + 1,
-			index.y + 1, index.y + 1, index.y + 1,
-			index.z + 1, index.z + 1, index.z + 1);
-		indicies += tmp;
-	}
-
-	string positions;
-	string normals;
-	string texels;
-	positions.reserve(32 * mMaxKey);
-	normals.reserve(32 * mMaxKey);
-	texels.reserve(32 * mMaxKey);
-	char tmpbuf[64] = { 0, };
-	for (int i = 0; i < mMaxKey + 1; ++i)
-	{
-		if (mMapExpVertInfo.find(i) == mMapExpVertInfo.end())
-		{
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "v %.4f %.4f %.4f\n", 0, 0, 0);
-			positions += tmpbuf;
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "vn %.4f %.4f %.4f\n", 0, 0, 0);
-			normals += tmpbuf;
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "vt %.4f %.4f %.4f\n", 0, 0, 0);
-			texels += tmpbuf;
-		}
-		else
-		{
-			positions += mMapExpVertInfo[i].p;
-			normals += mMapExpVertInfo[i].n;
-			texels += mMapExpVertInfo[i].t;
-		}
-	}
-
-	string ret = positions;
-	ret += normals;
-	ret += texels;
-	ret += indicies;
-	jUtils::SaveToFile("D:\export", modelName + ".obj", ret);
-
-	return true;
+	return pDataIB->data;
 }
+

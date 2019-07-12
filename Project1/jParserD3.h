@@ -21,16 +21,39 @@ struct GeometryInfo
 	unsigned int drawIndexOffset;
 	unsigned int drawVertOffset;
 };
-struct ExpVertInfo
+struct ExpVertex
 {
-	string p;
-	string n;
-	string t;
+	Vector3f p;
+	Vector3f n;
+	Vector2f t;
+};
+struct ExpMesh
+{
+	string name;
+	vector<ExpVertex> vert;
+	vector<Vector3n> indicies;
+	ExpMesh *pNext;
+	bool ExportToObject(string _filename, bool _isRoot, int _baseIdx);
+	bool Merge(ExpMesh *_mesh);
+	bool Add(int _idx, ExpVertex& _vert);
+	ExpMesh()
+	{
+		name = "";
+		pNext = nullptr;
+	}
+	void Reset()
+	{
+		name = "";
+		pNext = nullptr;
+		vert.clear();
+		indicies.clear();
+	}
 };
 
 class jParserD3
 {
 public:
+	static map<UINT64, ExpMesh*> mExpLinks;
 	static map<void*, pair<MyResBase*, void*>> mMapRes;
 	static void LoadResources(int idx);
 	static void Release();
@@ -71,6 +94,7 @@ public:
 	virtual int GetTex(int _idx, Vector2f* _t, int byteOffset = 0);
 	virtual Vector4n GetMatIdx(int _idx);
 	virtual Vector4f GetMatWeight(int _idx);
+	virtual char* GetIndiciesData();
 
 	Vector2f CalcTexCoord(unsigned char* _p)
 	{
@@ -79,9 +103,11 @@ public:
 		ret.y = ((float)_p[2] * 0.003906f + (float)_p[3]) * 0.5f - 64.0f;
 		return ret;
 	}
-	map<int, ExpVertInfo> mMapExpVertInfo;
-	int mMaxKey;
-	virtual bool ExportToObjectFormat();
+	bool IsTerrain();
+	unsigned long long CalcKey(float _x, float _y);
+	ExpMesh mExportInfo;
+	bool ExportToObjectFormat();
+	bool ExportTerrains();
 	bool AddVertInfo(int index, int offset);
 };
 

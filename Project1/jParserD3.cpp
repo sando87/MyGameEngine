@@ -6,8 +6,10 @@
 
 #define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
+#define COMP_FLOAT(a, b) (abs((a)-(b)) < 0.0001f ? true : false)
 
 map<void*, pair<MyResBase*, void*>> jParserD3::mMapRes;
+map<UINT64, ExpMesh*> jParserD3::mExpLinks;
 
 struct LayoutA
 {
@@ -115,17 +117,22 @@ void jParserD3::LoadResources(int idx)
 
 
 	//path = PATH_RESOURCE;
-	//filter = "*_D3D9RenderContext.bin";
+	//filter = "*_RenderingContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
 	//	vector<string> rets;
 	//	jUtils::Split(_str, "_.", rets);
+	//	int idx = atoi(rets[0].c_str());
 	//
 	//	int filesize = 0;
-	//	D3D9_RenderContext* pBuf = nullptr;
+	//	RenderContext* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
-	//	printf("%s : %d %d %d %d\n", _str.c_str(), pBuf->draw_BaseVertexIndex, pBuf->draw_startIndex, pBuf->draw_NumVertices, pBuf->draw_primCount);
+	//	if (pBuf->vb[0].addr == (void*)0x00000202e458d7a0 &&
+	//		pBuf->ib_addr == (void*)0x00000202e4593260)
+	//		printf("%d\n", idx);
 	//
+	//
+	//	free(pBuf);
 	//	return KEEPGOING;
 	//});
 }
@@ -154,6 +161,15 @@ bool jParserD3::Init(int _fileIdx)
 	char* pBuf = nullptr;
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
 	memcpy(&mContext, pBuf, sizeof(mContext));
+
+	//{
+	//	MyResBase* pData = (MyResBase*)mMapRes[mContext.vs_addr].first;
+	//	printf("vs crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
+	//	pData = (MyResBase*)mMapRes[mContext.ps_addr].first;
+	//	printf("ps crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
+	//	pData = (MyResBase*)mMapRes[mContext.layout_addr].first;
+	//	printf("layout crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
+	//}
 
 	InitCBMain();
 	ReadyForData();
@@ -250,10 +266,10 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0x41, 0x237c):	//38 
 	case RES_ID(0xff, 0x18a8):	//82 
 	case RES_ID(0xd2, 0x1a48): //13-1
-	case RES_ID(0xad, 0x23e8):
 	case RES_ID(0xd5, 0x2014):
+	case RES_ID(0xad, 0x23e8):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
-			Matrix4 matTex = mCBMain.matTex[1];
+			Matrix4 matTex = mCBMain.matTex[_idx + 1];
 			Vector2f tmp = CalcTexCoord(_p);
 			Vector2f ret;
 			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
@@ -303,6 +319,7 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0x84, 0x1A30): //19 
 	case RES_ID(0xed, 0x1b8c):	//20 
 	case RES_ID(0x51, 0x1a30):	//84 
+	case RES_ID(0xc2, 0x1c4c): // ¸ðµ¨ÀÇ worldÁÂÇ¥¸¦ ±â¹ÝÀ¸·Î ÅØ¼¿ÁÂÇ¥ »ý¼º o7(¾Æ¸¶ ·£´ý¿ä¼ÒÀÎµí) => skip
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4f matTex = mCBMain.matTex[_idx + 1];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -329,9 +346,6 @@ void jParserD3::InitFuncConvTex()
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
-
-	case RES_ID(0x92, 0x1378):	//90
-		_printlog("[vs] texel is created on view of camera and dynamic\n");
 	case RES_ID(0xd1, 0x2150):	//80 => hard
 	case RES_ID(0x2c, 0x1240):	//157
 	case RES_ID(0x8e, 0x1168):	//159
@@ -342,6 +356,7 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0xc5, 0x18b0): //130
 	case RES_ID(0xc1, 0x1518): //131
 	case RES_ID(0xd6, 0x1e50): //139
+		_printlog("[vs] default\n");
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -350,14 +365,24 @@ void jParserD3::InitFuncConvTex()
 			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
-		_printlog("[vs] skipped\n");
+		break;
+	case RES_ID(0x92, 0x1378):
+		_printlog("[vs] skip : pos * view mat needed!! \n"); // texel º¯È¯ ÁÂÇ¥°¡ viewÁÂÇ¥°è ±âÁØ º¯È¯ ÇÊ¿ä
+		break;
+	case RES_ID(0x90, 0x142c):
+		_printlog("[vs] skip : color * view mat needed!! \n"); // texel º¯È¯ ÁÂÇ¥°¡ viewÁÂÇ¥°è ±âÁØ º¯È¯ ÇÊ¿ä
 		break;
 	default:
-		_warn();
-		mFuncConvertTex = nullptr;
+		_printlog("[vs] undefine\n");
 		break;
 	}
 
+	if (mFuncConvertTex == nullptr)
+	{
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			return Vector2f(0, 0);
+		};
+	}
 }
 void jParserD3::ReadyForData()
 {
@@ -417,6 +442,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0xd3, 0x494): //14-2
 	case RES_ID(0xfb, 0x35c): //17-2
 	case RES_ID(0x22, 0x1268): //193-2
+	case RES_ID(0x25, 0x130c): 
 		mTextures.push_back(0);
 		break;
 	case RES_ID(0xe3, 0x10e8): //126
@@ -445,6 +471,10 @@ void jParserD3::InitTextureList()
 		mTextures.push_back(0);
 		mTextures.push_back(1);
 		break;
+	case RES_ID(0x69, 0x16cc):
+		mTextures.push_back(1);
+		mTextures.push_back(2);
+		break;
 	case RES_ID(0xfc, 0x1218): //139-2
 		mTextures.push_back(0);
 		mTextures.push_back(1);
@@ -453,6 +483,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x1c, 0x2b70): //19
 	case RES_ID(0xaf, 0x2ca4): //20
 	case RES_ID(0xfa, 0x2ab8): //84
+	case RES_ID(0x7, 0x3094):
 		mTextures.push_back(1);
 		mTextures.push_back(2);
 		mTextures.push_back(3);
@@ -461,7 +492,6 @@ void jParserD3::InitTextureList()
 		break;
 
 	case RES_ID(0x50, 0x2140): //80 => hard
-	case RES_ID(0x25, 0x130c): //90 => skip
 	case RES_ID(0x5a, 0x1418):  //124
 	case RES_ID(0x32, 0x10a0):	//136
 	case RES_ID(0x3d, 0x10e8):	//145
@@ -489,11 +519,11 @@ void jParserD3::InitTextureList()
 	case RES_ID(0xaa, 0x1324): //257-2
 	case RES_ID(0x6f, 0xfa8): //261-2
 	case RES_ID(0xe4, 0x11fc): //269-2
+		_printlog("[ps] default\n");
 		mTextures.push_back(0);
-		_printlog("[ps] skipped\n");
 		break;
 	default:
-		_warn();
+		_printlog("[ps] undefined\n");
 		break;
 	}
 }
@@ -513,8 +543,6 @@ bool jParserD3::IsValid()
 	if( mpVerticies == nullptr )
 		return false;
 	if (mLayoutFileID == 0)
-		return false;
-	if (mTextures.size() == 0)
 		return false;
 	if (mFuncConvertTex == nullptr)
 		return false;
@@ -646,9 +674,6 @@ bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
 
 	return true;
 }
-//ID3D11InputLayout*
-//ID3D11VertexShader*
-//ID3D11PixelShader*
 
 bool jParserD3::Render()
 {
@@ -927,70 +952,59 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 	}
 	return Vector4f(1, 0, 0, 0);
 }
+char * jParserD3::GetIndiciesData()
+{
+	void* ibAddr = mContext.ib_addr;
+	MyRes_CreateBuffer* pDataIB = (MyRes_CreateBuffer*)mMapRes[ibAddr].first;
+	return pDataIB->data;
+}
 
-/*
+bool jParserD3::IsTerrain()
+{
+	float posX = mCBMain.matWorld[3];
+	if (!COMP_FLOAT(posX, (int)posX))
+		return false;
+	float posY = mCBMain.matWorld[7];
+	if (!COMP_FLOAT(posY, (int)posY))
+		return false;
+	float posZ = mCBMain.matWorld[11];
+	if (!COMP_FLOAT(posZ, (int)posZ))
+		return false;
 
+	if (posX == 0 && posY == 0 && posZ == 0)
+		return false;
 
-v  -5.6743 -33.6384 0.0000
-v  -5.6743 31.9024 0.0000
-v  5.4042 31.9024 0.0000
-v  5.4042 -33.6384 0.0000
-v  -10.0057 -41.3635 75.6108
-v  10.4310 -41.3635 75.6108
-v  10.4310 41.5751 75.6108
-v  -10.0057 41.5751 75.6108
+	float axisX = mCBMain.matWorld[0];
+	if (!COMP_FLOAT(axisX, 1.0f))
+		return false;
+	float axisY = mCBMain.matWorld[5];
+	if (!COMP_FLOAT(axisY, 1.0f))
+		return false;
+	float axisZ = mCBMain.matWorld[10];
+	if (!COMP_FLOAT(axisZ, 1.0f))
+		return false;
 
-vn 0.0000 0.0000 -1.0000
-vn 0.0000 0.0000 1.0000
-vn 0.0000 -0.9948 -0.1016
-vn 0.9978 0.0000 -0.0663
-vn 0.0000 0.9919 -0.1269
-vn -0.9984 -0.0000 -0.0572
-vn -0.9984 0.0000 -0.0572
-
-vt 0.8578 0.6842 0.0000
-vt 0.8578 0.8290 0.0000
-vt 0.2803 0.8290 0.0000
-vt 0.2803 0.6842 0.0000
-vt 0.0680 0.1566 0.0000
-vt 0.2354 0.1566 0.0000
-vt 0.2354 0.8228 0.0000
-vt 0.0680 0.8228 0.0000
-vt 0.2865 0.1752 0.0000
-vt 0.8516 0.1752 0.0000
-vt 0.8516 0.6332 0.0000
-vt 0.2865 0.6332 0.0000
-
-o Box001
-g Box001
-f 1/1/1 2/2/1 3/3/1
-f 5/4/2 6/1/2 7/2/2
-f 1/5/3 4/6/3 6/7/3
-f 4/9/4 3/10/4 7/11/4
-f 7/11/4 6/12/4 4/9/4
-f 8/7/5 7/8/5 3/5/5
-f 5/11/6 8/12/6 2/9/6
-
-*/
-
-
+	return true;
+}
+unsigned long long jParserD3::CalcKey(float _x, float _y)
+{
+	UINT64 key = 0;
+	memcpy(&key, &_x, 4);
+	memcpy((char*)&key + 4, &_y, 4);
+	return key;
+}
 bool jParserD3::ExportToObjectFormat()
 {
-	void* vbAddr = mContext.vb[0].addr;
-	void* ibAddr = mContext.ib_addr;
-	MyRes_CreateBuffer* pDataVB = (MyRes_CreateBuffer*)mMapRes[vbAddr].first;
-	MyRes_CreateBuffer* pDataIB = (MyRes_CreateBuffer*)mMapRes[ibAddr].first;
+	mExportInfo.Reset();
+	char* pIndiciesData = GetIndiciesData();
 
 	int vertCount = mGeoInfo.vertexTotalCount;
 	int vertByteOffset = mGeoInfo.vertexVertexByteOffset + (mGeoInfo.vertexStride * mGeoInfo.drawVertOffset);
 	int polyCount = mGeoInfo.drawIndexCount / mGeoInfo.indiciesCntPerPoly;
 	int indexOff = mGeoInfo.drawIndexOffset;
-	mMaxKey = 0;
 
-	string indicies;
-	indicies = "o Box001\n";
-	indicies += "g Box001\n";
-	short* pIndicies = (short*)pDataIB->data + indexOff;
+	mExportInfo.name = "MyObject_" + to_string(mFileIndex);
+	short* pIndicies = (short*)pIndiciesData + indexOff;
 	for (int i = 0; i < polyCount; ++i)
 	{
 		Vector3n index;
@@ -1002,78 +1016,121 @@ bool jParserD3::ExportToObjectFormat()
 		AddVertInfo(index.y, vertByteOffset);
 		AddVertInfo(index.z, vertByteOffset);
 
-		char tmp[64] = { 0, };
-		sprintf_s(tmp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
-			index.x+1, index.x+1, index.x+1,
-			index.y+1, index.y+1, index.y+1,
-			index.z+1, index.z+1, index.z+1 );
-		indicies += tmp;
+		mExportInfo.indicies.push_back(index);
 	}
 
-	string positions;
-	string normals;
-	string texels;
-	positions.reserve(32 * mMaxKey);
-	normals.reserve(32 * mMaxKey);
-	texels.reserve(32 * mMaxKey);
-	char tmpbuf[64] = { 0, };
-	for (int i = 0; i < mMaxKey + 1; ++i)
+	if (IsTerrain())
 	{
-		if (mMapExpVertInfo.find(i) == mMapExpVertInfo.end()) 
-		{
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "v %.4f %.4f %.4f\n", 0, 0, 0);
-			positions += tmpbuf;
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "vn %.4f %.4f %.4f\n", 0, 0, 0);
-			normals += tmpbuf;
-			memset(tmpbuf, 0x00, 64);
-			sprintf_s(tmpbuf, "vt %.4f %.4f %.4f\n", 0, 0, 0);
-			texels += tmpbuf;
-		}
+		unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
+		if (mExpLinks.find(key) == mExpLinks.end())
+			mExpLinks[key] = &mExportInfo;
 		else
-		{
-			positions += mMapExpVertInfo[i].p;
-			normals += mMapExpVertInfo[i].n;
-			texels += mMapExpVertInfo[i].t;
-		}
+			mExpLinks[key]->Merge(&mExportInfo);
 	}
-
-	string ret = positions;
-	ret += normals;
-	ret += texels;
-	ret += indicies;
-	jUtils::SaveToFile("D:\export", "myBox001.obj", ret);
+	else
+		mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
 
 	return true;
 }
-
+bool jParserD3::ExportTerrains()
+{
+	for (auto iter = mExpLinks.begin(); iter != mExpLinks.end(); ++iter)
+	{
+		ExpMesh* pMesh = iter->second;
+		pMesh->ExportToObject(pMesh->name + ".obj", true, 0);
+	}
+	mExpLinks.clear();
+	return true;
+}
 bool jParserD3::AddVertInfo(int index, int offset)
 {
-	if (mMapExpVertInfo.find(index) != mMapExpVertInfo.end())
-		return false;
-
-	char tmp[64] = { 0, };
-	ExpVertInfo data;
-
-	Vector3f pos = GetPos(index, offset);
-	memset(tmp, 0x00, 64);
-	sprintf_s(tmp, "v %.4f %.4f %.4f\n", pos.x, pos.y, pos.z);
-	data.p = tmp;
-
-	Vector3f normal = GetNor(index, offset);
-	memset(tmp, 0x00, 64);
-	sprintf_s(tmp, "vn %.4f %.4f %.4f\n", normal.x, normal.y, normal.z);
-	data.n = tmp;
-
 	Vector2f texel[10];
+	ExpVertex vertex;
+	vertex.p = GetPos(index, offset);
+	vertex.n = GetNor(index, offset);
 	GetTex(index, texel, offset);
-	memset(tmp, 0x00, 64);
-	sprintf_s(tmp, "vt %.4f %.4f %.4f\n", texel[0].x, texel[0].y, 0.0f);
-	data.t = tmp;
+	vertex.t = texel[0];
 
-	mMapExpVertInfo[index] = data;
-	mMaxKey = index > mMaxKey ? index : mMaxKey;
+	mExportInfo.Add(index, vertex);
+	return true;
+}
 
+bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
+{
+	string strBaseIdx = to_string(_baseIdx);
+	string ret = "";
+	if (_isRoot)
+		ret = "o " + name + "\n";
+
+	ret += ("g " + name + "_" + strBaseIdx + "\n");
+
+	string pos = "";
+	string nor = "";
+	string tex = "";
+	char tmpBuf[64] = { 0, };
+	int vertCount = vert.size();
+	for (int i = 0; i < vertCount; ++i)
+	{
+		ExpVertex& curVert = vert[i];
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "v %.4f %.4f %.4f\n", curVert.p.x, curVert.p.y, curVert.p.z);
+		pos += tmpBuf;
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "vn %.4f %.4f %.4f\n", curVert.n.x, curVert.n.y, curVert.n.z);
+		nor += tmpBuf;
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "vt %.4f %.4f %.4f\n", curVert.t.x, curVert.t.y, 0.0f);
+		tex += tmpBuf;
+	}
+
+	string strIndicies = "";
+	int indiCount = indicies.size();
+	for (int i = 0; i < indiCount; ++i)
+	{
+		Vector3n& index = indicies[i];
+		int xIdx = _baseIdx + index.x + 1;
+		int yIdx = _baseIdx + index.y + 1;
+		int zIdx = _baseIdx + index.z + 1;
+
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+			xIdx, xIdx, xIdx,
+			yIdx, yIdx, yIdx,
+			zIdx, zIdx, zIdx );
+		strIndicies += tmpBuf;
+	}
+
+	ret += pos;
+	ret += nor;
+	ret += tex;
+	ret += strIndicies;
+	jUtils::SaveToFile("D:\export", _filename, ret, true);
+
+	if (pNext != nullptr)
+		pNext->ExportToObject(_filename, false, _baseIdx + vertCount);
+
+	return true;
+}
+bool ExpMesh::Merge(ExpMesh * _mesh)
+{
+	ExpMesh **ppMesh = &pNext;
+	while (*ppMesh != nullptr)
+		ppMesh = &(*ppMesh)->pNext;
+
+	*ppMesh = _mesh;
+	return true;
+}
+bool ExpMesh::Add(int _idx, ExpVertex& _vert)
+{
+	if (_idx < 0)
+	{
+		_warn();
+		return false;
+	}
+
+	while (_idx >= vert.size())
+		vert.push_back(ExpVertex());
+
+	vert[_idx] = _vert;
 	return true;
 }

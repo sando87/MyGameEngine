@@ -20,7 +20,6 @@ public:
 	int GetTex(int _idx, Vector2f* _t, int byteOffset = 0);
 	Vector4n GetMatIdx(int _idx);
 	Vector4f GetMatWeight(int _idx);
-
-	bool ExportToObjectFormat();
+	char * GetIndiciesData();
 };
 
