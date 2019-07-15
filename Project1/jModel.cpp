@@ -697,6 +697,64 @@ bool jModel::LoadDiablo_ForSkkinedShader(jParserD3 *_context)
 	return true;
 }
 
+bool jModel::LoadDiablo_ForTerrain(jParserD3 * _context)
+{
+	if (_context->mTextures.size() < 6)
+		return false;
+
+	auto pDev = jRenderer::GetInst().GetDevice();
+	GeometryInfo info = _context->GetGeometryInfo();
+	//CreateVertexBuffer
+	{
+		m_vertexCount = info.vertexTotalCount;
+		m_sizeVertex = sizeof(VertexType_Terrain);
+		vector<VertexType_Terrain> verticies;
+		Vector2f tex[10];
+		for (int i = 0; i < m_vertexCount; ++i)
+		{
+			VertexType_Terrain vert;
+			vert.p = _context->GetPos(i);
+			int cnt = _context->GetTex(i, tex);
+			vert.t0 = tex[0];
+			vert.t1 = tex[1];
+			vert.t2 = tex[2];
+			vert.t3 = tex[3];
+			vert.t4 = tex[4];
+			vert.t5 = tex[5];
+			verticies.push_back(vert);
+		}
+
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA subRes;
+		subRes.pSysMem = &verticies[0];
+		subRes.SysMemPitch = 0;
+		subRes.SysMemSlicePitch = 0;
+		if (FAILED(pDev->CreateBuffer(&vertexBufferDesc, &subRes, &m_vertexBuffer)))
+			return false;
+	}
+
+	//CreateIndexBuffer
+	{
+		m_sizeIndex = info.indiciesIndexUnit;
+		m_indexCount = info.drawIndexCount;
+		m_indexBuffer = _context->GetResIndexBuffer();
+	}
+
+	mStartIndex = info.drawIndexOffset;
+	mVertexOff = info.drawVertOffset;
+	mVertexOff_setting = (info.vertexVertexByteOffset / info.vertexStride) * m_sizeVertex;
+	mPrimitiveTopology = info.primitiveType;
+
+	return true;
+}
+
 void jModel::Release()
 {
 	m_vertexCount = 0;

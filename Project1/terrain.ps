@@ -1,0 +1,60 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: terrain.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D baseTexture;
+Texture2D TextureA;
+Texture2D TextureB;
+Texture2D TextureC;
+Texture2D TextureD;
+Texture2D mixTexture;
+
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex0 : TEXCOORD0;
+    float2 tex1 : TEXCOORD1;
+    float2 tex2 : TEXCOORD2;
+    float2 tex3 : TEXCOORD3;
+    float2 tex4 : TEXCOORD4;
+    float2 tex5 : TEXCOORD5;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 jPS(PixelInputType input) : SV_TARGET
+{
+	float4 reg0;
+	float4 reg1;
+	float4 reg2;
+
+    // 이 텍스처 좌표 위치에서 샘플러를 사용하여 텍스처에서 픽셀 색상을 샘플링합니다.
+    reg0 = mixTexture.Sample(SampleType, input.tex5);
+	reg1 = baseTexture.Sample(SampleType, input.tex0);
+	reg2 = TextureA.Sample(SampleType, input.tex1);
+	reg2 = reg2 - reg1;
+	reg1 = (reg2 * reg0.x) + reg1;
+	reg2 = TextureB.Sample(SampleType, input.tex2);
+	reg2 = reg2 - reg1;
+	reg1 = (reg2 * reg0.y) + reg1;
+	reg2 = TextureC.Sample(SampleType, input.tex3);
+	reg2 = reg2 - reg1;
+	reg1 = (reg2 * reg0.z) + reg1;
+	reg2 = TextureD.Sample(SampleType, input.tex4);
+	reg2 = reg2 - reg1;
+	reg1 = (reg2 * reg0.w) + reg1;
+
+    return reg1;
+}

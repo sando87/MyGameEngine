@@ -81,7 +81,7 @@ public:
 	
 	void* CreateD3DRescource(void* addr);
 	virtual ID3D11Buffer* GetResIndexBuffer();
-	virtual ID3D11ShaderResourceView* GetResShaderResourceView();
+	virtual ID3D11ShaderResourceView* GetResShaderResourceView(int _idx);
 	ID3D11BlendState* GetResBlendState();
 	ID3D11DepthStencilState* GetResDepthStencilState();
 	bool SetContantBuffer(MapInfo& cb, int slotIdx);

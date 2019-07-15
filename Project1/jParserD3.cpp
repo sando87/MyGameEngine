@@ -162,16 +162,13 @@ bool jParserD3::Init(int _fileIdx)
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
 	memcpy(&mContext, pBuf, sizeof(mContext));
 
-	//{
-	//	MyResBase* pData = (MyResBase*)mMapRes[mContext.vs_addr].first;
-	//	printf("vs crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
-	//	pData = (MyResBase*)mMapRes[mContext.ps_addr].first;
-	//	printf("ps crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
-	//	pData = (MyResBase*)mMapRes[mContext.layout_addr].first;
-	//	printf("layout crc: 0x%x, size: 0x%x\n", pData->crc, pData->totalSize);
-	//}
-
 	InitCBMain();
+	if (!IsTerrain())
+	{
+		printf("[%d] This isn't Terrain\n", mFileIndex);
+		return false;
+	}
+
 	ReadyForData();
 	InitFuncConvTex();
 	InitTextureList();
@@ -235,12 +232,30 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0xd3, 0x1a5c): //200-2 
 	case RES_ID(0x0, 0x12dc): //261-2
 	case RES_ID(0x3c, 0x1744): //269-2
+	case RES_ID(0xc1, 0x1518):
+	case RES_ID(0x85, 0x150c):
+	case RES_ID(0xe3, 0x11dc):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx];
 			Vector2f tmp = CalcTexCoord(_p);
 			Vector2f ret;
 			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
 			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		break;
+	case RES_ID(0x50, 0x1ee4):
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Matrix4 matTex = mCBMain.matTex[_idx];
+			Vector2f tmp = CalcTexCoord(_p);
+			Vector2f ret;
+			if (_idx >= 2)
+				ret = tmp;
+			else
+			{
+				ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
+				ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
+			}
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
@@ -268,6 +283,11 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0xd2, 0x1a48): //13-1
 	case RES_ID(0xd5, 0x2014):
 	case RES_ID(0xad, 0x23e8):
+	case RES_ID(0x7, 0x2100):
+	case RES_ID(0x49, 0x23f0):
+	case RES_ID(0xc5, 0x18b0):
+	case RES_ID(0x4c, 0x2038):
+	case RES_ID(0x8c, 0x1a04):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx + 1];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -330,12 +350,13 @@ void jParserD3::InitFuncConvTex()
 		};
 		break;
 	case RES_ID(0x28, 0x121c):	//152
+	case RES_ID(0x8e, 0x1168):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			float* p = (float*)_p;
 			Matrix4f matTex = mCBMain.matTex[0];
 			Vector2f ret;
-			ret.x = p[0] * matTex[0] + p[1] * matTex[1];
-			ret.y = p[0] * matTex[4] + p[1] * matTex[5];
+			ret.x = p[0] * matTex[0] + p[1] * matTex[1] + (1.0f) * matTex[3];
+			ret.y = p[0] * matTex[4] + p[1] * matTex[5] + (1.0f) * matTex[7];
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
@@ -346,17 +367,11 @@ void jParserD3::InitFuncConvTex()
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
-	case RES_ID(0xd1, 0x2150):	//80 => hard
 	case RES_ID(0x2c, 0x1240):	//157
-	case RES_ID(0x8e, 0x1168):	//159
-	case RES_ID(0x85, 0x150c):	//184
 	case RES_ID(0x3a, 0x1564):	//186
-	case RES_ID(0xe3, 0x11dc):	//191
-	case RES_ID(0xff, 0xfcc):		//220
-	case RES_ID(0xc5, 0x18b0): //130
-	case RES_ID(0xc1, 0x1518): //131
+	case RES_ID(0xff, 0xfcc):	//220
 	case RES_ID(0xd6, 0x1e50): //139
-		_printlog("[vs] default\n");
+		_printlog("[vs] default : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->head.crc, pData->head.totalSize);
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -366,6 +381,10 @@ void jParserD3::InitFuncConvTex()
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
+	case RES_ID(0x6f, 0x2170):
+	case RES_ID(0xd1, 0x2150):
+		_printlog("[vs] skip too hard.. : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->head.crc, pData->head.totalSize);
+		break;
 	case RES_ID(0x92, 0x1378):
 		_printlog("[vs] skip : pos * view mat needed!! \n"); // texel 변환 좌표가 view좌표계 기준 변환 필요
 		break;
@@ -373,7 +392,7 @@ void jParserD3::InitFuncConvTex()
 		_printlog("[vs] skip : color * view mat needed!! \n"); // texel 변환 좌표가 view좌표계 기준 변환 필요
 		break;
 	default:
-		_printlog("[vs] undefine\n");
+		_printlog("[vs] undefine : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->head.crc, pData->head.totalSize);
 		break;
 	}
 
@@ -442,7 +461,10 @@ void jParserD3::InitTextureList()
 	case RES_ID(0xd3, 0x494): //14-2
 	case RES_ID(0xfb, 0x35c): //17-2
 	case RES_ID(0x22, 0x1268): //193-2
-	case RES_ID(0x25, 0x130c): 
+	case RES_ID(0x25, 0x130c):
+	case RES_ID(0x28, 0x32c):
+	case RES_ID(0x42, 0xf3c):
+	case RES_ID(0xb3, 0x358):
 		mTextures.push_back(0);
 		break;
 	case RES_ID(0xe3, 0x10e8): //126
@@ -457,6 +479,9 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x87, 0x261c): //13-1
 	case RES_ID(0x1b, 0x1168): //65-1
 	case RES_ID(0xF3, 0x16cc):
+	case RES_ID(0x7e, 0x1418):
+	case RES_ID(0x5a, 0x1418):
+	case RES_ID(0x38, 0x1088):
 		mTextures.push_back(1);
 		break;
 	case RES_ID(0xf4, 0x11a4): //171-2
@@ -472,44 +497,50 @@ void jParserD3::InitTextureList()
 		mTextures.push_back(1);
 		break;
 	case RES_ID(0x69, 0x16cc):
+	case RES_ID(0x8b, 0x188c):
+	case RES_ID(0xa3, 0x1290):
 		mTextures.push_back(1);
 		mTextures.push_back(2);
 		break;
-	case RES_ID(0xfc, 0x1218): //139-2
+	case RES_ID(0xfc, 0x1218): 
+	case RES_ID(0x43, 0x117c):
 		mTextures.push_back(0);
 		mTextures.push_back(1);
 		mTextures.push_back(2);
+		break;
+	case RES_ID(0x64, 0x1290):
+		mTextures.push_back(0);
+		mTextures.push_back(1);
+		mTextures.push_back(2);
+		mTextures.push_back(3);
+		mTextures.push_back(4);
 		break;
 	case RES_ID(0x1c, 0x2b70): //19
 	case RES_ID(0xaf, 0x2ca4): //20
 	case RES_ID(0xfa, 0x2ab8): //84
 	case RES_ID(0x7, 0x3094):
+	case RES_ID(0xb5, 0x2a40):
 		mTextures.push_back(1);
 		mTextures.push_back(2);
 		mTextures.push_back(3);
 		mTextures.push_back(4);
 		mTextures.push_back(5);
+		mTextures.push_back(6);
 		break;
 
 	case RES_ID(0x50, 0x2140): //80 => hard
-	case RES_ID(0x5a, 0x1418):  //124
 	case RES_ID(0x32, 0x10a0):	//136
 	case RES_ID(0x3d, 0x10e8):	//145
 	case RES_ID(0x70, 0x1010):	//157
-	case RES_ID(0x42, 0xf3c):	//162
 	case RES_ID(0xc6, 0x12e4):	//184
-	case RES_ID(0x64, 0x1290):	//185
 	case RES_ID(0x18, 0x1348):	//186
 	case RES_ID(0x50, 0x330):	//203
-	case RES_ID(0xb3, 0x358):	//204
 	case RES_ID(0x8c, 0x10bc):	//218
 	case RES_ID(0x53, 0x10b0):	//219
 	case RES_ID(0x8e, 0xfd8):	//220
-	case RES_ID(0x38, 0x1088): //131-1
 	case RES_ID(0xbf, 0x1010): //134-1
 	case RES_ID(0x34, 0x1180): //139-1
 	case RES_ID(0x51, 0x102c): //150-1
-	case RES_ID(0x28, 0x32c): //161-1
 	case RES_ID(0xb8, 0x1124): //163-1
 	case RES_ID(0x88, 0x127c): //182-2
 	case RES_ID(0xbd, 0xf5c): //190-2
@@ -519,11 +550,15 @@ void jParserD3::InitTextureList()
 	case RES_ID(0xaa, 0x1324): //257-2
 	case RES_ID(0x6f, 0xfa8): //261-2
 	case RES_ID(0xe4, 0x11fc): //269-2
-		_printlog("[ps] default\n");
+		_printlog("[ps] default : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
 		mTextures.push_back(0);
 		break;
+	case RES_ID(0x73, 0x1b58):
+	case RES_ID(0x9, 0x1d50):
+		_printlog("[ps] skip too hard... : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
+		break;
 	default:
-		_printlog("[ps] undefined\n");
+		_printlog("[ps] undefine : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
 		break;
 	}
 }
@@ -634,12 +669,12 @@ ID3D11DepthStencilState * jParserD3::GetResDepthStencilState()
 
 	return (ID3D11DepthStencilState *)CreateD3DRescource(mContext.ds_addr);
 }
-ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView()
+ID3D11ShaderResourceView* jParserD3::GetResShaderResourceView(int _idx)
 {
 	if (mTextures.size() == 0)
 		return nullptr;
 
-	int idx = mTextures[0];
+	int idx = mTextures[_idx];
 	return (ID3D11ShaderResourceView *)CreateD3DRescource(mContext.tex[idx].addr);
 }
 bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
@@ -883,12 +918,10 @@ int jParserD3::GetTex(int _idx, Vector2f* _t, int byteOffset)
 	case RES_ID(0x2f, 0x15f):
 	{
 		LayoutB* pVert = (LayoutB*)pStreamOff;
-		_t[0] = mFuncConvertTex(0, (unsigned char*)pVert[_idx].t0);
-		_t[1] = mFuncConvertTex(1, (unsigned char*)pVert[_idx].t0);
-		_t[2] = mFuncConvertTex(2, (unsigned char*)pVert[_idx].t0);
-		_t[3] = mFuncConvertTex(3, (unsigned char*)pVert[_idx].t0);
-		_t[4] = mFuncConvertTex(4, (unsigned char*)pVert[_idx].t0);
-		return 5;
+		int cnt = mTextures.size();
+		for (int i = 0; i < cnt; ++i)
+			_t[i] = mFuncConvertTex(i, pVert[_idx].t0);
+		return cnt;
 	}
 	case RES_ID(0x1d, 0x137):
 	{

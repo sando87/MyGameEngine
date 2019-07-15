@@ -20,6 +20,7 @@ public:
 
 	bool LoadDiablo_ForTextureShader(jParserD3 *_context);
 	bool LoadDiablo_ForSkkinedShader(jParserD3 *_context);
+	bool LoadDiablo_ForTerrain(jParserD3 *_context);
 
 	void Release();
 

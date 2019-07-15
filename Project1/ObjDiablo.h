@@ -11,6 +11,7 @@ class jShaderDiablo;
 class jShaderColor;
 class jShaderSkinned;
 class jShaderTexture;
+class jShaderTerrain;
 class jTexture;
 struct MyResBase;
 struct CBMatrix;
@@ -48,8 +49,9 @@ private:
 
 	jModel* mModel;
 	//jShaderSkinned * mShader;
-	jShaderTexture * mShader;
-	jTexture * mTexture;
+	//jShaderTexture * mShader;
+	jShaderTerrain * mShader;
+	jTexture * mTexture[6];
 
 public:
 	int mFileIndex;

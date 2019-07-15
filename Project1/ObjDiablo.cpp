@@ -4,6 +4,7 @@
 #include "jShaderDiablo.h"
 #include "jShaderColor.h"
 #include "jShaderSkinned.h"
+#include "jShaderTerrain.h"
 #include "jTexture.h"
 #include "jShaderTexture.h"
 #include "jGameObjectMgr.h"
@@ -70,24 +71,35 @@ void ObjDiablo::OnStart()
 		return;
 	}
 
+	if(mRenderIfno.mTextures.size() < 6)
+	{
+		DeleteFromMgr();
+		return;
+	}
+
+
 	//mRenderIfno.ExportToObjectFormat();
 	//if (mFileIndex == 39)
 	//	mRenderIfno.ExportTerrains();
 
 	mModel = new jModel();
-	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
+	mModel->LoadDiablo_ForTerrain(&mRenderIfno);
 	//mModel->LoadSimpleRect(mFileIndex);
 
-	ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView();
-	mTexture = new jTexture();
-	mTexture->SetShaderResourceView(pIF);
+	
+	for (int i = 0; i < 6; ++i)
+	{
+		ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView(i);
+		mTexture[i] = new jTexture();
+		mTexture[i]->SetShaderResourceView(pIF);
+	}
 	//if(mFileIndex % 2 == 0)
 	//	mTexture->Initialize("D:\\temp\\138_000002A0414462E8_t.dump.tga");
 	//else
 	//	mTexture->Initialize("D:\\temp\\72_000002A05027FF28_t.dump.tga");
 
-	mShader = new jShaderTexture();
-	mShader->Initialize("./texture.vs", "./texture.ps");
+	mShader = new jShaderTerrain();
+	mShader->Initialize("./terrain.vs", "./terrain.ps");
 
 	//mShader = new jShaderSkinned();
 	//mShader->Initialize("./test.vs", "./test.ps");
@@ -99,7 +111,7 @@ void ObjDiablo::OnUpdate()
 void ObjDiablo::OnDraw()
 {
 	Matrix4 mat = Matrix4().identity();
-	//mat[12] = mm_x;
+
 	Matrix4 CBmat = mRenderIfno.mCBMain.matWorld;
 	CBmat.transpose();
 	static map<Vector3f, int> mmTest;
@@ -112,6 +124,8 @@ void ObjDiablo::OnDraw()
 		printf("[%d] x: %f, y: %f, z: %f\n", mFileIndex, CBmat[12], CBmat[13], CBmat[14]);
 		mmTest[key] = 1;
 	}
+
+	//mat[12] = mm_x;
 	mat[12] = CBmat[12];
 	mat[13] = CBmat[13];
 	mat[14] = CBmat[14];
@@ -166,6 +180,8 @@ void ObjDiablo::OnDraw()
 	//if (state != nullptr)
 	//	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(state, mRenderIfno.mContext.bs_factor, mRenderIfno.mContext.bs_mask);
 	
+	//mShader->SetParams(mModel, mat, mTexture);
+	//mShader->Render();
 	mShader->SetParams(mModel, mat, mTexture);
 	mShader->Render();
 
