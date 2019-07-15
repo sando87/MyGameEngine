@@ -117,6 +117,12 @@
     <ClCompile Include="jParserS2.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jShaderTerrain.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjTerrain.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -225,6 +231,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jParserS2.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderTerrain.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjTerrain.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

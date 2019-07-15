@@ -4,7 +4,7 @@
 #include "jRenderer.h"
 #include <sstream>
 
-#define REV_V(v) ((v))
+#define REV_V(v) (1 - (v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
 #define COMP_FLOAT(a, b) (abs((a)-(b)) < 0.0001f ? true : false)
 
@@ -207,6 +207,15 @@ bool jParserD3::InitGeoInfo()
 }
 void jParserD3::InitFuncConvTex()
 {
+	if (IsTerrain())
+	{
+		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
+			Vector2f ret = CalcTexCoord(_p);
+			return Vector2f(ret.x, REV_V(ret.y));
+		};
+		return;
+	}
+
 	MyRes_CreateShader* pData = (MyRes_CreateShader*)mMapRes[mContext.vs_addr].first;
 	int resID = RES_ID(pData->head.crc, pData->head.totalSize);
 	switch (resID)
@@ -288,6 +297,10 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0xc5, 0x18b0):
 	case RES_ID(0x4c, 0x2038):
 	case RES_ID(0x8c, 0x1a04):
+	case RES_ID(0x84, 0x1A30):
+	case RES_ID(0xed, 0x1b8c):
+	case RES_ID(0x51, 0x1a30):
+	case RES_ID(0xc2, 0x1c4c): 
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx + 1];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -333,19 +346,6 @@ void jParserD3::InitFuncConvTex()
 			Vector2f ret;
 			ret.x = p[0];
 			ret.y = p[1];
-			return Vector2f(ret.x, REV_V(ret.y));
-		};
-		break;
-	case RES_ID(0x84, 0x1A30): //19 
-	case RES_ID(0xed, 0x1b8c):	//20 
-	case RES_ID(0x51, 0x1a30):	//84 
-	case RES_ID(0xc2, 0x1c4c): // ¸ðµ¨ÀÇ worldÁÂÇ¥¸¦ ±â¹ÝÀ¸·Î ÅØ¼¿ÁÂÇ¥ »ý¼º o7(¾Æ¸¶ ·£´ý¿ä¼ÒÀÎµí) => skip
-		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
-			Matrix4f matTex = mCBMain.matTex[_idx + 1];
-			Vector2f tmp = CalcTexCoord(_p);
-			Vector2f ret;
-			ret.x = tmp.x * matTex[0] + tmp.y * matTex[1] + (1.0f) * matTex[3];
-			ret.y = tmp.x * matTex[4] + tmp.y * matTex[5] + (1.0f) * matTex[7];
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;

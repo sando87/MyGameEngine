@@ -13,6 +13,11 @@ cbuffer MatrixBuffer : register(b0)
 	matrix projectionMatrix;
 };
 
+cbuffer TexelVector : register(b1)
+{
+	float4 vectors[12];
+};
+
 
 //////////////
 // TYPEDEFS //
@@ -20,12 +25,7 @@ cbuffer MatrixBuffer : register(b0)
 struct VertexInputType
 {
     float4 position : POSITION;
-    float2 tex0 : TEXCOORD;
-    float2 tex1 : TEXCOORD1;
-    float2 tex2 : TEXCOORD2;
-    float2 tex3 : TEXCOORD3;
-    float2 tex4 : TEXCOORD4;
-    float2 tex5 : TEXCOORD5;
+    float4 tex0 : TEXCOORD;
 };
 
 struct PixelInputType
@@ -56,13 +56,20 @@ PixelInputType jVS(VertexInputType input)
     output.position = mul(output.position, projectionMatrix);
     
 	// 픽셀 쉐이더의 텍스처 좌표를 저장한다.
-    output.tex0 = input.tex0;
-    output.tex1 = input.tex1;
-	output.tex2 = input.tex2;
-	output.tex3 = input.tex3;
-	output.tex4 = input.tex4;
-	output.tex5 = input.tex5;
-    
+	input.tex0.z = 1.0f;
+	input.tex0.w = 0;
+    output.tex0.x = dot(input.tex0, vectors[0]);
+	output.tex0.y = dot(input.tex0, vectors[1]);
+    output.tex1.x = dot(input.tex0, vectors[2]);
+	output.tex1.y = dot(input.tex0, vectors[3]);
+    output.tex2.x = dot(input.tex0, vectors[4]);
+	output.tex2.y = dot(input.tex0, vectors[5]);
+    output.tex3.x = dot(input.tex0, vectors[6]);
+	output.tex3.y = dot(input.tex0, vectors[7]);
+    output.tex4.x = dot(input.tex0, vectors[8]);
+	output.tex4.y = dot(input.tex0, vectors[9]);
+    output.tex5.x = dot(input.tex0, vectors[10]);
+	output.tex5.y = dot(input.tex0, vectors[11]);    
     
     return output;
 }

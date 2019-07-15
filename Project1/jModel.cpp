@@ -707,20 +707,15 @@ bool jModel::LoadDiablo_ForTerrain(jParserD3 * _context)
 	//CreateVertexBuffer
 	{
 		m_vertexCount = info.vertexTotalCount;
-		m_sizeVertex = sizeof(VertexType_Terrain);
-		vector<VertexType_Terrain> verticies;
+		m_sizeVertex = sizeof(VertexType_Texture);
+		vector<VertexType_Texture> verticies;
 		Vector2f tex[10];
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
-			VertexType_Terrain vert;
+			VertexType_Texture vert;
 			vert.p = _context->GetPos(i);
 			int cnt = _context->GetTex(i, tex);
-			vert.t0 = tex[0];
-			vert.t1 = tex[1];
-			vert.t2 = tex[2];
-			vert.t3 = tex[3];
-			vert.t4 = tex[4];
-			vert.t5 = tex[5];
+			vert.t = tex[0];
 			verticies.push_back(vert);
 		}
 

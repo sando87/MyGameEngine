@@ -149,6 +149,7 @@
     <ClCompile Include="jRenderer.cpp" />
     <ClCompile Include="jShaderColor.cpp" />
     <ClCompile Include="jShaderSprite.cpp" />
+    <ClCompile Include="jShaderTerrain.cpp" />
     <ClCompile Include="jShaderTexture.cpp" />
     <ClCompile Include="jSound.cpp" />
     <ClCompile Include="jTexture.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="ObjCamera.cpp" />
     <ClCompile Include="ObjDiablo.cpp" />
     <ClCompile Include="ObjGroundAxis.cpp" />
+    <ClCompile Include="ObjTerrain.cpp" />
     <ClCompile Include="ObjTutorial1.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vectors.cpp" />
@@ -186,6 +188,7 @@
     <ClInclude Include="jRenderer.h" />
     <ClInclude Include="jShaderColor.h" />
     <ClInclude Include="jShaderSprite.h" />
+    <ClInclude Include="jShaderTerrain.h" />
     <ClInclude Include="jShaderTexture.h" />
     <ClInclude Include="jSound.h" />
     <ClInclude Include="jTexture.h" />
@@ -194,6 +197,7 @@
     <ClInclude Include="ObjCamera.h" />
     <ClInclude Include="ObjDiablo.h" />
     <ClInclude Include="ObjGroundAxis.h" />
+    <ClInclude Include="ObjTerrain.h" />
     <ClInclude Include="ObjTutorial1.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tinyxml2.h" />

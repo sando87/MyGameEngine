@@ -27,7 +27,7 @@ bool jShaderTerrain::Initialize(string _vsFilename, string _psFilename)
 		return false;
 
 	//CreateLayout Interface
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[7];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -43,46 +43,6 @@ bool jShaderTerrain::Initialize(string _vsFilename, string _psFilename)
 	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
-
-	polygonLayout[2].SemanticName = "TEXCOORD";
-	polygonLayout[2].InputSlot = 0;
-	polygonLayout[2].SemanticIndex = 1;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[2].InstanceDataStepRate = 0;
-	
-	polygonLayout[3].SemanticName = "TEXCOORD";
-	polygonLayout[3].InputSlot = 0;
-	polygonLayout[3].SemanticIndex = 2;
-	polygonLayout[3].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[3].InstanceDataStepRate = 0;
-	
-	polygonLayout[4].SemanticName = "TEXCOORD";
-	polygonLayout[4].InputSlot = 0;
-	polygonLayout[4].SemanticIndex = 3;
-	polygonLayout[4].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[4].InstanceDataStepRate = 0;
-	
-	polygonLayout[5].SemanticName = "TEXCOORD";
-	polygonLayout[5].InputSlot = 0;
-	polygonLayout[5].SemanticIndex = 4;
-	polygonLayout[5].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[5].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[5].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[5].InstanceDataStepRate = 0;
-	
-	polygonLayout[6].SemanticName = "TEXCOORD";
-	polygonLayout[6].InputSlot = 0;
-	polygonLayout[6].SemanticIndex = 5;
-	polygonLayout[6].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[6].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[6].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[6].InstanceDataStepRate = 0;
 	unsigned int numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 	if (FAILED(pDev->CreateInputLayout(polygonLayout, numElements,
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &mLayout)))
@@ -103,6 +63,16 @@ bool jShaderTerrain::Initialize(string _vsFilename, string _psFilename)
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 	if (FAILED(pDev->CreateBuffer(&matrixBufferDesc, NULL, &mMatrixBuffer)))
+		return false;
+
+	//CreateBufferInterface
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(TexelVector);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+	if (FAILED(pDev->CreateBuffer(&matrixBufferDesc, NULL, &mTexelVectorBuffer)))
 		return false;
 
 	//Create SamplerState
@@ -130,9 +100,11 @@ void jShaderTerrain::Release()
 {
 	if (mLayout) mLayout->Release();
 	if (mMatrixBuffer) mMatrixBuffer->Release();
+	if (mTexelVectorBuffer) mTexelVectorBuffer->Release();
 	if (mSampleState) mSampleState->Release();
 	mLayout = nullptr;
 	mMatrixBuffer = nullptr;
+	mTexelVectorBuffer = nullptr;
 	mSampleState = nullptr;
 }
 
@@ -140,6 +112,7 @@ bool jShaderTerrain::Render()
 {
 	ObjCamera& cam = jGameObjectMgr::GetInst().GetCamera();
 	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
+
 	unsigned int stride = mModel->GetVertexTypeSize();
 	ID3D11Buffer *pVertBuffer = mModel->GetVertexBuffer();
 	ID3D11Buffer *pIndexBuffer = mModel->GetIndexBuffer();
@@ -170,6 +143,16 @@ bool jShaderTerrain::Render()
 	pDevContext->Unmap(mMatrixBuffer, 0);
 	pDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
 
+	D3D11_MAPPED_SUBRESOURCE texelMapRes;
+	if (FAILED(pDevContext->Map(mTexelVectorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &texelMapRes)))
+	{
+		return false;
+	}
+	dataPtr = (MatrixBufferType*)texelMapRes.pData;
+	memcpy(dataPtr, mTexelVectors, sizeof(Vector4f) * 12);
+	pDevContext->Unmap(mTexelVectorBuffer, 0);
+	pDevContext->VSSetConstantBuffers(1, 1, &mTexelVectorBuffer);
+
 	// 픽셀 셰이더에서 셰이더 텍스처 리소스를 설정합니다.
 	for (int i = 0; i < 6; ++i)
 		pDevContext->PSSetShaderResources(i, 1, &mTexture[i]);
@@ -190,10 +173,11 @@ bool jShaderTerrain::Render()
 	return true;
 }
 
-void jShaderTerrain::SetParams(jModel * _model, Matrix4 _worldMat, jTexture * _texture[6])
+void jShaderTerrain::SetParams(jModel * _model, Matrix4 _worldMat, jTexture * _texture[6], Vector4f _texels[12])
 {
 	mModel = _model;
 	for(int i = 0; i < 6; ++i)
 		mTexture[i] = _texture[i]->mTextureView;
 	mWorld = _worldMat;
+	memcpy(mTexelVectors, _texels, sizeof(Vector4f) * 12);
 }

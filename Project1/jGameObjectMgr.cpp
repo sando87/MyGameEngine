@@ -7,6 +7,7 @@
 #include "ObjDiablo.h"
 #include "jUtils.h"
 #include "jGlobalStruct.h"
+#include "ObjTerrain.h"
 
 jGameObjectMgr::jGameObjectMgr()
 {
@@ -33,12 +34,19 @@ bool jGameObjectMgr::Initialize()
 	//	obj0->AddToMgr();
 	//}
 
-	for(int i = 10; i < 20; ++i) 
+	for (int i = 15; i < 18; ++i)
 	{
-		ObjDiablo* obj0 = new ObjDiablo();
+		ObjTerrain* obj0 = new ObjTerrain();
 		obj0->mFileIndex = i;
 		obj0->AddToMgr();
 	}
+
+	//for(int i = 47; i < 48; ++i) 
+	//{
+	//	ObjDiablo* obj0 = new ObjDiablo();
+	//	obj0->mFileIndex = i;
+	//	obj0->AddToMgr();
+	//}
 	return true;
 }
 

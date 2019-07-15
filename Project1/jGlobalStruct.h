@@ -291,16 +291,6 @@ struct MyRes_CreateDS
 
 
 
-struct VertexType_Terrain
-{
-	Vector3f p;
-	Vector2f t0;
-	Vector2f t1;
-	Vector2f t2;
-	Vector2f t3;
-	Vector2f t4;
-	Vector2f t5;
-};
 struct VertexType_Texture
 {
 	Vector3f p;
@@ -350,6 +340,10 @@ struct MyLayout {
 };
 
 
+struct TexelVector //should be 16byte aligned
+{
+	Vector4f vectors[12];
+};
 struct MatrixBufferType //should be 16byte aligned
 {
 	Matrix4f world;

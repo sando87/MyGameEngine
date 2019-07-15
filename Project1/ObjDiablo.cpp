@@ -37,29 +37,10 @@ ObjDiablo::~ObjDiablo()
 		mModel = nullptr;
 	}
 }
-bool SetDrawInfo(void *_this, char *_filename)
-{
-	ObjDiablo* pObj = (ObjDiablo*)_this;
-	vector<string> rets;
-	jUtils::Split(string(_filename), "_", rets);
-	if (stoi(rets[0]) != jGameObjectMgr::GetInst().mFileIndex)
-		return true;
 
-	if (rets[1] == "Draw")
-	{
-		pObj->mDrawInfos.IndexCount = stoi(rets[2]);
-		pObj->mDrawInfos.StartIndex = stoi(rets[3]);
-		pObj->mDrawInfos.VertexOffset = stoi(rets[4]);
-	}
-	if (rets[1] == "Primitive")
-	{
-		pObj->mDrawInfos.primitive = stoi(rets[2]);
-	}
-	return true;
-}
-float gg_x = 0;
 void ObjDiablo::OnStart()
 {
+	static float gg_x = 0;
 	mm_x = gg_x;
 	gg_x += 50.0f;
 
@@ -71,35 +52,20 @@ void ObjDiablo::OnStart()
 		return;
 	}
 
-	if(mRenderIfno.mTextures.size() < 6)
-	{
-		DeleteFromMgr();
-		return;
-	}
-
-
 	//mRenderIfno.ExportToObjectFormat();
-	//if (mFileIndex == 39)
-	//	mRenderIfno.ExportTerrains();
+	//mRenderIfno.ExportTerrains();
 
 	mModel = new jModel();
-	mModel->LoadDiablo_ForTerrain(&mRenderIfno);
+	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
 	//mModel->LoadSimpleRect(mFileIndex);
 
-	
-	for (int i = 0; i < 6; ++i)
-	{
-		ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView(i);
-		mTexture[i] = new jTexture();
-		mTexture[i]->SetShaderResourceView(pIF);
-	}
-	//if(mFileIndex % 2 == 0)
-	//	mTexture->Initialize("D:\\temp\\138_000002A0414462E8_t.dump.tga");
-	//else
-	//	mTexture->Initialize("D:\\temp\\72_000002A05027FF28_t.dump.tga");
 
-	mShader = new jShaderTerrain();
-	mShader->Initialize("./terrain.vs", "./terrain.ps");
+	ID3D11ShaderResourceView* pIF = mRenderIfno.GetResShaderResourceView(0);
+	mTexture = new jTexture();
+	mTexture->SetShaderResourceView(pIF);
+
+	mShader = new jShaderTexture();
+	mShader->Initialize("./texture.vs", "./texture.ps");
 
 	//mShader = new jShaderSkinned();
 	//mShader->Initialize("./test.vs", "./test.ps");
@@ -126,9 +92,9 @@ void ObjDiablo::OnDraw()
 	}
 
 	//mat[12] = mm_x;
-	mat[12] = CBmat[12];
-	mat[13] = CBmat[13];
-	mat[14] = CBmat[14];
+	//mat[12] = CBmat[12];
+	//mat[13] = CBmat[13];
+	//mat[14] = CBmat[14];
 	
 
 	static int drawIndx = 0;
@@ -180,33 +146,61 @@ void ObjDiablo::OnDraw()
 	//if (state != nullptr)
 	//	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(state, mRenderIfno.mContext.bs_factor, mRenderIfno.mContext.bs_mask);
 	
-	//mShader->SetParams(mModel, mat, mTexture);
-	//mShader->Render();
 	mShader->SetParams(mModel, mat, mTexture);
 	mShader->Render();
 
 	//mRenderIfno.Render();
 
 	//Setting Blend, Depth, stencil
-	/*
+	
 	D3D11_BLEND_DESC desc;
 	memset(&desc, 0x00, sizeof(desc));
 	desc.AlphaToCoverageEnable = FALSE;
 	desc.IndependentBlendEnable = FALSE;
 	desc.RenderTarget[0].BlendEnable = TRUE;
-	desc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_ONE;
-	desc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_ZERO;
+	desc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	desc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
-	desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
-	desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+	desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
-	desc.RenderTarget[0].RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALPHA;
+	desc.RenderTarget[0].RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
 	ID3D11BlendState* pState = nullptr;
 	jRenderer::GetInst().GetDevice()->CreateBlendState(&desc, &pState);
-	float factor[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+	float factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	UINT sampleMask = ~0;
 	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(pState, factor, sampleMask);
 
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = false;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = false;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	ID3D11DepthStencilState* pStateDS = nullptr;
+	jRenderer::GetInst().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &pStateDS);
+	jRenderer::GetInst().GetDeviceContext()->OMSetDepthStencilState(pStateDS, 1);
+
+	/*
 	if (mFileIndex % 2 == 0)
 	{
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
