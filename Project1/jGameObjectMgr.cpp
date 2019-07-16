@@ -34,7 +34,7 @@ bool jGameObjectMgr::Initialize()
 	//	obj0->AddToMgr();
 	//}
 
-	for (int i = 15; i < 18; ++i)
+	for (int i = 16; i < 18; ++i)
 	{
 		ObjTerrain* obj0 = new ObjTerrain();
 		obj0->mFileIndex = i;

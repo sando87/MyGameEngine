@@ -7,6 +7,8 @@
 using namespace std;
 struct MyResBase;
 
+#define PATH_EXPORT "D:\\export\\"
+
 struct GeometryInfo
 {
 	unsigned int vertexTotalCount;
@@ -27,12 +29,20 @@ struct ExpVertex
 	Vector3f n;
 	Vector2f t;
 };
+struct ExpMetaInfo
+{
+	vector<string> images;
+	vector<Vector3f> vectors;
+	Vector3f worldPosition;
+};
 struct ExpMesh
 {
 	string name;
+	ExpMetaInfo metaInfo;
 	vector<ExpVertex> vert;
 	vector<Vector3n> indicies;
 	ExpMesh *pNext;
+	bool ExportMetaInfo(string path);
 	bool ExportToObject(string _filename, bool _isRoot, int _baseIdx);
 	bool Merge(ExpMesh *_mesh);
 	bool Add(int _idx, ExpVertex& _vert);

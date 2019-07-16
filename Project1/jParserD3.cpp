@@ -2,6 +2,7 @@
 #include "jUtils.h"
 #include "jLog.h"
 #include "jRenderer.h"
+#include <direct.h>
 #include <sstream>
 
 #define REV_V(v) (1 - (v))
@@ -1052,16 +1053,32 @@ bool jParserD3::ExportToObjectFormat()
 		mExportInfo.indicies.push_back(index);
 	}
 
-	if (IsTerrain())
+	mExportInfo.metaInfo.worldPosition = Vector3f(mCBMain.matWorld[3], mCBMain.matWorld[7], mCBMain.matWorld[11]);
+	int cntTextures = mTextures.size();
+	for (int i = 0; i < cntTextures; ++i)
 	{
-		unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
-		if (mExpLinks.find(key) == mExpLinks.end())
-			mExpLinks[key] = &mExportInfo;
-		else
-			mExpLinks[key]->Merge(&mExportInfo);
+		int idx = mTextures[i];
+		stringstream ss;
+		ss << "*_" << mContext.tex[idx].addr << "_*.tga";
+		string imageName = jUtils::FindFile(PATH_RESOURCE, ss.str());
+		mExportInfo.metaInfo.images.push_back(imageName);
+
+		Matrix4f& mat = mCBMain.matTex[i + 1];
+		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[0], mat[1], mat[3]));
+		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[4], mat[5], mat[7]));
 	}
-	else
-		mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
+
+	mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
+	//if (IsTerrain())
+	//{
+	//	unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
+	//	if (mExpLinks.find(key) == mExpLinks.end())
+	//		mExpLinks[key] = &mExportInfo;
+	//	else
+	//		mExpLinks[key]->Merge(&mExportInfo);
+	//}
+	//else
+	//	mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
 
 	return true;
 }
@@ -1087,7 +1104,6 @@ bool jParserD3::AddVertInfo(int index, int offset)
 	mExportInfo.Add(index, vertex);
 	return true;
 }
-
 bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
 {
 	string strBaseIdx = to_string(_baseIdx);
@@ -1095,7 +1111,7 @@ bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
 	if (_isRoot)
 		ret = "o " + name + "\n";
 
-	ret += ("g " + name + "_" + strBaseIdx + "\n");
+	ret += ("g " + name + "\n");
 
 	string pos = "";
 	string nor = "";
@@ -1137,11 +1153,40 @@ bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
 	ret += nor;
 	ret += tex;
 	ret += strIndicies;
-	jUtils::SaveToFile("D:\export", _filename, ret, true);
+	string path = PATH_EXPORT + name;
+	_mkdir(path.c_str());
+	ExportMetaInfo(path);
+	jUtils::SaveToFile(path, _filename, ret, true);
 
 	if (pNext != nullptr)
 		pNext->ExportToObject(_filename, false, _baseIdx + vertCount);
 
+	return true;
+}
+bool ExpMesh::ExportMetaInfo(string path)
+{
+	string ret = "";
+	ret += to_string(metaInfo.worldPosition.x) + " ";
+	ret += to_string(metaInfo.worldPosition.y) + " ";
+	ret += to_string(metaInfo.worldPosition.z) + "\n";
+	int cnt = metaInfo.vectors.size();
+	for (int i = 0; i < cnt; ++i)
+	{
+		ret += to_string(metaInfo.vectors[i].x) + " ";
+		ret += to_string(metaInfo.vectors[i].y) + " ";
+		ret += to_string(metaInfo.vectors[i].z) + "\n";
+	}
+	cnt = metaInfo.images.size();
+	for (int i = 0; i < cnt; ++i)
+	{
+		string imageName = metaInfo.images[i];
+		jUtils::MyCopyFile(PATH_RESOURCE + imageName, path + "\\" + imageName);
+		ret += imageName;
+		ret += "\n";
+	}
+
+	jUtils::SaveToFile(path, name + ".txt", ret);
+	
 	return true;
 }
 bool ExpMesh::Merge(ExpMesh * _mesh)

@@ -49,8 +49,7 @@ void ObjTerrain::OnStart()
 		return;
 	}
 
-	//mRenderIfno.ExportToObjectFormat();
-	//mRenderIfno.ExportTerrains();
+	mRenderIfno.ExportToObjectFormat();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTerrain(&mRenderIfno);

@@ -180,6 +180,19 @@ void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*
 		FindClose(hFind);
 	}
 }
+string jUtils::FindFile(string _path, string _filter)
+{
+	string ret = "";
+	jUtils::ForEachFiles2(nullptr, (_path + _filter).c_str(), [&](void* _obj, string _str) {
+		ret = _str;
+		return STOP;
+	});
+	return ret;
+}
+bool jUtils::MyCopyFile(string _from, string _to)
+{
+	return CopyFile(_from.c_str(), _to.c_str(), true);
+}
 void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
 {
 	char name[260] = { 0, };
