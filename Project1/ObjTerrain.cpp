@@ -5,6 +5,8 @@
 #include "jShaderTerrain.h"
 #include "jGameObjectMgr.h"
 #include "jUtils.h"
+#include "jAStar.h"
+#include "jHeightMap.h"
 
 ObjTerrain::ObjTerrain()
 {
@@ -42,17 +44,24 @@ void ObjTerrain::OnStart()
 		DeleteFromMgr();
 		return;
 	}
-
+	
 	if (mRenderIfno.mTextures.size() < 6)
 	{
 		DeleteFromMgr();
 		return;
 	}
-
+	
 	mRenderIfno.ExportToObjectFormat();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTerrain(&mRenderIfno);
+	//mModel->LoadHeightMap("heightMapSample.tga", 1.0f, 50.0f);
+
+	//jHeightMap map(256, 256, 1);
+	//map.CreateHeightMap(mModel);
+	//jAStar Astar;
+	//Astar.SetHeightMap(&map);
+	//Astar.Route(Vector2f(0, 0), Vector2f(0, 128));
 
 	for (int i = 0; i < 6; ++i)
 	{

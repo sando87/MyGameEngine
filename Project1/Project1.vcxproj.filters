@@ -123,6 +123,12 @@
     <ClCompile Include="ObjTerrain.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jHeightMap.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jAStar.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jModel.h">
@@ -237,6 +243,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ObjTerrain.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jHeightMap.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jAStar.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include "header.h"
 #include "Vectors.h"
 class jParserD3;
+struct VertexType_Texture;
 
 class jModel
 {
@@ -17,6 +18,7 @@ public:
 	bool LoadAxis(int _len);
 	bool LoadSprite(Vector3 _point, Vector2f _uvStep);
 	bool LoadSimpleRect(int _len);
+	bool LoadHeightMap(string _filename, float _step, float _maxHeight);
 
 	bool LoadDiablo_ForTextureShader(jParserD3 *_context);
 	bool LoadDiablo_ForSkkinedShader(jParserD3 *_context);
@@ -29,7 +31,7 @@ public:
 	ID3D11Buffer* GetVertexBuffer() { return m_vertexBuffer; }
 	ID3D11Buffer* GetIndexBuffer() { return m_indexBuffer; }
 	bool IsIndiciesStrideTwo() { return m_sizeIndex == 2 ? true : false; }
-	
+	vector<VertexType_Texture>& GetVerticies() { return mVerticies; }
 
 public:
 	int mStartIndex;
@@ -38,6 +40,7 @@ public:
 	int mPrimitiveTopology;
 
 private:
+	vector<VertexType_Texture> mVerticies;
 	ID3D11Buffer* m_vertexBuffer;
 	ID3D11Buffer* m_indexBuffer;
 	int m_vertexCount;

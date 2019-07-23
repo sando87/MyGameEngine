@@ -128,10 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="jAnimate.cpp" />
+    <ClCompile Include="jAStar.cpp" />
     <ClCompile Include="jBaseShader.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGlobalStruct.cpp" />
+    <ClCompile Include="jHeightMap.cpp" />
     <ClCompile Include="jLine3D.cpp" />
     <ClCompile Include="jMatrixControl.cpp" />
     <ClCompile Include="jParserD3.cpp" />
@@ -167,10 +169,12 @@
   <ItemGroup>
     <ClInclude Include="header.h" />
     <ClInclude Include="jAnimate.h" />
+    <ClInclude Include="jAStar.h" />
     <ClInclude Include="jBaseShader.h" />
     <ClInclude Include="jBoneNode.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGlobalStruct.h" />
+    <ClInclude Include="jHeightMap.h" />
     <ClInclude Include="jLine3D.h" />
     <ClInclude Include="jMatrixControl.h" />
     <ClInclude Include="jParserD3.h" />

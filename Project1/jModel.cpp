@@ -5,6 +5,7 @@
 #include "jUtils.h"
 #include "jGameObjectMgr.h"
 #include "jParserD3.h"
+#include "jLog.h"
 
 jModel::jModel()
 {
@@ -288,6 +289,106 @@ bool jModel::LoadSimpleRect(int _len)
 	mVertexOff_setting = 0;
 	mPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
+	return true;
+}
+bool jModel::LoadHeightMap(string _filename, float _step, float _maxHeight)
+{
+	int width = 0;
+	int height = 0;
+	int bufSize = 0;
+	unsigned char* imgbuf = nullptr;
+	if (!jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width, bufSize, imgbuf))
+	{
+		_warn();
+		return false;
+	}
+
+	int pixelByteSize = bufSize / (height * width);
+	auto pDev = jRenderer::GetInst().GetDevice();
+	//CreateVertexBuffer
+	{
+		m_vertexCount = height * width;
+		m_sizeVertex = sizeof(VertexType_Texture);
+		mVerticies.clear();
+		for (int i = 0; i < m_vertexCount; ++i)
+		{
+			int idxW = i % width;
+			int idxH = i / height;
+			Vector3f pos;
+			pos.x = idxW * _step;
+			pos.y = idxH * _step;
+			int imgOff = i * pixelByteSize;
+			unsigned char* pixel = imgbuf + imgOff;
+			pos.z = ((float)pixel[0] / 255.0f) * _maxHeight;
+
+			VertexType_Texture vert;
+			vert.p = pos;
+			vert.t = Vector2f(0, 0);
+			mVerticies.push_back(vert);
+		}
+
+
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = m_sizeVertex * m_vertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA subRes;
+		subRes.pSysMem = &mVerticies[0];
+		subRes.SysMemPitch = 0;
+		subRes.SysMemSlicePitch = 0;
+		if (FAILED(pDev->CreateBuffer(&vertexBufferDesc, &subRes, &m_vertexBuffer)))
+			return false;
+	}
+
+	//CreateIndexBuffer
+	{
+		vector<Vector3n> indicies;
+		int cnt = (width - 1) * (height - 1);
+		for (int idx = 0; idx < cnt; ++idx)
+		{
+			int tmpX = idx % (width - 1);
+			int tmpY = idx / (height - 1);
+			int lb = tmpY * width + tmpX;
+			int rb = lb + 1;
+			int lt = lb + width;
+			int rt = lt + 1;
+			indicies.push_back(Vector3n(lb, lt, rb));
+			indicies.push_back(Vector3n(rb, lt, rt));
+		}
+		m_sizeIndex = 4;
+		m_indexCount = indicies.size() * 3;
+
+		// 정적 인덱스 버퍼의 구조체를 설정합니다.
+		D3D11_BUFFER_DESC indexBufferDesc;
+		indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+		indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		indexBufferDesc.CPUAccessFlags = 0;
+		indexBufferDesc.MiscFlags = 0;
+		indexBufferDesc.StructureByteStride = 0;
+
+		// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
+		D3D11_SUBRESOURCE_DATA indexData;
+		indexData.pSysMem = &indicies[0];
+		indexData.SysMemPitch = 0;
+		indexData.SysMemSlicePitch = 0;
+
+		// 인덱스 버퍼를 생성합니다.
+		if (FAILED(pDev->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)))
+			return false;
+	}
+
+	mStartIndex = 0;
+	mVertexOff = 0;
+	mVertexOff_setting = 0;
+	mPrimitiveTopology = 0; //TRIANGLE_LIST
+
+	if (imgbuf != nullptr)
+		delete[] imgbuf;
 	return true;
 }
 bool jModel::LoadPointList(vector<Vector3>& vec, float size)
@@ -603,7 +704,7 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 	{
 		m_vertexCount = info.vertexTotalCount;
 		m_sizeVertex = sizeof(VertexType_Texture);
-		vector<VertexType_Texture> verticies;
+		mVerticies.clear();
 		Vector2f tex[10];
 		for (int i = 0; i < m_vertexCount; ++i)
 		{
@@ -611,7 +712,7 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 			vert.p = _context->GetPos(i);
 			 int cnt = _context->GetTex(i, tex);
 			 vert.t = tex[0];
-			verticies.push_back(vert);
+			 mVerticies.push_back(vert);
 		}
 
 		D3D11_BUFFER_DESC vertexBufferDesc;
@@ -623,7 +724,7 @@ bool jModel::LoadDiablo_ForTextureShader(jParserD3 *_context)
 		vertexBufferDesc.StructureByteStride = 0;
 
 		D3D11_SUBRESOURCE_DATA subRes;
-		subRes.pSysMem = &verticies[0];
+		subRes.pSysMem = &mVerticies[0];
 		subRes.SysMemPitch = 0;
 		subRes.SysMemSlicePitch = 0;
 		if (FAILED(pDev->CreateBuffer(&vertexBufferDesc, &subRes, &m_vertexBuffer)))
