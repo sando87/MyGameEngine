@@ -44,14 +44,17 @@ void ObjTerrain::OnStart()
 		DeleteFromMgr();
 		return;
 	}
-	
-	if (mRenderIfno.mTextures.size() < 6)
+
+	if (!mRenderIfno.IsTerrain() || mRenderIfno.mTextures.size() < 6)
 	{
+		printf("[%d] This isn't Terrain Floor\n", mFileIndex);
 		DeleteFromMgr();
 		return;
 	}
-	
-	mRenderIfno.ExportToObjectFormat();
+
+	_printlog("Terrain[%d]\n", mFileIndex);
+
+	//mRenderIfno.ExportToObjectFormat();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTerrain(&mRenderIfno);
@@ -104,9 +107,9 @@ void ObjTerrain::OnDraw()
 	}
 
 	//mat[12] = mm_x;
-	//mat[12] = CBmat[12];
-	//mat[13] = CBmat[13];
-	//mat[14] = CBmat[14];
+	mat[12] = CBmat[12];
+	mat[13] = CBmat[13];
+	mat[14] = CBmat[14];
 
 
 	mShader->SetParams(mModel, mat, mTexture, mTexels);

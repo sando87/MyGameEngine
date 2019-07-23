@@ -12,7 +12,7 @@ public:
 	bool Init(int _fileIdx);
 
 	ID3D11Buffer* GetResIndexBuffer();
-	ID3D11ShaderResourceView* GetResShaderResourceView();
+	ID3D11ShaderResourceView* GetResShaderResourceView(int _idx);
 	bool InitGeoInfo();
 
 	Vector3f GetPos(int _idx, int byteOffset = 0);
@@ -21,5 +21,6 @@ public:
 	Vector4n GetMatIdx(int _idx);
 	Vector4f GetMatWeight(int _idx);
 	char * GetIndiciesData();
+	void* GetTexResAddr(int _idx);
 };
 

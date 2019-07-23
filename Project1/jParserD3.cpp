@@ -5,7 +5,7 @@
 #include <direct.h>
 #include <sstream>
 
-#define REV_V(v) (1 - (v))
+#define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
 #define COMP_FLOAT(a, b) (abs((a)-(b)) < 0.0001f ? true : false)
 
@@ -118,7 +118,7 @@ void jParserD3::LoadResources(int idx)
 
 
 	//path = PATH_RESOURCE;
-	//filter = "*_RenderingContext.bin";
+	//filter = "*_D3D9RenderContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
 	//	vector<string> rets;
@@ -126,16 +126,21 @@ void jParserD3::LoadResources(int idx)
 	//	int idx = atoi(rets[0].c_str());
 	//
 	//	int filesize = 0;
-	//	RenderContext* pBuf = nullptr;
+	//	D3D9_RenderContext* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
-	//	if (pBuf->vb[0].addr == (void*)0x00000202e458d7a0 &&
-	//		pBuf->ib_addr == (void*)0x00000202e4593260)
-	//		printf("%d\n", idx);
+	//	//for (int i = 0; i < 32; ++i)
+	//	{
+	//		if (pBuf->vb_OffsetBytes > 0 && pBuf->vb_stride != 0)
+	//		{
+	//			printf("%d\n", idx);
+	//		}
+	//	}
 	//
 	//
 	//	free(pBuf);
 	//	return KEEPGOING;
 	//});
+
 }
 void jParserD3::Release()
 {
@@ -164,12 +169,6 @@ bool jParserD3::Init(int _fileIdx)
 	memcpy(&mContext, pBuf, sizeof(mContext));
 
 	InitCBMain();
-	if (!IsTerrain())
-	{
-		printf("[%d] This isn't Terrain\n", mFileIndex);
-		return false;
-	}
-
 	ReadyForData();
 	InitFuncConvTex();
 	InitTextureList();
@@ -629,7 +628,7 @@ void* jParserD3::CreateD3DRescource(void* addr)
 	case MYRES_TYPE_CreateTex:
 	{
 		stringstream ss;
-		ss << PATH_RESOURCE << "*_" << addr << "_t.dump.tga";
+		ss << PATH_RESOURCE << "*_" << addr << "_t.tga";
 
 		int width = 0;
 		int height = 0;
@@ -993,6 +992,14 @@ char * jParserD3::GetIndiciesData()
 	return pDataIB->data;
 }
 
+void * jParserD3::GetTexResAddr(int _idx)
+{
+	if (_idx >= mTextures.size())
+		return nullptr;
+
+	return mContext.tex[mTextures[_idx]].addr;
+}
+
 bool jParserD3::IsTerrain()
 {
 	float posX = mCBMain.matWorld[3];
@@ -1059,7 +1066,8 @@ bool jParserD3::ExportToObjectFormat()
 	{
 		int idx = mTextures[i];
 		stringstream ss;
-		ss << "*_" << mContext.tex[idx].addr << "_*.tga";
+		void* pTexAddr = GetTexResAddr(i);
+		ss << "*_" << pTexAddr << "_*.tga";
 		string imageName = jUtils::FindFile(PATH_RESOURCE, ss.str());
 		mExportInfo.metaInfo.images.push_back(imageName);
 
@@ -1128,7 +1136,7 @@ bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
 		sprintf_s(tmpBuf, "vn %.4f %.4f %.4f\n", curVert.n.x, curVert.n.y, curVert.n.z);
 		nor += tmpBuf;
 		memset(tmpBuf, 0x00, 64);
-		sprintf_s(tmpBuf, "vt %.4f %.4f %.4f\n", curVert.t.x, curVert.t.y, 0.0f);
+		sprintf_s(tmpBuf, "vt %.4f %.4f %.4f\n", curVert.t.x, 1 - curVert.t.y, 0.0f);
 		tex += tmpBuf;
 	}
 

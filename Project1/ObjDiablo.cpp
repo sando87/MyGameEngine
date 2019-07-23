@@ -52,8 +52,15 @@ void ObjDiablo::OnStart()
 		return;
 	}
 
+	if (!mRenderIfno.IsTerrain() || mRenderIfno.mTextures.size() != 1)
+	{
+		printf("[%d] This isn't Terrain Object\n", mFileIndex);
+		DeleteFromMgr();
+		return;
+	}
+	_printlog("Terrain Obj[%d]\n", mFileIndex);
+
 	//mRenderIfno.ExportToObjectFormat();
-	//mRenderIfno.ExportTerrains();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
@@ -146,11 +153,6 @@ void ObjDiablo::OnDraw()
 	//ID3D11BlendState* state = mRenderIfno.GetResBlendState();
 	//if (state != nullptr)
 	//	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(state, mRenderIfno.mContext.bs_factor, mRenderIfno.mContext.bs_mask);
-	
-	mShader->SetParams(mModel, mat, mTexture);
-	mShader->Render();
-
-	//mRenderIfno.Render();
 
 	//Setting Blend, Depth, stencil
 	
@@ -200,6 +202,12 @@ void ObjDiablo::OnDraw()
 	//ID3D11DepthStencilState* pStateDS = nullptr;
 	//jRenderer::GetInst().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &pStateDS);
 	//jRenderer::GetInst().GetDeviceContext()->OMSetDepthStencilState(pStateDS, 1);
+
+	mShader->SetParams(mModel, mat, mTexture);
+	mShader->Render();
+
+	//mRenderIfno.Render();
+
 
 	/*
 	if (mFileIndex % 2 == 0)

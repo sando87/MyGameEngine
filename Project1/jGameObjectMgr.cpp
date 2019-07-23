@@ -8,6 +8,7 @@
 #include "jUtils.h"
 #include "jGlobalStruct.h"
 #include "ObjTerrain.h"
+#include "jObjStarCraft.h"
 
 jGameObjectMgr::jGameObjectMgr()
 {
@@ -34,19 +35,55 @@ bool jGameObjectMgr::Initialize()
 	//	obj0->AddToMgr();
 	//}
 
-	for (int i = 16; i < 18; ++i)
+	//for (int i = 16; i < 18; ++i)
+	//{
+	//	ObjTerrain* obj0 = new ObjTerrain();
+	//	obj0->mFileIndex = i;
+	//	obj0->AddToMgr();
+	//}
+
+	for(int i = 0; i < 30; ++i) 
 	{
-		ObjTerrain* obj0 = new ObjTerrain();
+		ObjDiablo* obj0 = new ObjDiablo();
 		obj0->mFileIndex = i;
 		obj0->AddToMgr();
 	}
 
-	//for(int i = 0; i < 30; ++i) 
+	//for (int i = 440; i < 460; ++i)
 	//{
-	//	ObjDiablo* obj0 = new ObjDiablo();
+	//	jObjStarCraft* obj0 = new jObjStarCraft();
 	//	obj0->mFileIndex = i;
 	//	obj0->AddToMgr();
 	//}
+
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 413; obj0->AddToMgr(); } //케리어
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 424; obj0->AddToMgr(); } //커세어
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 425; obj0->AddToMgr(); } //파수기
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 426; obj0->AddToMgr(); } //사도
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 427; obj0->AddToMgr(); } //하템
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 431; obj0->AddToMgr(); } //셔틀
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 436; obj0->AddToMgr(); } //
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 438; obj0->AddToMgr(); } //드라군
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 439; obj0->AddToMgr(); } //
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 448; obj0->AddToMgr(); } //프로브
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 449; obj0->AddToMgr(); } //질럿
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 450; obj0->AddToMgr(); } //불멸자
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 456; obj0->AddToMgr(); } //거신
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 457; obj0->AddToMgr(); } //폭풍함
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 463; obj0->AddToMgr(); } //스카웃
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 568; obj0->AddToMgr(); } //
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 569; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 570; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 571; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 572; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 573; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 592; obj0->AddToMgr(); } //옵져버
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 593; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 594; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 595; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 596; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 597; obj0->AddToMgr(); }
+	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 598; obj0->AddToMgr(); }
 	return true;
 }
 
