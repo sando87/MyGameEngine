@@ -52,8 +52,15 @@ void ObjDiablo::OnStart()
 		return;
 	}
 
-	//mRenderIfno.ExportToObjectFormat();
-	//mRenderIfno.ExportTerrains();
+	if (!mRenderIfno.IsTerrain() || mRenderIfno.mTextures.size() != 1)
+	{
+		printf("[%d] This isn't Terrain Object\n", mFileIndex);
+		DeleteFromMgr();
+		return;
+	}
+	_printlog("Terrain Obj[%d]\n", mFileIndex);
+
+	mRenderIfno.ExportToObjectFormat();
 
 	mModel = new jModel();
 	mModel->LoadDiablo_ForTextureShader(&mRenderIfno);
@@ -92,9 +99,9 @@ void ObjDiablo::OnDraw()
 	}
 
 	//mat[12] = mm_x;
-	//mat[12] = CBmat[12];
-	//mat[13] = CBmat[13];
-	//mat[14] = CBmat[14];
+	mat[12] = CBmat[12];
+	mat[13] = CBmat[13];
+	mat[14] = CBmat[14];
 	
 
 	static int drawIndx = 0;
@@ -145,14 +152,9 @@ void ObjDiablo::OnDraw()
 	//ID3D11BlendState* state = mRenderIfno.GetResBlendState();
 	//if (state != nullptr)
 	//	jRenderer::GetInst().GetDeviceContext()->OMSetBlendState(state, mRenderIfno.mContext.bs_factor, mRenderIfno.mContext.bs_mask);
-	
-	mShader->SetParams(mModel, mat, mTexture);
-	mShader->Render();
-
-	//mRenderIfno.Render();
 
 	//Setting Blend, Depth, stencil
-	
+
 	D3D11_BLEND_DESC desc;
 	memset(&desc, 0x00, sizeof(desc));
 	desc.AlphaToCoverageEnable = FALSE;
@@ -199,6 +201,12 @@ void ObjDiablo::OnDraw()
 	ID3D11DepthStencilState* pStateDS = nullptr;
 	jRenderer::GetInst().GetDevice()->CreateDepthStencilState(&depthStencilDesc, &pStateDS);
 	jRenderer::GetInst().GetDeviceContext()->OMSetDepthStencilState(pStateDS, 1);
+
+	mShader->SetParams(mModel, mat, mTexture);
+	mShader->Render();
+
+	//mRenderIfno.Render();
+
 
 	/*
 	if (mFileIndex % 2 == 0)

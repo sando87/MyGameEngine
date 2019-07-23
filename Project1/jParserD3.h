@@ -105,6 +105,7 @@ public:
 	virtual Vector4n GetMatIdx(int _idx);
 	virtual Vector4f GetMatWeight(int _idx);
 	virtual char* GetIndiciesData();
+	virtual void* GetTexResAddr(int _idx);
 
 	Vector2f CalcTexCoord(unsigned char* _p)
 	{

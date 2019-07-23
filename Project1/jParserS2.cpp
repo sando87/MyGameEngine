@@ -22,9 +22,15 @@ bool jParserS2::Init(int _fileIdx)
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
 	memcpy(&mContextD3D9, pBuf, sizeof(mContextD3D9));
 
-	if (mContextD3D9.vb_OffsetBytes > 0)
+	//if (mContextD3D9.vb_OffsetBytes > 0)
+	//{
+	//	printf("[%d] offset skip\n", mFileIndex);
+	//	return false;
+	//}
+
+	if (mContextD3D9.vb_stride == 0)
 	{
-		printf("[%d] offset skip\n", mFileIndex);
+		printf("[%d] stride zero skip\n", mFileIndex);
 		return false;
 	}
 
@@ -38,6 +44,8 @@ bool jParserS2::Init(int _fileIdx)
 		}
 	}
 
+	mTextures.push_back(4); // or 5
+
 	if (!InitGeoInfo())
 		return false;
 
@@ -49,20 +57,13 @@ ID3D11Buffer * jParserS2::GetResIndexBuffer()
 	return (ID3D11Buffer*)CreateD3DRescource(mContextD3D9.ib_addr);
 }
 
-ID3D11ShaderResourceView * jParserS2::GetResShaderResourceView()
+ID3D11ShaderResourceView * jParserS2::GetResShaderResourceView(int _idx)
 {
-	//000001C59FC93140
-	//000001C59FC93E20
-	//void *pAddr = (void*)0x000001C59FC93140;
-	//MyRes_CreateTexture* pData = (MyRes_CreateTexture*)mMapRes[pAddr].first;
-	//pData->SetSubResMem();
-	//int width = pData->desc.Width;
-	//int height = pData->desc.Height;
-	//ID3D11ShaderResourceView *pIF = (ID3D11ShaderResourceView *)pData->CreateResource(width, height, nullptr);
-	//return pIF;
+	if (mTextures.size() == 0)
+		return nullptr;
 
-	return (ID3D11ShaderResourceView*)CreateD3DRescource(mContextD3D9.tex_addr[0]);
-	
+	int idx = mTextures[_idx];
+	return (ID3D11ShaderResourceView*)CreateD3DRescource(mContextD3D9.tex_addr[idx]);
 }
 
 bool jParserS2::InitGeoInfo()
@@ -103,6 +104,12 @@ Vector3f jParserS2::GetPos(int _idx, int byteOffset)
 		Vector3f pos;
 		memcpy(&pos, &pData->data[off], sizeof(pos));
 		return pos;
+	}
+	else if (type == MyD3DDECLTYPE::D3DDECLTYPE_FLOAT4)
+	{
+		Vector4f tmp;
+		memcpy(&tmp, &pData->data[off], sizeof(tmp));
+		return Vector3f(tmp.x, tmp.y, tmp.z);
 	}
 	else if (type == MyD3DDECLTYPE::D3DDECLTYPE_SHORT2N)
 	{
@@ -164,13 +171,21 @@ int jParserS2::GetTex(int _idx, Vector2f * _t, int byteOffset)
 		Vector2f texel;
 		texel.x = (utexel[0] / 32767.0f) * 16.0f;
 		texel.y = (utexel[1] / 32767.0f) * 16.0f;
-		texel.y = 1 - texel.y;
 		_t[0] = texel;
 	}
 	else if (type == MyD3DDECLTYPE::D3DDECLTYPE_FLOAT2)
 	{
 		Vector2f texel;
 		memcpy(&texel, &pData->data[dataOffset], sizeof(float) * 2);
+		_t[0] = texel;
+	}
+	else if (type == MyD3DDECLTYPE::D3DDECLTYPE_SHORT4)
+	{
+		short utexel[4] = { 0, };
+		memcpy(utexel, &pData->data[dataOffset], sizeof(short) * 4);
+		Vector2f texel;
+		texel.x = (utexel[0] / 32767.0f) * 16.0f;
+		texel.y = (utexel[1] / 32767.0f) * 16.0f;
 		_t[0] = texel;
 	}
 	else
@@ -195,5 +210,13 @@ char * jParserS2::GetIndiciesData()
 	void* ibAddr = mContextD3D9.ib_addr;
 	MyRes_D3D9_IB* pDataIB = (MyRes_D3D9_IB*)mMapRes[ibAddr].first;
 	return pDataIB->data;
+}
+
+void * jParserS2::GetTexResAddr(int _idx)
+{
+	if (_idx >= mTextures.size())
+		return nullptr;
+
+	return mContextD3D9.tex_addr[mTextures[_idx]];
 }
 
