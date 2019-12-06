@@ -52,13 +52,13 @@ void ObjDiablo::OnStart()
 		return;
 	}
 
-	if (!mRenderIfno.IsTerrain() || mRenderIfno.mTextures.size() != 1)
-	{
-		printf("[%d] This isn't Terrain Object\n", mFileIndex);
-		DeleteFromMgr();
-		return;
-	}
-	_printlog("Terrain Obj[%d]\n", mFileIndex);
+	//if (mRenderIfno.IsTerrain())
+	//{
+	//	printf("[%d] This isn't Terrain Object\n", mFileIndex);
+	//	DeleteFromMgr();
+	//	return;
+	//}
+	//_printlog("Terrain Obj[%d]\n", mFileIndex);
 
 	//mRenderIfno.ExportToObjectFormat();
 

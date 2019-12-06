@@ -118,7 +118,7 @@ void jParserD3::LoadResources(int idx)
 
 
 	//path = PATH_RESOURCE;
-	//filter = "*_D3D9RenderContext.bin";
+	//filter = "*_RenderingContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
 	//	vector<string> rets;
@@ -126,16 +126,8 @@ void jParserD3::LoadResources(int idx)
 	//	int idx = atoi(rets[0].c_str());
 	//
 	//	int filesize = 0;
-	//	D3D9_RenderContext* pBuf = nullptr;
+	//	RenderContext* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
-	//	//for (int i = 0; i < 32; ++i)
-	//	{
-	//		if (pBuf->vb_OffsetBytes > 0 && pBuf->vb_stride != 0)
-	//		{
-	//			printf("%d\n", idx);
-	//		}
-	//	}
-	//
 	//
 	//	free(pBuf);
 	//	return KEEPGOING;

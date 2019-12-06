@@ -3,10 +3,8 @@
 #include <map>
 #include <vector>
 #include "Vectors.h"
+#include "jTypeDef.h"
 using namespace std;
-
-typedef unsigned long			u32;
-typedef unsigned long long	u64;
 
 
 class jHeightMap;
@@ -38,12 +36,12 @@ public:
 
 	void SetHeightMap(jHeightMap* _pMap) { mHeightMap = _pMap; }
 	bool Route(Vector2f _startPos, Vector2f _endPos);
+
+private:
 	bool UpdateWeights(u64 idx);
 	int FindNextKey();
 	float CalcWeight(u64 idx);
 	RouteInfo* GetRouteInfo(u64 idx);
-
-private:
 
 };
 

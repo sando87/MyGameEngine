@@ -11,9 +11,11 @@ private:
 	int mCntWidth;
 	int mCntHeight;
 	float *mHeightMap;
+	float mMinZ;
+	float mMaxZ;
 
 public:
-	jHeightMap(int _w, int _h, int _s) : mWidth(_w), mHeight(_h), mStep(_s) 
+	jHeightMap(int _w, int _h, int _s) : mWidth(_w), mHeight(_h), mStep(_s) , mMinZ(0), mMaxZ(0)
 	{
 		mCntWidth = mWidth / mStep;
 		mCntHeight = mHeight / mStep;
@@ -21,7 +23,7 @@ public:
 	}
 	~jHeightMap();
 
-	bool CreateHeightMap(jModel* _mesh);
+	bool UpdateHeightMap(jModel* _mesh, float _off);
 	int IdxOfNearPt(float x, float y);
 	void SetHeight(float x, float y, float z);
 	float GetHeightOfPos(float x, float y);
@@ -31,6 +33,7 @@ public:
 	int ToIndex(int x, int y) {	return mCntWidth * y + x;	}
 	int ToGridX(int idx) { return idx % mCntWidth; }
 	int ToGridY(int idx) { return idx / mCntWidth; }
-
+	float MinHeight() { return mMinZ; }
+	float MaxHeight() { return mMaxZ; }
 };
 

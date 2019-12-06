@@ -15,9 +15,14 @@ void jMatrixControl::init()
 {
 	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
-jMatrixControl& jMatrixControl::lookat(Vector3 view)
+jMatrixControl& jMatrixControl::lookDir(Vector3 view)
 {
 	lookat(mPos, mPos + view, Vector3(0,0,1));
+	return (*this);
+}
+jMatrixControl& jMatrixControl::lookPos(Vector3 pos)
+{
+	lookat(mPos, pos, Vector3(0, 0, 1));
 	return (*this);
 }
 jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
@@ -72,6 +77,19 @@ jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, dou
 
 	lookat(newPos, groundPt, axisUP);
 
+	return (*this);
+}
+jMatrixControl& jMatrixControl::rotateToPos_OnGround(Vector3 pos, double degree)
+{
+	pos.z = mPos.z;
+	Vector3 targetView = pos - mPos;
+	Vector3 turnDir = mView.cross(targetView);
+	turnDir.normalize();
+	Matrix4 rotMat;
+	rotMat.rotate(degree, 0, 0, turnDir.z);
+	mView = rotMat * mView;
+	mCross = mView.cross(mUp);
+	mCross.normalize();
 	return (*this);
 }
 Matrix4 jMatrixControl::refreshMatrix()

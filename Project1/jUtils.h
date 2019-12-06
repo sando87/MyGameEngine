@@ -2,6 +2,7 @@
 #define __JUTILS_H__
 
 #include "Matrices.h"
+#include "jTypeDef.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -19,6 +20,8 @@ struct TargaHeader
 #define KEEPGOING true
 #define STOP false
 
+
+
 class jUtils
 {
 public:
@@ -27,8 +30,13 @@ public:
 
 	static void GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far);
 	static void Split(string _str, const char* _del, vector<string>& _vec);
+	static strings Split2(string _str, const char* _del);
+	static double ToDouble(string _str) { return stod(_str); }
+	static string ToString(int _val) { return to_string(_val); }
 	static bool LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf, bool _isInvert = false);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
+	static chars LoadFile2(string path, int& _bufSize);
+	static strings LoadLines(string path);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
 	static string FindFile(string _path, string _filter);
@@ -37,6 +45,19 @@ public:
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);
+	}
+	static unsigned int Hash(string _str)
+	{
+		const char* s = _str.c_str();
+		unsigned int A = 54059; /* a prime */
+		unsigned int B = 76963; /* another prime */
+		unsigned int C = 86969; /* yet another prime */
+		unsigned int h = 37;
+		while (*s) {
+			h = (h * A) ^ (s[0] * B);
+			s++;
+		}
+		return h; // or return h % C;
 	}
 	static inline string& ltrim(string& s, const char* t = " \t\n\r\f\v")
 	{

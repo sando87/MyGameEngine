@@ -13,6 +13,8 @@ public:
 	~jLine3D() {}
 
 	Position2 GetXY(double _z);
+	Position2 GetYZ(double _x);
+	Position2 GetXZ(double _y);
 
 private:
 	Position3 mPoint;

@@ -3,6 +3,7 @@
 
 class jGameObjectMgr;
 class ObjCamera;
+class ObjTerrainMgr;
 
 class jGameObject
 {
@@ -14,6 +15,7 @@ public:
 
 	void AddToMgr();
 	ObjCamera& GetCamera();
+	ObjTerrainMgr& GetTerrain();
 	void DeleteFromMgr() { mIsRemoved = true; }
 
 protected:

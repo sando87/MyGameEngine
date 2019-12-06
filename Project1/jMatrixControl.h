@@ -27,11 +27,13 @@ public :
 	void		refreshAxis(Matrix4 _mat);
 
 	jMatrixControl&		lookat(Vector3 eye, Vector3 lookat, Vector3 up);
-	jMatrixControl&		lookat(Vector3 view);
+	jMatrixControl&		lookDir(Vector3 view);
+	jMatrixControl&		lookPos(Vector3 pos);
 	jMatrixControl&		goForward(double dist);
 	jMatrixControl&		moveTo(Vector3 pos);
 	jMatrixControl&		goTo(Vector3 dir);
 	jMatrixControl&		rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree);
+	jMatrixControl&		rotateToPos_OnGround(Vector3 pos, double degree);
 };
 
 #endif	// __EZ_CAMERA_H__

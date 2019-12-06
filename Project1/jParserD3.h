@@ -74,8 +74,8 @@ public:
 
 	GeometryInfo mGeoInfo;
 	int mFileIndex;
-	RenderContext mContext;
 	function< Vector2f(int _idx, unsigned char *_p) > mFuncConvertTex;
+	RenderContext mContext;
 	vector<int> mTextures;
 	CBMain mCBMain;
 	MyRes_CreateBuffer* mpVerticies;

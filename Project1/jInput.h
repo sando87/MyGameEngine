@@ -17,6 +17,8 @@ public:
 		unsigned char   right;
 		unsigned char   middle;
 		unsigned char   reserve;
+		int    fixedX;
+		int    fixedY;
 	} jMouseInfo;
 
 private:
@@ -28,6 +30,7 @@ public:
 	bool Update();
 
 	jFuncPtrList<void(jMouseInfo)> mMouse;
+	jFuncPtrList<void(jMouseInfo)> mMouseDown;
 	//std::function<void(jMouseInfo)> mMouse;
 	std::function<void(const unsigned char*)> mKeyboard;
 
@@ -36,10 +39,12 @@ private:
 	IDirectInputDevice8* m_keyboard = nullptr;
 	IDirectInputDevice8* m_mouse = nullptr;
 
+	DIMOUSESTATE mMousePreviousInfo;
 	unsigned char m_keyboardState[256] = { 0, };
 	DIMOUSESTATE m_mouseState;
 	bool isKeyIN();
 	bool isMouseIN();
+	bool isMouseDown();
 	int m_screenWidth = 0;
 	int m_screenHeight = 0;
 };

@@ -8,8 +8,13 @@ template<class T>
 class jFuncPtrList
 {
 public:
-	jFuncPtrList() {}
+	jFuncPtrList() { mpCurFunc = nullptr; }
 	~jFuncPtrList() {}
+
+	list<function<T>>& GetList()
+	{
+		return mList;
+	}
 
 	template<class... ArgTypes>
 	void operator()(ArgTypes... args)
@@ -43,5 +48,6 @@ public:
 
 private:
 	list<function<T>> mList;
+	function<T> *mpCurFunc;
 };
 

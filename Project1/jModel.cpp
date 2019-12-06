@@ -33,6 +33,7 @@ bool jModel::Load(string _name)
 	if (jUtils::GetFileExtension(_name) == "obj")
 	{
 		loader.LoadObjFile(_name);
+		//loader.LoadObjFile2(_name);
 	}
 	else if (jUtils::GetFileExtension(_name) == "DAE")
 	{
@@ -54,25 +55,29 @@ bool jModel::Load(string _name)
 			vertex.p = loader.mPos[faceInfo[j].x];
 			vertex.t = loader.mUV[faceInfo[j].y];
 			vertex.n = loader.mNormal[faceInfo[j].z];
-			vector<BoneWeight>& vecWeights = loader.mWeightPos[faceInfo[j].x].weights;
-			if (vecWeights.size() == 0)
+
+			if (loader.mWeightPos.size() > 0)
 			{
-				vertex.index = Vector4n(0,0,0,0);
-				vertex.weight = Vector4f(1,0,0,0);
-			}
-			else
-			{
-				for (int k = 0; k < 4; ++k)
+				vector<BoneWeight>& vecWeights = loader.mWeightPos[faceInfo[j].x].weights;
+				if (vecWeights.size() == 0)
 				{
-					if (k < (int)vecWeights.size())
+					vertex.index = Vector4n(0, 0, 0, 0);
+					vertex.weight = Vector4f(1, 0, 0, 0);
+				}
+				else
+				{
+					for (int k = 0; k < 4; ++k)
 					{
-						vertex.index[k] = vecWeights[k].boneIndex;
-						vertex.weight[k] = vecWeights[k].weight;
-					}
-					else
-					{
-						vertex.index[k] = 0;
-						vertex.weight[k] = 0.0f;
+						if (k < (int)vecWeights.size())
+						{
+							vertex.index[k] = vecWeights[k].boneIndex;
+							vertex.weight[k] = vecWeights[k].weight;
+						}
+						else
+						{
+							vertex.index[k] = 0;
+							vertex.weight[k] = 0.0f;
+						}
 					}
 				}
 			}

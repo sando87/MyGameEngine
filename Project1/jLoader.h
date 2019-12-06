@@ -21,6 +21,7 @@ public:
 	vector<BoneWeights> mWeightPos;
 
 	void LoadObjFile(string _filename);
+	void LoadObjFile2(string _filename);
 	void LoadDaeFile(string _filename);
 
 	void Release()

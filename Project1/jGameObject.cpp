@@ -1,6 +1,7 @@
 #include "jGameObject.h"
 #include "jGameObjectMgr.h"
 #include "ObjCamera.h"
+#include "ObjTerrainMgr.h"
 
 jGameObject::jGameObject()
 {
@@ -21,6 +22,10 @@ void jGameObject::AddToMgr()
 ObjCamera & jGameObject::GetCamera()
 {
 	return jGameObjectMgr::GetInst().GetCamera();
+}
+ObjTerrainMgr & jGameObject::GetTerrain()
+{
+	return jGameObjectMgr::GetInst().GetTerrain();
 }
 
 void jGameObject::OnStart()

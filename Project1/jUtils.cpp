@@ -1,6 +1,7 @@
 #include "jUtils.h"
 #include "jMath.h"
 #include "jLog.h"
+
 #include <sstream>
 #include <iostream>
 #include <Windows.h>
@@ -46,6 +47,26 @@ void jUtils::Split(string _str, const char* _del, vector<string>& _vec)
 	}
 }
 
+strings jUtils::Split2(string _str, const char* _del)
+{
+	strings rets;
+	trim(_str);
+	std::stringstream stringStream(_str);
+	std::string line;
+	while (std::getline(stringStream, line))
+	{
+		std::size_t prev = 0, pos;
+		while ((pos = line.find_first_of(_del, prev)) != std::string::npos)
+		{
+			if (pos > prev)
+				rets->push_back(line.substr(prev, pos - prev));
+			prev = pos + 1;
+		}
+		if (prev < line.length())
+			rets->push_back(line.substr(prev, std::string::npos));
+	}
+	return rets;
+}
 
 bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf, bool _isInvert)
 {
@@ -159,6 +180,48 @@ bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
 	fclose(filePtr);
 	return true;
 }
+chars jUtils::LoadFile2(string path, int& _bufSize)
+{
+	FILE* filePtr = NULL;
+	int filesize = 0;
+	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+		return chars();
+
+	fseek(filePtr, 0, SEEK_END);
+	filesize = ftell(filePtr);
+	fseek(filePtr, 0, SEEK_SET);
+
+	chars pBuf;
+	pBuf->resize(filesize);
+	fread(&pBuf[0], filesize, 1, filePtr);
+
+	_bufSize = filesize;
+
+	fclose(filePtr);
+	return pBuf;
+}
+strings jUtils::LoadLines(string path)
+{
+	FILE* filePtr = NULL;
+	int filesize = 0;
+	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+		return strings();
+
+	fseek(filePtr, 0, SEEK_END);
+	filesize = ftell(filePtr);
+	fseek(filePtr, 0, SEEK_SET);
+
+	chars pBuf;
+	pBuf->resize(filesize + 1);
+	fread(&pBuf[0], filesize, 1, filePtr);
+
+
+	strings lines = Split2(&pBuf[0], "\n");
+
+	fclose(filePtr);
+	return lines;
+}
+
 //example path is like "D:\\temp\\*.*";
 void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func)
 {

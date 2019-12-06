@@ -47,6 +47,38 @@ void jLoader::LoadObjFile(string _filename)
 	input.close();
 }
 
+void jLoader::LoadObjFile2(string _filename)
+{
+	strings lines = jUtils::LoadLines(_filename);
+	if (!lines)
+		return;
+
+	for (string line : *lines)
+	{
+		strings vec = jUtils::Split2(line, " ");
+
+		if (vec[0] == "v")
+			mPos.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
+		else if (vec[0] == "vt")
+			mUV.push_back(Vector2f(stof(vec[1]), stof(vec[2])));
+		else if (vec[0] == "vn")
+			mNormal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
+		else if (vec[0] == "f")
+		{
+			vector<Vector3n> vertN;
+			int faceCnt = vec->size();
+			for (int j = 1; j < faceCnt; ++j)
+			{
+				strings faces = jUtils::Split2(vec[j], "/");
+				vertN.push_back(Vector3n(stoi(faces[0]) - 1, stoi(faces[1]) - 1, stoi(faces[2]) - 1));
+			}
+			mFaceInfo.push_back(vertN);
+		}
+		else
+			mInfo.push_back(line);
+	}
+}
+
 void jLoader::LoadDaeFile(string _filename)
 {
 	tinyxml2::XMLDocument doc;

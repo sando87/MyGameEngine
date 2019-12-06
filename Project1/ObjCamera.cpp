@@ -71,8 +71,21 @@ void ObjCamera::OnStart()
 }
 void ObjCamera::OnUpdate()
 {
+	mGroundRect = UpdateGroundRect();
 }
 
+Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
+{
+	double wh = 640 / 2;
+	double hh = 480 / 2;
+	double pixelRateX = (_pixelX - wh) / wh;
+	double pixelRateY = (hh - _pixelY) / hh;
+	double width_half = tan(DegToRad(mFovDegHori*0.5));
+	double height_half = width_half / mAspect;
+	Vector3 dirA = mPos.getView() + width_half * pixelRateX * mPos.getCross() + height_half * pixelRateY * mPos.getUp();
+	dirA.normalize();
+	return dirA;
+}
 Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 {
 	Position4 pt(0.5, 0, 0.999998, 1);
@@ -82,6 +95,27 @@ Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 	Vector3 view = worldPt - mPos.getPos();
 
 	return view.normalize();
+}
+
+jRect ObjCamera::UpdateGroundRect()
+{
+	double width_half = tan(DegToRad(mFovDegHori*0.5));
+	double height_half = width_half / mAspect;
+	Vector3 dirA = mPos.getView() + width_half * mPos.getCross() + height_half * mPos.getUp();
+	jLine3D lineA(mPos.getPos(), dirA);
+	Vector2 gptA = lineA.GetXY(0);
+	Vector3 dirB = mPos.getView() + width_half * mPos.getCross() - height_half * mPos.getUp();
+	jLine3D lineB(mPos.getPos(), dirB);
+	Vector2 gptB = lineB.GetXY(0);
+	Vector3 dirC = mPos.getView() - width_half * mPos.getCross() + height_half * mPos.getUp();
+	jLine3D lineC(mPos.getPos(), dirC);
+	Vector2 gptC = lineC.GetXY(0);
+	Vector3 dirD = mPos.getView() - width_half * mPos.getCross() - height_half * mPos.getUp();
+	jLine3D lineD(mPos.getPos(), dirD);
+	Vector2 gptD = lineD.GetXY(0);
+	jRect rt;
+	rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+	return rt;
 }
 
 Matrix4 ObjCamera::getPosMat_D3D()

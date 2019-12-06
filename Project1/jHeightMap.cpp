@@ -8,13 +8,13 @@ jHeightMap::~jHeightMap()
 		delete[] mHeightMap;
 }
 
-bool jHeightMap::CreateHeightMap(jModel * _mesh)
+bool jHeightMap::UpdateHeightMap(jModel * _mesh, float _off)
 {
-	if (mHeightMap != nullptr)
-		delete[] mHeightMap;
-
-	mHeightMap = new float[mCntWidth * mCntHeight];
-	memset(mHeightMap, 0, sizeof(float) * mCntWidth * mCntHeight);
+	if (mHeightMap == nullptr)
+	{
+		mHeightMap = new float[mCntWidth * mCntHeight];
+		memset(mHeightMap, 0, sizeof(float) * mCntWidth * mCntHeight);
+	}
 
 	vector<VertexType_Texture>& verticies = _mesh->GetVerticies();
 	int cnt = verticies.size();
@@ -24,8 +24,9 @@ bool jHeightMap::CreateHeightMap(jModel * _mesh)
 		float x = vert.p.x;
 		float y = vert.p.y;
 		int gridIdx = IdxOfNearPt(x, y);
-		float oldHeight = mHeightMap[gridIdx];
-		mHeightMap[gridIdx] = vert.p.z > oldHeight ? vert.p.z : oldHeight;
+		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.p.z + _off);
+		mMinZ = min(mHeightMap[gridIdx], mMinZ);
+		mMaxZ = max(mHeightMap[gridIdx], mMaxZ);
 	}
 
 	return true;

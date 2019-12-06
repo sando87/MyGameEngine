@@ -4,6 +4,7 @@
 
 jInput::jInput()
 {
+	memset(&mMousePreviousInfo, 0x00, sizeof(mMousePreviousInfo));
 }
 
 
@@ -144,9 +145,16 @@ bool jInput::Update()
 
 	if (isMouseIN())
 	{
-		jMouseInfo info;
-		memcpy(&info, &m_mouseState, sizeof(info));
+		jMouseInfo info = { 0, };
+		memcpy(&info, &m_mouseState, sizeof(m_mouseState));
 		mMouse(info);
+	}
+
+	if (isMouseDown())
+	{
+		jMouseInfo info = { 0, };
+		memcpy(&info, &m_mouseState, sizeof(m_mouseState));
+		mMouseDown(info);
 	}
 	
 	if (isKeyIN())
@@ -155,6 +163,7 @@ bool jInput::Update()
 			mKeyboard(m_keyboardState);
 	}
 
+	memcpy(&mMousePreviousInfo, &m_mouseState, sizeof(m_mouseState));
 	return true;
 }
 bool jInput::isKeyIN()
@@ -176,4 +185,11 @@ bool jInput::isMouseIN()
 		m_mouseState.rgbButtons[3] == 0)
 		return false;
 	return true;
+}
+bool jInput::isMouseDown()
+{
+	if (mMousePreviousInfo.rgbButtons[0] == 0 && m_mouseState.rgbButtons[0] == 0x80)
+		return true;
+
+	return false;
 }

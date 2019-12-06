@@ -56,7 +56,7 @@ PixelInputType jVS(VertexInputType input)
     output.position += mul(input.position, g_bbones[input.index[1]]) * input.weight[1];
     output.position += mul(input.position, g_bbones[input.index[2]]) * input.weight[2];
     output.position += mul(input.position, g_bbones[input.index[3]]) * input.weight[3];
-    //output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     
