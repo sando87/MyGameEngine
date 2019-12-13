@@ -40,7 +40,7 @@ jRect3D& const jRect3D::expand(Vector3 pt)
 	return *this;
 }
 
-jRect3D& const jRect3D::expand(jRect3D& rect)
+jRect3D& const jRect3D::expand(jRect3D rect)
 {
 	expand(rect.Pos());
 	expand(rect.Pos() + rect.Size());

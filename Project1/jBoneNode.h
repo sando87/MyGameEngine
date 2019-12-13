@@ -4,7 +4,7 @@
 #include "Matrices.h"
 using namespace std;
 
-class jAnimate;
+class jBoneTree;
 
 struct KeyFrames
 {
@@ -22,7 +22,7 @@ struct KeyFrames
 
 class jBoneNode
 {
-	friend class jAnimate;
+	friend class jBoneTree;
 
 public:
 	jBoneNode();

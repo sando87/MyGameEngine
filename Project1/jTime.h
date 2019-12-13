@@ -2,12 +2,8 @@
 
 #include <chrono>
 
-static class jTime
+class jTime
 {
-public:
-	jTime();
-	~jTime();
-
 private:
 	static std::chrono::system_clock::time_point mStartTime;
 	static std::chrono::system_clock::time_point mNowTime;

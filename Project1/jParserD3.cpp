@@ -624,17 +624,14 @@ void* jParserD3::CreateD3DRescource(void* addr)
 
 		int width = 0;
 		int height = 0;
-		int bufSize = 0;
-		unsigned char* imgbuf = nullptr;
+		chars imgbuf;
 		jUtils::ForEachFiles2(nullptr, ss.str().c_str(), [&](void *_obj, string _filename) {
-			if (!jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width, bufSize, imgbuf))
-				_warn();
+			imgbuf = jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width);
 			return false;
 		});
 
-		//pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, nullptr);
-		pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, (char*)imgbuf);
-		delete[] imgbuf;
+		if(imgbuf)
+			pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, &imgbuf[0]);
 	}
 	break;
 	default:

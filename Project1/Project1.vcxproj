@@ -127,21 +127,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="jAnimate.cpp" />
+    <ClCompile Include="jBoneTree.cpp" />
     <ClCompile Include="jAStar.cpp" />
     <ClCompile Include="jBaseShader.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
+    <ClCompile Include="jComponent.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGlobalStruct.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
+    <ClCompile Include="jImage.cpp" />
     <ClCompile Include="jLine3D.cpp" />
     <ClCompile Include="jMatrixControl.cpp" />
+    <ClCompile Include="jMesh.cpp" />
     <ClCompile Include="jObjStarCraft.cpp" />
+    <ClCompile Include="jOS_APIs.cpp" />
     <ClCompile Include="jParserD3.cpp" />
     <ClCompile Include="jParserS2.cpp" />
     <ClCompile Include="jRect.cpp" />
     <ClCompile Include="jRect3D.cpp" />
+    <ClCompile Include="jResources.cpp" />
+    <ClCompile Include="jShader.cpp" />
     <ClCompile Include="jShaderDiablo.cpp" />
+    <ClCompile Include="jShaderSkin.cpp" />
     <ClCompile Include="jShaderSkinned.cpp" />
     <ClCompile Include="jGameObject.cpp" />
     <ClCompile Include="jGameObjectMgr.cpp" />
@@ -173,22 +180,31 @@
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="jDirectXheader.h" />
     <ClInclude Include="header.h" />
-    <ClInclude Include="jAnimate.h" />
+    <ClInclude Include="jBoneTree.h" />
     <ClInclude Include="jAStar.h" />
     <ClInclude Include="jBaseShader.h" />
     <ClInclude Include="jBoneNode.h" />
+    <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGlobalStruct.h" />
     <ClInclude Include="jHeightMap.h" />
+    <ClInclude Include="jImage.h" />
     <ClInclude Include="jLine3D.h" />
     <ClInclude Include="jMatrixControl.h" />
+    <ClInclude Include="jMesh.h" />
     <ClInclude Include="jObjStarCraft.h" />
+    <ClInclude Include="jOS_APIs.h" />
     <ClInclude Include="jParserD3.h" />
     <ClInclude Include="jParserS2.h" />
     <ClInclude Include="jRect.h" />
     <ClInclude Include="jRect3D.h" />
+    <ClInclude Include="jResources.h" />
+    <ClInclude Include="jShader.h" />
     <ClInclude Include="jShaderDiablo.h" />
+    <ClInclude Include="jShaderHeader.h" />
+    <ClInclude Include="jShaderSkin.h" />
     <ClInclude Include="jShaderSkinned.h" />
     <ClInclude Include="jGameObject.h" />
     <ClInclude Include="jGameObjectMgr.h" />
@@ -207,6 +223,7 @@
     <ClInclude Include="jTexture.h" />
     <ClInclude Include="jTime.h" />
     <ClInclude Include="jTypeDef.h" />
+    <ClInclude Include="junks.h" />
     <ClInclude Include="jUtils.h" />
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="ObjCamera.h" />

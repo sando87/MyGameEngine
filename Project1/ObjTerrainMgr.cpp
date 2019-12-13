@@ -1,10 +1,7 @@
 #include "ObjTerrainMgr.h"
-#include "jUtils.h"
-#include "jLog.h"
-#include "jTypeDef.h"
 #include "ObjCamera.h"
 #include "ObjTerrain.h"
-#include <algorithm>
+#include "jHeightMap.h"
 
 #define TERRAIN_SIZE 240
 #define TERRAIN_STEP 5
@@ -59,21 +56,30 @@ void ObjTerrainMgr::LoadingBlocks()
 
 			if (mCachedBlocks.find(key) == mCachedBlocks.end())
 			{
-				ObjTerrain* obj = LoadBlock(idxX, idxY);
-				mCachedBlocks[key] = obj;
+				TerrainBlock block;
+				block.heightMap = new jHeightMap(TERRAIN_SIZE, TERRAIN_SIZE, TERRAIN_STEP);
+				LoadBlock(idxX, idxY, block);
+				mCachedBlocks[key] = block;
 			}
 		}
 	}
 }
 
-ObjTerrain* ObjTerrainMgr::LoadBlock(int idxX, int idxY)
+void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 {
 	u64 key = GRID_HASH(idxX, idxY);
 	vector<string>* names = mBlockResourcesAll[key];
-	ObjTerrain* obj = new ObjTerrain();
-	obj->Load(names, TERRAIN_SIZE, TERRAIN_STEP);
-	obj->AddToMgr();
-	return obj;
+	for (string name : *names)
+	{
+		ObjTerrain* obj = new ObjTerrain();
+		obj->Load(name, TERRAIN_SIZE, TERRAIN_STEP, block.heightMap);
+		obj->AddToMgr();
+		block.terrains.push_back(obj);
+	}
+	float minZ = block.heightMap->MinHeight();
+	float maxZ = block.heightMap->MaxHeight();
+	block.rect = jRect3D(Vector3(idxX*TERRAIN_SIZE, idxY*TERRAIN_SIZE, minZ), Vector3(TERRAIN_SIZE, TERRAIN_SIZE, maxZ - minZ));
+	return;
 }
 void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 {
@@ -81,8 +87,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	vector<pair<double,u64>> distances;
 	for (auto item : mCachedBlocks)
 	{
-		ObjTerrain* terrain = item.second;
-		jRect rect = terrain->GetRect().TopBottom();
+		jRect rect = item.second.rect.TopBottom();
 		Vector2 pt = rect.Center();
 		u64 key = GRID_HASH(rect.Left(), rect.Bottom());
 		double dist = camRect.Center().distance(pt);
@@ -96,12 +101,14 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	for (int i = 0; i < clearCount; ++i)
 	{
 		u64 key = distances[i].second;
-		ObjTerrain* obj = mCachedBlocks[key];
-		jRect rect = obj->GetRect().TopBottom();
+		TerrainBlock& block = mCachedBlocks[key];
+		jRect rect = block.rect.TopBottom();
 		if (camRect.Overlapped(rect))
 			break;
 
-		obj->DeleteFromMgr();
+		for(ObjTerrain* terrain : block.terrains)
+			terrain->DeleteFromMgr();
+
 		mCachedBlocks.erase(key);
 	}
 }
@@ -133,37 +140,40 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 		return true;
 	});
 }
-float ObjTerrainMgr::GetHeight(float worldX, float worldY)
+bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 {
-	ObjTerrain* obj = GetTerrain(worldX, worldY);
-	if (obj == nullptr)
-		return 0;
+	u64 key = CoordinateToKey(worldX, worldY);
+	if (mCachedBlocks.find(key) == mCachedBlocks.end())
+		return false;
 
-	return obj->GetHeight(worldX, worldY);
+	TerrainBlock& block = mCachedBlocks[key];
+	jRect rect = block.rect.TopBottom();
+	height = block.heightMap->GetHeightOfPos(worldX - rect.Left(), worldY - rect.Bottom());
+	return true;
 }
 Vector3 ObjTerrainMgr::CalcGroundPos(Vector3 pos, Vector3 dir)
 {
 	dir.normalize();
 	Vector3 currentPos = pos;
-	while (true)
+	while (currentPos.z > 0)
 	{
-		ObjTerrain* obj = GetTerrain(currentPos.x, currentPos.y);
-		if (obj == nullptr)
-			break;
+		currentPos += (dir * TERRAIN_STEP);
 
-		float height = obj->GetHeight(currentPos.x, currentPos.y);
+		float height = 0;
+		if (!GetHeight(currentPos.x, currentPos.y, height))
+			continue;
+
 		if (currentPos.z < height)
 			return currentPos;
-
-		currentPos += (dir * TERRAIN_STEP);
 	}
 	return Vector3();
 }
-ObjTerrain* ObjTerrainMgr::GetTerrain(float worldX, float worldY)
-{
-	u64 key = CoordinateToKey(worldX, worldY);
-	if (mCachedBlocks.find(key) == mCachedBlocks.end())
-		return nullptr;
 
-	return mCachedBlocks[key];
-}
+//ObjTerrain* ObjTerrainMgr::GetTerrain(float worldX, float worldY)
+//{
+//	u64 key = CoordinateToKey(worldX, worldY);
+//	if (mCachedBlocks.find(key) == mCachedBlocks.end())
+//		return nullptr;
+//
+//	return mCachedBlocks[key];
+//}

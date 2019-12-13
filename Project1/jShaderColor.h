@@ -1,39 +1,28 @@
 #pragma once
-#include "jBaseShader.h"
-#include "Matrices.h"
-#include "jGlobalStruct.h"
-
-class jModel;
-class ObjCamera;
+#include "jShader.h"
 
 
 class jShaderColor :
-	public jBaseShader
+	public jShader
 {
 public:
 	jShaderColor();
 	virtual ~jShaderColor();
 
-	bool Initialize(string _vsFilename, string _psFilename);
-	void Release();
-	bool Render();
+	virtual bool LoadRenderResources();
+	virtual bool Render();
 
-	void SetParams(jModel * _model, Matrix4 _worldMat, ObjCamera * _camera, bool _isWire);
+protected:
+	bool CreateShaderAndLayout();
+	bool CreateInputBuffer();
 
-private:
 	ID3D11InputLayout* mLayout;
 	ID3D11Buffer* mMatrixBuffer;
-
-public:
 	ID3D11Buffer* mVertBuf;
 	ID3D11Buffer* mIdxBuf;
-	int mIndexCount;
-	int mVertTypeSize;
 
-	Matrix4 mWorld;
-	Matrix4 mView;
-	Matrix4 mProj;
-	bool mIsWire;
-	bool mIsIndexTwo;
+	unsigned int mVertexStride;
+	unsigned int mIndexCount;
+
 };
 

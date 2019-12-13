@@ -2,12 +2,12 @@
 #include "jGameObject.h"
 #include "Matrices.h"
 #include "jInput.h"
+
 class jShaderSkinned;
 class jShaderSprite;
-class jShaderColor;
 class jModel;
 class jTexture;
-class jAnimate;
+class jBoneTree;
 
 class ObjTutorial1 : public jGameObject
 {
@@ -23,12 +23,10 @@ private:
 	jModel* mModel;
 	jTexture * mTexture;
 	jShaderSkinned * mShader;
-	jAnimate* mAnim;
+	jBoneTree* mAnim;
 	Matrix4 mWorldMat;
 	int mIdxUV;
 	float mAnimTime;
 
-	jShaderColor * mShaderColor;
-	jModel* mModelX;
 };
 

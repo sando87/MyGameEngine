@@ -30,15 +30,16 @@ void jLoader::LoadObjFile(string _filename)
 			mNormal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
 		else if (vec[0] == "f")
 		{
-			vector<Vector3n> vertN;
+			//vector<Vector3n> vertN;
 			int faceCnt = vec.size();
 			for (int j = 1; j < faceCnt; ++j)
 			{
 				vector<string> vertS;
 				jUtils::Split(vec[j], "/", vertS);
-				vertN.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
+				//vertN.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
+				mVertexIdx.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
 			}
-			mFaceInfo.push_back(vertN);
+			//mFaceInfo.push_back(vertN);
 		}
 		else
 			mInfo.push_back(line);
@@ -159,6 +160,17 @@ void jLoader::LoadDaeFile(string _filename)
 		mFaceInfo.push_back(vertN);
 	}
 
+	cntVec = vecFaces.size() / 3;
+	for (int i = 0; i < cntVec; ++i)
+	{
+		Vector3n vertN;
+		vertN.x = stoi(vecFaces[i * 3 + 0]);
+		vertN.z = stoi(vecFaces[i * 3 + 1]);
+		vertN.y = stoi(vecFaces[i * 3 + 2]);
+
+		mVertexIdx.push_back(vertN);
+	}
+
 
 	if (doc.FirstChildElement("COLLADA")->FirstChildElement("library_controllers") == nullptr)
 	{
@@ -211,6 +223,25 @@ void jLoader::LoadDaeFile(string _filename)
 		}
 		accIdx += cntV;
 		mWeightPos.push_back(bws);
+	}
+
+	accIdx = 0;
+	cntVC = vecVCs.size();
+	for (int i = 0; i < cntVC; ++i)
+	{
+		Vector4n bones;
+		Vector4f weights;
+		int cntV = stoi(vecVCs[i]);
+		cntV = min(4, cntV);
+		for (int j = 0; j < cntV; ++j)
+		{
+			bones[j] = stoi(vecVs[(accIdx + j) * 2]);
+			int weightIdx = stoi(vecVs[(accIdx + j) * 2 + 1]);
+			weights[j] = stof(vecWeights[weightIdx]);
+		}
+		accIdx += cntV;
+		mBoneIndexs.push_back(bones);
+		mWeights.push_back(weights);
 	}
 
 }

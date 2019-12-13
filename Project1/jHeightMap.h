@@ -1,6 +1,6 @@
 #pragma once
-#include "Vectors.h"
-class jModel;
+#include "junks.h"
+class jMesh;
 
 class jHeightMap
 {
@@ -23,7 +23,7 @@ public:
 	}
 	~jHeightMap();
 
-	bool UpdateHeightMap(jModel* _mesh, float _off);
+	bool UpdateHeightMap(jMesh* _mesh, Vector3 _base);
 	int IdxOfNearPt(float x, float y);
 	void SetHeight(float x, float y, float z);
 	float GetHeightOfPos(float x, float y);

@@ -1,6 +1,5 @@
 #include "jHeightMap.h"
-#include "jModel.h"
-#include "jGlobalStruct.h"
+#include "jMesh.h"
 
 jHeightMap::~jHeightMap()
 {
@@ -8,7 +7,7 @@ jHeightMap::~jHeightMap()
 		delete[] mHeightMap;
 }
 
-bool jHeightMap::UpdateHeightMap(jModel * _mesh, float _off)
+bool jHeightMap::UpdateHeightMap(jMesh * _mesh, Vector3 _base)
 {
 	if (mHeightMap == nullptr)
 	{
@@ -16,15 +15,18 @@ bool jHeightMap::UpdateHeightMap(jModel * _mesh, float _off)
 		memset(mHeightMap, 0, sizeof(float) * mCntWidth * mCntHeight);
 	}
 
-	vector<VertexType_Texture>& verticies = _mesh->GetVerticies();
+	vector<VertexFormat>& verticies = _mesh->GetVerticies();
 	int cnt = verticies.size();
 	for (int idx = 0; idx < cnt; ++idx)
 	{
-		VertexType_Texture& vert = verticies[idx];
-		float x = vert.p.x;
-		float y = vert.p.y;
+		VertexFormat& vert = verticies[idx];
+		float x = vert.position.x;
+		float y = vert.position.y;
 		int gridIdx = IdxOfNearPt(x, y);
-		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.p.z + _off);
+		if (gridIdx < 0 || gridIdx >= mCntWidth * mCntHeight)
+			continue;
+
+		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.position.z + _base.z);
 		mMinZ = min(mHeightMap[gridIdx], mMinZ);
 		mMaxZ = max(mHeightMap[gridIdx], mMaxZ);
 	}

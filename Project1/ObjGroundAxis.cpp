@@ -1,60 +1,27 @@
 #include "ObjGroundAxis.h"
-#include "jModel.h"
+#include "jMesh.h"
 #include "ObjCamera.h"
 #include "jShaderColor.h"
 
 ObjGroundAxis::ObjGroundAxis()
 {
-	mShader = nullptr;
-	mModel = nullptr;
-	mModelX = nullptr;
-	mWorldMat.identity();
 }
 
 
 ObjGroundAxis::~ObjGroundAxis()
 {
-	if (mShader != nullptr)
-	{
-		mShader->Release();
-		delete mShader;
-		mShader = nullptr;
-	}
-	if (mModel != nullptr)
-	{
-		mModel->Release();
-		delete mModel;
-		mModel = nullptr;
-
-		mModelX->Release();
-		delete mModelX;
-	}
 }
 
 void ObjGroundAxis::OnStart()
 {
-	mWorldMat.identity();
+	jMesh* mesh = new jMesh();
+	//mesh->LoadGrid(-100, 100, 200, 200, 10);
+	//AddComponent(mesh);
 
-	mModel = new jModel();
-	mModel->LoadGrid(-100, 100, 200, 200, 10);
+	mesh = new jMesh();
+	mesh->LoadAxis(10);
+	AddComponent(mesh);
 
-	mModelX = new jModel();
-	mModelX->LoadAxis(10);
-
-	mShader = new jShaderColor();
-	mShader->Initialize("./color.vs", "./color.ps");
-
+	AddComponent(new jShaderColor());
 }
 
-void ObjGroundAxis::OnUpdate()
-{
-
-}
-
-void ObjGroundAxis::OnDraw()
-{
-	mShader->SetParams(mModel, mWorldMat, &GetCamera(), true);
-	mShader->Render();
-	mShader->SetParams(mModelX, mWorldMat, &GetCamera(), true);
-	mShader->Render();
-}

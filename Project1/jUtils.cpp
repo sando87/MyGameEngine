@@ -1,11 +1,5 @@
-#include "jUtils.h"
-#include "jMath.h"
-#include "jLog.h"
 
-#include <sstream>
-#include <iostream>
-#include <Windows.h>
-#include <stdio.h>
+#include "jOS_APIs.h"
 
 jUtils::jUtils()
 {
@@ -68,13 +62,14 @@ strings jUtils::Split2(string _str, const char* _del)
 	return rets;
 }
 
-bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf, bool _isInvert)
+chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert)
 {
 	// targa 파일을 바이너리 모드로 파일을 엽니다.
 	FILE* filePtr;
 	if (fopen_s(&filePtr, filename.c_str(), "rb") != 0)
 	{
-		return false;
+		_printlog("fail to load %s\n", filename);
+		return chars();
 	}
 
 	// 파일 헤더를 읽어옵니다.
@@ -82,7 +77,8 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 	unsigned int count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
 	if (count != 1)
 	{
-		return false;
+		_printlog("fail to load .tga file\n");
+		return chars();
 	}
 
 	// 파일헤더에서 중요 정보를 얻어옵니다.
@@ -93,40 +89,23 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 	// 파일이 32bit 인지 24bit인지 체크합니다.
 	if (bpp != 32)
 	{
-		return false;
+		_printlog("tga file error (only 32bit possible)\n");
+		return chars();
 	}
 
 	// 32 비트 이미지 데이터의 크기를 계산합니다.
 	int imageSize = width * height * 4;
 
-	//  targa 이미지 데이터 용 메모리를 할당합니다.
-	unsigned char* targaImage = new unsigned char[imageSize];
-	if (!targaImage)
-	{
-		return false;
-	}
-
-	// targa 이미지 데이터를 읽습니다.
-	count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
-	if (count != imageSize)
-	{
-		return false;
-	}
+	chars targaRawData;
+	targaRawData->resize(imageSize);
+	fread(&targaRawData[0], imageSize, 1, filePtr);
 
 	// 파일을 닫습니다.
-	if (fclose(filePtr) != 0)
-	{
-		return false;
-	}
+	fclose(filePtr);
 
-	// targa 대상 데이터에 대한 메모리를 할당합니다.
-	_buf = new unsigned char[imageSize];
-	if (!_buf)
-	{
-		return false;
-	}
 
-	_bufSize = imageSize;
+	chars pBuf;
+	pBuf->resize(imageSize);
 	// targa 대상 데이터 배열에 인덱스를 초기화합니다.
 	int index = 0;
 
@@ -138,10 +117,10 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 	{
 		for (int i = 0; i<width; i++)
 		{
-			_buf[index + 0] = targaImage[k + 2];  // 빨강
-			_buf[index + 1] = targaImage[k + 1];  // 녹색
-			_buf[index + 2] = targaImage[k + 0];  // 파랑
-			_buf[index + 3] = targaImage[k + 3];  // 알파
+			pBuf[index + 0] = targaRawData[k + 2];  // 빨강
+			pBuf[index + 1] = targaRawData[k + 1];  // 녹색
+			pBuf[index + 2] = targaRawData[k + 0];  // 파랑
+			pBuf[index + 3] = targaRawData[k + 3];  // 알파
 
 														 // 인덱스를 targa 데이터로 증가시킵니다.
 			k += 4;
@@ -153,11 +132,7 @@ bool jUtils::LoadTarga(string filename, int& height, int& width, int& _bufSize, 
 			k -= (width * 8);
 	}
 
-	// 대상 배열에 복사 된 targa 이미지 데이터를 해제합니다.
-	delete[] targaImage;
-	targaImage = nullptr;
-
-	return true;
+	return pBuf;
 }
 
 bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
@@ -225,22 +200,22 @@ strings jUtils::LoadLines(string path)
 //example path is like "D:\\temp\\*.*";
 void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func)
 {
-	HANDLE hFind;
-	WIN32_FIND_DATA data;
-	hFind = FindFirstFile(_path, &data);
-	if (hFind != INVALID_HANDLE_VALUE)
+	struct _finddata_t fd;
+	intptr_t handle = 1;
+	if ((handle = _findfirst(_path, &fd)) >= 0)
 	{
-		do {
-			if (strncmp(data.cFileName, ".", 260) == 0)
+		do
+		{
+			if (strncmp(fd.name, ".", 260) == 0)
 				continue;
-			if (strncmp(data.cFileName, "..", 260) == 0)
+			if (strncmp(fd.name, "..", 260) == 0)
 				continue;
 
-			if (!_func(_object, data.cFileName))
+			if (!_func(_object, fd.name))
 				break;
+		} while (_findnext(handle, &fd) == 0);
 
-		} while (FindNextFile(hFind, &data));
-		FindClose(hFind);
+		_findclose(handle);
 	}
 }
 string jUtils::FindFile(string _path, string _filter)
@@ -254,7 +229,7 @@ string jUtils::FindFile(string _path, string _filter)
 }
 bool jUtils::MyCopyFile(string _from, string _to)
 {
-	return CopyFile(_from.c_str(), _to.c_str(), true);
+	return jOS_APIs::MyCopyFile(_from, _to);
 }
 void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
 {
@@ -282,23 +257,24 @@ void jUtils::SaveToFile(string path, string filename, string data, bool isAttach
 	fclose(pFile);
 	return;
 }
+
 void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))
 {
-	HANDLE hFind;
-	WIN32_FIND_DATA data;
-	hFind = FindFirstFile(_path, &data);
-	if (hFind != INVALID_HANDLE_VALUE) 
+	struct _finddata_t fd;
+	intptr_t handle = 1;
+	if ((handle = _findfirst(_path, &fd)) >= 0)
 	{
-		do {
-			if (strncmp(data.cFileName, ".", 260) == 0)
+		do
+		{
+			if (strncmp(fd.name, ".", 260) == 0)
 				continue;
-			if (strncmp(data.cFileName, "..", 260) == 0)
+			if (strncmp(fd.name, "..", 260) == 0)
 				continue;
 
-			if (!_func(_object, data.cFileName))
+			if (!_func(_object, fd.name))
 				break;
+		} while (_findnext(handle, &fd) == 0);
 
-		} while (FindNextFile(hFind, &data));
-		FindClose(hFind);
+		_findclose(handle);
 	}
 }

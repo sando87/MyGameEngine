@@ -30,6 +30,6 @@ public:
 
 	bool PassedBy(jLine3D line, vector<Vector3>& vecs);
 	jRect3D& const expand(Vector3 pt);
-	jRect3D& const expand(jRect3D& rect);
+	jRect3D& const expand(jRect3D rect);
 };
 

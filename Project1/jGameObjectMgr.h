@@ -36,6 +36,7 @@ public:
 	void Release();
 	void RunObjects();
 
+
 	bool AddGPURes(MyResBase* pData, void* pInterface);
 	bool InitResources(int _idx);
 	void AddResource(MyResBase* _res);

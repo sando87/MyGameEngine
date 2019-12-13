@@ -300,15 +300,14 @@ bool jModel::LoadHeightMap(string _filename, float _step, float _maxHeight)
 {
 	int width = 0;
 	int height = 0;
-	int bufSize = 0;
-	unsigned char* imgbuf = nullptr;
-	if (!jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width, bufSize, imgbuf))
+	chars imgbuf = jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width);
+	if (!imgbuf)
 	{
 		_warn();
 		return false;
 	}
 
-	int pixelByteSize = bufSize / (height * width);
+	int pixelByteSize = imgbuf->size() / (height * width);
 	auto pDev = jRenderer::GetInst().GetDevice();
 	//CreateVertexBuffer
 	{
@@ -323,7 +322,7 @@ bool jModel::LoadHeightMap(string _filename, float _step, float _maxHeight)
 			pos.x = idxW * _step;
 			pos.y = idxH * _step;
 			int imgOff = i * pixelByteSize;
-			unsigned char* pixel = imgbuf + imgOff;
+			unsigned char* pixel = (unsigned char*)&imgbuf[0] + imgOff;
 			pos.z = ((float)pixel[0] / 255.0f) * _maxHeight;
 
 			VertexType_Texture vert;
@@ -392,8 +391,6 @@ bool jModel::LoadHeightMap(string _filename, float _step, float _maxHeight)
 	mVertexOff_setting = 0;
 	mPrimitiveTopology = 0; //TRIANGLE_LIST
 
-	if (imgbuf != nullptr)
-		delete[] imgbuf;
 	return true;
 }
 bool jModel::LoadPointList(vector<Vector3>& vec, float size)

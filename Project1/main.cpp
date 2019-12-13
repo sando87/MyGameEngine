@@ -3,6 +3,7 @@
 #include "jRenderer.h"
 #include "jInput.h"
 #include "jSound.h"
+#include "jOS_APIs.h"
 
 int gScreenWidth = 640;
 int gScreenHeight = 480;
@@ -42,6 +43,7 @@ int main()
 		return 0;
 	}
 
+	jOS_APIs::SetHandle(handle);
 	jSound::GetInst().Initialize(handle);
 	jSound::GetInst().LoadWaveFile("sound01.wav");
 

@@ -1,23 +1,10 @@
 #include "jTime.h"
 
 
-std::chrono::system_clock::time_point jTime::mStartTime;
-std::chrono::system_clock::time_point jTime::mNowTime;
+std::chrono::system_clock::time_point jTime::mStartTime = std::chrono::system_clock::now();
+std::chrono::system_clock::time_point jTime::mNowTime = mStartTime;
 double jTime::mDeltaTime = 0;
 double jTime::mTotalTime = 0;
-
-jTime::jTime()
-{
-	mStartTime = std::chrono::system_clock::now();
-	mNowTime = mStartTime;
-	mDeltaTime = 0;
-	mTotalTime = 0;
-}
-
-
-jTime::~jTime()
-{
-}
 
 void jTime::Update()
 {

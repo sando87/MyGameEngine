@@ -1,17 +1,16 @@
-#include "jAnimate.h"
-#include "jUtils.h"
-#include "jLog.h"
+#include "jBoneTree.h"
 
-jAnimate::jAnimate()
+
+jBoneTree::jBoneTree()
 {
 }
 
 
-jAnimate::~jAnimate()
+jBoneTree::~jBoneTree()
 {
 }
 
-bool jAnimate::Load(string _name)
+bool jBoneTree::Load(string _name)
 {
 	if (jUtils::GetFileExtension(_name) == "DAE")
 	{
@@ -23,7 +22,7 @@ bool jAnimate::Load(string _name)
 	return true;
 }
 
-bool jAnimate::LoadBoneTreeDAE(string _name)
+bool jBoneTree::LoadBoneTreeDAE(string _name)
 {
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(_name.c_str());
@@ -63,7 +62,7 @@ bool jAnimate::LoadBoneTreeDAE(string _name)
 	return true;
 }
 
-bool jAnimate::LoadAnimateDAE(string _name)
+bool jBoneTree::LoadAnimateDAE(string _name)
 {
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(_name.c_str());
@@ -122,7 +121,7 @@ bool jAnimate::LoadAnimateDAE(string _name)
 	return true;
 }
 
-XMLElement* jAnimate::FindRootBone_DAE(tinyxml2::XMLDocument& _doc)
+XMLElement* jBoneTree::FindRootBone_DAE(tinyxml2::XMLDocument& _doc)
 {
 	XMLElement* ele = _doc.FirstChildElement("COLLADA")
 		->FirstChildElement("library_visual_scenes")
@@ -144,7 +143,7 @@ XMLElement* jAnimate::FindRootBone_DAE(tinyxml2::XMLDocument& _doc)
 	return nullptr;
 }
 
-void jAnimate::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
+void jBoneTree::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 {
 	const char* name = nullptr;
 	_ele->QueryStringAttribute("id", &name);
@@ -200,7 +199,7 @@ void jAnimate::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 	}
 }
 
-int jAnimate::SerchBoneIndex(string _name)
+int jBoneTree::SerchBoneIndex(string _name)
 {
 	int cnt = mVecBones.size();
 	for (int i = 0; i < cnt; ++i)
@@ -209,7 +208,7 @@ int jAnimate::SerchBoneIndex(string _name)
 	return -1;
 }
 
-void jAnimate::Animate(float _time, vector<Matrix4>& _rets)
+void jBoneTree::Animate(float _time, vector<Matrix4>& _rets)
 {
 	if (mRootBone == nullptr)
 		return;

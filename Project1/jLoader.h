@@ -17,6 +17,10 @@ public:
 	vector<Vector3f> mPos;
 	vector<Vector2f> mUV;
 	vector<Vector3f> mNormal;
+	vector<Vector4n> mBoneIndexs;
+	vector<Vector4f> mWeights;
+	vector<Vector3n> mVertexIdx;
+
 	vector<vector<Vector3n>> mFaceInfo;
 	vector<BoneWeights> mWeightPos;
 

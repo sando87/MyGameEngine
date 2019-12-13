@@ -1,12 +1,7 @@
 #ifndef __JUTILS_H__
 #define __JUTILS_H__
 
-#include "Matrices.h"
-#include "jTypeDef.h"
-#include <string>
-#include <vector>
-#include <functional>
-using namespace std;
+#include "junks.h"
 
 struct TargaHeader
 {
@@ -21,7 +16,6 @@ struct TargaHeader
 #define STOP false
 
 
-
 class jUtils
 {
 public:
@@ -33,7 +27,7 @@ public:
 	static strings Split2(string _str, const char* _del);
 	static double ToDouble(string _str) { return stod(_str); }
 	static string ToString(int _val) { return to_string(_val); }
-	static bool LoadTarga(string filename, int& height, int& width, int& _bufSize, unsigned char*& _buf, bool _isInvert = false);
+	static chars LoadTarga(string filename, int& height, int& width, bool _isInvert = false);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
 	static chars LoadFile2(string path, int& _bufSize);
 	static strings LoadLines(string path);

@@ -6,7 +6,7 @@
 #include "jInput.h"
 #include "jSound.h"
 #include "jTexture.h"
-#include "jAnimate.h"
+#include "jBoneTree.h"
 #include "ObjCamera.h"
 #include "jShaderSprite.h"
 #include "jShaderSkinned.h"
@@ -20,19 +20,11 @@ ObjTutorial1::ObjTutorial1()
 	mIdxUV = 0;
 	mAnimTime = 0.0f;
 
-	mModelX = nullptr;
-	mShaderColor = nullptr;
 }
 
 
 ObjTutorial1::~ObjTutorial1()
 {
-	if (mShaderColor != nullptr)
-	{
-		mShaderColor->Release();
-		delete mShaderColor;
-		mShaderColor = nullptr;
-	}
 	if (mShader != nullptr)
 	{
 		mShader->Release();
@@ -45,20 +37,12 @@ ObjTutorial1::~ObjTutorial1()
 		delete mModel;
 		mModel = nullptr;
 
-		mModelX->Release();
-		delete mModelX;
 	}
 }
 
 void ObjTutorial1::OnStart()
 {
 	mWorldMat.identity();
-
-	mModelX = new jModel();
-	mModelX->LoadAxis(10);
-
-	mShaderColor = new jShaderColor();
-	mShaderColor->Initialize("./color.vs", "./color.ps");
 
 	mModel = new jModel();
 	mModel->Load("mob_new2.DAE");
@@ -70,7 +54,7 @@ void ObjTutorial1::OnStart()
 	mTexture = new jTexture();
 	mTexture->Initialize("./stone01.tga");
 
-	mAnim = new jAnimate();
+	mAnim = new jBoneTree();
 	mAnim->Load("mob_new2.DAE");
 
 	//int size = mAnim->mVecBones.size();
@@ -134,14 +118,5 @@ void ObjTutorial1::OnDraw()
 	//mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector2f(0.2f, 0.2f), Vector2n(mIdxUV % 5, mIdxUV / 5));
 	mShader->SetParams(mModel, mWorldMat, &GetCamera(), mTexture, Vector4f(0.5f, 0.5f, 0.5f, 1.0f), Vector4f(1,1,-1,0), mats);
 	mShader->Render();
-
-	//mShaderColor->SetParams(mModelX, mats[0], &GetCamera(), true);
-	//mShaderColor->Render();
-	//
-	//mShaderColor->SetParams(mModelX, mats[1], &GetCamera(), true);
-	//mShaderColor->Render();
-	//
-	//mShaderColor->SetParams(mModelX, mAnim->mVecBones[2].mMatWorld, &GetCamera(), true);
-	//mShaderColor->Render();
 	
 }

@@ -13,6 +13,9 @@
 #include "ObjPlayer.h"
 #include "jLog.h"
 #include "jTime.h"
+#include "jComponent.h"
+#include "jMesh.h"
+#include "jShaderSkin.h"
 
 jGameObjectMgr::jGameObjectMgr()
 {
@@ -59,10 +62,6 @@ bool jGameObjectMgr::Initialize()
 	//00007FFEA8D34300
 	//00007FFEA8D30000
 
-
-
-
-
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
 
@@ -73,27 +72,14 @@ bool jGameObjectMgr::Initialize()
 	mTerrainMgr->AddToMgr();
 	
 	(new ObjPlayer())->AddToMgr();
-	
-	//for (int i = 16; i < 18; ++i)
-	//{
-	//	ObjTerrain* obj0 = new ObjTerrain();
-	//	obj0->mFileIndex = i;
-	//	obj0->AddToMgr();
-	//}
 
-	//for(int i = 134; i < 136; ++i) 
+	//for(int i = 134; i < 136; ++i)
 	//{
 	//	ObjDiablo* obj0 = new ObjDiablo();
 	//	obj0->mFileIndex = i;
 	//	obj0->AddToMgr();
 	//}
 
-	//for (int i = 440; i < 460; ++i)
-	//{
-	//	jObjStarCraft* obj0 = new jObjStarCraft();
-	//	obj0->mFileIndex = i;
-	//	obj0->AddToMgr();
-	//}
 
 	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 413; obj0->AddToMgr(); } //케리어
 	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 424; obj0->AddToMgr(); } //커세어
@@ -151,10 +137,23 @@ void jGameObjectMgr::RunObjects()
 		(*it)->mIsStarted = true;
 	}
 
-	for (auto iter = mCoroutines.begin(); iter != mCoroutines.end(); )
+	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
+	{
+		list<jComponent*>& components = (*it)->mComponents;
+		for (jComponent* comp : components)
+		{
+			jShader* shader = dynamic_cast<jShader*>(comp);
+			if (shader)
+				shader->LoadRenderResources();
+		}
+	}
+
+	for (auto iter = mCoroutines.begin(); iter != mCoroutines.end();)
 	{
 		function<bool(void)> func = iter->second;
-		if (func())
+		if (func == nullptr)
+			mCoroutines.erase(iter++);
+		else if (func())
 			++iter;
 		else
 			mCoroutines.erase(iter++);
@@ -308,10 +307,9 @@ void jGameObjectMgr::StartCoroutine(function<bool(void)> coroutine)
 }
 void jGameObjectMgr::StartCoroutine(function<bool(void)> coroutine, string name)
 { 
-	StopCoroutine(name);
 	mCoroutines[name] = coroutine;
 }
 void jGameObjectMgr::StopCoroutine(string name)
 {
-	mCoroutines.erase(name);
+	mCoroutines[name] = nullptr;
 }

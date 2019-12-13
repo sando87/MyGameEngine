@@ -17,11 +17,10 @@ bool jTexture::Initialize(string _filename)
 {
 	int width = 0;
 	int height = 0;
-	int bufSize = 0;
-	unsigned char* buf = nullptr;
+	chars buf = jUtils::LoadTarga(_filename, height, width);
 
 	// targa 이미지 데이터를 메모리에 로드합니다.
-	if (!jUtils::LoadTarga(_filename, height, width, bufSize, buf))
+	if (!buf)
 	{
 		_warn();
 		return false;
@@ -54,7 +53,7 @@ bool jTexture::Initialize(string _filename)
 	UINT rowPitch = (width * 4) * sizeof(unsigned char);
 
 	// targa 이미지 데이터를 텍스처에 복사합니다.
-	jRenderer::GetInst().GetDeviceContext()->UpdateSubresource(texture, 0, NULL, buf, rowPitch, 0);
+	jRenderer::GetInst().GetDeviceContext()->UpdateSubresource(texture, 0, NULL, &buf[0], rowPitch, 0);
 
 	// 셰이더 리소스 뷰 구조체를 설정합니다.
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -75,8 +74,6 @@ bool jTexture::Initialize(string _filename)
 	jRenderer::GetInst().GetDeviceContext()->GenerateMips(mTextureView);
 
 	// 이미지 데이터가 텍스처에 로드 되었으므로 targa 이미지 데이터를 해제합니다.
-	delete[] buf;
-	buf = nullptr;
 
 	texture->Release();
 	texture = nullptr;
