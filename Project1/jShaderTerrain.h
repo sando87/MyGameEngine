@@ -10,8 +10,8 @@ public:
 	jShaderTerrain();
 	~jShaderTerrain();
 
-	virtual bool LoadRenderResources();
-	virtual bool Render();
+	virtual bool OnLoad();
+	virtual bool OnRender();
 
 	bool SetTextures(vector<jImage *>& images);
 	ShaderParamsTerrain& GetParams() { return mParams; }

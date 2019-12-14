@@ -31,6 +31,5 @@ private:
 	vector<u32> mIndicies;
 
 	Property_Getter(string, Name)
-	Property_Getter(int, PrimitiveCount)
 };
 

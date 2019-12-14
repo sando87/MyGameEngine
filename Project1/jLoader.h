@@ -1,11 +1,6 @@
 #pragma once
 
-#include <vector>
-using namespace std;
-
-#include "header.h"
-#include "Vectors.h"
-#include "TmpComStruct.h"
+#include "junks.h"
 
 class jLoader
 {
@@ -21,11 +16,7 @@ public:
 	vector<Vector4f> mWeights;
 	vector<Vector3n> mVertexIdx;
 
-	vector<vector<Vector3n>> mFaceInfo;
-	vector<BoneWeights> mWeightPos;
-
 	void LoadObjFile(string _filename);
-	void LoadObjFile2(string _filename);
 	void LoadDaeFile(string _filename);
 
 	void Release()
@@ -34,7 +25,9 @@ public:
 		mPos.clear();
 		mUV.clear();
 		mNormal.clear();
-		mFaceInfo.clear();
+		mBoneIndexs.clear();
+		mWeights.clear();
+		mVertexIdx.clear();
 	}
 };
 

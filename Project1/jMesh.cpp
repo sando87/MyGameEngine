@@ -47,7 +47,6 @@ bool jMesh::Load(string _name)
 		}
 	}
 
-	mPrimitiveCount = 3;
 	mName = _name;
 	return true;
 }
@@ -93,7 +92,6 @@ bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 		mIndicies.push_back(cnt - 1);
 	}
 
-	mPrimitiveCount = 2;
 	mName = "GroundGrid";
 	return true;
 }
@@ -192,7 +190,6 @@ bool jMesh::LoadAxis(int _len)
 	}
 
 
-	mPrimitiveCount = 2;
 	mName = "Axis";
 
 	return true;

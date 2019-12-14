@@ -9,9 +9,9 @@ public:
 	jShaderSkin();
 	virtual ~jShaderSkin();
 
-	virtual bool LoadRenderResources();
-	virtual bool Render();
-
+	virtual bool OnLoad();
+	virtual bool OnRender();
+	
 	ShaderParamsSkin& GetParams() { return mParams; }
 protected:
 

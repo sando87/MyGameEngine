@@ -1,8 +1,7 @@
 #pragma once
 
-#include "header.h"
-#include "Vectors.h"
-#include "Matrices.h"
+#include "junks.h"
+#include "jDirectXheader.h"
 
 #pragma pack(push, 1)
 

@@ -11,7 +11,6 @@ public:
 	friend void jGameObject::AddComponent(jComponent* comp);
 
 	Property_Getter(jGameObject*, GameObject)
-	Property_GetSetter(bool, Enabled)
 };
 
 

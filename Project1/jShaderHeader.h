@@ -4,6 +4,13 @@
 #include "Vectors.h"
 #include "Matrices.h"
 
+
+struct VertexFormatPTN
+{
+	Vector3f p;
+	Vector2f t;
+	Vector3f n;
+};
 struct VertexFormatPT
 {
 	Vector3f p;
@@ -61,6 +68,11 @@ struct ShaderParamsSprite //should be 16byte aligned
 struct ShaderParamsSkin //should be 16byte aligned
 {
 	Matrix4f bones[45];
+	ShaderBufferMaterial material;
+	ShaderBufferLight light;
+};
+struct ShaderParamsDefault //should be 16byte aligned
+{
 	ShaderBufferMaterial material;
 	ShaderBufferLight light;
 };

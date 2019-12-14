@@ -73,10 +73,3 @@ void jGameObject::OnStart()
 void jGameObject::OnUpdate()
 {
 }
-
-void jGameObject::OnDraw()
-{
-	jShader* shader = FindComponent<jShader>();
-	if (shader != nullptr && shader->GetLoaded() && shader->GetEnabled() && shader->GetVisiable())
-		shader->Render();
-}

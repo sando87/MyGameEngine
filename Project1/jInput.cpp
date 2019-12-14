@@ -1,5 +1,4 @@
 #include "jInput.h"
-#include "jLog.h"
 
 
 jInput::jInput()

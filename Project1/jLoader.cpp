@@ -1,10 +1,4 @@
 #include "jLoader.h"
-#include "jLog.h"
-#include "jUtils.h"
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <iostream>
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
@@ -30,54 +24,19 @@ void jLoader::LoadObjFile(string _filename)
 			mNormal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
 		else if (vec[0] == "f")
 		{
-			//vector<Vector3n> vertN;
 			int faceCnt = vec.size();
 			for (int j = 1; j < faceCnt; ++j)
 			{
 				vector<string> vertS;
 				jUtils::Split(vec[j], "/", vertS);
-				//vertN.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
 				mVertexIdx.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
 			}
-			//mFaceInfo.push_back(vertN);
 		}
 		else
 			mInfo.push_back(line);
 	}
 
 	input.close();
-}
-
-void jLoader::LoadObjFile2(string _filename)
-{
-	strings lines = jUtils::LoadLines(_filename);
-	if (!lines)
-		return;
-
-	for (string line : *lines)
-	{
-		strings vec = jUtils::Split2(line, " ");
-
-		if (vec[0] == "v")
-			mPos.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
-		else if (vec[0] == "vt")
-			mUV.push_back(Vector2f(stof(vec[1]), stof(vec[2])));
-		else if (vec[0] == "vn")
-			mNormal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
-		else if (vec[0] == "f")
-		{
-			vector<Vector3n> vertN;
-			int faceCnt = vec->size();
-			for (int j = 1; j < faceCnt; ++j)
-			{
-				strings faces = jUtils::Split2(vec[j], "/");
-				vertN.push_back(Vector3n(stoi(faces[0]) - 1, stoi(faces[1]) - 1, stoi(faces[2]) - 1));
-			}
-			mFaceInfo.push_back(vertN);
-		}
-		else
-			mInfo.push_back(line);
-	}
 }
 
 void jLoader::LoadDaeFile(string _filename)
@@ -139,27 +98,6 @@ void jLoader::LoadDaeFile(string _filename)
 	const char* faces = geoEle->FirstChildElement("triangles")->FirstChildElement("p")->GetText();
 	vector<string> vecFaces;
 	jUtils::Split(string(faces), " \n", vecFaces);
-	cntVec = vecFaces.size() / 9;
-	for (int i = 0; i < cntVec; ++i)
-	{
-		vector<Vector3n> vertN;
-		Vector3n facePt;
-		facePt.x = stoi(vecFaces[i * 9 + 0]);
-		facePt.z = stoi(vecFaces[i * 9 + 1]); //Normal => z matching
-		facePt.y = stoi(vecFaces[i * 9 + 2]); //UZ => y matching
-		vertN.push_back(facePt);
-		facePt.x = stoi(vecFaces[i * 9 + 3]);
-		facePt.z = stoi(vecFaces[i * 9 + 4]);
-		facePt.y = stoi(vecFaces[i * 9 + 5]);
-		vertN.push_back(facePt);
-		facePt.x = stoi(vecFaces[i * 9 + 6]);
-		facePt.z = stoi(vecFaces[i * 9 + 7]);
-		facePt.y = stoi(vecFaces[i * 9 + 8]);
-		vertN.push_back(facePt);
-
-		mFaceInfo.push_back(vertN);
-	}
-
 	cntVec = vecFaces.size() / 3;
 	for (int i = 0; i < cntVec; ++i)
 	{
@@ -169,13 +107,6 @@ void jLoader::LoadDaeFile(string _filename)
 		vertN.y = stoi(vecFaces[i * 3 + 2]);
 
 		mVertexIdx.push_back(vertN);
-	}
-
-
-	if (doc.FirstChildElement("COLLADA")->FirstChildElement("library_controllers") == nullptr)
-	{
-		mWeightPos.resize(mPos.size());
-		return;
 	}
 
 	XMLElement* element = doc.FirstChildElement("COLLADA")
@@ -206,27 +137,8 @@ void jLoader::LoadDaeFile(string _filename)
 	jUtils::Split(vc_, " \n", vecVCs);
 	jUtils::Split(v_, " \n", vecVs);
 
-	
 	int accIdx = 0;
 	int cntVC = vecVCs.size();
-	for (int i = 0; i < cntVC; ++i)
-	{
-		BoneWeights bws;
-		int cntV = stoi(vecVCs[i]);
-		for (int j = 0; j < cntV; ++j)
-		{
-			BoneWeight bw;
-			bw.boneIndex = stoi(vecVs[(accIdx + j) * 2]);
-			int weightIdx = stoi(vecVs[(accIdx + j) * 2 + 1]);
-			bw.weight = stof(vecWeights[weightIdx]);
-			bws.weights.push_back(bw);
-		}
-		accIdx += cntV;
-		mWeightPos.push_back(bws);
-	}
-
-	accIdx = 0;
-	cntVC = vecVCs.size();
 	for (int i = 0; i < cntVC; ++i)
 	{
 		Vector4n bones;

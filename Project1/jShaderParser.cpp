@@ -13,11 +13,8 @@ jShaderParser::~jShaderParser()
 {
 }
 
-bool jShaderParser::LoadRenderResources()
+bool jShaderParser::Load(jParserD3 * parser)
 {
-	if (mLoaded)
-		return true;
-
 	ID3D10Blob* vertexShaderBuffer = CompileShader(SHADER_PARSER_FILENAME);
 	if (vertexShaderBuffer == nullptr)
 		return false;
@@ -76,11 +73,7 @@ bool jShaderParser::LoadRenderResources()
 	if (FAILED(mDev->CreateSamplerState(&samplerDesc, &mSampleState)))
 		return false;
 
-	mLoaded = true;
-	return true;
-}
-void jShaderParser::Load(jParserD3 * parser)
-{
+
 	mTexture = parser->GetResShaderResourceView(0);
 	mIndexBuffer = parser->GetResIndexBuffer();
 
@@ -111,7 +104,7 @@ void jShaderParser::Load(jParserD3 * parser)
 	subRes.SysMemPitch = 0;
 	subRes.SysMemSlicePitch = 0;
 	if (FAILED(mDev->CreateBuffer(&vertexBufferDesc, &subRes, &mVertBuffer)))
-		return;
+		return false;
 
 	mIASetVertexBuffersOff = (info.vertexVertexByteOffset / info.vertexStride) * mIASetVertexBuffersStride;
 	mIndexStride = info.indiciesIndexUnit; // 2 or 4
@@ -119,8 +112,13 @@ void jShaderParser::Load(jParserD3 * parser)
 	mDrawIndexed1 = info.drawIndexCount;
 	mDrawIndexed2 = info.drawIndexOffset;
 	mDrawIndexed3 = info.drawVertOffset;
+	return true;
 }
-bool jShaderParser::Render()
+bool jShaderParser::OnLoad()
+{
+	return true;
+}
+bool jShaderParser::OnRender()
 {
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	mDevContext->IASetVertexBuffers(0, 1, &mVertBuffer, &mIASetVertexBuffersStride, (const UINT *)&mIASetVertexBuffersOff);

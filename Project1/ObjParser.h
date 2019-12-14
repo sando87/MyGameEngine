@@ -4,18 +4,16 @@
 class jParserD3;
 class jShaderParser;
 
-class ObjTutorial1 : public jGameObject
+class ObjParser : public jGameObject
 {
 public:
-	ObjTutorial1();
-	~ObjTutorial1();
+	ObjParser();
+	~ObjParser();
 
 	int mFileIndex;
 	float mOff;
 private:
 	void OnStart();
-	void OnUpdate();
-	void OnDraw();
 
 	jParserD3* mParser;
 	jShaderParser* mShader;

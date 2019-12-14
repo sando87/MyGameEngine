@@ -26,7 +26,7 @@ bool jHeightMap::UpdateHeightMap(jMesh * _mesh, Vector3 _base)
 		if (gridIdx < 0 || gridIdx >= mCntWidth * mCntHeight)
 			continue;
 
-		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.position.z + _base.z);
+		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.position.z + (float)_base.z);
 		mMinZ = min(mHeightMap[gridIdx], mMinZ);
 		mMaxZ = max(mHeightMap[gridIdx], mMaxZ);
 	}

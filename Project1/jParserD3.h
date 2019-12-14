@@ -1,13 +1,12 @@
 #pragma once
-#include <utility>
-#include <map>
-#include <functional>
 
-#include "jGlobalStruct.h"
-using namespace std;
-struct MyResBase;
+#include "junks.h"
+#include "jDirectXheader.h"
+#include "jParserSub.h"
 
 #define PATH_EXPORT "D:\\export\\"
+
+struct MyResBase;
 
 struct GeometryInfo
 {

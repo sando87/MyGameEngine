@@ -1,5 +1,8 @@
 #pragma once
-#include "junks.h"
+#include <string>
+#include <functional>
+#include "Vectors.h"
+using namespace std;
 
 class jOS_APIs
 {

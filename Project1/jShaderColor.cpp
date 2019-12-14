@@ -13,6 +13,8 @@ jShaderColor::jShaderColor()
 
 	mVertexStride = 0;
 	mIndexCount = 0;
+
+	mLineMode = false;
 }
 
 jShaderColor::~jShaderColor()
@@ -20,25 +22,17 @@ jShaderColor::~jShaderColor()
 }
 
 
-bool jShaderColor::LoadRenderResources()
+bool jShaderColor::OnLoad()
 {
-	if (mLoaded)
-		return true;
-
 	bool ret = CreateShaderAndLayout();
 	if (ret) ret = CreateInputBuffer();
 
-	if (ret)
-		mLoaded = true;
-	else
-		_echoS("failed Loading Shader");
+	_warnif(!ret);
 	return ret;
 }
 
-bool jShaderColor::Render()
+bool jShaderColor::OnRender()
 {
-	jShader::Render();
-
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int stride = mVertexStride;
 	unsigned int offset = 0;
@@ -70,7 +64,9 @@ bool jShaderColor::Render()
 	mDevContext->PSSetShader(mPixelShader, NULL, 0);
 
 	// 삼각형을 그립니다.
+	mDevContext->IASetPrimitiveTopology(mLineMode ? D3D11_PRIMITIVE_TOPOLOGY_LINELIST : D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mDevContext->DrawIndexed(mIndexCount, 0, 0);
+	mDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	return true;
 }
 

@@ -9,8 +9,8 @@ public:
 	jShaderColor();
 	virtual ~jShaderColor();
 
-	virtual bool LoadRenderResources();
-	virtual bool Render();
+	virtual bool OnLoad();
+	virtual bool OnRender();
 
 protected:
 	bool CreateShaderAndLayout();
@@ -24,5 +24,6 @@ protected:
 	unsigned int mVertexStride;
 	unsigned int mIndexCount;
 
+	Property_Setter(bool, LineMode)
 };
 

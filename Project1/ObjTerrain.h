@@ -13,7 +13,6 @@ public:
 private:
 	//void OnStart();
 	//void OnUpdate();
-	//void OnDraw();
 	
 public:
 	void Load(string name, float size, float step, jHeightMap* heightmap);

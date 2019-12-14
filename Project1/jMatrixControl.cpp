@@ -1,8 +1,4 @@
-#include <math.h>
 #include "jMatrixControl.h"
-#include "jMath.h"
-#include "jLog.h"
-#include "jUtils.h"
 
 jMatrixControl::jMatrixControl()
 {

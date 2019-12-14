@@ -16,28 +16,20 @@ jShaderSkin::~jShaderSkin()
 {
 }
 
-bool jShaderSkin::LoadRenderResources()
+bool jShaderSkin::OnLoad()
 {
-	if (mLoaded)
-		return true;
-
 	bool ret = CreateShaderAndLayout();
 	if (ret) ret = CreateBuffers();
 	if (ret) ret = CreateSamplerState();
 	if (ret) ret = CreateInputBuffer();
 	if (ret) CreateTexture();
 
-	if (ret)
-		mLoaded = true;
-	else
-		_echoS("failed Loading Shader");
+	_warnif(!ret);
 	return ret;
 }
 
-bool jShaderSkin::Render()
+bool jShaderSkin::OnRender()
 {
-	jShader::Render();
-
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
 	

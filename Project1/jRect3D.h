@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Vectors.h"
+#include "junks.h"
 #include "jRect.h"
 #include "jLine3D.h"
-#include <vector>
-using namespace std;
 
 class jRect3D
 {

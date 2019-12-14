@@ -1,6 +1,4 @@
 #include "jParserS2.h"
-#include "jUtils.h"
-#include "jLog.h"
 
 jParserS2::jParserS2()
 {

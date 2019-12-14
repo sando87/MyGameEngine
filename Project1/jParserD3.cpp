@@ -1,9 +1,5 @@
 #include "jParserD3.h"
-#include "jUtils.h"
-#include "jLog.h"
 #include "jRenderer.h"
-#include <direct.h>
-#include <sstream>
 
 #define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))

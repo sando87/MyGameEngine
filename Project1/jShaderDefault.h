@@ -1,19 +1,19 @@
 #pragma once
 #include "jShader.h"
 
-class jShaderSprite : 
+class jShaderDefault :
 	public jShader
 {
 public:
-	jShaderSprite();
-	virtual ~jShaderSprite();
+	jShaderDefault();
+	virtual ~jShaderDefault();
 
 	virtual bool OnLoad();
 	virtual bool OnRender();
 
-	ShaderParamsSprite& GetParams() { return mParams; }
-protected:
+	ShaderParamsDefault& GetParams() { return mParams; }
 
+protected:
 	bool CreateShaderAndLayout();
 	bool CreateBuffers();
 	bool CreateSamplerState();
@@ -23,7 +23,7 @@ protected:
 	ID3D11InputLayout* mLayout;
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mMaterialBuffer;
-	ID3D11Buffer* mSpriteBuffer;
+	ID3D11Buffer* mLightBuffer;
 	ID3D11SamplerState* mSampleState;
 	ID3D11ShaderResourceView * mTextureView;
 	ID3D11Buffer* mVertBuf;
@@ -32,6 +32,6 @@ protected:
 	unsigned int mVertexStride;
 	unsigned int mIndexCount;
 
-	ShaderParamsSprite mParams;
+	ShaderParamsDefault mParams;
+	
 };
-

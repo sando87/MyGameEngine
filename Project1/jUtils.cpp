@@ -1,4 +1,6 @@
 
+#include "jUtils.h"
+#include "junks.h"
 #include "jOS_APIs.h"
 
 jUtils::jUtils()
@@ -10,18 +12,6 @@ jUtils::~jUtils()
 {
 }
 
-void jUtils::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far)
-{
-	_errorif(_near == _far || _aspect == 0);
-	
-	_mat.identity();
-	_mat[5] = 1 / tan(DegToRad(_fovDeg * 0.5));
-	_mat[0] = _mat[5] / _aspect;
-	_mat[10] = _far / (_far - _near);
-	_mat[11] = 1.0;
-	_mat[14] = (_far*_near) / (_near - _far);
-	_mat[15] = 0.0;
-}
 void jUtils::Split(string _str, const char* _del, vector<string>& _vec)
 {
 	trim(_str);

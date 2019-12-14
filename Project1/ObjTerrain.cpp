@@ -16,7 +16,6 @@ ObjTerrain::~ObjTerrain()
 
 void ObjTerrain::Load(string name, float size, float step, jHeightMap* heightmap)
 {
-	jShaderTerrain* shader = new jShaderTerrain();
 	string path = "D:\\export\\D3\\" + name + "\\";
 
 	jMesh* mesh = new jMesh();
@@ -54,6 +53,7 @@ void ObjTerrain::Load(string name, float size, float step, jHeightMap* heightmap
 		}
 	}
 
+	jShaderTerrain* shader = new jShaderTerrain();
 	shader->SetTextures(textures);
 	ShaderParamsTerrain& param = shader->GetParams();
 	memcpy(param.vectors, &texels[0], sizeof(Vector4f) * texels.size());

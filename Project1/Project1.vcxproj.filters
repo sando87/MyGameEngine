@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jModel.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Vectors.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -28,12 +25,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jLog.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jBaseShader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jMath.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jUtils.cpp">
@@ -48,9 +39,6 @@
     <ClCompile Include="jGameObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ObjTutorial1.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="jInput.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -58,9 +46,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jLoader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jTexture.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jMaterial.cpp">
@@ -78,9 +63,6 @@
     <ClCompile Include="jShaderColor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jShaderSkinned.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="ObjGroundAxis.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -94,18 +76,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jLine3D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjDiablo.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderDiablo.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderTexture.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jGlobalStruct.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jParserD3.cpp">
@@ -124,9 +94,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jAStar.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jObjStarCraft.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ObjTerrainMgr.cpp">
@@ -171,27 +138,24 @@
     <ClCompile Include="jShaderParser.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ObjParser.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderDefault.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jParserSub.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jModel.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="header.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Vectors.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Matrices.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="jMath.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="jLog.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jBaseShader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jUtils.h">
@@ -206,9 +170,6 @@
     <ClInclude Include="jGameObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ObjTutorial1.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="jInput.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -218,16 +179,10 @@
     <ClInclude Include="jLoader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="jTexture.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="jMaterial.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="tinyxml2.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="TmpComStruct.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -240,9 +195,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jShaderColor.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderSkinned.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ObjGroundAxis.h">
@@ -258,18 +210,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jLine3D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjDiablo.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderDiablo.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jGlobalStruct.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderTexture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jParserD3.h">
@@ -290,13 +230,7 @@
     <ClInclude Include="jAStar.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="jObjStarCraft.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ObjTerrainMgr.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jTypeDef.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jRect.h">
@@ -345,6 +279,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="jShaderParser.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjParser.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderDefault.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserSub.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

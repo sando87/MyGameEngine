@@ -8,7 +8,6 @@
 
 jShader::jShader()
 {
-	mLoaded = false;
 	mVisiable = true;
 	mVertexShader = nullptr;
 	mPixelShader = nullptr;
@@ -54,19 +53,4 @@ ID3D10Blob * jShader::CompileShader(string filename)
 
 	pixelShaderBuffer->Release();
 	return vertexShaderBuffer;
-}
-
-
-bool jShader::Render()
-{
-	if (mMesh == nullptr)
-		mMesh = GetGameObject()->FindComponent<jMesh>();
-
-	ID3D11DeviceContext* pDevContext = jRenderer::GetInst().GetDeviceContext();
-	if(mMesh->GetPrimitiveCount() == 2)
-		pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	else
-		pDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return false;
 }

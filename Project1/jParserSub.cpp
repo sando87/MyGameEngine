@@ -1,9 +1,5 @@
-#include "jGlobalStruct.h"
-#include "jLog.h"
-#include "jUtils.h"
+#include "jParserSub.h"
 #include "jRenderer.h"
-#include "jGameObjectMgr.h"
-#include <sstream>
 
 void MyRes_CreateLayout::SetNameOffset()
 {

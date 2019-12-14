@@ -41,7 +41,6 @@ public:
 protected:
 	virtual void OnStart();
 	virtual void OnUpdate();
-	virtual void OnDraw();
 
 	bool mIsRemoved;
 	bool mIsStarted;

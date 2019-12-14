@@ -1,7 +1,8 @@
 #ifndef __JSOUND_H__
 #define __JSOUND_H__
 
-#include "header.h"
+#include "junks.h"
+#include "jDirectXheader.h"
 
 class jSound
 {

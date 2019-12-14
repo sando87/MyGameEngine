@@ -1,9 +1,8 @@
 #include "ObjCamera.h"
-#include "jUtils.h"
-#include "jInput.h"
-#include "jMath.h"
-#include "jLog.h"
+#include "junks.h"
 #include "jLine3D.h"
+#include "jInput.h"
+
 
 ObjCamera::ObjCamera()
 {
@@ -18,7 +17,7 @@ void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, doub
 	mWidth = _width;
 	mHeight = _height;
 	double aspect = (double)_width / _height;
-	jUtils::GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
+	GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
 
 	mNear = zNear;
 	mFar = zFar;
@@ -27,6 +26,18 @@ void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, doub
 	double mFovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) / aspect);
 	mFovDegVerti = RadToDeg(mFovRadVerti);
 	mFovDegVerti *= 2;
+}
+void ObjCamera::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far)
+{
+	_errorif(_near == _far || _aspect == 0);
+
+	_mat.identity();
+	_mat[5] = 1 / tan(DegToRad(_fovDeg * 0.5));
+	_mat[0] = _mat[5] / _aspect;
+	_mat[10] = _far / (_far - _near);
+	_mat[11] = 1.0;
+	_mat[14] = (_far*_near) / (_near - _far);
+	_mat[15] = 0.0;
 }
 
 void ObjCamera::OnStart()

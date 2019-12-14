@@ -4,7 +4,6 @@
 
 jComponent::jComponent()
 {
-	mEnabled = true;
 }
 
 

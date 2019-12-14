@@ -1,4 +1,4 @@
-#include "ObjTutorial1.h"
+#include "ObjParser.h"
 #include "jParserD3.h"
 #include "jParserS2.h"
 #include "jShaderParser.h"
@@ -6,7 +6,7 @@
 
 #define IS_DIABLO
 
-ObjTutorial1::ObjTutorial1()
+ObjParser::ObjParser()
 {
 	mFileIndex = 0;
 	mOff = 0;
@@ -17,13 +17,13 @@ ObjTutorial1::ObjTutorial1()
 #endif
 }
 
-ObjTutorial1::~ObjTutorial1()
+ObjParser::~ObjParser()
 {
 	delete mParser;
 	delete mShader;
 }
 
-void ObjTutorial1::OnStart()
+void ObjParser::OnStart()
 {
 	if (!mParser->Init(mFileIndex))
 	{
@@ -43,11 +43,3 @@ void ObjTutorial1::OnStart()
 	mTransport->moveTo(pos);
 }
 
-void ObjTutorial1::OnUpdate()
-{
-}
-
-void ObjTutorial1::OnDraw()
-{
-	mShader->Render();
-}

@@ -1,7 +1,26 @@
 #ifndef __JUTILS_H__
 #define __JUTILS_H__
 
-#include "junks.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include <functional>
+using namespace std;
+
+class Matrix4;
+
+template<typename T>
+class shared_ptr_array : public shared_ptr<vector<T>>
+{
+public:
+	shared_ptr_array() : shared_ptr<vector<T>>(new vector<T>()) {}
+	T& operator[](int idx) { return this->get()->operator[](idx); }
+	operator bool() const { return this->get()->size() > 0; }
+};
+
+typedef shared_ptr_array<string> strings;
+typedef shared_ptr_array<char> chars;
+
 
 struct TargaHeader
 {
@@ -22,7 +41,6 @@ public:
 	jUtils();
 	~jUtils();
 
-	static void GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far);
 	static void Split(string _str, const char* _del, vector<string>& _vec);
 	static strings Split2(string _str, const char* _del);
 	static double ToDouble(string _str) { return stod(_str); }

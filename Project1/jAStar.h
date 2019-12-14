@@ -1,11 +1,6 @@
 #pragma once
-#include <unordered_map>
-#include <map>
-#include <vector>
-#include "Vectors.h"
-#include "jTypeDef.h"
-using namespace std;
 
+#include "junks.h"
 
 class jHeightMap;
 

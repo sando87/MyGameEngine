@@ -10,10 +10,10 @@ public:
 	jShaderParser();
 	virtual ~jShaderParser();
 
-	virtual bool LoadRenderResources();
-	virtual bool Render();
+	virtual bool OnLoad();
+	virtual bool OnRender();
 
-	void Load(jParserD3* parser);
+	bool Load(jParserD3* parser);
 
 private:
 	ID3D11InputLayout * mLayout;

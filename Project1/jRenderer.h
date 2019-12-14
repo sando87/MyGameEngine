@@ -1,7 +1,7 @@
 #ifndef __JRENDERER_H__
 #define __JRENDERER_H__
 
-#include "header.h"
+#include "jDirectXheader.h"
 
 #define SCREEN_NEAR 1.0f
 #define SCREEN_FAR 1000.0f

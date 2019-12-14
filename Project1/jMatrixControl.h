@@ -1,7 +1,7 @@
 #ifndef __EZ_CAMERA_H__
 #define __EZ_CAMERA_H__
 
-#include "Matrices.h"
+#include "junks.h"
 
 class jMatrixControl
 {

@@ -13,8 +13,8 @@ public:
 	jShader();
 	virtual ~jShader() {}
 
-	virtual bool LoadRenderResources() = 0;
-	virtual bool Render();
+	virtual bool OnLoad() = 0;
+	virtual bool OnRender() = 0;
 
 protected:
 	ID3D10Blob * CompileShader(string filename);
@@ -27,7 +27,7 @@ protected:
 
 	jMesh * mMesh;
 
-	Property_Getter(bool, Loaded)
-	Property_Getter(bool, Visiable)
+	Property_GetSetter(bool, Visiable)
+	Property_GetSetter(bool, Loaded)
 };
 

@@ -1,9 +1,8 @@
 #ifndef __JINPUT_H__
 #define __JINPUT_H__
 
-#include "header.h"
-#include <functional>
-#include "jFuncPtrList.h"
+#include "junks.h"
+#include "jDirectXheader.h"
 
 class jInput
 {
