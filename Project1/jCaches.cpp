@@ -1,30 +1,30 @@
-#include "jResources.h"
+#include "jCaches.h"
 #include "jDirectXheader.h"
 
 #define CacheSize 100
 
-jResources * jResources::mInst = new jResources();
-void * jResources::CacheClass(string name, function<void*(string)> loader)
+jCaches * jCaches::mInst = new jCaches();
+void * jCaches::CacheClass(string name, function<void*(string)> loader)
 {
 	return mInst->CacheItem(name, loader, [](void* ptr) { delete ptr; });
 }
-void * jResources::CacheBuffers(string name, function<void*(string)> loader)
+void * jCaches::CacheBuffers(string name, function<void*(string)> loader)
 {
 	return mInst->CacheItem(name, loader, [](void* ptr) { delete[] ptr; });
 }
-void * jResources::CacheGraphics(string name, function<void*(string)> loader)
+void * jCaches::CacheGraphics(string name, function<void*(string)> loader)
 {
 	return mInst->CacheItem(name, loader, [](void* ptr) { ((IUnknown*)ptr)->Release(); });
 }
 
-jResources::jResources()
+jCaches::jCaches()
 {
 }
-jResources::~jResources()
+jCaches::~jCaches()
 {
 	ClearItems(mCachedItems.size());
 }
-void jResources::ClearItems(int count)
+void jCaches::ClearItems(int count)
 {
 	vector<ItemInfo> items;
 	for (auto item : mCachedItems)
@@ -41,7 +41,7 @@ void jResources::ClearItems(int count)
 		mCachedItems.erase(items[i].name);
 	}
 }
-void * jResources::CacheItem(string name, function<void*(string)> loader, function<void(void*)> releaser)
+void * jCaches::CacheItem(string name, function<void*(string)> loader, function<void(void*)> releaser)
 {
 	if (mCachedItems.find(name) == mCachedItems.end())
 	{

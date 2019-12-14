@@ -1,17 +1,29 @@
 #include "jTime.h"
+#include "junks.h"
 
-
-std::chrono::system_clock::time_point jTime::mStartTime = std::chrono::system_clock::now();
-std::chrono::system_clock::time_point jTime::mNowTime = mStartTime;
+system_clock::time_point jTime::mStartTime = system_clock::now();
+system_clock::time_point jTime::mNowTime = mStartTime;
+system_clock::time_point jTime::mPreviousTime = mStartTime;
 double jTime::mDeltaTime = 0;
 double jTime::mTotalTime = 0;
 
 void jTime::Update()
 {
-	std::chrono::system_clock::time_point nowTime = std::chrono::system_clock::now();
-	std::chrono::duration<double> delta = nowTime - mNowTime;
+	system_clock::time_point nowTime = system_clock::now();
+	duration<double> delta = nowTime - mNowTime;
 	mDeltaTime = delta.count();
-	std::chrono::duration<double> total = nowTime - mStartTime;
+	duration<double> total = nowTime - mStartTime;
 	mTotalTime = total.count();
 	mNowTime = nowTime;
+}
+void jTime::Start()
+{
+	mPreviousTime = system_clock::now();
+}
+void jTime::Measure(string printMsg)
+{
+	system_clock::time_point now = system_clock::now();
+	duration<double> delta = now - mPreviousTime;
+	mPreviousTime = now;
+	_printlog("[%f] %s\n", delta.count(), printMsg.c_str());
 }

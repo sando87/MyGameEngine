@@ -165,7 +165,10 @@
     <ClCompile Include="jOS_APIs.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jResources.cpp">
+    <ClCompile Include="jCaches.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderParser.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -338,7 +341,10 @@
     <ClInclude Include="jOS_APIs.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="jResources.h">
+    <ClInclude Include="jCaches.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderParser.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

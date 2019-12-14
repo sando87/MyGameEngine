@@ -25,7 +25,10 @@ ObjPlayer::~ObjPlayer()
 void ObjPlayer::OnStart()
 {
 	mBones = new jBoneTree();
-	mBones->Load("mob2.DAE");
+	mBones->LoadBoneTreeDAE("mob2.DAE");
+	mBones->LoadAnimateDAE("mob2_idle.DAE", "idle");
+	mBones->LoadAnimateDAE("mob2_run.DAE", "run");
+	mBones->LoadAnimateDAE("mob2_attack.DAE", "attack");
 
 	AddComponent(new jMesh("mob2.DAE"));
 	AddComponent(new jImage("./stone01.tga"));
@@ -46,11 +49,11 @@ void ObjPlayer::OnStart()
 	param.light.position = light;
 	param.light.reserve = light;
 
-	InitAnim();
-
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
-		//SetWalk();
+		SetAnim("run");
+		return;
+
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
 		Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
@@ -69,28 +72,17 @@ void ObjPlayer::OnStart()
 		}, "MovePlayer");
 	};
 }
-
-void ObjPlayer::InitAnim()
+void ObjPlayer::SetAnim(string animName)
 {
-	mIdle = [this]() {
-		GetTransport().goForward(3 * jTime::Delta());
-		return EnumCoroutine::Continue;
-	};
-	mWalk = [this]() {
+	mBones->SetAnimate(animName);
+	StartCoRoutine([this]() {
 		mAnimTime += jTime::Delta();
 		vector<Matrix4> mats;
 		mBones->Animate(mAnimTime, mats);
 		ShaderParamsSkin& param = mShader->GetParams();
 		for (int i = 0; i < mats.size(); ++i)
 			param.bones[i] = mats[i].transpose();
+		//GetTransport().goForward(3 * jTime::Delta());
 		return EnumCoroutine::Continue;
-	};
-	mRun = [this]() {
-		GetTransport().rotateToPos_OnGround(Vector3(1,1,0), 30 * jTime::Delta());
-		return EnumCoroutine::Continue;
-	};
-	mDeath = [this]() {
-		GetTransport().rotateToPos_OnGround(Vector3(-1, -1, 0), 30 * jTime::Delta());
-		return EnumCoroutine::Continue;
-	};
+	}, "player");
 }

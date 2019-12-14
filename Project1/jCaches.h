@@ -8,7 +8,7 @@ struct ItemInfo{
 	clock_t hitTime;
 };
 
-class jResources
+class jCaches
 {
 public:
 	static void * CacheClass(string name, function<void*(string)> loader);
@@ -16,10 +16,10 @@ public:
 	static void * CacheGraphics(string name, function<void*(string)> loader);
 
 private:
-	static jResources * mInst;
+	static jCaches * mInst;
 	
-	jResources();
-	~jResources();
+	jCaches();
+	~jCaches();
 
 	unordered_map<string, ItemInfo> mCachedItems;
 

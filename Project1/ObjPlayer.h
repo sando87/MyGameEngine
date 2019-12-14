@@ -19,15 +19,6 @@ private:
 	jBoneTree* mBones;
 
 	float mAnimTime = 0;
-
-	void InitAnim();
-	void SetIdle() { StartCoRoutine(mIdle, "play"); }
-	void SetWalk() { StartCoRoutine(mWalk, "play"); }
-	void SetRun() { StartCoRoutine(mRun, "play"); }
-	void SetDeath() { StartCoRoutine(mDeath, "play"); }
-	function<bool(void)> mIdle;
-	function<bool(void)> mWalk;
-	function<bool(void)> mRun;
-	function<bool(void)> mDeath;
+	void SetAnim(string animName);
 };
 

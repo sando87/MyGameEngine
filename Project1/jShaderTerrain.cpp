@@ -241,18 +241,18 @@ bool jShaderTerrain::CreateInputBuffer()
 	vector<VertexFormat>& meshVert = mesh->GetVerticies();
 	vector<u32>& meshTri = mesh->GetIndicies();
 
-	vector<VertexFormatTerrain> vertices;
+	vector<VertexFormatPT> vertices;
 	int cnt = meshVert.size();
 	for (int i = 0; i < cnt; ++i)
 	{
-		VertexFormatTerrain vertex;
+		VertexFormatPT vertex;
 		vertex.p = meshVert[i].position;
 		vertex.t = meshVert[i].texel;
 
 		vertices.push_back(vertex);
 	}
 
-	mVertexStride = sizeof(VertexFormatTerrain);
+	mVertexStride = sizeof(VertexFormatPT);
 	mIndexCount = meshTri.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.

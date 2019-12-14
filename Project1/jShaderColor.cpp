@@ -125,18 +125,18 @@ bool jShaderColor::CreateInputBuffer()
 	vector<VertexFormat>& meshVert = mesh->GetVerticies();
 	vector<u32>& meshTri = mesh->GetIndicies();
 
-	vector<VertexFormatColor> vertices;
+	vector<VertexFormatPC> vertices;
 	int cnt = meshVert.size();
 	for (int i = 0; i < cnt; ++i)
 	{
-		VertexFormatColor vertex;
+		VertexFormatPC vertex;
 		vertex.p = meshVert[i].position;
 		vertex.c = meshVert[i].color;
 
 		vertices.push_back(vertex);
 	}
 
-	mVertexStride = sizeof(VertexFormatColor);
+	mVertexStride = sizeof(VertexFormatPC);
 	mIndexCount = meshTri.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.

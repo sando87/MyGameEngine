@@ -37,8 +37,8 @@ float4 jPS(PixelInputType input) : SV_TARGET
 	float4 color;
 	float2 tex_fixed;
 
-	tex_fixed.x = (g_uvInfo.x * g_uvInfo.z) + input.tex.x;
-	tex_fixed.y = (g_uvInfo.y * g_uvInfo.w) + input.tex.y;
+	tex_fixed.x = (g_uvInfo.x * g_uvInfo.z) + input.tex.x; //(idxX * stepX) + offX
+	tex_fixed.y = (g_uvInfo.y * g_uvInfo.w) + input.tex.y; //(idxY * stepY) + offY
     textureColor = shaderTexture.Sample(SampleType, tex_fixed);
 
     color = g_ambient * textureColor;

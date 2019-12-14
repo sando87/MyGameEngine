@@ -2,7 +2,7 @@
 #include "jMesh.h"
 #include "jImage.h"
 #include "ObjCamera.h"
-#include "jResources.h"
+#include "jCaches.h"
 
 #define SHADER_SKIN_FILENAME "./test"
 
@@ -248,7 +248,7 @@ bool jShaderSkin::CreateTexture()
 		return false;
 
 	string name = compImage->GetFileName();
-	mTextureView = (ID3D11ShaderResourceView *)jResources::CacheGraphics(name, [this, compImage](string name) {
+	mTextureView = (ID3D11ShaderResourceView *)jCaches::CacheGraphics(name, [this, compImage](string name) {
 		ID3D11ShaderResourceView * textureView = nullptr;
 
 		int width = compImage->GetWidth();
@@ -319,11 +319,11 @@ bool jShaderSkin::CreateInputBuffer()
 	vector<VertexFormat>& meshVert = mesh->GetVerticies();
 	vector<u32>& meshTri = mesh->GetIndicies();
 
-	vector<VertexFormatSkin> vertices;
+	vector<VertexFormatPTNIW> vertices;
 	int cnt = meshVert.size();
 	for (int i = 0; i < cnt; ++i)
 	{
-		VertexFormatSkin vertex;
+		VertexFormatPTNIW vertex;
 		vertex.p = meshVert[i].position;
 		vertex.t = meshVert[i].texel;
 		vertex.n = meshVert[i].normal;
@@ -333,7 +333,7 @@ bool jShaderSkin::CreateInputBuffer()
 		vertices.push_back(vertex);
 	}
 
-	mVertexStride = sizeof(VertexFormatSkin);
+	mVertexStride = sizeof(VertexFormatPTNIW);
 	mIndexCount = meshTri.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.

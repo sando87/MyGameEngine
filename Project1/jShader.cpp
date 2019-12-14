@@ -52,6 +52,7 @@ ID3D10Blob * jShader::CompileShader(string filename)
 		return nullptr;
 	}
 
+	pixelShaderBuffer->Release();
 	return vertexShaderBuffer;
 }
 

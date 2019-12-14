@@ -1,18 +1,24 @@
 #pragma once
 
+#include <string>
 #include <chrono>
+using namespace std;
+using namespace chrono;
 
 class jTime
 {
 private:
-	static std::chrono::system_clock::time_point mStartTime;
-	static std::chrono::system_clock::time_point mNowTime;
+	static system_clock::time_point mStartTime;
+	static system_clock::time_point mNowTime;
 	static double mDeltaTime;
 	static double mTotalTime;
+	static system_clock::time_point mPreviousTime;
 
 public:
 	static void Update();
 	static double Delta() { return mDeltaTime; }
 	static double Total() { return mTotalTime; }
+	static void Start();
+	static void Measure(string printMsg);
 };
 

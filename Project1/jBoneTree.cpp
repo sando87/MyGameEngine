@@ -10,20 +10,11 @@ jBoneTree::~jBoneTree()
 {
 }
 
-bool jBoneTree::Load(string _name)
-{
-	if (jUtils::GetFileExtension(_name) == "DAE")
-	{
-		LoadBoneTreeDAE(_name);
-
-		LoadAnimateDAE(_name);
-	}
-
-	return true;
-}
-
 bool jBoneTree::LoadBoneTreeDAE(string _name)
 {
+	if (jUtils::GetFileExtension(_name) != "DAE")
+		return false;
+
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(_name.c_str());
 
@@ -56,16 +47,19 @@ bool jBoneTree::LoadBoneTreeDAE(string _name)
 		mVecBones[i].mName = boneIndicies[i];
 	}
 
-	ProcNode(rootBone, nullptr);
+	LinkTreeNodes(rootBone, nullptr);
 
 	doc.Clear();
 	return true;
 }
 
-bool jBoneTree::LoadAnimateDAE(string _name)
+bool jBoneTree::LoadAnimateDAE(string _filename, string _animName)
 {
+	if (jUtils::GetFileExtension(_filename) != "DAE")
+		return false;
+
 	tinyxml2::XMLDocument doc;
-	doc.LoadFile(_name.c_str());
+	doc.LoadFile(_filename.c_str());
 
 	if (string(doc.FirstChildElement()->Name()) != "COLLADA")
 		return false;
@@ -73,6 +67,8 @@ bool jBoneTree::LoadAnimateDAE(string _name)
 	if (doc.FirstChildElement("COLLADA")->FirstChildElement("library_animations") == nullptr)
 		return false;
 
+	float frameRate = FindFrameRate(doc);
+	float animateEndTime = FindAnimateEndTime(doc);
 	XMLElement* eleNode = doc.FirstChildElement("COLLADA")->FirstChildElement("library_animations")->FirstChildElement("animation");
 	while (true)
 	{
@@ -88,16 +84,19 @@ bool jBoneTree::LoadAnimateDAE(string _name)
 		if (idx < 0)
 			break;
 
-		KeyFrames& key = mVecBones[idx].mKeyFrames;
+		mVecBones[idx].mAnimates[_animName] = KeyFrames();
+		KeyFrames& key = mVecBones[idx].mAnimates[_animName];
 		key.name = boneName;
-		key.times.clear();
+		key.frameRate = 1 / frameRate;
+		key.endTime = animateEndTime;
 		key.keyMats.clear();
 
+		vector<float> vecTimesFloat;
 		vector<string> vecTimes;
 		string times = eleNode->FirstChildElement("animation")->FirstChildElement("source")->FirstChildElement("float_array")->GetText();
 		jUtils::Split(times, " \n", vecTimes);
-		for (int i = 0; i < (int)vecTimes.size(); ++i)
-			key.times.push_back(stof(vecTimes[i]));
+		for (int i = 0; i < vecTimes.size(); ++i)
+			vecTimesFloat.push_back(stof(vecTimes[i]));
 
 		vector<string> vecMats;
 		string mats = eleNode->FirstChildElement("animation")->FirstChildElement("source")->NextSiblingElement()->FirstChildElement("float_array")->GetText();
@@ -105,6 +104,9 @@ bool jBoneTree::LoadAnimateDAE(string _name)
 		int cnt = vecMats.size() / 16;
 		for (int i = 0; i < cnt; i++)
 		{
+			if (vecTimesFloat[i] > animateEndTime)
+				break;
+
 			Matrix4 mat;
 			for (int j = 0; j < 16; ++j)
 			{
@@ -143,7 +145,61 @@ XMLElement* jBoneTree::FindRootBone_DAE(tinyxml2::XMLDocument& _doc)
 	return nullptr;
 }
 
-void jBoneTree::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
+float jBoneTree::FindFrameRate(tinyxml2::XMLDocument & _doc)
+{
+	XMLElement* ele = _doc.FirstChildElement("COLLADA")
+		->FirstChildElement("library_visual_scenes")
+		->FirstChildElement("visual_scene")
+		->FirstChildElement("extra")
+		->FirstChildElement("technique");
+	if (ele == nullptr)
+		return 0;
+
+
+	while (true)
+	{
+		const char *profile = nullptr;
+		auto err = ele->QueryStringAttribute("profile", &profile);
+		if (err != XML_NO_ATTRIBUTE && string(profile) == "MAX3D")
+		{
+			const char *val = ele->FirstChildElement("frame_rate")->GetText();
+			return jUtils::ToDouble(val);
+		}
+
+		ele = ele->NextSiblingElement();
+	}
+
+	return 0;
+}
+
+float jBoneTree::FindAnimateEndTime(tinyxml2::XMLDocument & _doc)
+{
+	XMLElement* ele = _doc.FirstChildElement("COLLADA")
+		->FirstChildElement("library_visual_scenes")
+		->FirstChildElement("visual_scene")
+		->FirstChildElement("extra")
+		->FirstChildElement("technique");
+	if (ele == nullptr)
+		return 0;
+
+
+	while (true)
+	{
+		const char *profile = nullptr;
+		auto err = ele->QueryStringAttribute("profile", &profile);
+		if (err != XML_NO_ATTRIBUTE && string(profile) == "FCOLLADA")
+		{
+			const char *val = ele->FirstChildElement("end_time")->GetText();
+			return jUtils::ToDouble(val);
+		}
+
+		ele = ele->NextSiblingElement();
+	}
+
+	return 0;
+}
+
+void jBoneTree::LinkTreeNodes(XMLElement * _ele, jBoneNode* _parentBone)
 {
 	const char* name = nullptr;
 	_ele->QueryStringAttribute("id", &name);
@@ -194,7 +250,7 @@ void jBoneTree::ProcNode(XMLElement * _ele, jBoneNode* _parentBone)
 		if (eleNode == nullptr || strcmp(eleNode->Name(), "node"))
 			break;
 
-		ProcNode(eleNode, &bone);
+		LinkTreeNodes(eleNode, &bone);
 		eleNode = eleNode->NextSiblingElement();
 	}
 }
@@ -221,4 +277,10 @@ void jBoneTree::Animate(float _time, vector<Matrix4>& _rets)
 	for (int i = 0; i < cnt; ++i)
 		_rets[i] = mVecBones[i].mMatWorldInv * mVecBones[i].mMatAnim;
 
+}
+
+void jBoneTree::SetAnimate(string animName)
+{
+	for (jBoneNode& bone : mVecBones)
+		bone.SetAnimate(animName);
 }

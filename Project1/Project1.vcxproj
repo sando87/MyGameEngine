@@ -145,9 +145,10 @@
     <ClCompile Include="jParserS2.cpp" />
     <ClCompile Include="jRect.cpp" />
     <ClCompile Include="jRect3D.cpp" />
-    <ClCompile Include="jResources.cpp" />
+    <ClCompile Include="jCaches.cpp" />
     <ClCompile Include="jShader.cpp" />
     <ClCompile Include="jShaderDiablo.cpp" />
+    <ClCompile Include="jShaderParser.cpp" />
     <ClCompile Include="jShaderSkin.cpp" />
     <ClCompile Include="jShaderSkinned.cpp" />
     <ClCompile Include="jGameObject.cpp" />
@@ -200,10 +201,11 @@
     <ClInclude Include="jParserS2.h" />
     <ClInclude Include="jRect.h" />
     <ClInclude Include="jRect3D.h" />
-    <ClInclude Include="jResources.h" />
+    <ClInclude Include="jCaches.h" />
     <ClInclude Include="jShader.h" />
     <ClInclude Include="jShaderDiablo.h" />
     <ClInclude Include="jShaderHeader.h" />
+    <ClInclude Include="jShaderParser.h" />
     <ClInclude Include="jShaderSkin.h" />
     <ClInclude Include="jShaderSkinned.h" />
     <ClInclude Include="jGameObject.h" />

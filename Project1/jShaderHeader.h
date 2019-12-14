@@ -4,12 +4,12 @@
 #include "Vectors.h"
 #include "Matrices.h"
 
-struct VertexFormatTerrain
+struct VertexFormatPT
 {
 	Vector3f p;
 	Vector2f t;
 };
-struct VertexFormatSkin
+struct VertexFormatPTNIW
 {
 	Vector3f p;
 	Vector2f t;
@@ -17,7 +17,7 @@ struct VertexFormatSkin
 	Vector4n i;
 	Vector4f w;
 };
-struct VertexFormatColor
+struct VertexFormatPC
 {
 	Vector3f p;
 	Vector4f c;
@@ -52,6 +52,12 @@ struct ShaderBufferLight //should be 16byte aligned
 	Vector4f reserve;
 };
 
+struct ShaderParamsSprite //should be 16byte aligned
+{
+	Vector2n ImageIDX;
+	Vector2f step;
+	Vector4f ambient;
+};
 struct ShaderParamsSkin //should be 16byte aligned
 {
 	Matrix4f bones[45];

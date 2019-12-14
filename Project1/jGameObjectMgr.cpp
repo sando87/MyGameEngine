@@ -68,15 +68,16 @@ bool jGameObjectMgr::Initialize()
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 
-	mTerrainMgr = new ObjTerrainMgr();
-	mTerrainMgr->AddToMgr();
+	//mTerrainMgr = new ObjTerrainMgr();
+	//mTerrainMgr->AddToMgr();
 	
 	(new ObjPlayer())->AddToMgr();
 
-	//for(int i = 134; i < 136; ++i)
+	//for(int i = 158; i < 162; ++i)
 	//{
-	//	ObjDiablo* obj0 = new ObjDiablo();
+	//	ObjTutorial1* obj0 = new ObjTutorial1();
 	//	obj0->mFileIndex = i;
+	//	obj0->mOff = (i - 158) * 20.0f;
 	//	obj0->AddToMgr();
 	//}
 
