@@ -71,6 +71,21 @@ void ObjPlayer::OnStart()
 			return CoroutineKeep;
 		}, "MovePlayer");
 	};
+
+	Vector3 terrainCenter = GetTerrain().GetTerrainCenter();
+	terrainCenter.z = 27;
+	GetTransport().moveTo(terrainCenter);
+}
+void ObjPlayer::OnUpdate()
+{
+	//Vector3 pos = GetTransport().getPos();
+	//float height = 0;
+	//bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
+	//if (ret)
+	//{
+	//	pos.z = height;
+	//	GetTransport().moveTo(pos);
+	//}
 }
 void ObjPlayer::SetAnim(string animName)
 {

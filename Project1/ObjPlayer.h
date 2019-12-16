@@ -14,6 +14,7 @@ public:
 
 private:
 	virtual void OnStart();
+	virtual void OnUpdate();
 
 	jShaderSkin* mShader;
 	jBoneTree* mBones;

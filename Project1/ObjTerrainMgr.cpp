@@ -115,7 +115,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 
 void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 {
-	string path = "D:\\export\\D3\\";
+	string path = "E:\\export\\D3\\";
 	jUtils::ForEachFiles2(nullptr, (path+"*.*").c_str(), [&](void *obj, string name) {
 		string fullname = path + name + "\\" + name + ".txt";
 		strings lines = jUtils::LoadLines(fullname);
@@ -126,6 +126,9 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 		strings coordinates = jUtils::Split2(firstLine, " ");
 		int x = atoi(coordinates[0].c_str());
 		int y = atoi(coordinates[1].c_str());
+		mTerrainCenter.x += x;
+		mTerrainCenter.y += y;
+		mTerrainCenter.z += 1;
 		u64 key = CoordinateToKey(x, y);
 		if (mBlockResourcesAll.find(key) == mBlockResourcesAll.end())
 		{
@@ -139,6 +142,9 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 		
 		return true;
 	});
+
+	mTerrainCenter.x /= mTerrainCenter.z;
+	mTerrainCenter.y /= mTerrainCenter.z;
 }
 bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 {

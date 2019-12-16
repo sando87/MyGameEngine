@@ -16,7 +16,7 @@ ObjTerrain::~ObjTerrain()
 
 void ObjTerrain::Load(string name, float size, float step, jHeightMap* heightmap)
 {
-	string path = "D:\\export\\D3\\" + name + "\\";
+	string path = "E:\\export\\D3\\" + name + "\\";
 
 	jMesh* mesh = new jMesh();
 	mesh->Load(path + name + ".obj");

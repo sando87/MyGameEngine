@@ -54,14 +54,15 @@ bool jGameObjectMgr::Initialize()
 	//00007FFEA8D34300
 	//00007FFEA8D30000
 
+	mTerrainMgr = new ObjTerrainMgr();
+	mTerrainMgr->AddToMgr();
+
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
 
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 
-	//mTerrainMgr = new ObjTerrainMgr();
-	//mTerrainMgr->AddToMgr();
 	
 	(new ObjPlayer())->AddToMgr();
 

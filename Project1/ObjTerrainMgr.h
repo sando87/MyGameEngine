@@ -29,6 +29,7 @@ private:
 	unordered_map<uint64_t, vector<string>*> mBlockResourcesAll;
 	unordered_map<uint64_t, TerrainBlock> mCachedBlocks;
 	int mBlockSize;
+	Vector3 mTerrainCenter;
 
 	void LoadTerrainGridMetaInfo();
 	void LoadingBlocks();
@@ -46,5 +47,6 @@ private:
 public:
 	Vector3 CalcGroundPos(Vector3 pos, Vector3 dir);
 	bool GetHeight(float worldX, float worldY, float& height);
+	Vector3 GetTerrainCenter() { return mTerrainCenter; }
 };
 
