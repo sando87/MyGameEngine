@@ -37,8 +37,8 @@ private:
 	//ObjTerrain* GetTerrain(float worldX, float worldY);
 	u64 CoordinateToKey(float x, float y)
 	{
-		int nx = (x / mBlockSize);
-		int ny = (y / mBlockSize);
+		int nx = (int)(x / mBlockSize);
+		int ny = (int)(y / mBlockSize);
 		u64 key = GRID_HASH(nx, ny);
 		return key;
 	}

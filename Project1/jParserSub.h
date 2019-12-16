@@ -121,9 +121,9 @@ struct MyResBase
 	void * addr;
 	unsigned int crc;
 	unsigned int totalSize;
-	unsigned int reserve1;
-	unsigned int reserve2;
-	unsigned int reserve3;
+	int reserve1;
+	int reserve2;
+	int reserve3;
 };
 
 typedef enum _MyD3DDECLUSAGE {
@@ -260,7 +260,7 @@ struct MyRes_CreateTexture
 	D3D11_SUBRESOURCE_DATA subRes[64];
 	char data[];
 	void SetSubResMem();
-	int GetCount() { return 64; }
+	unsigned int GetCount() { return 64; }
 	void* CreateResource(int width, int height, char *imgTGA);
 };
 

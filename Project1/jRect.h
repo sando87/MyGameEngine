@@ -25,13 +25,13 @@ public:
 	double Bottom() { return mLeftBottom.y; }
 	double Top() { return mRightTop.y; }
 
-	jRect& const expand(jRect& rect)
+	jRect& expand(jRect& rect)
 	{
 		expand(Vector2(rect.Left(), rect.Bottom()));
 		expand(Vector2(rect.Right(), rect.Top()));
 		return *this;
 	}
-	jRect& const expand(Vector2 pt)
+	jRect& expand(Vector2 pt)
 	{
 		if (!mInit)
 		{

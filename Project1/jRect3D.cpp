@@ -16,7 +16,7 @@ bool jRect3D::PassedBy(jLine3D line, vector<Vector3>& vecs)
 	if (TopBottom().Contains(ptTop))	vecs.push_back(Vector3(ptTop.x, ptTop.y, mMaxXYZ.z));
 	return vecs.size() > 0 ? true : false;
 }
-jRect3D& const jRect3D::expand(Vector3 pt)
+jRect3D& jRect3D::expand(Vector3 pt)
 {
 	if (!mInit)
 	{
@@ -37,7 +37,7 @@ jRect3D& const jRect3D::expand(Vector3 pt)
 	return *this;
 }
 
-jRect3D& const jRect3D::expand(jRect3D rect)
+jRect3D& jRect3D::expand(jRect3D rect)
 {
 	expand(rect.Pos());
 	expand(rect.Pos() + rect.Size());

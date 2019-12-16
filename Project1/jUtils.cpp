@@ -217,9 +217,9 @@ string jUtils::FindFile(string _path, string _filter)
 	});
 	return ret;
 }
-bool jUtils::MyCopyFile(string _from, string _to)
+void jUtils::MyCopyFile(string _from, string _to)
 {
-	return jOS_APIs::MyCopyFile(_from, _to);
+	jOS_APIs::MyCopyFile(_from, _to);
 }
 void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
 {

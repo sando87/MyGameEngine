@@ -7,8 +7,8 @@ void MyRes_CreateLayout::SetNameOffset()
 	D3D11_INPUT_ELEMENT_DESC* layouts = (D3D11_INPUT_ELEMENT_DESC *)data;
 	for (int i = 0; i < numEle; ++i)
 	{
-		unsigned int pOff = (unsigned int)layouts[i].SemanticName;
-		if (pOff > head.totalSize)
+		u64 pOff = (u64)layouts[i].SemanticName;
+		if ((u32)pOff > head.totalSize)
 			return; //here means already fixed.. so return this function
 
 		char* pBase = (char*)this;
@@ -283,7 +283,7 @@ int D3D9_RenderContext::GetStride()
 
 int D3D9_RenderContext::GetPositionOffset(MyD3DDECLTYPE & type)
 {
-	for (int i = 0; i < decl_count - 1; ++i)
+	for (u32 i = 0; i < decl_count - 1; ++i)
 	{
 		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_POSITION)
 		{
@@ -296,7 +296,7 @@ int D3D9_RenderContext::GetPositionOffset(MyD3DDECLTYPE & type)
 
 int D3D9_RenderContext::GetTexelOffset(int idx, MyD3DDECLTYPE& type)
 {
-	for (int i = 0; i < decl_count - 1; ++i)
+	for (u32 i = 0; i < decl_count - 1; ++i)
 	{
 		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_TEXCOORD
 			&& decl_eles[i].UsageIndex == idx)
@@ -310,7 +310,7 @@ int D3D9_RenderContext::GetTexelOffset(int idx, MyD3DDECLTYPE& type)
 
 int D3D9_RenderContext::GetNormalOffset(MyD3DDECLTYPE & type)
 {
-	for (int i = 0; i < decl_count - 1; ++i)
+	for (u32 i = 0; i < decl_count - 1; ++i)
 	{
 		if (decl_eles[i].Usage == _MyD3DDECLUSAGE::D3DDECLUSAGE_NORMAL)
 		{

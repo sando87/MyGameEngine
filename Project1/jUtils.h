@@ -52,7 +52,7 @@ public:
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
 	static string FindFile(string _path, string _filter);
-	static bool MyCopyFile(string _from, string _to);
+	static void MyCopyFile(string _from, string _to);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);
 	static string GetFileExtension(string _filename)
 	{

@@ -10,17 +10,17 @@ struct MyResBase;
 
 struct GeometryInfo
 {
-	unsigned int vertexTotalCount;
-	unsigned int vertexStride;
-	unsigned int vertexVertexByteOffset;
-	unsigned int indiciesIndexUnit;// 2
-	unsigned int indiciesCntPerPoly;// 3
-	unsigned int indiciesTotalSize;
-	unsigned int primitiveType;
-	unsigned int drawIndexCount;
-	unsigned int drawVertCount;
-	unsigned int drawIndexOffset;
-	unsigned int drawVertOffset;
+	int vertexTotalCount;
+	int vertexStride;
+	int vertexVertexByteOffset;
+	int indiciesIndexUnit;// 2
+	int indiciesCntPerPoly;// 3
+	int indiciesTotalSize;
+	int primitiveType;
+	int drawIndexCount;
+	int drawVertCount;
+	int drawIndexOffset;
+	int drawVertOffset;
 };
 struct ExpVertex
 {

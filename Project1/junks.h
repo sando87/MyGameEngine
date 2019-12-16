@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma warning(disable: 4244)
+#pragma warning(disable: 4267)
 
 #include <string>
 #include <vector>
@@ -57,9 +59,5 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long long u64;
 
-
-enum EnumCoroutine
-{
-	Stop = false,
-	Continue = true,
-};
+#define CoroutineKeep true
+#define CoroutineStop false

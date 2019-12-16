@@ -67,8 +67,8 @@ void ObjPlayer::OnStart()
 			GetTransport().rotateToPos_OnGround(target, speedRot * delta);
 			GetTransport().goForward(speed * delta);
 			if (GetTransport().getPos().distance(target) < 1)
-				return false;
-			return true;
+				return CoroutineStop;
+			return CoroutineKeep;
 		}, "MovePlayer");
 	};
 }
@@ -83,6 +83,6 @@ void ObjPlayer::SetAnim(string animName)
 		for (int i = 0; i < mats.size(); ++i)
 			param.bones[i] = mats[i].transpose();
 		//GetTransport().goForward(3 * jTime::Delta());
-		return EnumCoroutine::Continue;
+		return CoroutineKeep;
 	}, "player");
 }

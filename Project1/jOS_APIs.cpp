@@ -37,9 +37,9 @@ void jOS_APIs::ForEachFiles(void* _object, const char* _path, function<bool(void
 	}
 }
 
-bool jOS_APIs::MyCopyFile(string _from, string _to)
+void jOS_APIs::MyCopyFile(string _from, string _to)
 {
-	return CopyFile(_from.c_str(), _to.c_str(), true);
+	CopyFile(_from.c_str(), _to.c_str(), true);
 }
 Vector2 jOS_APIs::GetCursorScreenPos()
 {

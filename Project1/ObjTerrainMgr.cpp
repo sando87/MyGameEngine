@@ -42,10 +42,10 @@ void ObjTerrainMgr::OnUpdate()
 void ObjTerrainMgr::LoadingBlocks()
 {
 	jRect rect = GetCamera().GetGroundRect();
-	int idxStartX = rect.Left() / mBlockSize;
-	int idxEndX = rect.Right() / mBlockSize;
-	int idxStartY = rect.Bottom() / mBlockSize;
-	int idxEndY = rect.Top() / mBlockSize;
+	int idxStartX = (int)(rect.Left() / mBlockSize);
+	int idxEndX =  (int)(rect.Right() / mBlockSize);
+	int idxStartY = (int)(rect.Bottom() / mBlockSize);
+	int idxEndY =  (int)(rect.Top() / mBlockSize);
 	for (int idxY = idxStartY; idxY <= idxEndY; ++idxY)
 	{
 		for (int idxX = idxStartX; idxX <= idxEndX; ++idxX)
