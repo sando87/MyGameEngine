@@ -9,6 +9,7 @@
 #include "jInput.h"
 #include "jBoneTree.h"
 #include "jOS_APIs.h"
+#include "jCrash.h"
 
 ObjPlayer::ObjPlayer()
 {
@@ -51,9 +52,6 @@ void ObjPlayer::OnStart()
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
-		//SetAnim("run");
-		return;
-
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
 		Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
@@ -75,6 +73,17 @@ void ObjPlayer::OnStart()
 	Vector3 terrainCenter = GetTerrain().GetTerrainCenter();
 	//terrainCenter.z = 27;
 	GetTransport().moveTo(terrainCenter);
+
+	//CrashCapsule shape;
+	//shape.center = Vector3(0, 0, 0);
+	//shape.round = 3;
+	//shape.height = 10;
+	//jCrash* crash = new jCrash();
+	//crash->Init(shape, [](jCrashs objs) {
+	//	jRect rect = objs[0]->GetRect();
+	//	_printlog("ObjPlayer %f\n", rect.Center().x);
+	//});
+	//AddComponent(crash);
 }
 void ObjPlayer::OnUpdate()
 {

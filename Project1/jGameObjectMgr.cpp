@@ -10,8 +10,9 @@
 
 #include "jTime.h"
 #include "jShader.h"
+#include "jCrash.h"
 
-jGameObjectMgr::jGameObjectMgr()
+jGameObjectMgr::jGameObjectMgr() : mCrashGrid(CRASH_SIZE, CRASH_STEP)
 {
 	mCamera = nullptr;
 	mTerrainMgr = nullptr;
@@ -142,8 +143,30 @@ void jGameObjectMgr::RunObjects()
 	}
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-		if(!(*it)->mIsRemoved)
+	{
+		if (!(*it)->mIsRemoved)
 			(*it)->OnUpdate();
+
+		jCrash* crash = (*it)->FindComponent<jCrash>();
+		if (crash != nullptr)
+		{
+			jRect rect = crash->GetRect();
+			vector<list<jCrash*>*> grids;
+			mCrashGrid.GetGrids(rect, grids);
+			for (list<jCrash*>* grid : grids)
+				grid->push_back(crash);
+		}
+	}
+		
+
+	AddCrashs();
+	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
+	{
+		jGameObject* obj = *it;
+		jCrash* crash = obj->FindComponent<jCrash>();
+		if (crash != nullptr)
+			crash->OnCrash();
+	}
 
 	jRenderer::GetInst().BeginScene();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
@@ -165,8 +188,47 @@ void jGameObjectMgr::RunObjects()
 			}
 		}
 	}
-		
 	jRenderer::GetInst().EndScene();
+}
+void jGameObjectMgr::AddCrashs()
+{
+	//우선 게임 오브젝트 별로 루프를 돌며
+	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
+	{
+		jGameObject* obj = *it;
+		if (obj->mIsRemoved)
+			continue;
+
+		jCrash* crash = obj->FindComponent<jCrash>();
+		if (crash == nullptr)
+			continue;
+
+		jRect rect = crash->GetRect();
+		vector<list<jCrash*>*> grids;
+		mCrashGrid.GetGrids(rect, grids);
+		//현재 오브젝트의 걸친 충돌 grid들을 찾고
+		for (list<jCrash*> *grid : grids)
+		{
+			//각각의 grid안에 있는 오브젝트 충돌체를 검사한다.
+			list<jCrash*>::iterator me;
+			for (auto iter = grid->begin(); iter != grid->end(); ++iter)
+			{
+				jCrash* target = *iter;
+				if (crash == target)
+				{
+					me = iter;
+					continue;
+				}
+
+				if (crash->Crashed(target))
+				{
+					crash->AddCrashed(target);
+					target->AddCrashed(crash);
+				}
+			}
+			grid->erase(me);
+		}
+	}
 }
 void jGameObjectMgr::Release()
 {

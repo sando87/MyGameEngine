@@ -61,3 +61,6 @@ typedef unsigned long long u64;
 
 #define CoroutineKeep true
 #define CoroutineStop false
+
+#define CRASH_SIZE 8192
+#define CRASH_STEP 8

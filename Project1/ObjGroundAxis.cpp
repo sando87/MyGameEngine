@@ -1,6 +1,7 @@
 #include "ObjGroundAxis.h"
 #include "jMesh.h"
 #include "jShaderColor.h"
+#include "jCrash.h"
 
 ObjGroundAxis::ObjGroundAxis()
 {

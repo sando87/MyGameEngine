@@ -147,6 +147,7 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 	mTerrainCenter.y /= mTerrainCenter.z;
 	mTerrainCenter.x = 0;
 	mTerrainCenter.y = 0;
+	mTerrainCenter.z = 0;
 }
 bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 {
