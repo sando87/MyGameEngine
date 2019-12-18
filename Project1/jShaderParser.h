@@ -18,6 +18,8 @@ public:
 private:
 	ID3D11InputLayout * mLayout;
 	ID3D11Buffer* mMatrixBuffer;
+	ID3D11Buffer* mMaterialBuffer;
+	ID3D11Buffer* mLightBuffer;
 	ID3D11SamplerState* mSampleState;
 	ID3D11ShaderResourceView * mTexture;
 	ID3D11Buffer *mVertBuffer;

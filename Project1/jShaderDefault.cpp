@@ -101,7 +101,7 @@ bool jShaderDefault::CreateShaderAndLayout()
 
 	// 정점 입력 레이아웃 구조체를 설정합니다.
 	// 이 설정은 ModelClass와 셰이더의 VertexType 구조와 일치해야합니다.
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;

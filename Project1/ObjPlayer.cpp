@@ -25,17 +25,17 @@ ObjPlayer::~ObjPlayer()
 void ObjPlayer::OnStart()
 {
 	mBones = new jBoneTree();
-	mBones->LoadBoneTreeDAE("mob2.DAE");
-	mBones->LoadAnimateDAE("mob2_idle.DAE", "idle");
-	mBones->LoadAnimateDAE("mob2_run.DAE", "run");
-	mBones->LoadAnimateDAE("mob2_attack.DAE", "attack");
+	mBones->LoadBoneTreeDAE("mob3.DAE");
+	//mBones->LoadAnimateDAE("mob2_idle.DAE", "idle");
+	//mBones->LoadAnimateDAE("mob2_run.DAE", "run");
+	//mBones->LoadAnimateDAE("mob2_attack.DAE", "attack");
 
-	AddComponent(new jMesh("mob2.DAE"));
+	AddComponent(new jMesh("mob3.DAE"));
 	AddComponent(new jImage("./stone01.tga"));
 	AddComponent(mShader = new jShaderSkin());
 	//mShader->SetEnabled(false);
 
-	Vector4f diffuse = Vector4f(0.5f, 0.5f, 0.5f, 1.0f);
+	Vector4f diffuse = Vector4f(1, 1, 1, 1);
 	Vector4f light = Vector4f(1, 1, -1, 0);
 	ShaderParamsSkin& param = mShader->GetParams();
 	for(int i = 0; i < 45; ++i)
@@ -51,7 +51,7 @@ void ObjPlayer::OnStart()
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
-		SetAnim("run");
+		//SetAnim("run");
 		return;
 
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
@@ -73,7 +73,7 @@ void ObjPlayer::OnStart()
 	};
 
 	Vector3 terrainCenter = GetTerrain().GetTerrainCenter();
-	terrainCenter.z = 27;
+	//terrainCenter.z = 27;
 	GetTransport().moveTo(terrainCenter);
 }
 void ObjPlayer::OnUpdate()
