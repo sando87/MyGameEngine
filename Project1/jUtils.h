@@ -8,6 +8,7 @@
 using namespace std;
 
 class Matrix4;
+class Matrix4f;
 
 template<typename T>
 class shared_ptr_array : public shared_ptr<vector<T>>
@@ -85,6 +86,7 @@ public:
 	{
 		return ltrim(rtrim(s, t), t);
 	}
+	static string MatToCSV(Matrix4f* mat);
 };
 
 #endif

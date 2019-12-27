@@ -248,6 +248,15 @@ void jUtils::SaveToFile(string path, string filename, string data, bool isAttach
 	return;
 }
 
+string jUtils::MatToCSV(Matrix4f * mat)
+{
+	const float * p = mat->get();
+	char buf[260] = { 0, };
+	sprintf_s(buf, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+		p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+	return string(buf);
+}
+
 void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))
 {
 	struct _finddata_t fd;

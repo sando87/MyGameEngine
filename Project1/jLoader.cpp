@@ -1,6 +1,5 @@
 #include "jLoader.h"
-#include "tinyxml2.h"
-using namespace tinyxml2;
+
 
 void jLoader::LoadObjFile(string _filename)
 {
@@ -11,17 +10,20 @@ void jLoader::LoadObjFile(string _filename)
 		return;
 	}
 
+	mObjects.push_back(ObjectInfo());
+	ObjectInfo& info = mObjects.back();
+
 	string line;
 	while (getline(input, line))
 	{
 		vector<string> vec;
 		jUtils::Split(line, " \n", vec);
 		if (vec[0] == "v")
-			mPos.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
+			info.Pos.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
 		else if (vec[0] == "vt")
-			mUV.push_back(Vector2f(stof(vec[1]), stof(vec[2])));
+			info.UV.push_back(Vector2f(stof(vec[1]), stof(vec[2])));
 		else if (vec[0] == "vn")
-			mNormal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
+			info.Normal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
 		else if (vec[0] == "f")
 		{
 			int faceCnt = vec.size();
@@ -29,11 +31,11 @@ void jLoader::LoadObjFile(string _filename)
 			{
 				vector<string> vertS;
 				jUtils::Split(vec[j], "/", vertS);
-				mVertexIdx.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
+				info.VertexIdx.push_back(Vector3n(stoi(vertS[0]) - 1, stoi(vertS[1]) - 1, stoi(vertS[2]) - 1));
 			}
 		}
 		else
-			mInfo.push_back(line);
+			info.Info.push_back(line);
 	}
 
 	input.close();
@@ -44,14 +46,69 @@ void jLoader::LoadDaeFile(string _filename)
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(_filename.c_str());
 
-	if (string(doc.FirstChildElement()->Name()) != "COLLADA")
-		return;
+	XMLElement* ctrlNode = doc.FirstChildElement("COLLADA")
+		->FirstChildElement("library_controllers")
+		->FirstChildElement("controller");
 
+	xmlElements objs = GetObjects(doc);
+	int count = objs->size();
+	for (int i = 0; i < count; ++i)
+	{
+		XMLElement* ele = objs[i];
+
+		mObjects.push_back(ObjectInfo());
+		ObjectInfo& info = mObjects.back();
+		ParseMeshes(ele, info);
+
+		const char *val = nullptr;
+		ele->QueryStringAttribute("id", &val);
+		string objectName = string(val);
+
+		XMLElement* currnet = ctrlNode;
+		XMLElement* findSkinNode = nullptr;
+		while (currnet != nullptr)
+		{
+			const char *src = nullptr;
+			findSkinNode = currnet->FirstChildElement("skin");
+			findSkinNode->QueryStringAttribute("source", &src);
+			if ("#" + objectName == string(src))
+				break;
+
+			findSkinNode = nullptr;
+			currnet = currnet->NextSiblingElement();
+		}
+
+		if(findSkinNode)
+			ParseWeights(findSkinNode, info);
+	}
+
+	doc.Clear();
+}
+
+
+xmlElements jLoader::GetObjects(tinyxml2::XMLDocument& _doc)
+{
+	xmlElements eles;
+	tinyxml2::XMLDocument& doc = _doc;
+
+	if (string(doc.FirstChildElement()->Name()) != "COLLADA")
+		return eles;
 
 	XMLElement* geoEle = doc.FirstChildElement("COLLADA")
 		->FirstChildElement("library_geometries")
-		->FirstChildElement("geometry")
-		->FirstChildElement("mesh");
+		->FirstChildElement("geometry");
+
+	while (geoEle != nullptr)
+	{
+		eles->push_back(geoEle);
+		geoEle = geoEle->NextSiblingElement();
+	}
+
+	return eles;
+}
+void jLoader::ParseMeshes(XMLElement* _ele, ObjectInfo & info)
+{
+	XMLElement* geoEle = _ele->FirstChildElement("mesh");
 
 	int cntVec = 0;
 	XMLElement* meshEle = geoEle->FirstChildElement("source");
@@ -65,7 +122,7 @@ void jLoader::LoadDaeFile(string _filename)
 		pt.x = stof(vecPoints[i * 3 + 0]);
 		pt.y = stof(vecPoints[i * 3 + 1]);
 		pt.z = stof(vecPoints[i * 3 + 2]);
-		mPos.push_back(pt);
+		info.Pos.push_back(pt);
 	}
 
 	meshEle = meshEle->NextSiblingElement();
@@ -79,7 +136,7 @@ void jLoader::LoadDaeFile(string _filename)
 		nr.x = stof(vecNormals[i * 3 + 0]);
 		nr.y = stof(vecNormals[i * 3 + 1]);
 		nr.z = stof(vecNormals[i * 3 + 2]);
-		mNormal.push_back(nr);
+		info.Normal.push_back(nr);
 	}
 
 	meshEle = meshEle->NextSiblingElement();
@@ -92,7 +149,7 @@ void jLoader::LoadDaeFile(string _filename)
 		Vector2f uv;
 		uv.x = stof(vecUVs[i * 2 + 0]);
 		uv.y = stof(vecUVs[i * 2 + 1]);
-		mUV.push_back(uv);
+		info.UV.push_back(uv);
 	}
 
 	const char* faces = geoEle->FirstChildElement("triangles")->FirstChildElement("p")->GetText();
@@ -106,14 +163,12 @@ void jLoader::LoadDaeFile(string _filename)
 		vertN.z = stoi(vecFaces[i * 3 + 1]);
 		vertN.y = stoi(vecFaces[i * 3 + 2]);
 
-		mVertexIdx.push_back(vertN);
+		info.VertexIdx.push_back(vertN);
 	}
-
-	XMLElement* element = doc.FirstChildElement("COLLADA")
-		->FirstChildElement("library_controllers")
-		->FirstChildElement("controller")
-		->FirstChildElement("skin")
-		->FirstChildElement("source");
+}
+void jLoader::ParseWeights(tinyxml2::XMLElement* _ele, ObjectInfo & info)
+{
+	XMLElement* element = _ele->FirstChildElement("source");
 
 	const char* boneNames = element->FirstChildElement("Name_array")->GetText();
 	string boneNames_(boneNames);
@@ -152,9 +207,8 @@ void jLoader::LoadDaeFile(string _filename)
 			weights[j] = stof(vecWeights[weightIdx]);
 		}
 		accIdx += cntV;
-		mBoneIndexs.push_back(bones);
-		mWeights.push_back(weights);
+		info.BoneIndexs.push_back(bones);
+		info.Weights.push_back(weights);
 	}
-
 }
 

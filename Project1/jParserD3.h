@@ -58,6 +58,10 @@ struct ExpMesh
 		indicies.clear();
 	}
 };
+struct AnimInfo
+{
+	vector<vector<Matrix4f>> keys;
+};
 
 class jParserD3
 {
@@ -71,6 +75,7 @@ public:
 	jParserD3();
 	virtual ~jParserD3();
 
+	vector<AnimInfo> anims;
 	GeometryInfo mGeoInfo;
 	int mFileIndex;
 	function< Vector2f(int _idx, unsigned char *_p) > mFuncConvertTex;
@@ -87,6 +92,7 @@ public:
 	void InitTextureList();
 	void InitCBMain();
 	bool IsValid();
+	void InitAnims();
 	
 	void* CreateD3DRescource(void* addr);
 	virtual ID3D11Buffer* GetResIndexBuffer();

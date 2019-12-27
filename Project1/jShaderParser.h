@@ -15,6 +15,8 @@ public:
 
 	bool Load(jParserD3* parser);
 
+	Matrix4f mBones[45];
+
 private:
 	ID3D11InputLayout * mLayout;
 	ID3D11Buffer* mMatrixBuffer;

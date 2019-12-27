@@ -19,16 +19,35 @@
 #define MYRES_TYPE_CreateDapth	'd'
 #define MYRES_TYPE_D3D9_VB		'k'
 #define MYRES_TYPE_D3D9_IB			'm'
+#define MYRES_TYPE_CreateAnim		'c'
 
 struct Matrix3x4f
 {
-	Vector4f a;
-	Vector4f b;
-	Vector4f c;
+	float a[12];
+	Matrix4f ToMat()
+	{
+		Matrix4f mat;
+		for (int i = 0; i < 12; ++i)
+			mat[i] = a[i];
+		mat[12] = 0; mat[13] = 0; mat[14] = 0; mat[15] = 1;
+		return mat;
+	}
 };
-struct CBMatrix
+
+struct Matrix3x4n
 {
-	Matrix3x4f mat[45];
+	Vector4n a;
+	Vector4n b;
+	Vector4n c;
+	Matrix4f ToMat()
+	{
+		Matrix4f mat;
+		mat[0] = (float)a.x / 100.0f; mat[1] = (float)a.y / 100.0f; mat[2] = (float)a.z / 100.0f; mat[3] = (float)a.w / 100.0f;
+		mat[4] = (float)b.x / 100.0f; mat[5] = (float)b.y / 100.0f; mat[6] = (float)b.z / 100.0f; mat[7] = (float)b.w / 100.0f;
+		mat[8] = (float)c.x / 100.0f; mat[9] = (float)c.y / 100.0f; mat[10] = (float)c.z / 100.0f; mat[11] = (float)c.w / 100.0f;
+		mat[12] = 0; mat[13] = 0; mat[14] = 0; mat[15] = 1;
+		return mat;
+	}
 };
 
 struct CBMain
@@ -283,6 +302,13 @@ struct MyRes_CreateDS
 	MyResBase head;
 	D3D11_DEPTH_STENCIL_DESC desc;
 	void* CreateResource();
+};
+struct MyRes_CreateAnimations
+{
+	MyResBase head;
+	int offset[16];
+	int counts[16];
+	char data[];
 };
 
 

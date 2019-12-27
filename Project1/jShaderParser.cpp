@@ -3,7 +3,7 @@
 #include "ObjCamera.h"
 #include "jMatrixControl.h"
 
-#define SHADER_PARSER_FILENAME "./default"
+#define SHADER_PARSER_FILENAME "./parser"
 
 jShaderParser::jShaderParser()
 {
@@ -21,7 +21,7 @@ bool jShaderParser::Load(jParserD3 * parser)
 
 	// 정점 입력 레이아웃 구조체를 설정합니다.
 	// 이 설정은 ModelClass와 셰이더의 VertexType 구조와 일치해야합니다.
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -46,6 +46,22 @@ bool jShaderParser::Load(jParserD3 * parser)
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
 
+	polygonLayout[3].SemanticName = "INDEX";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	polygonLayout[3].InputSlot = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[3].InstanceDataStepRate = 0;
+
+	polygonLayout[4].SemanticName = "WEIGHT";
+	polygonLayout[4].SemanticIndex = 0;
+	polygonLayout[4].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[4].InputSlot = 0;
+	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[4].InstanceDataStepRate = 0;
+
 	// 레이아웃의 요소 수를 가져옵니다.
 	unsigned int numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
@@ -63,7 +79,7 @@ bool jShaderParser::Load(jParserD3 * parser)
 	// 행렬 상수 버퍼의 구조체를 작성합니다.
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(ShaderBufferWVP);
+	matrixBufferDesc.ByteWidth = sizeof(ShaderBufferMatrixs);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
@@ -130,16 +146,18 @@ bool jShaderParser::Load(jParserD3 * parser)
 
 	auto info = parser->GetGeometryInfo();
 	int vertexCount = info.vertexTotalCount;
-	mIASetVertexBuffersStride = sizeof(VertexFormatPTN);
-	vector<VertexFormatPTN> verticies;
+	mIASetVertexBuffersStride = sizeof(VertexFormatPTNIW);
+	vector<VertexFormatPTNIW> verticies;
 	Vector2f tex[10];
 	for (int i = 0; i < vertexCount; ++i)
 	{
-		VertexFormatPTN vert;
+		VertexFormatPTNIW vert;
 		vert.p = parser->GetPos(i);
 		int cnt = parser->GetTex(i, tex);
 		vert.t = tex[0];
 		vert.n = parser->GetNor(i);
+		vert.i = parser->GetMatIdx(i);
+		vert.w = parser->GetMatWeight(i);
 		verticies.push_back(vert);
 	}
 
@@ -164,6 +182,10 @@ bool jShaderParser::Load(jParserD3 * parser)
 	mDrawIndexed1 = info.drawIndexCount;
 	mDrawIndexed2 = info.drawIndexOffset;
 	mDrawIndexed3 = info.drawVertOffset;
+
+	for(int i = 0 ; i < 45; ++i)
+		mBones[i] = Matrix4().identity();
+
 	return true;
 }
 bool jShaderParser::OnLoad()
@@ -191,10 +213,12 @@ bool jShaderParser::OnRender()
 	{
 		return false;
 	}
-	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
+	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
 	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();
+	for (int i = 0; i<45; ++i)
+		dataPtr->bones[i] = mBones[i];
 	mDevContext->Unmap(mMatrixBuffer, 0);
 	mDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
 

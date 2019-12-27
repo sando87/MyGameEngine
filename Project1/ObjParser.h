@@ -17,5 +17,7 @@ private:
 
 	jParserD3* mParser;
 	jShaderParser* mShader;
+
+	int animIndex = 0;
 };
 

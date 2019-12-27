@@ -31,7 +31,7 @@ public:
 	jFuncPtrList<void(jMouseInfo)> mMouse;
 	jFuncPtrList<void(jMouseInfo)> mMouseDown;
 	//std::function<void(jMouseInfo)> mMouse;
-	std::function<void(const unsigned char*)> mKeyboard;
+	jFuncPtrList<void(const unsigned char*)> mKeyboard;
 
 private:
 	IDirectInput8 * m_directInput = nullptr;
