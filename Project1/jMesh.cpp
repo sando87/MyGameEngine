@@ -50,6 +50,68 @@ bool jMesh::Load(string _name)
 	mName = _name;
 	return true;
 }
+bool jMesh::LoadCube(int size)
+{
+	mVerticies.resize(8);
+	mVerticies[0].position = Vector3(0, size, 0);
+	mVerticies[1].position = Vector3(size, size, 0);
+	mVerticies[2].position = Vector3(0, size, size);
+	mVerticies[3].position = Vector3(size, size, size);
+	mVerticies[4].position = Vector3(0, 0, 0);
+	mVerticies[5].position = Vector3(size, 0, 0);
+	mVerticies[6].position = Vector3(0, 0, size);
+	mVerticies[7].position = Vector3(size, 0, size);
+
+	mVerticies[0].color = Vector4f(1, 0, 0, 1);
+	mVerticies[1].color = Vector4f(0, 1, 0, 1);
+	mVerticies[2].color = Vector4f(0, 0, 1, 1);
+	mVerticies[3].color = Vector4f(1, 1, 0, 1);
+	mVerticies[4].color = Vector4f(1, 0, 1, 1);
+	mVerticies[5].color = Vector4f(0, 1, 1, 1);
+	mVerticies[6].color = Vector4f(0, 0, 0, 1);
+	mVerticies[7].color = Vector4f(1, 1, 1, 1);
+
+	mIndicies.resize(6 * 2 * 3);
+
+	int idx = 0;
+	mIndicies[idx++] = 0;	mIndicies[idx++] = 2;	mIndicies[idx++] = 1; //front
+	mIndicies[idx++] = 1;	mIndicies[idx++] = 2;	mIndicies[idx++] = 3;
+	mIndicies[idx++] = 4;	mIndicies[idx++] = 5;	mIndicies[idx++] = 6; //back
+	mIndicies[idx++] = 4;	mIndicies[idx++] = 6;	mIndicies[idx++] = 5;
+	mIndicies[idx++] = 1;	mIndicies[idx++] = 7;	mIndicies[idx++] = 5; //right
+	mIndicies[idx++] = 1;	mIndicies[idx++] = 3;	mIndicies[idx++] = 7;
+	mIndicies[idx++] = 0;	mIndicies[idx++] = 6;	mIndicies[idx++] = 2; //left
+	mIndicies[idx++] = 0;	mIndicies[idx++] = 4;	mIndicies[idx++] = 6;
+	mIndicies[idx++] = 7;	mIndicies[idx++] = 2;	mIndicies[idx++] = 6; //top
+	mIndicies[idx++] = 7;	mIndicies[idx++] = 3;	mIndicies[idx++] = 2;
+	mIndicies[idx++] = 5;	mIndicies[idx++] = 4;	mIndicies[idx++] = 0; //bottom
+	mIndicies[idx++] = 5;	mIndicies[idx++] = 0;	mIndicies[idx++] = 1;
+
+	mName = "Cube";
+	return true;
+}
+bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
+{
+	mVerticies.resize(4);
+	mVerticies[0].position = Vector3(-size.x * 0.5, 0, -size.y * 0.5);
+	mVerticies[1].position = Vector3(size.x * 0.5, 0, -size.y * 0.5);
+	mVerticies[2].position = Vector3(-size.x * 0.5, 0, size.y * 0.5);
+	mVerticies[3].position = Vector3(size.x * 0.5, 0, size.y * 0.5);
+
+	mVerticies[0].color = Vector4f(0, 1, 0, 1);
+	mVerticies[1].color = Vector4f(0, 1, 0, 1);
+	mVerticies[2].color = Vector4f(0, 1, 0, 1);
+	mVerticies[3].color = Vector4f(0, 1, 0, 1);
+
+	mIndicies.resize(2 * 3);
+
+	int idx = 0;
+	mIndicies[idx++] = 0;	mIndicies[idx++] = 2;	mIndicies[idx++] = 1;
+	mIndicies[idx++] = 1;	mIndicies[idx++] = 2;	mIndicies[idx++] = 3;
+
+	mName = "Rect";
+	return true;
+}
 bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 {
 	int left = _x;
