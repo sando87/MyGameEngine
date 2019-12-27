@@ -131,7 +131,9 @@
     <ClCompile Include="jAStar.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
     <ClCompile Include="jComponent.cpp" />
+    <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
+    <ClCompile Include="jGrid.cpp" />
     <ClCompile Include="jParserSub.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
     <ClCompile Include="jImage.cpp" />
@@ -173,12 +175,14 @@
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="jCrash.h" />
     <ClInclude Include="jDirectXheader.h" />
     <ClInclude Include="jBoneTree.h" />
     <ClInclude Include="jAStar.h" />
     <ClInclude Include="jBoneNode.h" />
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
+    <ClInclude Include="jGrid.h" />
     <ClInclude Include="jParserSub.h" />
     <ClInclude Include="jHeightMap.h" />
     <ClInclude Include="jImage.h" />

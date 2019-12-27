@@ -96,7 +96,7 @@ void jParserD3::LoadResources(int idx)
 		ss << std::hex << rets[idx];
 		ss >> nAddr;
 		void* id = (void*)nAddr;
-		if (mMapRes.find(id) != mMapRes.end())
+		if (mMapRes.find(id) != mMapRes.end() || rets[idx + 1] == "c")
 			return true;
 
 		int filesize = 0;
@@ -161,6 +161,7 @@ bool jParserD3::Init(int _fileIdx)
 	InitFuncConvTex();
 	InitTextureList();
 	InitGeoInfo();
+	InitAnims();
 
 	if (!IsValid())
 	{
@@ -573,6 +574,42 @@ bool jParserD3::IsValid()
 	return true;
 }
 
+void jParserD3::InitAnims()
+{
+	stringstream ss;
+	ss << mFileIndex << "_" << mContext.tex[0].addr << "_c.dump";
+
+	int fileSize = 0;
+	MyRes_CreateAnimations* pData = nullptr;
+	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
+	
+	if (pData)
+	{
+		int i = 0;
+		while (pData->offset[i] != 0)
+		{
+			int off = pData->offset[i];
+			int count = pData->counts[i];
+			Matrix3x4f* pMat = (Matrix3x4f*)((char*)pData + off);
+			anims.push_back(AnimInfo());
+			for (int j = 0; j < count; ++j)
+			{
+				AnimInfo& info = anims.back();
+				
+				vector<Matrix4f> key;
+				for (int k = 0; k < 45; ++k)
+					key.push_back(pMat[k + j * 45].ToMat());
+
+				info.keys.push_back(key);
+			}
+			
+			i++;
+		}
+	}
+	
+	free(pData);
+}
+
 
 void* jParserD3::CreateD3DRescource(void* addr)
 {
@@ -935,7 +972,8 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 	MyRes_CreateBuffer* pData = mpVerticies;
 	switch (mLayoutFileID)
 	{
-	case RES_ID(0x59, 0x167):
+	//case RES_ID(0x59, 0x167):
+	case RES_ID(0x3e, 0x167):
 	{
 		LayoutA* pVert = (LayoutA*)pData->data;
 		Vector4n ret = Vector4n(pVert[_idx].i[0], pVert[_idx].i[1], pVert[_idx].i[2], pVert[_idx].i[3]);
@@ -944,7 +982,7 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	default:
-		_warn();
+		//_warn();
 		break;
 	}
 	return Vector4n(0, 0, 0, 0);
@@ -956,16 +994,18 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 	MyRes_CreateBuffer* pData = mpVerticies;
 	switch (mLayoutFileID)
 	{
-	case RES_ID(0x59, 0x167):
+	//case RES_ID(0x59, 0x167):
+	case RES_ID(0x3e, 0x167):
 	{
 		LayoutA* pVert = (LayoutA*)pData->data;
-		Vector4f ret = Vector4f(pVert[_idx].w[0], pVert[_idx].w[1], pVert[_idx].w[2], 0);
+		float other = 1 - (pVert[_idx].w[0] + pVert[_idx].w[1] + pVert[_idx].w[2]);
+		Vector4f ret = Vector4f(pVert[_idx].w[0], pVert[_idx].w[1], pVert[_idx].w[2], other);
 		return ret;
 	}
 	case RES_ID(0x5D, 0x15F):
 	case RES_ID(0xA, 0x10E):
 	default:
-		_warn();
+		//_warn();
 		break;
 	}
 	return Vector4f(1, 0, 0, 0);

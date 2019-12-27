@@ -158,8 +158,7 @@ bool jInput::Update()
 	
 	if (isKeyIN())
 	{
-		if (mKeyboard != nullptr)
-			mKeyboard(m_keyboardState);
+		mKeyboard(m_keyboardState);
 	}
 
 	memcpy(&mMousePreviousInfo, &m_mouseState, sizeof(m_mouseState));

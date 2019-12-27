@@ -1,7 +1,6 @@
 #pragma once
 #include "jComponent.h"
 #include "junks.h"
-#include "jLoader.h"
 
 struct VertexFormat
 {

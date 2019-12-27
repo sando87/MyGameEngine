@@ -1,5 +1,5 @@
 #include "jMesh.h"
-
+#include "jLoader.h"
 
 
 jMesh::jMesh(string _name)
@@ -25,16 +25,17 @@ bool jMesh::Load(string _name)
 		data.LoadDaeFile(_name);
 	}
 
-	int cnt = data.mVertexIdx.size();
+	ObjectInfo& info = data.mObjects[0];
+	int cnt = info.VertexIdx.size();
 	for (int i = 0; i < cnt; ++i)
 	{
 		VertexFormat vertex;
-		Vector3n& vertIdx = data.mVertexIdx[i];
-		vertex.position = data.mPos[vertIdx.x];
-		vertex.texel = data.mUV[vertIdx.y];
-		vertex.normal = data.mNormal[vertIdx.z];
-		vertex.boneIndexs = data.mBoneIndexs.size() > 0 ? data.mBoneIndexs[vertIdx.x] : Vector4n();
-		vertex.weights = data.mWeights.size() > 0 ? data.mWeights[vertIdx.x] : Vector4f(1,0,0,0);
+		Vector3n& vertIdx = info.VertexIdx[i];
+		vertex.position = info.Pos[vertIdx.x];
+		vertex.texel = info.UV[vertIdx.y];
+		vertex.normal = info.Normal[vertIdx.z];
+		vertex.boneIndexs = info.BoneIndexs.size() > 0 ? info.BoneIndexs[vertIdx.x] : Vector4n();
+		vertex.weights = info.Weights.size() > 0 ? info.Weights[vertIdx.x] : Vector4f(1,0,0,0);
 
 		mVerticies.push_back(vertex);
 
