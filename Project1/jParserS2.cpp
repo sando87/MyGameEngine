@@ -14,7 +14,7 @@ bool jParserS2::Init(int _fileIdx)
 	LoadResources(1);
 
 	mFileIndex = _fileIdx;
-	string name = PATH_RESOURCE + to_string(_fileIdx) + "_D3D9RenderContext.bin";
+	string name = PATH_PARSER_DATA + to_string(_fileIdx) + "_D3D9RenderContext.bin";
 	int size = 0;
 	char* pBuf = nullptr;
 	jUtils::LoadFile(name, &size, (char**)&pBuf);

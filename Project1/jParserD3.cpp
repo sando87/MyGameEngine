@@ -85,7 +85,7 @@ jParserD3::~jParserD3()
 
 void jParserD3::LoadResources(int idx)
 {
-	string path = PATH_RESOURCE;
+	string path = PATH_PARSER_DATA;
 	string filter = "*.dump";
 	jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 
@@ -113,7 +113,7 @@ void jParserD3::LoadResources(int idx)
 	});
 
 
-	//path = PATH_RESOURCE;
+	//path = PATH_PARSER_DATA;
 	//filter = "*_RenderingContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
 	//
@@ -150,7 +150,7 @@ bool jParserD3::Init(int _fileIdx)
 	LoadResources(1);
 
 	mFileIndex = _fileIdx;
-	string name = PATH_RESOURCE + to_string(_fileIdx) + "_RenderingContext.bin";
+	string name = PATH_PARSER_DATA + to_string(_fileIdx) + "_RenderingContext.bin";
 	int size = 0;
 	char* pBuf = nullptr;
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
@@ -558,7 +558,7 @@ void jParserD3::InitCBMain()
 
 	int fileSize = 0;
 	MyRes_CreateBuffer* pData = nullptr;
-	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
+	jUtils::LoadFile(PATH_PARSER_DATA + ss.str(), &fileSize, (char**)&pData);
 	memcpy(&mCBMain, pData->data, sizeof(mCBMain));
 	free(pData);
 }
@@ -581,7 +581,7 @@ void jParserD3::InitAnims()
 
 	int fileSize = 0;
 	MyRes_CreateAnimations* pData = nullptr;
-	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pData);
+	jUtils::LoadFile(PATH_PARSER_DATA + ss.str(), &fileSize, (char**)&pData);
 	
 	if (pData)
 	{
@@ -653,13 +653,13 @@ void* jParserD3::CreateD3DRescource(void* addr)
 	case MYRES_TYPE_CreateTex:
 	{
 		stringstream ss;
-		ss << PATH_RESOURCE << "*_" << addr << "_t.tga";
+		ss << PATH_PARSER_DATA << "*_" << addr << "_t.tga";
 
 		int width = 0;
 		int height = 0;
 		chars imgbuf;
 		jUtils::ForEachFiles2(nullptr, ss.str().c_str(), [&](void *_obj, string _filename) {
-			imgbuf = jUtils::LoadTarga(PATH_RESOURCE + _filename, height, width);
+			imgbuf = jUtils::LoadTarga(PATH_PARSER_DATA + _filename, height, width);
 			return false;
 		});
 
@@ -711,7 +711,7 @@ bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
 
 	int fileSize = 0;
 	MyRes_CreateBuffer* pConstData = nullptr;
-	jUtils::LoadFile(PATH_RESOURCE + ss.str(), &fileSize, (char**)&pConstData);
+	jUtils::LoadFile(PATH_PARSER_DATA + ss.str(), &fileSize, (char**)&pConstData);
 	if (pConstData == nullptr)
 		return false;
 
@@ -1093,7 +1093,7 @@ bool jParserD3::ExportToObjectFormat()
 		stringstream ss;
 		void* pTexAddr = GetTexResAddr(i);
 		ss << "*_" << pTexAddr << "_*.tga";
-		string imageName = jUtils::FindFile(PATH_RESOURCE, ss.str());
+		string imageName = jUtils::FindFile(PATH_PARSER_DATA, ss.str());
 		mExportInfo.metaInfo.images.push_back(imageName);
 
 		Matrix4f& mat = mCBMain.matTex[i + 1];
@@ -1101,7 +1101,9 @@ bool jParserD3::ExportToObjectFormat()
 		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[4], mat[5], mat[7]));
 	}
 
-	mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
+	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta\\"));
+	mExportInfo.ExportImage(PATH_RESOURCES + string("img\\"));
+	mExportInfo.ExportMesh(PATH_RESOURCES + string("mesh\\"), true, 0);
 	//if (IsTerrain())
 	//{
 	//	unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
@@ -1113,16 +1115,6 @@ bool jParserD3::ExportToObjectFormat()
 	//else
 	//	mExportInfo.ExportToObject(mExportInfo.name + ".obj", true, 0);
 
-	return true;
-}
-bool jParserD3::ExportTerrains()
-{
-	for (auto iter = mExpLinks.begin(); iter != mExpLinks.end(); ++iter)
-	{
-		ExpMesh* pMesh = iter->second;
-		pMesh->ExportToObject(pMesh->name + ".obj", true, 0);
-	}
-	mExpLinks.clear();
 	return true;
 }
 bool jParserD3::AddVertInfo(int index, int offset)
@@ -1137,8 +1129,11 @@ bool jParserD3::AddVertInfo(int index, int offset)
 	mExportInfo.Add(index, vertex);
 	return true;
 }
-bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
+bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 {
+	if (jUtils::ExistFile(_path + name + ".obj"))
+		return true;
+
 	string strBaseIdx = to_string(_baseIdx);
 	string ret = "";
 	if (_isRoot)
@@ -1186,19 +1181,17 @@ bool ExpMesh::ExportToObject(string _filename, bool _isRoot, int _baseIdx)
 	ret += nor;
 	ret += tex;
 	ret += strIndicies;
-	string path = PATH_EXPORT + name;
-	_mkdir(path.c_str());
-	ExportMetaInfo(path);
-	jUtils::SaveToFile(path, _filename, ret, true);
+
+	jUtils::SaveToFile(_path, name + ".obj", ret, true);
 
 	if (pNext != nullptr)
-		pNext->ExportToObject(_filename, false, _baseIdx + vertCount);
+		pNext->ExportMesh(_path, false, _baseIdx + vertCount);
 
 	return true;
 }
 bool ExpMesh::ExportMetaInfo(string path)
 {
-	string ret = "";
+	string ret = name + "\n";
 	ret += to_string(metaInfo.worldPosition.x) + " ";
 	ret += to_string(metaInfo.worldPosition.y) + " ";
 	ret += to_string(metaInfo.worldPosition.z) + "\n";
@@ -1209,17 +1202,24 @@ bool ExpMesh::ExportMetaInfo(string path)
 		ret += to_string(metaInfo.vectors[i].y) + " ";
 		ret += to_string(metaInfo.vectors[i].z) + "\n";
 	}
+
 	cnt = metaInfo.images.size();
 	for (int i = 0; i < cnt; ++i)
-	{
-		string imageName = metaInfo.images[i];
-		jUtils::MyCopyFile(PATH_RESOURCE + imageName, path + "\\" + imageName);
-		ret += imageName;
-		ret += "\n";
-	}
+		ret += metaInfo.images[i] + "\n";
 
 	jUtils::SaveToFile(path, name + ".txt", ret);
 	
+	return true;
+}
+bool ExpMesh::ExportImage(string path)
+{
+	int cnt = metaInfo.images.size();
+	for (int i = 0; i < cnt; ++i)
+	{
+		string imageName = metaInfo.images[i];
+		if(jUtils::ExistFile(imageName) == false)
+			jUtils::MyCopyFile(PATH_PARSER_DATA + imageName, path + imageName);
+	}
 	return true;
 }
 bool ExpMesh::Merge(ExpMesh * _mesh)

@@ -53,7 +53,7 @@ void ObjParser::OnStart()
 	mShader->Load(mParser);
 	AddComponent(mShader);
 
-	//mParser->ExportToObjectFormat();
+	mParser->ExportToObjectFormat();
 
 	Vector3 pos = mTransport->getPos();
 	pos.x = mOff;

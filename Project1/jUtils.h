@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <io.h>
 using namespace std;
 
 class Matrix4;
@@ -58,6 +59,10 @@ public:
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);
+	}
+	static bool ExistFile(string _fullname)
+	{
+		return _access(_fullname.c_str(), 0) == 0 ? true : false;
 	}
 	static unsigned int Hash(string _str)
 	{

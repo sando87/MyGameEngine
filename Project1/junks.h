@@ -52,7 +52,7 @@ public:	 void Set##Name(type val) { m##Name = val; }
 #define RadToDeg(rad) ((rad)*180.0/jPI)
 #define IsOutofOne(x) ((0.9999<(x) && (x)<1.0001) ? false : true)
 
-#define PATH_RESOURCE "D:\\temp\\"
+#define PATH_RESOURCES ".\\res\\"
 
 typedef unsigned char u8;
 typedef unsigned short u16;

@@ -115,15 +115,16 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 
 void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 {
-	string path = "D:\\export\\D3\\";
-	jUtils::ForEachFiles2(nullptr, (path+"*.*").c_str(), [&](void *obj, string name) {
-		string fullname = path + name + "\\" + name + ".txt";
+	string path = PATH_RESOURCES + string("meta\\");
+	jUtils::ForEachFiles2(nullptr, (path+"*.*").c_str(), [&](void *obj, string filename) {
+		string fullname = path + filename;
 		strings lines = jUtils::LoadLines(fullname);
-		if (lines->size() != 19)
+		if (lines->size() != 20)
 			return true;
 
-		string firstLine = lines->front();
-		strings coordinates = jUtils::Split2(firstLine, " ");
+		string name = lines->front();
+		string positionInfo = lines[1];
+		strings coordinates = jUtils::Split2(positionInfo, " ");
 		int x = atoi(coordinates[0].c_str());
 		int y = atoi(coordinates[1].c_str());
 		mTerrainCenter.x += x;

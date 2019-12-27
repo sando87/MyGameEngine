@@ -4,7 +4,7 @@
 #include "jDirectXheader.h"
 #include "jParserSub.h"
 
-#define PATH_EXPORT "D:\\export\\"
+#define PATH_PARSER_DATA "D:\\temp\\"
 
 struct MyResBase;
 
@@ -42,7 +42,8 @@ struct ExpMesh
 	vector<Vector3n> indicies;
 	ExpMesh *pNext;
 	bool ExportMetaInfo(string path);
-	bool ExportToObject(string _filename, bool _isRoot, int _baseIdx);
+	bool ExportImage(string path);
+	bool ExportMesh(string _path, bool _isRoot, int _baseIdx);
 	bool Merge(ExpMesh *_mesh);
 	bool Add(int _idx, ExpVertex& _vert);
 	ExpMesh()
@@ -123,7 +124,6 @@ public:
 	unsigned long long CalcKey(float _x, float _y);
 	ExpMesh mExportInfo;
 	bool ExportToObjectFormat();
-	bool ExportTerrains();
 	bool AddVertInfo(int index, int offset);
 };
 
