@@ -51,20 +51,37 @@ strings jUtils::Split2(string _str, const char* _del)
 	}
 	return rets;
 }
+void jUtils::ReadTargaSize(string filename, int& height, int& width, int& size)
+{
+	FILE* filePtr;
+	if (fopen_s(&filePtr, filename.c_str(), "rb") != 0)
+		return;
 
+	TargaHeader targaFileHeader;
+	unsigned int count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+	if (count != 1)
+		return;
+
+	height = (int)targaFileHeader.height;
+	width = (int)targaFileHeader.width;
+	size = (targaFileHeader.bpp / 8 ) * height * width;
+
+	fclose(filePtr);
+}
 chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert)
 {
 	// targa 파일을 바이너리 모드로 파일을 엽니다.
-	FILE* filePtr;
-	if (fopen_s(&filePtr, filename.c_str(), "rb") != 0)
+	FILE* filePtr = nullptr;
+	if(fopen_s(&filePtr, filename.c_str(), "rb") != 0)
 	{
-		_printlog("fail to load %s\n", filename);
+		_printlog("fail to load %s\n", filename.c_str());
 		return chars();
 	}
 
 	// 파일 헤더를 읽어옵니다.
 	TargaHeader targaFileHeader;
-	unsigned int count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+	memset(&targaFileHeader, 0x00, sizeof(targaFileHeader));
+	unsigned int count = (unsigned int)fread_s(&targaFileHeader, sizeof(TargaHeader), sizeof(TargaHeader), 1, filePtr);
 	if (count != 1)
 	{
 		_printlog("fail to load .tga file\n");
@@ -92,16 +109,17 @@ chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert
 
 	// 파일을 닫습니다.
 	fclose(filePtr);
-
+	//return targaRawData;
+	
 
 	chars pBuf;
 	pBuf->resize(imageSize);
 	// targa 대상 데이터 배열에 인덱스를 초기화합니다.
 	int index = 0;
-
+	
 	// targa 이미지 데이터에 인덱스를 초기화합니다.
 	int k = _isInvert ? ((width * height * 4) - (width * 4)) : 0;
-
+	
 	// 이제 targa 형식이 거꾸로 저장되었으므로 올바른 순서로 targa 이미지 데이터를 targa 대상 배열에 복사합니다.
 	for (int j = 0; j < height; j++)
 	{
@@ -111,17 +129,17 @@ chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert
 			pBuf[index + 1] = targaRawData[k + 1];  // 녹색
 			pBuf[index + 2] = targaRawData[k + 0];  // 파랑
 			pBuf[index + 3] = targaRawData[k + 3];  // 알파
-
+	
 														 // 인덱스를 targa 데이터로 증가시킵니다.
 			k += 4;
 			index += 4;
 		}
-
+	
 		// targa 이미지 데이터 인덱스를 역순으로 읽은 후 열의 시작 부분에서 이전 행으로 다시 설정합니다.
 		if(_isInvert)
 			k -= (width * 8);
 	}
-
+	
 	return pBuf;
 }
 

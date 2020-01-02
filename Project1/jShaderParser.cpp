@@ -2,6 +2,8 @@
 #include "jParserD3.h"
 #include "ObjCamera.h"
 #include "jMatrixControl.h"
+#include "jCaches.h"
+#include "jRenderer.h"
 
 #define SHADER_PARSER_FILENAME "./parser"
 
@@ -238,7 +240,7 @@ bool jShaderParser::OnRender()
 		return false;
 	}
 	ShaderBufferLight* dataPtrLight = (ShaderBufferLight*)mappedResource.pData;
-	dataPtrLight->direction = Vector4f(1, 1, -1, 0);
+	dataPtrLight->direction = Vector4f(-1, -1, -1, 0);
 	mDevContext->Unmap(mLightBuffer, 0);
 	mDevContext->PSSetConstantBuffers(1, 1, &mLightBuffer);
 
@@ -254,6 +256,12 @@ bool jShaderParser::OnRender()
 
 	// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
 	mDevContext->PSSetSamplers(0, 1, &mSampleState);
+
+	ID3D11BlendState *bs = GetAlphaOn() ? jRenderer::GetInst().GetBS_AlphaOn() : jRenderer::GetInst().GetBS_AlphaOff();
+	mDevContext->OMSetBlendState(bs, nullptr, 0xffffffff);
+
+	ID3D11DepthStencilState *dss = GetDepthOn() ? jRenderer::GetInst().GetDSS_DepthOn() : jRenderer::GetInst().GetDSS_DepthOff();
+	mDevContext->OMSetDepthStencilState(dss, 1);
 
 	// 삼각형을 그립니다.
 	mDevContext->DrawIndexed(mDrawIndexed1, mDrawIndexed2, mDrawIndexed3);

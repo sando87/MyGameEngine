@@ -10,7 +10,7 @@ private:
 	int mStep;
 	int mCntWidth;
 	int mCntHeight;
-	float *mHeightMap;
+	vector<float> mHeightMap;
 	float mMinZ;
 	float mMaxZ;
 
@@ -19,7 +19,6 @@ public:
 	{
 		mCntWidth = mWidth / mStep;
 		mCntHeight = mHeight / mStep;
-		mHeightMap = nullptr;
 	}
 	~jHeightMap();
 

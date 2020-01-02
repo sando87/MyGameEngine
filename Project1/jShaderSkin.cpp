@@ -239,8 +239,8 @@ bool jShaderSkin::CreateTexture()
 	if (compImage == nullptr)
 		return false;
 
-	string name = compImage->GetFileName();
-	mTextureView = (ID3D11ShaderResourceView *)jCaches::CacheGraphics(name, [this, compImage](string name) {
+	string key = compImage->GetFileName() + ".texture";
+	mTextureView = (ID3D11ShaderResourceView *)jCaches::CacheGraphics(key, [this, compImage](string no_use) {
 		ID3D11ShaderResourceView * textureView = nullptr;
 
 		int width = compImage->GetWidth();

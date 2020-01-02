@@ -1059,7 +1059,7 @@ unsigned long long jParserD3::CalcKey(float _x, float _y)
 	memcpy((char*)&key + 4, &_y, 4);
 	return key;
 }
-bool jParserD3::ExportToObjectFormat()
+bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 {
 	mExportInfo.Reset();
 	char* pIndiciesData = GetIndiciesData();
@@ -1070,6 +1070,12 @@ bool jParserD3::ExportToObjectFormat()
 	int indexOff = mGeoInfo.drawIndexOffset;
 
 	mExportInfo.name = "MyObject_" + to_string(mFileIndex);
+	stringstream ss;
+	ss << mContext.vb[0].addr << "_" << mFileIndex << ".obj";
+	mExportInfo.objname = ss.str();
+	mExportInfo.type = type;
+	mExportInfo.alpha = alpha;
+	mExportInfo.depth = depth;
 	short* pIndicies = (short*)pIndiciesData + indexOff;
 	for (int i = 0; i < polyCount; ++i)
 	{
@@ -1085,7 +1091,14 @@ bool jParserD3::ExportToObjectFormat()
 		mExportInfo.indicies.push_back(index);
 	}
 
-	mExportInfo.metaInfo.worldPosition = Vector3f(mCBMain.matWorld[3], mCBMain.matWorld[7], mCBMain.matWorld[11]);
+	Vector3f basePos;
+	basePos.x = (int)(mCBMain.matWorld[3] / 240) * 240.0f;
+	basePos.y = (int)(mCBMain.matWorld[7] / 240) * 240.0f;
+	basePos.z = mCBMain.matWorld[11];
+	_warnif(abs(basePos.x - mCBMain.matWorld[3]) > 1);
+	_warnif(abs(basePos.y - mCBMain.matWorld[7]) > 1);
+
+	mExportInfo.metaInfo.worldPosition = basePos;
 	int cntTextures = mTextures.size();
 	for (int i = 0; i < cntTextures; ++i)
 	{
@@ -1101,9 +1114,9 @@ bool jParserD3::ExportToObjectFormat()
 		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[4], mat[5], mat[7]));
 	}
 
-	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta\\"));
-	mExportInfo.ExportImage(PATH_RESOURCES + string("img\\"));
-	mExportInfo.ExportMesh(PATH_RESOURCES + string("mesh\\"), true, 0);
+	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
+	mExportInfo.ExportImage(PATH_RESOURCES + string("img/"));
+	mExportInfo.ExportMesh(PATH_RESOURCES + string("mesh/"), true, 0);
 	//if (IsTerrain())
 	//{
 	//	unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
@@ -1131,7 +1144,8 @@ bool jParserD3::AddVertInfo(int index, int offset)
 }
 bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 {
-	if (jUtils::ExistFile(_path + name + ".obj"))
+	string fullname = _path + objname;
+	if (jUtils::ExistFile(fullname))
 		return true;
 
 	string strBaseIdx = to_string(_baseIdx);
@@ -1182,7 +1196,7 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 	ret += tex;
 	ret += strIndicies;
 
-	jUtils::SaveToFile(_path, name + ".obj", ret, true);
+	jUtils::SaveToFile(_path, objname, ret, true);
 
 	if (pNext != nullptr)
 		pNext->ExportMesh(_path, false, _baseIdx + vertCount);
@@ -1191,7 +1205,13 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 }
 bool ExpMesh::ExportMetaInfo(string path)
 {
-	string ret = name + "\n";
+	string folderPath = path + to_string((int)metaInfo.worldPosition.x) + "_" + to_string((int)metaInfo.worldPosition.y);
+	_mkdir(folderPath.c_str());
+
+	string ret = objname + "\n";
+	ret += type + "\n";
+	ret += alpha ? "TRUE\n" : "FALSE\n";
+	ret += depth ? "TRUE\n" : "FALSE\n";
 	ret += to_string(metaInfo.worldPosition.x) + " ";
 	ret += to_string(metaInfo.worldPosition.y) + " ";
 	ret += to_string(metaInfo.worldPosition.z) + "\n";
@@ -1207,7 +1227,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 	for (int i = 0; i < cnt; ++i)
 		ret += metaInfo.images[i] + "\n";
 
-	jUtils::SaveToFile(path, name + ".txt", ret);
+	jUtils::SaveToFile(folderPath, name + ".txt", ret);
 	
 	return true;
 }

@@ -8,10 +8,11 @@
 
 jShader::jShader()
 {
+	memset(this, 0x00, sizeof(jShader));
+	
 	mVisiable = true;
-	mVertexShader = nullptr;
-	mPixelShader = nullptr;
-	mMesh = nullptr;
+	mDepthOn = true;
+
 	mDev = jRenderer::GetInst().GetDevice();
 	mDevContext = jRenderer::GetInst().GetDeviceContext();
 }

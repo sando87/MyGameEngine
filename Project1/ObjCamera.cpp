@@ -44,7 +44,7 @@ void ObjCamera::OnStart()
 {
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
 	Vector3 terrainCenter = GetTerrain().GetTerrainCenter();
-	mPos.lookat(Vector3(terrainCenter.x -25, terrainCenter.y -25, 25), Vector3(terrainCenter.x, terrainCenter.y, 0), Vector3(0, 0, 1));
+	mPos.lookat(Vector3(terrainCenter.x +25, terrainCenter.y +25, 50), Vector3(terrainCenter.x, terrainCenter.y, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse += [&](auto info)
 	{
 		if (info.z > 0)
@@ -127,6 +127,7 @@ jRect ObjCamera::UpdateGroundRect()
 	Vector2 gptD = lineD.GetXY(0);
 	jRect rt;
 	rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+	rt.ClipMinus();
 	return rt;
 }
 

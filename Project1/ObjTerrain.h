@@ -15,6 +15,6 @@ private:
 	//void OnUpdate();
 	
 public:
-	void Load(string name, float size, float step, jHeightMap* heightmap);
+	void Load(string name);
 };
 

@@ -48,6 +48,7 @@ public:
 	static double ToDouble(string _str) { return stod(_str); }
 	static string ToString(int _val) { return to_string(_val); }
 	static chars LoadTarga(string filename, int& height, int& width, bool _isInvert = false);
+	static void ReadTargaSize(string filename, int& height, int& width, int& size);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
 	static chars LoadFile2(string path, int& _bufSize);
 	static strings LoadLines(string path);

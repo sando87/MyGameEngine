@@ -23,7 +23,8 @@ private:
 	list<jGameObject*> mObjects;
 	jGrid<list<jCrash*>> mCrashGrid;
 	unordered_map<string, function<bool(void)>> mCoroutines;
-	
+
+	int tmpIdx;
 
 public:
 	bool Initialize();

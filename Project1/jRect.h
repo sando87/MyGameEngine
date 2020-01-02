@@ -61,6 +61,13 @@ public:
 		double refHeight = (Size().y + rect.Size().y) * 0.5;
 		return gapWidth <= refWidth && gapHeight <= refHeight;
 	}
+	void ClipMinus()
+	{
+		mLeftBottom.x	= mLeftBottom.x	< 0 ? 0 : mLeftBottom.x;
+		mLeftBottom.y	= mLeftBottom.y	< 0 ? 0 : mLeftBottom.y;
+		mRightTop.x		= mRightTop.x	< 0 ? 0 : mRightTop.x;
+		mRightTop.y		= mRightTop.y	< 0 ? 0 : mRightTop.y;
+	}
 
 
 };

@@ -11,6 +11,9 @@
 #include "jTime.h"
 #include "jShader.h"
 #include "jCrash.h"
+#include "jInput.h"
+
+#include "jParserD3.h"
 
 jGameObjectMgr::jGameObjectMgr() : mCrashGrid(CRASH_SIZE, CRASH_STEP)
 {
@@ -60,50 +63,59 @@ bool jGameObjectMgr::Initialize()
 
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
-
+	
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
-
 	
-	(new ObjPlayer())->AddToMgr();
+	//(new ObjPlayer())->AddToMgr();
 
-	//for(int i = 158; i < 162; ++i)
+	static vector<ObjParser*> vecObjs;
+	tmpIdx = 0;
+	//for(int i = 203; i < 210; ++i)
 	//{
 	//	ObjParser* obj0 = new ObjParser();
 	//	obj0->mFileIndex = i;
-	//	obj0->mOff = (i - 158) * 20.0f;
+	//	//obj0->mOff = (i - 203) * 20.0f;
 	//	obj0->AddToMgr();
+	//	vecObjs.push_back(obj0);
 	//}
 
+	//{ jParserD3 parser; parser.Init(203);	parser.ExportToObjectFormat("terrain", false, true);}
+	//{ jParserD3 parser; parser.Init(204);	parser.ExportToObjectFormat("terrain", false, true);}
+	//{ jParserD3 parser; parser.Init(206);	parser.ExportToObjectFormat("default", false, true);}
+	//{ jParserD3 parser; parser.Init(207);	parser.ExportToObjectFormat("default", false, true);}
+	//{ jParserD3 parser; parser.Init(208);	parser.ExportToObjectFormat("default", false, true);}
 
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 413; obj0->AddToMgr(); } //케리어
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 424; obj0->AddToMgr(); } //커세어
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 425; obj0->AddToMgr(); } //파수기
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 426; obj0->AddToMgr(); } //사도
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 427; obj0->AddToMgr(); } //하템
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 431; obj0->AddToMgr(); } //셔틀
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 436; obj0->AddToMgr(); } //
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 438; obj0->AddToMgr(); } //드라군
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 439; obj0->AddToMgr(); } //
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 448; obj0->AddToMgr(); } //프로브
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 449; obj0->AddToMgr(); } //질럿
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 450; obj0->AddToMgr(); } //불멸자
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 456; obj0->AddToMgr(); } //거신
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 457; obj0->AddToMgr(); } //폭풍함
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 463; obj0->AddToMgr(); } //스카웃
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 568; obj0->AddToMgr(); } //
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 569; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 570; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 571; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 572; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 573; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 592; obj0->AddToMgr(); } //옵져버
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 593; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 594; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 595; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 596; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 597; obj0->AddToMgr(); }
-	//{ jObjStarCraft* obj0 = new jObjStarCraft(); obj0->mFileIndex = 598; obj0->AddToMgr(); }
+
+	jInput::GetInst().mKeyboard += [this](const unsigned char* key) {
+		//char keys[256] = { 0, };
+		//memcpy(keys, key, 256);
+		
+		if (key[78] != 0)
+		{
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(false);
+			tmpIdx = (tmpIdx + 1) % vecObjs.size();
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
+			_echoN(vecObjs[tmpIdx]->mFileIndex);
+		}
+		else if (key[74] != 0)
+		{
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(false);
+			tmpIdx--;
+			tmpIdx = tmpIdx < 0 ? vecObjs.size() - 1 : tmpIdx;
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
+			_echoN(vecObjs[tmpIdx]->mFileIndex);
+		}
+		Sleep(500);
+		// enter key[41]
+		// a key[30]
+		// 1 key[2]
+		// num9 key[73]
+		// unm6 key[77]
+		// + key[78]
+		// - key[74]
+	};
+
 	return true;
 }
 void jGameObjectMgr::RunObjects()
@@ -177,10 +189,10 @@ void jGameObjectMgr::RunObjects()
 			jShader* shader = obj->FindComponent<jShader>();
 			if (shader != nullptr)
 			{
-				if (!shader->GetLoaded())
+				if (!shader->mLoaded)
 				{
 					shader->OnLoad();
-					shader->SetLoaded(true);
+					shader->mLoaded = true;
 				}
 
 				if(shader->GetVisiable())

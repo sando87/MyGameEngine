@@ -2,6 +2,7 @@
 #define __JRENDERER_H__
 
 #include "jDirectXheader.h"
+#include "junks.h"
 
 #define SCREEN_NEAR 1.0f
 #define SCREEN_FAR 1000.0f
@@ -17,6 +18,7 @@ private:
 
 public:
 	bool Initialize(HWND _hWnd, int _width, int _height, bool _isFullScreen, bool _isVsync);
+	bool InitRenderStates();
 	void Release();
 	bool Render();
 	void BeginScene();
@@ -37,6 +39,14 @@ private:
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11DepthStencilView* m_depthStencilView;
 	ID3D11RasterizerState* m_rasterState;
+
+
+
+	Property_Getter(ID3D11BlendState *, BS_AlphaOff)
+	Property_Getter(ID3D11BlendState *, BS_AlphaOn)
+	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOff)
+	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOn)
+	
 };
 
 #endif

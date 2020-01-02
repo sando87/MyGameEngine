@@ -2,6 +2,7 @@
 #include "ObjCamera.h"
 #include "ObjTerrain.h"
 #include "jHeightMap.h"
+#include "jMesh.h"
 
 #define TERRAIN_SIZE 240
 #define TERRAIN_STEP 5
@@ -67,14 +68,19 @@ void ObjTerrainMgr::LoadingBlocks()
 
 void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 {
+	string foldername = to_string(idxX * 240) + "_" + to_string(idxY * 240);
 	u64 key = GRID_HASH(idxX, idxY);
 	vector<string>* names = mBlockResourcesAll[key];
 	for (string name : *names)
 	{
 		ObjTerrain* obj = new ObjTerrain();
-		obj->Load(name, TERRAIN_SIZE, TERRAIN_STEP, block.heightMap);
+		obj->Load(foldername + "/" + name);
 		obj->AddToMgr();
 		block.terrains.push_back(obj);
+		
+		jMesh* mesh = obj->FindComponent<jMesh>();
+		Vector3 basePos = obj->GetTransport().getPos();
+		block.heightMap->UpdateHeightMap(mesh, basePos);
 	}
 	float minZ = block.heightMap->MinHeight();
 	float maxZ = block.heightMap->MaxHeight();
@@ -106,7 +112,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 		if (camRect.Overlapped(rect))
 			break;
 
-		for(ObjTerrain* terrain : block.terrains)
+		for(jGameObject* terrain : block.terrains)
 			terrain->DeleteFromMgr();
 
 		mCachedBlocks.erase(key);
@@ -115,16 +121,11 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 
 void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 {
-	string path = PATH_RESOURCES + string("meta\\");
-	jUtils::ForEachFiles2(nullptr, (path+"*.*").c_str(), [&](void *obj, string filename) {
-		string fullname = path + filename;
-		strings lines = jUtils::LoadLines(fullname);
-		if (lines->size() != 20)
-			return true;
+	string path = PATH_RESOURCES + string("meta/");
 
-		string name = lines->front();
-		string positionInfo = lines[1];
-		strings coordinates = jUtils::Split2(positionInfo, " ");
+	//폴더별로 루프
+	jUtils::ForEachFiles2(nullptr, (path+"*").c_str(), [&](void *obj, string filename) {
+		strings coordinates = jUtils::Split2(filename, "_");
 		int x = atoi(coordinates[0].c_str());
 		int y = atoi(coordinates[1].c_str());
 		mTerrainCenter.x += x;
@@ -132,14 +133,14 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 		mTerrainCenter.z += 1;
 		u64 key = CoordinateToKey(x, y);
 		if (mBlockResourcesAll.find(key) == mBlockResourcesAll.end())
-		{
 			mBlockResourcesAll[key] = new vector<string>;
-			mBlockResourcesAll[key]->push_back(name);
-		}
-		else
-		{
-			mBlockResourcesAll[key]->push_back(name);
-		}
+		vector<string>* list = mBlockResourcesAll[key];
+
+		//각폴더안의 txt파일별로 루프
+		jUtils::ForEachFiles2(nullptr, (path + filename + "/*.*").c_str(), [&](void *obj, string filename) {
+			list->push_back(filename);
+			return true;
+		});
 		
 		return true;
 	});

@@ -4,6 +4,7 @@
 #include "junks.h"
 #include "jComponent.h"
 #include "jShaderHeader.h"
+#include "jGameObjectMgr.h"
 
 class jMesh;
 
@@ -26,8 +27,12 @@ protected:
 	ID3D11PixelShader *		mPixelShader;
 
 	jMesh * mMesh;
+	bool mLoaded;
+	friend void jGameObjectMgr::RunObjects();
+
 
 	Property_GetSetter(bool, Visiable)
-	Property_GetSetter(bool, Loaded)
+	Property_GetSetter(bool, AlphaOn)
+	Property_GetSetter(bool, DepthOn)
 };
 

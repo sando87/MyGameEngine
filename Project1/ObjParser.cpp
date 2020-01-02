@@ -47,13 +47,24 @@ void ObjParser::OnStart()
 	//	string matStr = jUtils::MatToCSV(&mat);
 	//	jUtils::SaveToFile(".", "animTest.csv", matStr, true);
 	//}
-	
+
+	//_printlog("[%d] [%p] [%d] [%d]\n", mFileIndex, mParser->mContext.vs_addr, mParser->mContext.ds_isDirty, mParser->mContext.bs_isDirty);
 
 	mShader = new jShaderParser();
 	mShader->Load(mParser);
+	mShader->SetVisiable(false);
 	AddComponent(mShader);
 
-	mParser->ExportToObjectFormat();
+	if (mFileIndex < 239)
+	{
+		mShader->SetAlphaOn(false);
+		mShader->SetDepthOn(true);
+	}
+	else
+	{
+		mShader->SetAlphaOn(true);
+		mShader->SetDepthOn(false);
+	}
 
 	Vector3 pos = mTransport->getPos();
 	pos.x = mOff;

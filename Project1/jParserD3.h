@@ -37,6 +37,10 @@ struct ExpMetaInfo
 struct ExpMesh
 {
 	string name;
+	string objname;
+	string type;
+	bool alpha;
+	bool depth;
 	ExpMetaInfo metaInfo;
 	vector<ExpVertex> vert;
 	vector<Vector3n> indicies;
@@ -123,7 +127,7 @@ public:
 	bool IsTerrain();
 	unsigned long long CalcKey(float _x, float _y);
 	ExpMesh mExportInfo;
-	bool ExportToObjectFormat();
+	bool ExportToObjectFormat(string type, bool alpha, bool depth);
 	bool AddVertInfo(int index, int offset);
 };
 

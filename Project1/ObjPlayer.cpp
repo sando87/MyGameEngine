@@ -37,7 +37,7 @@ void ObjPlayer::OnStart()
 	//mShader->SetEnabled(false);
 
 	Vector4f diffuse = Vector4f(1, 1, 1, 1);
-	Vector4f light = Vector4f(1, 1, -1, 0);
+	Vector4f light = Vector4f(-1, -1, -1, 0);
 	ShaderParamsSkin& param = mShader->GetParams();
 	for(int i = 0; i < 45; ++i)
 		param.bones[i] = Matrix4().identity();

@@ -335,6 +335,60 @@ bool jRenderer::Initialize(HWND _hWnd, int _width, int _height, bool _isFullScre
 	// Create the viewport.
 	m_deviceContext->RSSetViewports(1, &viewport);
 
+	InitRenderStates();
+
+	return true;
+}
+
+bool jRenderer::InitRenderStates()
+{
+	//ID3D11BlendState *mBlendState;
+	//ID3D11DepthStencilState* mDepthStencilState;
+
+	D3D11_BLEND_DESC bsDesc;
+	memset(&bsDesc, 0x00, sizeof(bsDesc));
+	bsDesc.RenderTarget[0].BlendEnable = false;
+	bsDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	bsDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	bsDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+	bsDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	bsDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+	bsDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+	bsDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	if (FAILED(m_device->CreateBlendState(&bsDesc, &mBS_AlphaOff)))
+		return false;
+
+	bsDesc.RenderTarget[0].BlendEnable = true;
+	if (FAILED(m_device->CreateBlendState(&bsDesc, &mBS_AlphaOn)))
+		return false;
+
+	D3D11_DEPTH_STENCIL_DESC dssDesc;
+	memset(&dssDesc, 0x00, sizeof(dssDesc));
+	// Set up the description of the stencil state.
+	dssDesc.DepthEnable = false;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	dssDesc.StencilEnable = false;
+	dssDesc.StencilReadMask = 0xFF;
+	dssDesc.StencilWriteMask = 0xFF;
+	// Stencil operations if pixel is front-facing.
+	dssDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dssDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	dssDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dssDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	// Stencil operations if pixel is back-facing.
+	dssDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dssDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	dssDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dssDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	// Create the depth stencil state.
+	if (FAILED(m_device->CreateDepthStencilState(&dssDesc, &mDSS_DepthOff)))
+		return false;
+
+	dssDesc.DepthEnable = true;
+	if (FAILED(m_device->CreateDepthStencilState(&dssDesc, &mDSS_DepthOn)))
+		return false;
+
 	return true;
 }
 

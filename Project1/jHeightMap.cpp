@@ -3,17 +3,12 @@
 
 jHeightMap::~jHeightMap()
 {
-	if (mHeightMap != nullptr)
-		delete[] mHeightMap;
 }
 
 bool jHeightMap::UpdateHeightMap(jMesh * _mesh, Vector3 _base)
 {
-	if (mHeightMap == nullptr)
-	{
-		mHeightMap = new float[mCntWidth * mCntHeight];
-		memset(mHeightMap, 0, sizeof(float) * mCntWidth * mCntHeight);
-	}
+	if (mHeightMap.empty())
+		mHeightMap.resize(mCntWidth * mCntHeight);
 
 	vector<VertexFormat>& verticies = _mesh->GetVerticies();
 	int cnt = verticies.size();
@@ -22,10 +17,10 @@ bool jHeightMap::UpdateHeightMap(jMesh * _mesh, Vector3 _base)
 		VertexFormat& vert = verticies[idx];
 		float x = vert.position.x;
 		float y = vert.position.y;
-		int gridIdx = IdxOfNearPt(x, y);
-		if (gridIdx < 0 || gridIdx >= mCntWidth * mCntHeight)
+		if (x < 0 || mWidth <= x || y < 0 || mHeight <= y)
 			continue;
 
+		int gridIdx = IdxOfNearPt(x, y);
 		mHeightMap[gridIdx] = max(mHeightMap[gridIdx], vert.position.z + (float)_base.z);
 		mMinZ = min(mHeightMap[gridIdx], mMinZ);
 		mMaxZ = max(mHeightMap[gridIdx], mMaxZ);
