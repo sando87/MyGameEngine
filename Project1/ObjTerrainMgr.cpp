@@ -126,6 +126,9 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 	//폴더별로 루프
 	jUtils::ForEachFiles2(nullptr, (path+"*").c_str(), [&](void *obj, string filename) {
 		strings coordinates = jUtils::Split2(filename, "_");
+		if (coordinates->size() != 2)
+			return true;
+
 		int x = atoi(coordinates[0].c_str());
 		int y = atoi(coordinates[1].c_str());
 		mTerrainCenter.x += x;

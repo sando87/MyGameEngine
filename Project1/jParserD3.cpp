@@ -74,7 +74,6 @@ jParserD3::jParserD3()
 {
 	mpVerticies = nullptr;
 	mLayoutFileID = 0;
-	mMapRes.clear();
 }
 
 
@@ -577,24 +576,25 @@ bool jParserD3::IsValid()
 void jParserD3::InitAnims()
 {
 	stringstream ss;
-	ss << mFileIndex << "_" << mContext.tex[0].addr << "_c.dump";
+	ss << mFileIndex << "_" << mContext.tex[0].addr << "_c";
 
 	int fileSize = 0;
 	MyRes_CreateAnimations* pData = nullptr;
-	jUtils::LoadFile(PATH_PARSER_DATA + ss.str(), &fileSize, (char**)&pData);
+	jUtils::LoadFile(PATH_PARSER_DATA + ss.str() + ".dump", &fileSize, (char**)&pData);
 	
 	if (pData)
 	{
+		mAnimFileName = ss.str();
 		int i = 0;
 		while (pData->offset[i] != 0)
 		{
 			int off = pData->offset[i];
 			int count = pData->counts[i];
 			Matrix3x4f* pMat = (Matrix3x4f*)((char*)pData + off);
-			anims.push_back(AnimInfo());
+			mAnims.push_back(AnimInfo());
 			for (int j = 0; j < count; ++j)
 			{
-				AnimInfo& info = anims.back();
+				AnimInfo& info = mAnims.back();
 				
 				vector<Matrix4f> key;
 				for (int k = 0; k < 45; ++k)
@@ -965,7 +965,7 @@ int jParserD3::GetTex(int _idx, Vector2f* _t, int byteOffset)
 	}
 	return 0;
 }
-Vector4n jParserD3::GetMatIdx(int _idx)
+Vector4n jParserD3::GetMatIdx(int _idx, int byteOffset)
 {
 	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
@@ -975,7 +975,7 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 	//case RES_ID(0x59, 0x167):
 	case RES_ID(0x3e, 0x167):
 	{
-		LayoutA* pVert = (LayoutA*)pData->data;
+		LayoutA* pVert = (LayoutA*)(pData->data + byteOffset);
 		Vector4n ret = Vector4n(pVert[_idx].i[0], pVert[_idx].i[1], pVert[_idx].i[2], pVert[_idx].i[3]);
 		return ret;
 	}
@@ -987,7 +987,7 @@ Vector4n jParserD3::GetMatIdx(int _idx)
 	}
 	return Vector4n(0, 0, 0, 0);
 }
-Vector4f jParserD3::GetMatWeight(int _idx)
+Vector4f jParserD3::GetMatWeight(int _idx, int byteOffset)
 {
 	_warnif(_idx >= mGeoInfo.vertexTotalCount);
 
@@ -997,7 +997,7 @@ Vector4f jParserD3::GetMatWeight(int _idx)
 	//case RES_ID(0x59, 0x167):
 	case RES_ID(0x3e, 0x167):
 	{
-		LayoutA* pVert = (LayoutA*)pData->data;
+		LayoutA* pVert = (LayoutA*)(pData->data + byteOffset);
 		float other = 1 - (pVert[_idx].w[0] + pVert[_idx].w[1] + pVert[_idx].w[2]);
 		Vector4f ret = Vector4f(pVert[_idx].w[0], pVert[_idx].w[1], pVert[_idx].w[2], other);
 		return ret;
@@ -1092,11 +1092,9 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 	}
 
 	Vector3f basePos;
-	basePos.x = (int)(mCBMain.matWorld[3] / 240) * 240.0f;
-	basePos.y = (int)(mCBMain.matWorld[7] / 240) * 240.0f;
+	basePos.x = mCBMain.matWorld[3];
+	basePos.y = mCBMain.matWorld[7];
 	basePos.z = mCBMain.matWorld[11];
-	_warnif(abs(basePos.x - mCBMain.matWorld[3]) > 1);
-	_warnif(abs(basePos.y - mCBMain.matWorld[7]) > 1);
 
 	mExportInfo.metaInfo.worldPosition = basePos;
 	int cntTextures = mTextures.size();
@@ -1114,6 +1112,25 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[4], mat[5], mat[7]));
 	}
 
+	if (mAnims.size() > 0)
+	{
+		mExportInfo.animName = mAnimFileName + ".csv";
+		for (int i = 0; i < mAnims[0].keys.size(); ++i)
+		{
+			string line = "";
+			int cnt = mAnims[0].keys[i].size();
+			for (int j = 0; j < cnt; ++j)
+			{
+				Matrix4f& mat = mAnims[0].keys[i][j];
+				line += jUtils::MatToCSV(&mat) + ",";
+			}
+			mExportInfo.animationInfo.push_back(line);
+		}
+	}
+	else
+		mExportInfo.animName = "NoAnim";
+
+	mExportInfo.ExportAnimInfo(PATH_RESOURCES + string("anim/"));
 	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
 	mExportInfo.ExportImage(PATH_RESOURCES + string("img/"));
 	mExportInfo.ExportMesh(PATH_RESOURCES + string("mesh/"), true, 0);
@@ -1138,6 +1155,8 @@ bool jParserD3::AddVertInfo(int index, int offset)
 	vertex.n = GetNor(index, offset);
 	GetTex(index, texel, offset);
 	vertex.t = texel[0];
+	vertex.w = GetMatWeight(index, offset);
+	vertex.i = GetMatIdx(index, offset);
 
 	mExportInfo.Add(index, vertex);
 	return true;
@@ -1158,6 +1177,8 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 	string pos = "";
 	string nor = "";
 	string tex = "";
+	string wei = "";
+	string weiIdx = "";
 	char tmpBuf[64] = { 0, };
 	int vertCount = vert.size();
 	for (int i = 0; i < vertCount; ++i)
@@ -1172,6 +1193,12 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 		memset(tmpBuf, 0x00, 64);
 		sprintf_s(tmpBuf, "vt %.4f %.4f %.4f\n", curVert.t.x, 1 - curVert.t.y, 0.0f);
 		tex += tmpBuf;
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "w %.4f %.4f %.4f %.4f\n", curVert.w.x, curVert.w.y, curVert.w.z, curVert.w.w);
+		wei += tmpBuf;
+		memset(tmpBuf, 0x00, 64);
+		sprintf_s(tmpBuf, "i %d %d %d %d\n", curVert.i.x, curVert.i.y, curVert.i.z, curVert.i.w);
+		weiIdx += tmpBuf;
 	}
 
 	string strIndicies = "";
@@ -1194,6 +1221,8 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 	ret += pos;
 	ret += nor;
 	ret += tex;
+	ret += wei;
+	ret += weiIdx;
 	ret += strIndicies;
 
 	jUtils::SaveToFile(_path, objname, ret, true);
@@ -1203,10 +1232,35 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 
 	return true;
 }
+bool ExpMesh::ExportAnimInfo(string path)
+{
+	if(animationInfo.size() <= 0)
+		return false;
+
+	string total = "";
+	for (string line : animationInfo)
+	{
+		total += line + "\n";
+	}
+	jUtils::SaveToFile(path, animName, total);
+
+	return true;
+}
 bool ExpMesh::ExportMetaInfo(string path)
 {
-	string folderPath = path + to_string((int)metaInfo.worldPosition.x) + "_" + to_string((int)metaInfo.worldPosition.y);
-	_mkdir(folderPath.c_str());
+	string folderPath = "";
+	if (type == "skin")
+	{
+		folderPath = path;
+	}
+	else
+	{
+		int blockPosX = (int)(metaInfo.worldPosition.x / 240) * 240;
+		int blockPosY = (int)(metaInfo.worldPosition.y / 240) * 240;
+		folderPath = path + to_string(blockPosX) + "_" + to_string(blockPosY);
+		_mkdir(folderPath.c_str());
+	}
+	
 
 	string ret = objname + "\n";
 	ret += type + "\n";
@@ -1215,6 +1269,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 	ret += to_string(metaInfo.worldPosition.x) + " ";
 	ret += to_string(metaInfo.worldPosition.y) + " ";
 	ret += to_string(metaInfo.worldPosition.z) + "\n";
+	ret += animName + "\n";
 	int cnt = metaInfo.vectors.size();
 	for (int i = 0; i < cnt; ++i)
 	{

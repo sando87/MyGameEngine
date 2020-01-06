@@ -2,6 +2,7 @@
 #include "jUtils.h"
 #include "junks.h"
 #include "jOS_APIs.h"
+#include "jTime.h"
 
 jUtils::jUtils()
 {
@@ -109,7 +110,7 @@ chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert
 
 	// 파일을 닫습니다.
 	fclose(filePtr);
-	//return targaRawData;
+	return targaRawData;
 	
 
 	chars pBuf;
@@ -199,7 +200,7 @@ strings jUtils::LoadLines(string path)
 	fread(&pBuf[0], filesize, 1, filePtr);
 
 
-	strings lines = Split2(&pBuf[0], "\n");
+	strings lines = Split2(&pBuf[0], "\r\n");
 
 	fclose(filePtr);
 	return lines;
@@ -270,9 +271,39 @@ string jUtils::MatToCSV(Matrix4f * mat)
 {
 	const float * p = mat->get();
 	char buf[260] = { 0, };
-	sprintf_s(buf, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+	sprintf_s(buf, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",
 		p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 	return string(buf);
+}
+bool jUtils::CsvToMat(string line, vector<Matrix4>& mats)
+{
+	strings pieces = Split2(line, ",");
+	if (pieces->size() % 16 != 0)
+		return false;
+
+	Matrix4 rotMat;
+	rotMat.identity();
+	rotMat.rotateZ(-90);
+	rotMat.transpose();
+	int idx = 0;
+	while (idx < pieces->size())
+	{
+		Matrix4 mat;
+		mat.setRow(0, Vector4(stof(pieces[idx]), stof(pieces[idx+1]), stof(pieces[idx+2]), stof(pieces[idx+3]))); idx += 4;
+		mat.setRow(1, Vector4(stof(pieces[idx]), stof(pieces[idx+1]), stof(pieces[idx+2]), stof(pieces[idx+3]))); idx += 4;
+		mat.setRow(2, Vector4(stof(pieces[idx]), stof(pieces[idx+1]), stof(pieces[idx+2]), stof(pieces[idx+3]))); idx += 4;
+		mat.setRow(3, Vector4(stof(pieces[idx]), stof(pieces[idx+1]), stof(pieces[idx+2]), stof(pieces[idx+3]))); idx += 4;
+		mats.push_back(rotMat * mat);
+	}
+	return true;
+}
+
+int jUtils::Random()
+{
+	static int seed = 0;
+	seed++;
+	srand(seed);
+	return rand();
 }
 
 void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))

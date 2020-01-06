@@ -41,48 +41,44 @@ void ObjParser::OnStart()
 		return;
 	}
 
-	//for (int i = 0; i < mParser->anims[0].keys.size(); ++i)
-	//{
-	//	Matrix4f& mat = mParser->anims[0].keys[i][30];
-	//	string matStr = jUtils::MatToCSV(&mat);
-	//	jUtils::SaveToFile(".", "animTest.csv", matStr, true);
-	//}
-
-	//_printlog("[%d] [%p] [%d] [%d]\n", mFileIndex, mParser->mContext.vs_addr, mParser->mContext.ds_isDirty, mParser->mContext.bs_isDirty);
-
 	mShader = new jShaderParser();
 	mShader->Load(mParser);
 	mShader->SetVisiable(false);
 	AddComponent(mShader);
 
-	if (mFileIndex < 239)
-	{
-		mShader->SetAlphaOn(false);
-		mShader->SetDepthOn(true);
-	}
-	else
-	{
-		mShader->SetAlphaOn(true);
-		mShader->SetDepthOn(false);
-	}
-
 	Vector3 pos = mTransport->getPos();
 	pos.x = mOff;
 	mTransport->moveTo(pos);
 
-	//if (mParser->anims.size() > 0)
-	//{
-	//	jInput::GetInst().mKeyboard += [this](const unsigned char* info)
-	//	{
-	//		_echoN(animIndex);
-	//		PrintMat(&mParser->anims[0].keys[animIndex][0]);
-	//		for (int i = 0; i < 45; ++i)
-	//			mShader->mBones[i] = mParser->anims[0].keys[animIndex][i];
-	//
-	//		animIndex++;
-	//		animIndex %= mParser->anims[0].keys.size();
-	//
-	//	};
-	//}
+	if (mParser->mAnims.size() > 0)
+	{
+		jInput::GetInst().mKeyboard += [this](const unsigned char* key)
+		{
+			_echoN(animIndex);
+			for (int i = 0; i < 45; ++i)
+				mShader->mBones[i] = mParser->mAnims[0].keys[animIndex][i];
+
+
+			if (key[30] != 0)
+			{
+				animIndex++;
+				animIndex %= mParser->mAnims[0].keys.size();
+				Sleep(500);
+			}
+			else if (key[31] != 0)
+			{
+				animIndex--;
+				animIndex = animIndex < 0 ? mParser->mAnims[0].keys.size() - 1 : animIndex;
+				Sleep(500);
+			}
+			else
+			{
+				animIndex++;
+				animIndex %= mParser->mAnims[0].keys.size();
+			}
+
+	
+		};
+	}
 }
 

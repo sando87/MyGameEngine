@@ -7,6 +7,7 @@
 #include "ObjGroundAxis.h"
 #include "ObjTerrainMgr.h"
 #include "ObjPlayer.h"
+#include "ObjEnemy.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -68,23 +69,43 @@ bool jGameObjectMgr::Initialize()
 	obj->AddToMgr();
 	
 	//(new ObjPlayer())->AddToMgr();
+	(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	//for(int i = 203; i < 210; ++i)
-	//{
-	//	ObjParser* obj0 = new ObjParser();
-	//	obj0->mFileIndex = i;
-	//	//obj0->mOff = (i - 203) * 20.0f;
-	//	obj0->AddToMgr();
-	//	vecObjs.push_back(obj0);
-	//}
+	for(int i = 397; i < 0; ++i)
+	{
+		ObjParser* obj0 = new ObjParser();
+		obj0->mFileIndex = i;
+		//obj0->mOff = (i - 192) * 20.0f;
+		obj0->AddToMgr();
+		vecObjs.push_back(obj0);
+	}
 
-	//{ jParserD3 parser; parser.Init(203);	parser.ExportToObjectFormat("terrain", false, true);}
-	//{ jParserD3 parser; parser.Init(204);	parser.ExportToObjectFormat("terrain", false, true);}
-	//{ jParserD3 parser; parser.Init(206);	parser.ExportToObjectFormat("default", false, true);}
-	//{ jParserD3 parser; parser.Init(207);	parser.ExportToObjectFormat("default", false, true);}
-	//{ jParserD3 parser; parser.Init(208);	parser.ExportToObjectFormat("default", false, true);}
+	for (int i = 397; i < 0; ++i)
+	{
+		jParserD3 parser; 
+		parser.Init(i);
+		MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.vs_addr].first;
+		_printlog("%d v[%d]\n", i, pDataVS->head.crc);
+		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237)
+		{
+			parser.ExportToObjectFormat("terrain", false, true);
+		}
+		if (pDataVS->head.crc == 99 || pDataVS->head.crc == 210)
+		{
+			parser.ExportToObjectFormat("default", false, true);
+		}
+		else if (pDataVS->head.crc == 154 || pDataVS->head.crc == 255 || pDataVS->head.crc == 7)
+		{
+			parser.ExportToObjectFormat("default", true, false);
+		}
+		else if (pDataVS->head.crc == 83)
+		{
+			parser.ExportToObjectFormat("skin", false, true);
+		}
+	}
+
 
 
 	jInput::GetInst().mKeyboard += [this](const unsigned char* key) {
@@ -96,7 +117,21 @@ bool jGameObjectMgr::Initialize()
 			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(false);
 			tmpIdx = (tmpIdx + 1) % vecObjs.size();
 			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
-			_echoN(vecObjs[tmpIdx]->mFileIndex);
+
+			jParserD3* parser = vecObjs[tmpIdx]->mParser;
+			MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.vs_addr].first;
+			MyRes_CreateShader* pDataPS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.ps_addr].first;
+
+			Vector3f pos;
+			pos.x = parser->mCBMain.matWorld[3];
+			pos.y = parser->mCBMain.matWorld[7];
+			pos.z = parser->mCBMain.matWorld[11];
+
+			_printlog("%d v[%d %d] p[%d %d] %f %f %f\n", vecObjs[tmpIdx]->mFileIndex, 
+				pDataVS->head.crc, pDataVS->head.totalSize, 
+				pDataPS->head.crc, pDataPS->head.totalSize,
+				pos.x, pos.y, pos.z);
+			Sleep(200);
 		}
 		else if (key[74] != 0)
 		{
@@ -104,9 +139,22 @@ bool jGameObjectMgr::Initialize()
 			tmpIdx--;
 			tmpIdx = tmpIdx < 0 ? vecObjs.size() - 1 : tmpIdx;
 			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
-			_echoN(vecObjs[tmpIdx]->mFileIndex);
+
+			jParserD3* parser = vecObjs[tmpIdx]->mParser;
+			MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.vs_addr].first;
+			MyRes_CreateShader* pDataPS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.ps_addr].first;
+
+			Vector3f pos;
+			pos.x = parser->mCBMain.matWorld[3];
+			pos.y = parser->mCBMain.matWorld[7];
+			pos.z = parser->mCBMain.matWorld[11];
+
+			_printlog("%d v[%d %d] p[%d %d] %f %f %f\n", vecObjs[tmpIdx]->mFileIndex,
+				pDataVS->head.crc, pDataVS->head.totalSize,
+				pDataPS->head.crc, pDataPS->head.totalSize,
+				pos.x, pos.y, pos.z);
+			Sleep(200);
 		}
-		Sleep(500);
 		// enter key[41]
 		// a key[30]
 		// 1 key[2]
@@ -143,16 +191,8 @@ void jGameObjectMgr::RunObjects()
 		(*it)->mIsStarted = true;
 	}
 
-	for (auto iter = mCoroutines.begin(); iter != mCoroutines.end();)
-	{
-		function<bool(void)> func = iter->second;
-		if (func == nullptr)
-			mCoroutines.erase(iter++);
-		else if (func())
-			++iter;
-		else
-			mCoroutines.erase(iter++);
-	}
+
+	mCoroutine.RunCoroutines();
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
@@ -254,18 +294,11 @@ void jGameObjectMgr::Release()
 
 }
 
-void jGameObjectMgr::StartCoroutine(function<bool(void)> coroutine)
-{
-	static u32 index = 0;
-	index++;
-	string key = "__" + jUtils::ToString(index) + "__";
-	mCoroutines[key] = coroutine;
-}
-void jGameObjectMgr::StartCoroutine(function<bool(void)> coroutine, string name)
+void jGameObjectMgr::StartCoroutine(CoroutineInfo coroutineInfo, string name)
 { 
-	mCoroutines[name] = coroutine;
+	mCoroutine.StartCoroutine(coroutineInfo, name);
 }
 void jGameObjectMgr::StopCoroutine(string name)
 {
-	mCoroutines[name] = nullptr;
+	mCoroutine.StopCoroutine(name);
 }

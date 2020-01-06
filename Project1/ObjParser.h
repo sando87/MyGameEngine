@@ -12,8 +12,8 @@ public:
 
 	int mFileIndex;
 	float mOff;
-private:
-	void OnStart();
+
+	virtual void OnStart();
 
 	jParserD3* mParser;
 	jShaderParser* mShader;

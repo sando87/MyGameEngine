@@ -5,77 +5,37 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="리소스 파일">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\GameObjects">
+      <UniqueIdentifier>{86668f5e-917d-470c-91b6-9fe70c6c74fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Shaders">
+      <UniqueIdentifier>{20444ec1-c9b8-4dee-b375-cdc4c21895c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Components">
+      <UniqueIdentifier>{519097cc-09aa-4fd5-8726-85d8456230cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\System">
+      <UniqueIdentifier>{edfb5375-9837-4338-9776-28f6f6a9ee95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Math">
+      <UniqueIdentifier>{fd5dc8b0-5687-43a2-8045-7d6f6ec6a4d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Utils">
+      <UniqueIdentifier>{2463bdd5-b167-4fbf-9dcb-fc51ad9a82ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\CommonHeader">
+      <UniqueIdentifier>{58369511-71be-45c1-be21-50bcc008e637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{41a14542-496d-4624-99a2-16e9f2dae146}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Vectors.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Matrices.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jLog.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jUtils.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jRenderer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jGameObjectMgr.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jGameObject.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jInput.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jSound.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jLoader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jMaterial.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="tinyxml2.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jBoneNode.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderSprite.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderColor.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjGroundAxis.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjCamera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jMatrixControl.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jFuncPtrList.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jLine3D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="jParserD3.cpp">
@@ -84,223 +44,295 @@
     <ClCompile Include="jParserS2.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jShaderTerrain.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjTerrain.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jHeightMap.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jAStar.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjTerrainMgr.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jRect.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jRect3D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjPlayer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jTime.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jComponent.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderSkin.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jMesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jImage.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jBoneTree.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jOS_APIs.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jCaches.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderParser.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjParser.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="jShaderDefault.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="jParserSub.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jGrid.cpp">
+    <ClCompile Include="jAnimCSV.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="jShaderColor.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderDefault.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderParser.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderSkin.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderSprite.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderTerrain.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjCamera.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjGroundAxis.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjParser.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjPlayer.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjTerrain.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjTerrainMgr.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jGameObject.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jComponent.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jImage.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
     <ClCompile Include="jCrash.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jShader.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jMesh.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jGameObjectMgr.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jInput.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jOS_APIs.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jRenderer.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jTime.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jLine3D.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="jMatrixControl.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="jRect.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="jRect3D.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrices.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Vectors.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="jAStar.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jBoneNode.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jBoneTree.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jCaches.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jFuncPtrList.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jGrid.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jHeightMap.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jLoader.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jLog.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jUtils.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jSound.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="jCoroutine.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjEnemy.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vectors.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrices.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jLog.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jUtils.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jRenderer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jGameObjectMgr.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jGameObject.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jInput.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jSound.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jLoader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jMaterial.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="tinyxml2.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="jAStar.h">
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
     <ClInclude Include="jBoneNode.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderSprite.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderColor.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjGroundAxis.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjCamera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jMatrixControl.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jFuncPtrList.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jLine3D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jParserD3.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jParserS2.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderTerrain.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjTerrain.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jHeightMap.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jAStar.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjTerrainMgr.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jRect.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jRect3D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjPlayer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jTime.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jComponent.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="junks.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jDirectXheader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderSkin.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderHeader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jMesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jImage.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
     <ClInclude Include="jBoneTree.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jOS_APIs.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
     <ClInclude Include="jCaches.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="jShaderParser.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjParser.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jShaderDefault.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jParserSub.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="jGrid.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="jComponent.h">
+      <Filter>소스 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="jCrash.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jMesh.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jImage.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jShader.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jFuncPtrList.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jGrid.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jHeightMap.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jLoader.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jLog.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jGameObject.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jGameObjectMgr.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jInput.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jOS_APIs.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jLine3D.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jMatrixControl.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jRect.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jRect3D.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jRenderer.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jSound.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jTime.h">
+      <Filter>소스 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderTerrain.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderColor.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderDefault.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderParser.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderSkin.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderSprite.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderHeader.h">
+      <Filter>소스 파일\CommonHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="jDirectXheader.h">
+      <Filter>소스 파일\CommonHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="junks.h">
+      <Filter>소스 파일\CommonHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="jUtils.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjTerrainMgr.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjCamera.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjGroundAxis.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjParser.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjPlayer.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjTerrain.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Vectors.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrices.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>소스 파일\CommonHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="jAnimCSV.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserD3.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserS2.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserSub.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jCoroutine.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjEnemy.h">
+      <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

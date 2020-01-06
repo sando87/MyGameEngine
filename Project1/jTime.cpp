@@ -16,6 +16,12 @@ void jTime::Update()
 	mTotalTime = total.count();
 	mNowTime = nowTime;
 }
+double jTime::Now()
+{
+	system_clock::time_point nowTime = system_clock::now();
+	duration<double> current = nowTime - mStartTime;
+	return current.count();
+}
 void jTime::Start()
 {
 	mPreviousTime = system_clock::now();

@@ -10,6 +10,7 @@
 #include "jBoneTree.h"
 #include "jOS_APIs.h"
 #include "jCrash.h"
+#include "jAnimCSV.h"
 
 ObjPlayer::ObjPlayer()
 {
@@ -65,8 +66,8 @@ void ObjPlayer::OnStart()
 			GetTransport().rotateToPos_OnGround(target, speedRot * delta);
 			GetTransport().goForward(speed * delta);
 			if (GetTransport().getPos().distance(target) < 1)
-				return CoroutineStop;
-			return CoroutineKeep;
+				return CoroutineReturn::Stop;
+			return CoroutineReturn::Keep;
 		}, "MovePlayer");
 	};
 
@@ -107,6 +108,6 @@ void ObjPlayer::SetAnim(string animName)
 		for (int i = 0; i < mats.size(); ++i)
 			param.bones[i] = mats[i].transpose();
 		//GetTransport().goForward(3 * jTime::Delta());
-		return CoroutineKeep;
+		return CoroutineReturn::Keep;
 	}, "player");
 }

@@ -13,7 +13,6 @@ public:
 	virtual bool OnLoad();
 	virtual bool OnRender();
 
-	bool SetTextures(vector<jImage *>& images);
 	ShaderParamsTerrain& GetParams() { return mParams; }
 
 protected:
@@ -21,6 +20,7 @@ protected:
 	bool CreateBuffers();
 	bool CreateSamplerState();
 	bool CreateInputBuffer();
+	bool CreateTextures();
 
 	ID3D11InputLayout* mLayout;
 	ID3D11Buffer* mMatrixBuffer;

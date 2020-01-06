@@ -9,10 +9,12 @@
 #include <unordered_map>
 #include <map>
 
+#include <tuple>
 #include <memory>
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <thread>
 
 #include <fstream>
 #include <sstream>
@@ -58,9 +60,6 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long long u64;
-
-#define CoroutineKeep true
-#define CoroutineStop false
 
 #define CRASH_SIZE 8192
 #define CRASH_STEP 8

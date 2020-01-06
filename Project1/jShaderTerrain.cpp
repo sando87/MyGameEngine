@@ -21,7 +21,7 @@ bool jShaderTerrain::OnLoad()
 	if (ret) ret = CreateBuffers();
 	if (ret) ret = CreateSamplerState();
 	if (ret) ret = CreateInputBuffer();
-	//if (ret) CreateTexture();
+	if (ret) ret = CreateTextures();
 
 	_warnif(!ret);
 	return ret;
@@ -80,10 +80,10 @@ bool jShaderTerrain::OnRender()
 	return true;
 }
 
-bool jShaderTerrain::SetTextures(vector<jImage *>& images)
+bool jShaderTerrain::CreateTextures()
 {
-	jGameObject* gameObj = GetGameObject();
-	for (jImage* compImage : images)
+	auto images = GetGameObject()->FindComponents<jImage>();
+	for (jImage* compImage : *images)
 	{
 		int width = compImage->GetWidth();
 		int height = compImage->GetHeight();

@@ -27,6 +27,8 @@ struct ExpVertex
 	Vector3f p;
 	Vector3f n;
 	Vector2f t;
+	Vector4f w;
+	Vector4n i;
 };
 struct ExpMetaInfo
 {
@@ -38,13 +40,16 @@ struct ExpMesh
 {
 	string name;
 	string objname;
+	string animName;
 	string type;
 	bool alpha;
 	bool depth;
 	ExpMetaInfo metaInfo;
 	vector<ExpVertex> vert;
 	vector<Vector3n> indicies;
+	vector<string> animationInfo;
 	ExpMesh *pNext;
+	bool ExportAnimInfo(string path);
 	bool ExportMetaInfo(string path);
 	bool ExportImage(string path);
 	bool ExportMesh(string _path, bool _isRoot, int _baseIdx);
@@ -80,7 +85,8 @@ public:
 	jParserD3();
 	virtual ~jParserD3();
 
-	vector<AnimInfo> anims;
+	string mAnimFileName;
+	vector<AnimInfo> mAnims;
 	GeometryInfo mGeoInfo;
 	int mFileIndex;
 	function< Vector2f(int _idx, unsigned char *_p) > mFuncConvertTex;
@@ -112,8 +118,8 @@ public:
 	virtual Vector3f GetPos(int _idx, int byteOffset = 0);
 	virtual Vector3f GetNor(int _idx, int byteOffset = 0);
 	virtual int GetTex(int _idx, Vector2f* _t, int byteOffset = 0);
-	virtual Vector4n GetMatIdx(int _idx);
-	virtual Vector4f GetMatWeight(int _idx);
+	virtual Vector4n GetMatIdx(int _idx, int byteOffset = 0);
+	virtual Vector4f GetMatWeight(int _idx, int byteOffset = 0);
 	virtual char* GetIndiciesData();
 	virtual void* GetTexResAddr(int _idx);
 

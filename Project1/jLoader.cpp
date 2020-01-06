@@ -24,6 +24,10 @@ void jLoader::LoadObjFile(string _filename)
 			info.UV.push_back(Vector2f(stof(vec[1]), stof(vec[2])));
 		else if (vec[0] == "vn")
 			info.Normal.push_back(Vector3f(stof(vec[1]), stof(vec[2]), stof(vec[3])));
+		else if (vec[0] == "w")
+			info.Weights.push_back(Vector4f(stof(vec[1]), stof(vec[2]), stof(vec[3]), stof(vec[4])));
+		else if (vec[0] == "i")
+			info.BoneIndexs.push_back(Vector4n(stoi(vec[1]), stoi(vec[2]), stoi(vec[3]), stoi(vec[4])));
 		else if (vec[0] == "f")
 		{
 			int faceCnt = vec.size();

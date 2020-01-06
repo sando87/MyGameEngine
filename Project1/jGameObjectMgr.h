@@ -3,11 +3,13 @@
 
 #include "junks.h"
 #include "jGrid.h"
+#include "jCoroutine.h"
 
 class jGameObject;
 class ObjCamera;
 class ObjTerrainMgr;
 class jCrash;
+
 
 class jGameObjectMgr
 {
@@ -22,7 +24,7 @@ private:
 	ObjTerrainMgr* mTerrainMgr;
 	list<jGameObject*> mObjects;
 	jGrid<list<jCrash*>> mCrashGrid;
-	unordered_map<string, function<bool(void)>> mCoroutines;
+	jCoroutine mCoroutine;
 
 	int tmpIdx;
 
@@ -32,8 +34,7 @@ public:
 	void RunObjects();
 	void AddCrashs();
 
-	void StartCoroutine(function<bool(void)> coroutine);
-	void StartCoroutine(function<bool(void)> coroutine, string name);
+	void StartCoroutine(CoroutineInfo coroutineInfo, string name);
 	void StopCoroutine(string name);
 
 	void AddGameObject(jGameObject* _obj) { mObjects.push_back(_obj); }

@@ -128,13 +128,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="jAnimCSV.cpp" />
     <ClCompile Include="jBoneTree.cpp" />
     <ClCompile Include="jAStar.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
     <ClCompile Include="jComponent.cpp" />
+    <ClCompile Include="jCoroutine.cpp" />
     <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGrid.cpp" />
+    <ClCompile Include="ObjEnemy.cpp" />
     <ClCompile Include="jParserSub.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
     <ClCompile Include="jImage.cpp" />
@@ -155,7 +158,6 @@
     <ClCompile Include="jInput.cpp" />
     <ClCompile Include="jLoader.cpp" />
     <ClCompile Include="jLog.cpp" />
-    <ClCompile Include="jMaterial.cpp" />
     <ClCompile Include="jRenderer.cpp" />
     <ClCompile Include="jShaderColor.cpp" />
     <ClCompile Include="jShaderSprite.cpp" />
@@ -176,6 +178,8 @@
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="jAnimCSV.h" />
+    <ClInclude Include="jCoroutine.h" />
     <ClInclude Include="jCrash.h" />
     <ClInclude Include="jDirectXheader.h" />
     <ClInclude Include="jBoneTree.h" />
@@ -184,6 +188,7 @@
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGrid.h" />
+    <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
     <ClInclude Include="jHeightMap.h" />
     <ClInclude Include="jImage.h" />
@@ -205,7 +210,6 @@
     <ClInclude Include="jInput.h" />
     <ClInclude Include="jLoader.h" />
     <ClInclude Include="jLog.h" />
-    <ClInclude Include="jMaterial.h" />
     <ClInclude Include="jRenderer.h" />
     <ClInclude Include="jShaderColor.h" />
     <ClInclude Include="jShaderSprite.h" />

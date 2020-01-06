@@ -20,6 +20,7 @@ public:
 	operator bool() const { return this->get()->size() > 0; }
 };
 
+typedef shared_ptr_array<Matrix4> mat4s;
 typedef shared_ptr_array<string> strings;
 typedef shared_ptr_array<char> chars;
 
@@ -93,6 +94,8 @@ public:
 		return ltrim(rtrim(s, t), t);
 	}
 	static string MatToCSV(Matrix4f* mat);
+	static bool CsvToMat(string line, vector<Matrix4>& mat);
+	static int Random();
 };
 
 #endif

@@ -84,6 +84,11 @@ void ObjCamera::OnStart()
 void ObjCamera::OnUpdate()
 {
 	mGroundRect = UpdateGroundRect();
+	Vector2 center = mGroundRect.Center();
+	static int iii = 0;
+	iii++;
+	if(iii % 180 == 0)
+		_printlog("cen : %f, %f\n", center.x, center.y);
 }
 
 Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)

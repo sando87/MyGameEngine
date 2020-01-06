@@ -16,6 +16,7 @@ private:
 
 public:
 	static void Update();
+	static double Now();
 	static double Delta() { return mDeltaTime; }
 	static double Total() { return mTotalTime; }
 	static void Start();
