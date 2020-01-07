@@ -21,3 +21,9 @@ Position2 jLine3D::GetXZ(double _y)
 	double z = (mDirect.z / d) + mPoint.z;
 	return Position2(x, z);
 }
+
+Vector3 jLine3D::ClosePoint(Vector3 _pt)
+{
+	double dot = mDirect.dot(_pt - mPoint);
+	return mDirect * dot + mPoint;
+}

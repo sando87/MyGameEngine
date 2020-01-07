@@ -13,6 +13,7 @@
 #include "jShader.h"
 #include "jCrash.h"
 #include "jInput.h"
+#include "jLine3D.h"
 
 #include "jParserD3.h"
 
@@ -68,8 +69,8 @@ bool jGameObjectMgr::Initialize()
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 	
-	//(new ObjPlayer())->AddToMgr();
-	(new ObjEnemy())->AddToMgr();
+	(new ObjPlayer())->AddToMgr();
+	//(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
@@ -294,11 +295,35 @@ void jGameObjectMgr::Release()
 
 }
 
-void jGameObjectMgr::StartCoroutine(CoroutineInfo coroutineInfo, string name)
+void jGameObjectMgr::StartCoroutine(CoroutineInfo coroutineInfo)
 { 
-	mCoroutine.StartCoroutine(coroutineInfo, name);
+	mCoroutine.StartCoroutine(coroutineInfo);
 }
 void jGameObjectMgr::StopCoroutine(string name)
 {
 	mCoroutine.StopCoroutine(name);
+}
+
+vector<jGameObject*> jGameObjectMgr::CheckCrash(Vector3 pos, Vector3 dir)
+{
+	jLine3D line(pos, dir);
+	pos.z = 0;
+	dir.z = 0;
+	jLine3D lineGround(pos, dir);
+	
+	vector<jGameObject*> rets;
+	for (jGameObject* obj : mObjects)
+	{
+		jCrash* crash = obj->FindComponent<jCrash>();
+		if (crash == nullptr)
+			continue;
+
+		const CrashCapsule shape = crash->GetShape();
+		Vector3 onPT = line.ClosePoint(shape.center);
+		double dist = onPT.distance(shape.center);
+		if (dist > shape.round)
+			continue;
+
+	}
+	return rets;
 }

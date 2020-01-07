@@ -11,69 +11,55 @@
 #include "jOS_APIs.h"
 #include "jCrash.h"
 #include "jAnimCSV.h"
+#include "jLine3D.h"
 
 ObjPlayer::ObjPlayer()
 {
-	mBones = nullptr;
 }
 
 
 ObjPlayer::~ObjPlayer()
 {
-	if (mBones)
-		delete mBones;
 }
 
 void ObjPlayer::OnStart()
 {
-	mBones = new jBoneTree();
-	mBones->LoadBoneTreeDAE("mob3.DAE");
-	//mBones->LoadAnimateDAE("mob2_idle.DAE", "idle");
-	//mBones->LoadAnimateDAE("mob2_run.DAE", "run");
-	//mBones->LoadAnimateDAE("mob2_attack.DAE", "attack");
+	LoadTxt("MyObject_397.txt");
+	mAnim = FindComponent<jAnimCSV>();
+	mShader = FindComponent<jShaderSkin>();
 
-	AddComponent(new jMesh("mob3.DAE"));
-	AddComponent(new jImage("./stone01.tga"));
-	AddComponent(mShader = new jShaderSkin());
-	//mShader->SetEnabled(false);
-
-	Vector4f diffuse = Vector4f(1, 1, 1, 1);
-	Vector4f light = Vector4f(-1, -1, -1, 0);
 	ShaderParamsSkin& param = mShader->GetParams();
-	for(int i = 0; i < 45; ++i)
-		param.bones[i] = Matrix4().identity();
-	param.material.ambient = diffuse;
-	param.material.diffuse = diffuse;
-	param.material.shininess = diffuse;
-	param.material.specular = diffuse;
-	param.light.color = light;
-	param.light.direction = light;
-	param.light.position = light;
-	param.light.reserve = light;
+	param.material.diffuse = Vector4f(1, 1, 1, 1);
+	param.light.direction = Vector4f(-1, -1, -1, 0);
+
+	mAnim->SetAnimation("idle");
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
-		Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
+		//Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
+		jLine3D line3d(GetCamera().GetPosture().getPos(), view);
+		Vector2 zero = line3d.GetXY(0);
 	
-		StartCoRoutine([this, pt]() {
-			float speed = 1; //1초(60프레임)당 움직이는 속도
-			float speedRot = 30; //1초(60프레임)당 회전하는 속도
+		mAnim->SetAnimation("walk");
+		StartCoRoutine("MovePlayer", [this, zero]() {
+			float speed = 10; //1초(60프레임)당 움직이는 속도
+			float speedRot = 30; //프레임당 회전하는 속도
 			float delta = jTime::Delta();
-			Vector3 target = pt;
+			Vector3 target = Vector3(zero.x, zero.y, 0);
 			target.z = GetTransport().getPos().z;
-			GetTransport().rotateToPos_OnGround(target, speedRot * delta);
+			GetTransport().rotateToPos_OnGround(target, speedRot);
 			GetTransport().goForward(speed * delta);
 			if (GetTransport().getPos().distance(target) < 1)
+			{
+				mAnim->SetAnimation("idle");
 				return CoroutineReturn::Stop;
+			}
+				
 			return CoroutineReturn::Keep;
-		}, "MovePlayer");
+		});
 	};
-
-	Vector3 terrainCenter = GetTerrain().GetTerrainCenter();
-	//terrainCenter.z = 27;
-	GetTransport().moveTo(terrainCenter);
 
 	//CrashCapsule shape;
 	//shape.center = Vector3(0, 0, 0);
@@ -88,6 +74,11 @@ void ObjPlayer::OnStart()
 }
 void ObjPlayer::OnUpdate()
 {
+	mat4s mats = mAnim->Animate(jTime::Delta());
+	ShaderParamsSkin& param = mShader->GetParams();
+	for (int i = 0; i < 45; ++i)
+		param.bones[i] = mats[i];
+
 	//Vector3 pos = GetTransport().getPos();
 	//float height = 0;
 	//bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
@@ -96,18 +87,4 @@ void ObjPlayer::OnUpdate()
 	//	pos.z = height;
 	//	GetTransport().moveTo(pos);
 	//}
-}
-void ObjPlayer::SetAnim(string animName)
-{
-	mBones->SetAnimate(animName);
-	StartCoRoutine([this]() {
-		mAnimTime += jTime::Delta();
-		vector<Matrix4> mats;
-		mBones->Animate(mAnimTime, mats);
-		ShaderParamsSkin& param = mShader->GetParams();
-		for (int i = 0; i < mats.size(); ++i)
-			param.bones[i] = mats[i].transpose();
-		//GetTransport().goForward(3 * jTime::Delta());
-		return CoroutineReturn::Keep;
-	}, "player");
 }

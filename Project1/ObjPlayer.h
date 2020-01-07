@@ -3,7 +3,7 @@
 #include "junks.h"
 
 class jShaderSkin;
-class jBoneTree;
+class jAnimCSV;
 
 
 class ObjPlayer : public jGameObject
@@ -17,9 +17,8 @@ private:
 	virtual void OnUpdate();
 
 	jShaderSkin* mShader;
-	jBoneTree* mBones;
+	jAnimCSV* mAnim;
 
 	float mAnimTime = 0;
-	void SetAnim(string animName);
 };
 

@@ -110,16 +110,16 @@ void jGameObject::StopCoRoutine(string name)
 {
 	jGameObjectMgr::GetInst().StopCoroutine(name);
 }
-void jGameObject::StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, string name)
+void jGameObject::StartCoRoutine(string name, std::function<CoroutineReturn(void)> coroutine)
 {
 	CoroutineInfo info;
 	info.enabled = true;
 	info.mode = CoroutineMode::Normal;
 	info.name = name;
 	info.coroutine = coroutine;
-	jGameObjectMgr::GetInst().StartCoroutine(info, name);
+	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
-void jGameObject::StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, float time_ms, string name)
+void jGameObject::StartCoRoutine(string name, float time_ms, std::function<CoroutineReturn(void)> coroutine)
 {
 	CoroutineInfo info;
 	info.enabled = true;
@@ -128,9 +128,9 @@ void jGameObject::StartCoRoutine(std::function<CoroutineReturn(void)> coroutine,
 	info.time_ms = time_ms;
 	info.time_back_ms = time_ms;
 	info.coroutine = coroutine;
-	jGameObjectMgr::GetInst().StartCoroutine(info, name);
+	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
-void jGameObject::StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, std::function<void(void)> task, string name)
+void jGameObject::StartCoRoutine(string name, std::function<void(void)> task, std::function<CoroutineReturn(void)> coroutine)
 {
 	CoroutineInfo info;
 	info.enabled = true;
@@ -140,7 +140,7 @@ void jGameObject::StartCoRoutine(std::function<CoroutineReturn(void)> coroutine,
 	info.taskStarted = false;
 	info.taskDone = false;
 	info.coroutine = coroutine;
-	jGameObjectMgr::GetInst().StartCoroutine(info, name);
+	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
 bool jGameObject::LoadTxt(string objName)
 {

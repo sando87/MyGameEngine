@@ -34,8 +34,10 @@ public:
 	void RunObjects();
 	void AddCrashs();
 
-	void StartCoroutine(CoroutineInfo coroutineInfo, string name);
+	void StartCoroutine(CoroutineInfo coroutineInfo);
 	void StopCoroutine(string name);
+
+	vector<jGameObject*> CheckCrash(Vector3 pos, Vector3 dir);
 
 	void AddGameObject(jGameObject* _obj) { mObjects.push_back(_obj); }
 	ObjCamera& GetCamera() { return *mCamera; }

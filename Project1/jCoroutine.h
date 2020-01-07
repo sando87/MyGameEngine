@@ -36,7 +36,7 @@ public:
 	jCoroutine();
 	~jCoroutine();
 
-	void StartCoroutine(CoroutineInfo coroutineInfo, string name);
+	void StartCoroutine(CoroutineInfo coroutineInfo);
 	void StopCoroutine(string name);
 	void RunCoroutines();
 

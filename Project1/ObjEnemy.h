@@ -14,7 +14,7 @@ public:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
-	bool WalkTo(Vector3 target);
+	bool WalkTo(Vector3 target, float speed);
 
 private:
 	jAnimCSV* mAnim;

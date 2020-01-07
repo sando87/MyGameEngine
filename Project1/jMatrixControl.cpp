@@ -79,11 +79,18 @@ jMatrixControl& jMatrixControl::rotateToPos_OnGround(Vector3 pos, double degree)
 {
 	pos.z = mPos.z;
 	Vector3 targetView = pos - mPos;
+	targetView.normalize();
 	Vector3 turnDir = mView.cross(targetView);
+	if (turnDir.length() < 0.0001f)
+		return (*this);
+
 	turnDir.normalize();
 	Matrix4 rotMat;
 	rotMat.rotate(degree, 0, 0, turnDir.z);
 	mView = rotMat * mView;
+	float after = mView.cross(targetView).z;
+	if (turnDir.z * after < 0)
+		mView = targetView;
 	mCross = mView.cross(mUp);
 	mCross.normalize();
 	return (*this);

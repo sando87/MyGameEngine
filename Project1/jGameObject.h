@@ -21,9 +21,9 @@ public:
 	void AddToMgr();
 	ObjCamera& GetCamera();
 	ObjTerrainMgr& GetTerrain();
-	void StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, string name = "");
-	void StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, float time_ms, string name = "");
-	void StartCoRoutine(std::function<CoroutineReturn(void)> coroutine, std::function<void(void)> task, string name = "");
+	void StartCoRoutine(string name, std::function<CoroutineReturn(void)> coroutine);
+	void StartCoRoutine(string name, float time_ms, std::function<CoroutineReturn(void)> coroutine);
+	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CoroutineReturn(void)> coroutine);
 	void StopCoRoutine(string name);
 	void DeleteFromMgr() { mIsRemoved = true; }
 	jMatrixControl& GetTransport();

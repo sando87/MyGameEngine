@@ -11,19 +11,16 @@ jCoroutine::~jCoroutine()
 {
 }
 
-void jCoroutine::StartCoroutine(CoroutineInfo coroutineInfo, string name)
+void jCoroutine::StartCoroutine(CoroutineInfo coroutineInfo)
 {
-	string key;
-	if (name.length() <= 0)
+	if (coroutineInfo.name.length() <= 0)
 	{
 		static u32 index = 0;
 		index++;
-		key = "__AutoCoroutineName__" + jUtils::ToString(index) + "__";
+		coroutineInfo.name = "__AutoCoroutineName__" + jUtils::ToString(index) + "__";
 	}
-	else
-		key = name;
 
-	mCoroutines[key] = coroutineInfo;
+	mCoroutines[coroutineInfo.name] = coroutineInfo;
 }
 void jCoroutine::StopCoroutine(string name)
 {
@@ -43,14 +40,14 @@ void jCoroutine::RunCoroutines()
 
 		if (cInfo.mode == CoroutineMode::Normal) //코루틴 호출 후 false반환시 종료
 		{
-			cInfo.enabled = cInfo.coroutine();
+			cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
 		}
 		else if (cInfo.mode == CoroutineMode::Timer) //일정시간 지연 후 코루틴 호출
 		{
 			cInfo.time_ms -= jTime::Delta() * 1000.0;
 			if (cInfo.time_ms <= 0)
 			{
-				cInfo.enabled = cInfo.coroutine();
+				cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
 				cInfo.time_ms = cInfo.time_back_ms;
 			}
 		}
@@ -68,7 +65,7 @@ void jCoroutine::RunCoroutines()
 
 			if (cInfo.taskDone)
 			{
-				cInfo.enabled = cInfo.coroutine();
+				cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
 				cInfo.taskStarted = false;
 				cInfo.taskDone = false;
 			}

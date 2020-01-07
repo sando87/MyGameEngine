@@ -19,39 +19,32 @@ ObjEnemy::~ObjEnemy()
 
 void ObjEnemy::OnStart()
 {
-	LoadTxt("MyObject_397.txt");
+	LoadTxt("MyObject_232.txt");
 	mAnim = FindComponent<jAnimCSV>();
 	mShader = FindComponent<jShaderSkin>();
 
 	ShaderParamsSkin& param = mShader->GetParams();
-	for (int i = 0; i < 45; ++i)
-		param.bones[i] = Matrix4().identity();
 	param.material.diffuse = Vector4f(1, 1, 1, 1);
 	param.light.direction = Vector4f(-1, -1, -1, 0);
 
 	mAnim->SetAnimation("idle");
-	StartCoRoutine([this]() {
+	StartCoRoutine("enemyTimer", 5000, [this]() {  //start timer every 5sec
 		int cmd = jUtils::Random() % 4;
 		if (cmd == 1)
 		{
 			Vector3 pos = GetTransport().getPos();
 			pos.x += jUtils::Random() % 50 - 25;
 			pos.y += jUtils::Random() % 50 - 25;
-			WalkTo(pos);
+			WalkTo(pos, 10);
 		}
 		else if (cmd == 2)
 		{
 			mAnim->SetAnimation("attack", "idle");
 			StopCoRoutine("CoroutineWalk");
 		}
-		else if (cmd == 3)
-		{
-			mAnim->SetAnimation("attack2", "idle");
-			StopCoRoutine("CoroutineWalk");
-		}
 
 		return CoroutineReturn::Keep;
-	}, 5000, "enemyTimer");
+	});
 }
 
 void ObjEnemy::OnUpdate()
@@ -63,12 +56,12 @@ void ObjEnemy::OnUpdate()
 }
 
 
-bool ObjEnemy::WalkTo(Vector3 target)
+bool ObjEnemy::WalkTo(Vector3 target, float speed)
 {
 	mAnim->SetAnimation("walk");
 
 	GetTransport().lookPos(target);
-	StartCoRoutine([target, this]() {
+	StartCoRoutine("CoroutineWalk", [target, speed, this]() {
 		float dist = GetTransport().getPos().distance(target);
 		if (dist < 1)
 		{
@@ -76,9 +69,9 @@ bool ObjEnemy::WalkTo(Vector3 target)
 			return CoroutineReturn::Stop;
 		}
 
-		GetTransport().goForward(jTime::Delta() * 10);
+		GetTransport().goForward(jTime::Delta() * speed);
 		return CoroutineReturn::Keep;
-	}, "CoroutineWalk");
+	});
 
 	return true;
 }
