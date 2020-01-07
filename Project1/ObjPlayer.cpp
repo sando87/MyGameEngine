@@ -41,6 +41,8 @@ void ObjPlayer::OnStart()
 		//Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
 		jLine3D line3d(GetCamera().GetPosture().getPos(), view);
 		Vector2 zero = line3d.GetXY(0);
+		_echoF(zero.x);
+		_echoF(zero.y);
 	
 		mAnim->SetAnimation("walk");
 		StartCoRoutine("MovePlayer", [this, zero]() {
@@ -62,7 +64,6 @@ void ObjPlayer::OnStart()
 	};
 
 	//CrashCapsule shape;
-	//shape.center = Vector3(0, 0, 0);
 	//shape.round = 3;
 	//shape.height = 10;
 	//jCrash* crash = new jCrash();

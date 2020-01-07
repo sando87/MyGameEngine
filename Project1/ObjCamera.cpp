@@ -18,14 +18,15 @@ void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, doub
 	mHeight = _height;
 	double aspect = (double)_width / _height;
 	GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
+	//GetOrthogonalMat(mMatProj, -1, 1, -1, 1, 1, 1000);
 
 	mNear = zNear;
 	mFar = zFar;
-	mFovDegHori = fovDeg;
+	mFovDegVerti = fovDeg;
 	mAspect = aspect;
-	double mFovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) / aspect);
-	mFovDegVerti = RadToDeg(mFovRadVerti);
-	mFovDegVerti *= 2;
+	double mFovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) * aspect);
+	mFovDegHori = RadToDeg(mFovRadVerti);
+	mFovDegHori *= 2;
 }
 void ObjCamera::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far)
 {
@@ -38,6 +39,18 @@ void ObjCamera::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspec
 	_mat[11] = 1.0;
 	_mat[14] = (_far*_near) / (_near - _far);
 	_mat[15] = 0.0;
+
+}
+void ObjCamera::GetOrthogonalMat(Matrix4& _mat, double _left, double _right, double _bottom, double _top, double _near, double _far)
+{
+	_mat.identity();
+	_mat[0] = 2 / (_right - _left);
+	//_mat[3] = -(_right + _left) / (_right - _left);
+	_mat[5] = 2 / (_top - _bottom);
+	//_mat[7] = -(_top + _bottom) / (_top - _bottom);
+	_mat[10] = 2 / (_far - _near); //if Opengl then * -1
+	_mat[11] = (_far + _near) / (_far - _near); //if Opengl then * -1
+	_mat[15] = 0;
 }
 
 void ObjCamera::OnStart()
@@ -93,8 +106,8 @@ void ObjCamera::OnUpdate()
 
 Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 {
-	double wh = 640 / 2;
-	double hh = 480 / 2;
+	double wh = (mWidth - 17) / 2; //Window 좌우 경계 픽셀 제외
+	double hh = (mHeight - 40) / 2; //window title 및 하단 경계 픽셀 제외
 	double pixelRateX = (_pixelX - wh) / wh;
 	double pixelRateY = (hh - _pixelY) / hh;
 	double width_half = tan(DegToRad(mFovDegHori*0.5));

@@ -1,11 +1,10 @@
 #pragma once
 #include "jComponent.h"
 #include "junks.h"
-#include "jRect.h"
+#include "jRect3D.h"
 
 struct CrashCapsule
 {
-	Vector3 center;
 	double round;
 	double height;
 };
@@ -26,7 +25,7 @@ public:
 	}
 	bool Crashed(jCrash* target);
 	void OnCrash();
-	jRect GetRect();
+	jRect3D GetRect();
 	void AddCrashed(jCrash* target) { mCrashs->push_back(target); }
 	const CrashCapsule GetShape() { return mShape; }
 

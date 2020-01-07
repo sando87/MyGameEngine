@@ -1,7 +1,6 @@
 #include "jCrash.h"
 #include "jMatrixControl.h"
 
-
 jCrash::jCrash()
 {
 }
@@ -13,8 +12,8 @@ jCrash::~jCrash()
 
 bool jCrash::Crashed(jCrash * target)
 {
-	Vector3 center = mShape.center + GetGameObject()->GetTransport().getPos();
-	Vector3 targetCenter = target->GetShape().center + target->GetGameObject()->GetTransport().getPos();
+	Vector3 center = GetGameObject()->GetTransport().getPos();
+	Vector3 targetCenter = target->GetGameObject()->GetTransport().getPos() + target->GetGameObject()->GetTransport().getPos();
 	double dist = center.distance(targetCenter);
 	if (dist < mShape.round + target->GetShape().round)
 		return true;
@@ -29,8 +28,10 @@ void jCrash::OnCrash()
 	mCrashs->clear();
 }
 
-jRect jCrash::GetRect()
+jRect3D jCrash::GetRect()
 {
-	Vector3 center = mShape.center + GetGameObject()->GetTransport().getPos();
-	return jRect(center.x - mShape.round, center.y - mShape.round, center.x + mShape.round, center.y + mShape.round);
+	Vector3 center = GetGameObject()->GetTransport().getPos();
+	Vector3 pos = Vector3(center.x - mShape.round, center.y - mShape.round, center.z);
+	Vector3 size = Vector3(mShape.round * 2, mShape.round * 2, mShape.round * 2 + mShape.height);
+	return jRect3D(pos, size);
 }

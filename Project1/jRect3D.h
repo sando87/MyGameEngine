@@ -21,6 +21,8 @@ public:
 	void SetRect(Vector3 pos, Vector3 size) { mMinXYZ = pos; mMaxXYZ = pos + size; }
 	Vector3 Center() { return (mMinXYZ + mMaxXYZ) * 0.5; }
 	Vector3 Pos() { return mMinXYZ; }
+	Vector3 Min() { return mMinXYZ; }
+	Vector3 Max() { return mMaxXYZ; }
 	Vector3 Size() { return mMaxXYZ - mMinXYZ; }
 	jRect LeftRight() { return jRect(mMinXYZ.y, mMinXYZ.z, mMaxXYZ.y, mMaxXYZ.z); }
 	jRect TopBottom() { return jRect(mMinXYZ.x, mMinXYZ.y, mMaxXYZ.x, mMaxXYZ.y); }

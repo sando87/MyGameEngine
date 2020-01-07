@@ -25,9 +25,6 @@ struct CoroutineInfo
 	function<void(void)> task;
 	bool taskStarted;
 	bool taskDone;
-	CoroutineInfo() {
-		memset(this, 0x00, sizeof(CoroutineInfo));
-	}
 };
 
 class jCoroutine

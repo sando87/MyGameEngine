@@ -34,6 +34,7 @@ private:
 	jRect mGroundRect;
 
 	void		GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far);
+	void		GetOrthogonalMat(Matrix4& _mat, double _left, double _right, double _bottom, double _top, double _near, double _far);
 	void		setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar);
 	jRect		UpdateGroundRect();
 	//void		setPerspInfo(double fov, double aspect, double zNear, double zFar);

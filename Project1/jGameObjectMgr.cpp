@@ -203,9 +203,9 @@ void jGameObjectMgr::RunObjects()
 		jCrash* crash = (*it)->FindComponent<jCrash>();
 		if (crash != nullptr)
 		{
-			jRect rect = crash->GetRect();
+			jRect3D rect = crash->GetRect();
 			vector<list<jCrash*>*> grids;
-			mCrashGrid.GetGrids(rect, grids);
+			mCrashGrid.GetGrids(rect.TopBottom(), grids);
 			for (list<jCrash*>* grid : grids)
 				grid->push_back(crash);
 		}
@@ -256,9 +256,9 @@ void jGameObjectMgr::AddCrashs()
 		if (crash == nullptr)
 			continue;
 
-		jRect rect = crash->GetRect();
+		jRect3D rect = crash->GetRect();
 		vector<list<jCrash*>*> grids;
-		mCrashGrid.GetGrids(rect, grids);
+		mCrashGrid.GetGrids(rect.TopBottom(), grids);
 		//현재 오브젝트의 걸친 충돌 grid들을 찾고
 		for (list<jCrash*> *grid : grids)
 		{
@@ -304,12 +304,12 @@ void jGameObjectMgr::StopCoroutine(string name)
 	mCoroutine.StopCoroutine(name);
 }
 
-vector<jGameObject*> jGameObjectMgr::CheckCrash(Vector3 pos, Vector3 dir)
+vector<jGameObject*> jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 {
 	jLine3D line(pos, dir);
 	pos.z = 0;
 	dir.z = 0;
-	jLine3D lineGround(pos, dir);
+	jLine3D line2D(pos, dir);
 	
 	vector<jGameObject*> rets;
 	for (jGameObject* obj : mObjects)
@@ -318,12 +318,16 @@ vector<jGameObject*> jGameObjectMgr::CheckCrash(Vector3 pos, Vector3 dir)
 		if (crash == nullptr)
 			continue;
 
-		const CrashCapsule shape = crash->GetShape();
-		Vector3 onPT = line.ClosePoint(shape.center);
-		double dist = onPT.distance(shape.center);
-		if (dist > shape.round)
+		Vector3 objPos = obj->GetTransport().getPos();
+		Vector3 onPT = line2D.ClosePoint(Vector3(objPos.x, objPos.y, 0));
+		double dist = onPT.distance(Vector3(objPos.x, objPos.y, 0));
+		if (dist > crash->GetShape().round)
 			continue;
 
+		jRect3D rt = crash->GetRect();
+		Vector2 posYZ = line.GetYZ(onPT.x);
+		if (rt.Min().z <= posYZ.y && posYZ.y <= rt.Max().z)
+			rets.push_back(obj);
 	}
 	return rets;
 }
