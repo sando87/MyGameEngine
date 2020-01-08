@@ -32,6 +32,6 @@ private:
 	vector<u32> mIndicies;
 
 	Property_Getter(string, Name)
-	Property_Getter(char*, Stream)
+	Property_Getter(chars, Stream)
 };
 

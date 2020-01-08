@@ -36,10 +36,9 @@ bool jShaderSkin::OnRender()
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	mDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &mVertexStride, &offset);
 
-	mDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
 	//mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	mDevContext->IASetPrimitiveTopology(GetPrimitiveTriList() ? D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST : D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	
 	// 정점 입력 레이아웃을 설정합니다.
 	mDevContext->IASetInputLayout(mLayout);
@@ -93,7 +92,7 @@ bool jShaderSkin::OnRender()
 	}
 	
 	// 삼각형을 그립니다.
-	//mDevContext->DrawIndexed(mIndexCount * 3, 0, 0);
+	//mDevContext->DrawIndexed(mIndexCount, 0, 0);
 	mDevContext->Draw(mVertexCount, 0);
 	return true;
 }
@@ -318,9 +317,38 @@ bool jShaderSkin::CreateInputBuffer()
 	if (mesh == nullptr)
 		return false;
 
-	vector<VertexFormat>& meshVert = mesh->GetVerticies();
-	vector<u32>& meshTri = mesh->GetIndicies();
+	if (mesh->GetStream())
+	{
+		chars stream = mesh->GetStream();
+		mVertexStride = sizeof(VertexFormatPTNIW);
+		mVertexCount = stream->size() / mVertexStride;
 
+		// 정적 정점 버퍼의 구조체를 설정합니다.
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		vertexBufferDesc.ByteWidth = mVertexStride * mVertexCount;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = 0;
+		vertexBufferDesc.MiscFlags = 0;
+		vertexBufferDesc.StructureByteStride = 0;
+
+		// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
+		D3D11_SUBRESOURCE_DATA vertexData;
+		vertexData.pSysMem = &stream[0];
+		vertexData.SysMemPitch = 0;
+		vertexData.SysMemSlicePitch = 0;
+
+		// 이제 정점 버퍼를 만듭니다.
+		if (FAILED(mDev->CreateBuffer(&vertexBufferDesc, &vertexData, &mVertBuf)))
+		{
+			_echoS("failed create VB");
+			return false;
+		}
+
+		return true;
+	}
+
+	vector<VertexFormat>& meshVert = mesh->GetVerticies();
 	vector<VertexFormatPTNIW> vertices;
 	int cnt = meshVert.size();
 	for (int i = 0; i < cnt; ++i)
@@ -337,12 +365,11 @@ bool jShaderSkin::CreateInputBuffer()
 
 	mVertexStride = sizeof(VertexFormatPTNIW);
 	mVertexCount = vertices.size();
-	mIndexCount = meshTri.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = mVertexStride * vertices.size();
+	vertexBufferDesc.ByteWidth = mVertexStride * mVertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -360,29 +387,6 @@ bool jShaderSkin::CreateInputBuffer()
 		_echoS("failed create VB");
 		return false;
 	}
-
-	// 정적 인덱스 버퍼의 구조체를 설정합니다.
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(u32) * mIndexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
-	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = &meshTri[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// 인덱스 버퍼를 생성합니다.
-	if (FAILED(mDev->CreateBuffer(&indexBufferDesc, &indexData, &mIdxBuf)))
-	{
-		_echoS("failed create IB");
-		return false;
-	}
-
 
 	return true;
 }

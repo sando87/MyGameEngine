@@ -4,7 +4,6 @@
 
 jMesh::jMesh(string _name)
 {
-	mStream = nullptr;
 	if (_name.length() > 0)
 		Load(_name);
 }
@@ -12,8 +11,6 @@ jMesh::jMesh(string _name)
 
 jMesh::~jMesh()
 {
-	if (mStream)
-		delete[] mStream;
 }
 
 bool jMesh::Load(string _name)
@@ -29,12 +26,7 @@ bool jMesh::Load(string _name)
 	}
 	else if (jUtils::GetFileExtension(_name) == "dump")
 	{
-		if (mStream)
-			delete[] mStream;
-
-		chars buf = jUtils::LoadFile2(_name);
-		mStream = new char[buf->size()];
-		memcpy(mStream, &buf[0], buf->size());
+		mStream = jUtils::LoadFile2(_name);
 		mName = _name;
 		return true;
 	}
@@ -53,13 +45,13 @@ bool jMesh::Load(string _name)
 
 		mVerticies.push_back(vertex);
 
-		if (mVerticies.size() % 3 == 2)
-		{
-			int startIdx = mVerticies.size();
-			mIndicies.push_back(startIdx);
-			mIndicies.push_back(startIdx - 2);
-			mIndicies.push_back(startIdx - 1);
-		}
+		//if (mVerticies.size() % 3 == 2)
+		//{
+		//	int startIdx = mVerticies.size();
+		//	mIndicies.push_back(startIdx);
+		//	mIndicies.push_back(startIdx - 2);
+		//	mIndicies.push_back(startIdx - 1);
+		//}
 	}
 
 	mName = _name;

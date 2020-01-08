@@ -15,15 +15,14 @@ public:
 protected:
 	bool CreateShaderAndLayout();
 	bool CreateInputBuffer();
+	bool CreateBuffers();
 
 	ID3D11InputLayout* mLayout;
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mVertBuf;
-	ID3D11Buffer* mIdxBuf;
 
 	unsigned int mVertexStride;
-	unsigned int mIndexCount;
+	unsigned int mVertexCount;
 
-	Property_Setter(bool, LineMode)
 };
 

@@ -1,7 +1,7 @@
 #include "jCaches.h"
 #include "jDirectXheader.h"
 
-#define CacheSize 100
+#define CacheSize 1000
 
 jCaches * jCaches::mInst = new jCaches();
 void * jCaches::CacheClass(string name, function<void*(string)> loader)

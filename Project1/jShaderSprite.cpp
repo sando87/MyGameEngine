@@ -37,7 +37,8 @@ bool jShaderSprite::OnRender()
 	mDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &mVertexStride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	//mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	mDevContext->IASetPrimitiveTopology(GetPrimitiveTriList() ? D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST : D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	// 정점 입력 레이아웃을 설정합니다.
 	mDevContext->IASetInputLayout(mLayout);
@@ -92,7 +93,7 @@ bool jShaderSprite::OnRender()
 	}
 
 	// 삼각형을 그립니다.
-	mDevContext->DrawIndexed(mIndexCount, 0, 0);
+	mDevContext->Draw(mVertexCount, 0);
 	return true;
 }
 
@@ -273,7 +274,6 @@ bool jShaderSprite::CreateInputBuffer()
 		return false;
 
 	vector<VertexFormat>& meshVert = mesh->GetVerticies();
-	vector<u32>& meshTri = mesh->GetIndicies();
 
 	vector<VertexFormatPT> vertices;
 	int cnt = meshVert.size();
@@ -287,12 +287,12 @@ bool jShaderSprite::CreateInputBuffer()
 	}
 
 	mVertexStride = sizeof(VertexFormatPT);
-	mIndexCount = meshTri.size();
+	mVertexCount = vertices.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = mVertexStride * vertices.size();
+	vertexBufferDesc.ByteWidth = mVertexStride * mVertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -308,28 +308,6 @@ bool jShaderSprite::CreateInputBuffer()
 	if (FAILED(mDev->CreateBuffer(&vertexBufferDesc, &vertexData, &mVertBuf)))
 	{
 		_echoS("failed create VB");
-		return false;
-	}
-
-	// 정적 인덱스 버퍼의 구조체를 설정합니다.
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(u32) * mIndexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// 인덱스 데이터를 가리키는 보조 리소스 구조체를 작성합니다.
-	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = &meshTri[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// 인덱스 버퍼를 생성합니다.
-	if (FAILED(mDev->CreateBuffer(&indexBufferDesc, &indexData, &mIdxBuf)))
-	{
-		_echoS("failed create IB");
 		return false;
 	}
 

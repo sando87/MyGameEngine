@@ -69,12 +69,12 @@ bool jGameObjectMgr::Initialize()
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 	
-	(new ObjPlayer())->AddToMgr();
+	//(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 397; i < 0; ++i)
+	for(int i = 159; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -83,28 +83,34 @@ bool jGameObjectMgr::Initialize()
 		vecObjs.push_back(obj0);
 	}
 
-	for (int i = 397; i < 0; ++i)
+	for (int i = 146; i < 0; ++i)
 	{
 		jParserD3 parser; 
 		parser.Init(i);
 		MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.vs_addr].first;
 		_printlog("%d v[%d]\n", i, pDataVS->head.crc);
-		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237)
+		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237 || pDataVS->head.crc == 194)
 		{
 			parser.ExportToObjectFormat("terrain", false, true);
 		}
-		if (pDataVS->head.crc == 99 || pDataVS->head.crc == 210)
+		if (pDataVS->head.crc == 99 || pDataVS->head.crc == 210 || pDataVS->head.crc == 173)
 		{
 			parser.ExportToObjectFormat("default", false, true);
 		}
-		else if (pDataVS->head.crc == 154 || pDataVS->head.crc == 255 || pDataVS->head.crc == 7)
+		else if (pDataVS->head.crc == 154 || pDataVS->head.crc == 255 || pDataVS->head.crc == 7 || pDataVS->head.crc == 213 || pDataVS->head.crc == 22)
 		{
 			parser.ExportToObjectFormat("default", true, false);
 		}
-		else if (pDataVS->head.crc == 83)
-		{
-			parser.ExportToObjectFormat("skin", false, true);
-		}
+		//else if (pDataVS->head.crc == 83 || pDataVS->head.crc == 65)
+		//{
+		//	parser.ExportToObjectFormat("skin", false, true);
+		//}
+		//252 - 주캐릭터부위별스킨
+		//157,134 - 천 애니메이션
+		//128 - 주캐릭아이템(방패)
+		//65 - skinned 지형지물
+		//215 - UI종류같음
+		//213,22 - 불타는장작,커튼
 	}
 
 

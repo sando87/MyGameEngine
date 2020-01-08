@@ -30,10 +30,10 @@ private:
 	unsigned int mIASetVertexBuffersStride;
 	unsigned int mIASetVertexBuffersOff;
 	int mIndexStride; // 2 or 4
-	int mPrimitiveTopology;
 	int mDrawIndexed1;
 	int mDrawIndexed2;
 	int mDrawIndexed3;
+	int mPrimitiveType;
 
 };
 

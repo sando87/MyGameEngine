@@ -1162,7 +1162,7 @@ bool jParserD3::AddVertInfo(int index, int offset)
 	vertex.w = GetMatWeight(index, offset);
 	vertex.i = GetMatIdx(index, offset);
 
-	mExportInfo.Add(index, vertex);
+	mExportInfo.vert.push_back(vertex);
 	return true;
 }
 bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
@@ -1367,19 +1367,5 @@ bool ExpMesh::Merge(ExpMesh * _mesh)
 		ppMesh = &(*ppMesh)->pNext;
 
 	*ppMesh = _mesh;
-	return true;
-}
-bool ExpMesh::Add(int _idx, ExpVertex& _vert)
-{
-	if (_idx < 0)
-	{
-		_warn();
-		return false;
-	}
-
-	while (_idx >= vert.size())
-		vert.push_back(ExpVertex());
-
-	vert[_idx] = _vert;
 	return true;
 }

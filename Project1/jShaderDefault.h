@@ -27,10 +27,9 @@ protected:
 	ID3D11SamplerState* mSampleState;
 	ID3D11ShaderResourceView * mTextureView;
 	ID3D11Buffer* mVertBuf;
-	ID3D11Buffer* mIdxBuf;
 
 	unsigned int mVertexStride;
-	unsigned int mIndexCount;
+	unsigned int mVertexCount;
 
 	ShaderParamsDefault mParams;
 	

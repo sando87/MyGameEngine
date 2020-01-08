@@ -180,10 +180,10 @@ bool jShaderParser::Load(jParserD3 * parser)
 
 	mIASetVertexBuffersOff = (info.vertexVertexByteOffset / info.vertexStride) * mIASetVertexBuffersStride;
 	mIndexStride = info.indiciesIndexUnit; // 2 or 4
-	mPrimitiveTopology = info.primitiveType;
 	mDrawIndexed1 = info.drawIndexCount;
 	mDrawIndexed2 = info.drawIndexOffset;
 	mDrawIndexed3 = info.drawVertOffset;
+	mPrimitiveType = info.primitiveType;
 
 	for(int i = 0 ; i < 45; ++i)
 		mBones[i] = Matrix4().identity();
@@ -206,8 +206,7 @@ bool jShaderParser::OnRender()
 		mDevContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	// 정점 버퍼로 그릴 기본형을 설정합니다. 여기서는 삼각형으로 설정합니다.
-	int primitive = mPrimitiveTopology == 0 ? D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST : mPrimitiveTopology;
-	mDevContext->IASetPrimitiveTopology((D3D_PRIMITIVE_TOPOLOGY)primitive);
+	mDevContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)mPrimitiveType);
 
 	// 상수 버퍼의 내용을 쓸 수 있도록 잠급니다.
 	D3D11_MAPPED_SUBRESOURCE mappedResource;

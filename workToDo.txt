@@ -8,6 +8,8 @@ Animation
 Collision
 Resource
 =========
+- 메쉬 및 이미지 올릴때 그래픽 리소스 캐쉬할것(할때 jshader에 동일 소스 옮기기)
+- 중복된 Vertex제거를 위한 index드로잉 방식으로 개선이 필요
 Terrain
 Combat Game Logic
 (enemy AI, regen, attack, health, death...)
