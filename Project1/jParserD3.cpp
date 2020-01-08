@@ -1,5 +1,6 @@
 #include "jParserD3.h"
 #include "jRenderer.h"
+#include "jShaderHeader.h"
 
 #define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
@@ -1071,7 +1072,8 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 
 	mExportInfo.name = "MyObject_" + to_string(mFileIndex);
 	stringstream ss;
-	ss << mContext.vb[0].addr << "_" << mFileIndex << ".obj";
+	//ss << mContext.vb[0].addr << "_" << mFileIndex << ".obj";
+	ss << mContext.vb[0].addr << "_" << mFileIndex << ".dump";
 	mExportInfo.objname = ss.str();
 	mExportInfo.type = type;
 	mExportInfo.alpha = alpha;
@@ -1103,7 +1105,8 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 		int idx = mTextures[i];
 		stringstream ss;
 		void* pTexAddr = GetTexResAddr(i);
-		ss << "*_" << pTexAddr << "_*.tga";
+		//ss << "*_" << pTexAddr << "_*.tga";
+		ss << "*_" << pTexAddr << "_*.dump";
 		string imageName = jUtils::FindFile(PATH_PARSER_DATA, ss.str());
 		mExportInfo.metaInfo.images.push_back(imageName);
 
@@ -1134,6 +1137,7 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
 	mExportInfo.ExportImage(PATH_RESOURCES + string("img/"));
 	mExportInfo.ExportMesh(PATH_RESOURCES + string("mesh/"), true, 0);
+	
 	//if (IsTerrain())
 	//{
 	//	unsigned long long key = CalcKey(mCBMain.matWorld[3], mCBMain.matWorld[7]);
@@ -1166,6 +1170,12 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 	string fullname = _path + objname;
 	if (jUtils::ExistFile(fullname))
 		return true;
+
+	if (jUtils::GetFileExtension(objname) == "dump")
+	{
+		ExportMeshDump(_path);
+		return true;
+	}
 
 	string strBaseIdx = to_string(_baseIdx);
 	string ret = "";
@@ -1231,6 +1241,59 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 		pNext->ExportMesh(_path, false, _baseIdx + vertCount);
 
 	return true;
+}
+bool ExpMesh::ExportMeshDump(string _path)
+{
+	int size = 0;
+	char* data = nullptr;
+	if (type == "terrain")
+	{
+		int cnt = vert.size();
+		size = sizeof(VertexFormatPT) * cnt;
+		data = (char*)malloc(size);
+		memset(data, 0x00, size);
+		VertexFormatPT* pVert = (VertexFormatPT*)data;
+		for (int i = 0; i < cnt; ++i)
+		{
+			pVert[i].p = vert[i].p;
+			pVert[i].t = vert[i].t;
+		}
+	}
+	else if (type == "skin")
+	{
+		int cnt = vert.size();
+		size = sizeof(VertexFormatPTNIW) * cnt;
+		data = (char*)malloc(size);
+		memset(data, 0x00, size);
+		VertexFormatPTNIW* pVert = (VertexFormatPTNIW*)data;
+		for (int i = 0; i < cnt; ++i)
+		{
+			pVert[i].p = vert[i].p;
+			pVert[i].t = vert[i].t;
+			pVert[i].n = vert[i].n;
+			pVert[i].i = vert[i].i;
+			pVert[i].w = vert[i].w;
+		}
+	}
+	else if (type == "default")
+	{
+		int cnt = vert.size();
+		size = sizeof(VertexFormatPTN) * cnt;
+		data = (char*)malloc(size);
+		memset(data, 0x00, size);
+		VertexFormatPTN* pVert = (VertexFormatPTN*)data;
+		for (int i = 0; i < cnt; ++i)
+		{
+			pVert[i].p = vert[i].p;
+			pVert[i].t = vert[i].t;
+			pVert[i].n = vert[i].n;
+		}
+	}
+
+	jUtils::SaveToFile(_path, objname, data, size);
+
+	free(data);
+	return false;
 }
 bool ExpMesh::ExportAnimInfo(string path)
 {

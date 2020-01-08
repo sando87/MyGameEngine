@@ -3,19 +3,31 @@ Render
 Input
 Math
 Cache
-Sound
-=========
-Animation
-Resource
-==>캐릭로드 , 클릭지점으로 이동 및 애님까지
-Collision
-Terrain
 Astar
-==
+Animation
+Collision
+Resource
+=========
+Terrain
+Combat Game Logic
+(enemy AI, regen, attack, health, death...)
+Effect
+Sound
 UI system
-Font
-==
-Physics
-==
+==========
 network
-===
+database
+Physics
+==========
+
+
+====namiong convention====
+파일명이 담기는 변수 관련
+- fullname : 경로명 + 파일명 (D:/temp/example.txt)
+- filename : 파일명 (example.txt)
+- pathname : 경로명 (D:/temp/) , 주의할 점은 끝에 /까지 붙인다
+- extname  : 확장자명(txt)
+- 확장자가 없는 경우는 취급하지 않음
+
+class멤버함수
+- m변수명

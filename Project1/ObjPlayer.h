@@ -16,6 +16,8 @@ private:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
+	void WalkTo(Vector2 pos, jGameObject * obj);
+
 	jShaderSkin* mShader;
 	jAnimCSV* mAnim;
 

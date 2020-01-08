@@ -7,6 +7,7 @@
 #include "ObjTerrainMgr.h"
 #include "jInput.h"
 #include "jTime.h"
+#include "jCrash.h"
 
 ObjEnemy::ObjEnemy()
 {
@@ -26,6 +27,7 @@ void ObjEnemy::OnStart()
 	ShaderParamsSkin& param = mShader->GetParams();
 	param.material.diffuse = Vector4f(1, 1, 1, 1);
 	param.light.direction = Vector4f(-1, -1, -1, 0);
+	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
 
 	mAnim->SetAnimation("idle");
 	StartCoRoutine("enemyTimer", 5000, [this]() {  //start timer every 5sec

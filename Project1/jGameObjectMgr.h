@@ -37,7 +37,7 @@ public:
 	void StartCoroutine(CoroutineInfo coroutineInfo);
 	void StopCoroutine(string name);
 
-	vector<jGameObject*> RayCast(Vector3 pos, Vector3 dir);
+	jGameObject* RayCast(Vector3 pos, Vector3 dir);
 
 	void AddGameObject(jGameObject* _obj) { mObjects.push_back(_obj); }
 	ObjCamera& GetCamera() { return *mCamera; }

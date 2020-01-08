@@ -51,13 +51,14 @@ public:
 	static chars LoadTarga(string filename, int& height, int& width, bool _isInvert = false);
 	static void ReadTargaSize(string filename, int& height, int& width, int& size);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
-	static chars LoadFile2(string path, int& _bufSize);
+	static chars LoadFile2(string path);
 	static strings LoadLines(string path);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
 	static string FindFile(string _path, string _filter);
 	static void MyCopyFile(string _from, string _to);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);
+	static void SaveToFile(string path, string filename, char* data, int size);
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);

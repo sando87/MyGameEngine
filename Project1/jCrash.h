@@ -3,14 +3,21 @@
 #include "junks.h"
 #include "jRect3D.h"
 
+class jCrash;
+typedef shared_ptr_array<jCrash*> jCrashs;
+
 struct CrashCapsule
 {
 	double round;
 	double height;
 };
+struct CrashTrigInfo
+{
+	bool isNew;
+	bool isKeep;
+	jCrash* crash;
+};
 
-class jCrash;
-typedef shared_ptr_array<jCrash*> jCrashs;
 class jCrash :
 	public jComponent
 {
@@ -18,20 +25,24 @@ public:
 	jCrash();
 	virtual ~jCrash();
 
-	void Init(CrashCapsule shape, function<void(jCrashs)> _onCrash)
+	jCrash* Init(double _r, double _h, function<void(jCrashs)> _onCrash)
 	{
-		mShape = shape;
-		mCallback = _onCrash;
+		mShape.round = _r;
+		mShape.height = _h;
+		mCallbacksEnter = _onCrash;
+		return this;
 	}
 	bool Crashed(jCrash* target);
-	void OnCrash();
+	void CallbackCrash();
 	jRect3D GetRect();
-	void AddCrashed(jCrash* target) { mCrashs->push_back(target); }
+	void AddCrashed(jCrash* target);
 	const CrashCapsule GetShape() { return mShape; }
 
 private:
 	CrashCapsule mShape;
-	jCrashs mCrashs;
-	function<void(jCrashs)> mCallback;
+	unordered_map<jCrash*, CrashTrigInfo> mCrashes;
+	function<void(jCrashs)> mCallbacksEnter;
+	function<void(jCrashs)> mCallbacksKeep;
+	function<void(jCrashs)> mCallbacksLeave;
 };
 

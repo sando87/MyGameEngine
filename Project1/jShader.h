@@ -17,6 +17,8 @@ public:
 	virtual bool OnLoad() = 0;
 	virtual bool OnRender() = 0;
 
+	ID3D11ShaderResourceView *LoadDumpTexture(string fullname);
+
 protected:
 	ID3D10Blob * CompileShader(string filename);
 

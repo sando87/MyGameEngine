@@ -85,6 +85,14 @@ bool jShaderTerrain::CreateTextures()
 	auto images = GetGameObject()->FindComponents<jImage>();
 	for (jImage* compImage : *images)
 	{
+		string ext = jUtils::GetFileExtension(compImage->GetFullName());
+		if (ext == "dump")
+		{
+			ID3D11ShaderResourceView *texView = LoadDumpTexture(compImage->GetFullName());
+			mTextureViews.push_back(texView);
+			continue;
+		}
+
 		int width = compImage->GetWidth();
 		int height = compImage->GetHeight();
 		int bufSize = compImage->GetBufferSize();

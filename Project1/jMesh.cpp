@@ -4,6 +4,7 @@
 
 jMesh::jMesh(string _name)
 {
+	mStream = nullptr;
 	if (_name.length() > 0)
 		Load(_name);
 }
@@ -11,6 +12,8 @@ jMesh::jMesh(string _name)
 
 jMesh::~jMesh()
 {
+	if (mStream)
+		delete[] mStream;
 }
 
 bool jMesh::Load(string _name)
@@ -23,6 +26,17 @@ bool jMesh::Load(string _name)
 	else if (jUtils::GetFileExtension(_name) == "DAE")
 	{
 		data.LoadDaeFile(_name);
+	}
+	else if (jUtils::GetFileExtension(_name) == "dump")
+	{
+		if (mStream)
+			delete[] mStream;
+
+		chars buf = jUtils::LoadFile2(_name);
+		mStream = new char[buf->size()];
+		memcpy(mStream, &buf[0], buf->size());
+		mName = _name;
+		return true;
 	}
 
 	ObjectInfo& info = data.mObjects[0];

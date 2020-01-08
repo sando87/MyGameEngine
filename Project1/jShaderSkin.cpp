@@ -35,9 +35,11 @@ bool jShaderSkin::OnRender()
 	
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	mDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &mVertexStride, &offset);
+
+	mDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
+	//mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
 	
 	// 정점 입력 레이아웃을 설정합니다.
 	mDevContext->IASetInputLayout(mLayout);
@@ -91,7 +93,8 @@ bool jShaderSkin::OnRender()
 	}
 	
 	// 삼각형을 그립니다.
-	mDevContext->DrawIndexed(mIndexCount, 0, 0);
+	//mDevContext->DrawIndexed(mIndexCount * 3, 0, 0);
+	mDevContext->Draw(mVertexCount, 0);
 	return true;
 }
 
@@ -239,7 +242,14 @@ bool jShaderSkin::CreateTexture()
 	if (compImage == nullptr)
 		return false;
 
-	string key = compImage->GetFileName() + ".texture";
+	string ext = jUtils::GetFileExtension(compImage->GetFullName());
+	if (ext == "dump")
+	{
+		mTextureView = LoadDumpTexture(compImage->GetFullName());
+		return true;
+	}
+
+	string key = compImage->GetFullName() + ".texture";
 	mTextureView = (ID3D11ShaderResourceView *)jCaches::CacheGraphics(key, [this, compImage](string no_use) {
 		ID3D11ShaderResourceView * textureView = nullptr;
 
@@ -326,6 +336,7 @@ bool jShaderSkin::CreateInputBuffer()
 	}
 
 	mVertexStride = sizeof(VertexFormatPTNIW);
+	mVertexCount = vertices.size();
 	mIndexCount = meshTri.size();
 
 	// 정적 정점 버퍼의 구조체를 설정합니다.

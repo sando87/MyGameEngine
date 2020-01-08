@@ -205,12 +205,11 @@ void jGameObjectMgr::RunObjects()
 		{
 			jRect3D rect = crash->GetRect();
 			vector<list<jCrash*>*> grids;
-			mCrashGrid.GetGrids(rect.TopBottom(), grids);
+			mCrashGrid.GetGrids(rect.TopBottom().ClipMinus(), grids);
 			for (list<jCrash*>* grid : grids)
 				grid->push_back(crash);
 		}
 	}
-		
 
 	AddCrashs();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
@@ -218,7 +217,7 @@ void jGameObjectMgr::RunObjects()
 		jGameObject* obj = *it;
 		jCrash* crash = obj->FindComponent<jCrash>();
 		if (crash != nullptr)
-			crash->OnCrash();
+			crash->CallbackCrash();
 	}
 
 	jRenderer::GetInst().BeginScene();
@@ -258,7 +257,7 @@ void jGameObjectMgr::AddCrashs()
 
 		jRect3D rect = crash->GetRect();
 		vector<list<jCrash*>*> grids;
-		mCrashGrid.GetGrids(rect.TopBottom(), grids);
+		mCrashGrid.GetGrids(rect.TopBottom().ClipMinus(), grids);
 		//현재 오브젝트의 걸친 충돌 grid들을 찾고
 		for (list<jCrash*> *grid : grids)
 		{
@@ -304,14 +303,13 @@ void jGameObjectMgr::StopCoroutine(string name)
 	mCoroutine.StopCoroutine(name);
 }
 
-vector<jGameObject*> jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
+jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 {
 	jLine3D line(pos, dir);
-	pos.z = 0;
-	dir.z = 0;
-	jLine3D line2D(pos, dir);
+	jLine3D line2D(Vector3(pos.x, pos.y, 0), Vector3(dir.x, dir.y, 0));
 	
-	vector<jGameObject*> rets;
+	jGameObject* ret = nullptr;
+	double minDist = 1000.0;
 	for (jGameObject* obj : mObjects)
 	{
 		jCrash* crash = obj->FindComponent<jCrash>();
@@ -320,14 +318,21 @@ vector<jGameObject*> jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 
 		Vector3 objPos = obj->GetTransport().getPos();
 		Vector3 onPT = line2D.ClosePoint(Vector3(objPos.x, objPos.y, 0));
-		double dist = onPT.distance(Vector3(objPos.x, objPos.y, 0));
-		if (dist > crash->GetShape().round)
+		double distOfShape = onPT.distance(Vector3(objPos.x, objPos.y, 0));
+		if (distOfShape > crash->GetShape().round)
 			continue;
 
 		jRect3D rt = crash->GetRect();
 		Vector2 posYZ = line.GetYZ(onPT.x);
-		if (rt.Min().z <= posYZ.y && posYZ.y <= rt.Max().z)
-			rets.push_back(obj);
+		if (rt.Min().z > posYZ.y || posYZ.y > rt.Max().z)
+			continue;
+
+		double distFar = mCamera->GetTransport().getPos().distance(onPT);
+		if (distFar < minDist)
+		{
+			minDist = distFar;
+			ret = obj;
+		}
 	}
-	return rets;
+	return ret;
 }

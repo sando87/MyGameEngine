@@ -31,6 +31,7 @@ protected:
 	ID3D11Buffer* mIdxBuf;
 
 	unsigned int mVertexStride;
+	unsigned int mVertexCount;
 	unsigned int mIndexCount;
 
 	ShaderParamsSkin mParams;

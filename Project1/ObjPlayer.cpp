@@ -38,30 +38,19 @@ void ObjPlayer::OnStart()
 	{
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
+
+		jGameObject* target = jGameObjectMgr::GetInst().RayCast(GetCamera().GetPosture().getPos(), view);
 		//Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
 		jLine3D line3d(GetCamera().GetPosture().getPos(), view);
-		Vector2 zero = line3d.GetXY(0);
-		_echoF(zero.x);
-		_echoF(zero.y);
-	
-		mAnim->SetAnimation("walk");
-		StartCoRoutine("MovePlayer", [this, zero]() {
-			float speed = 10; //1초(60프레임)당 움직이는 속도
-			float speedRot = 30; //프레임당 회전하는 속도
-			float delta = jTime::Delta();
-			Vector3 target = Vector3(zero.x, zero.y, 0);
-			target.z = GetTransport().getPos().z;
-			GetTransport().rotateToPos_OnGround(target, speedRot);
-			GetTransport().goForward(speed * delta);
-			if (GetTransport().getPos().distance(target) < 1)
-			{
-				mAnim->SetAnimation("idle");
-				return CoroutineReturn::Stop;
-			}
-				
-			return CoroutineReturn::Keep;
-		});
+		Vector2 pt = line3d.GetXY(0);
+		WalkTo(pt, target);
 	};
+
+	AddComponent((new jCrash())->Init(1, 2, [this](jCrashs objs) {
+		if (!objs) return;
+		StopCoRoutine("MovePlayer");
+		mAnim->SetAnimation("attack", "idle");
+	}));
 
 	//CrashCapsule shape;
 	//shape.round = 3;
@@ -88,4 +77,25 @@ void ObjPlayer::OnUpdate()
 	//	pos.z = height;
 	//	GetTransport().moveTo(pos);
 	//}
+}
+
+void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)
+{
+	mAnim->SetAnimation("walk");
+	StartCoRoutine("MovePlayer", [this, obj, pos]() {
+		float speed = 10; //1초(60프레임)당 움직이는 속도
+		float speedRot = 30; //프레임당 회전하는 속도
+		float delta = jTime::Delta();
+		Vector3 target = (obj != nullptr) ? obj->GetTransport().getPos() : Vector3(pos.x, pos.y, 0);
+		target.z = GetTransport().getPos().z;
+		GetTransport().rotateToPos_OnGround(target, speedRot);
+		GetTransport().goForward(speed * delta);
+		if (GetTransport().getPos().distance(target) < 1)
+		{
+			mAnim->SetAnimation("idle");
+			return CoroutineReturn::Stop;
+		}
+
+		return CoroutineReturn::Keep;
+	});
 }

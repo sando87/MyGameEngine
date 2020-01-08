@@ -164,7 +164,7 @@ bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
 	fclose(filePtr);
 	return true;
 }
-chars jUtils::LoadFile2(string path, int& _bufSize)
+chars jUtils::LoadFile2(string path)
 {
 	FILE* filePtr = NULL;
 	int filesize = 0;
@@ -178,8 +178,6 @@ chars jUtils::LoadFile2(string path, int& _bufSize)
 	chars pBuf;
 	pBuf->resize(filesize);
 	fread(&pBuf[0], filesize, 1, filePtr);
-
-	_bufSize = filesize;
 
 	fclose(filePtr);
 	return pBuf;
@@ -263,6 +261,21 @@ void jUtils::SaveToFile(string path, string filename, string data, bool isAttach
 	int size = data.size();
 	fwrite(data.c_str(), 1, size, pFile);
 
+	fclose(pFile);
+	return;
+}
+
+void jUtils::SaveToFile(string path, string filename, char * data, int size)
+{
+	char name[260] = { 0, };
+	sprintf_s(name, "%s\\%s", path.c_str(), filename.c_str());
+
+	FILE *pFile = NULL;
+	fopen_s(&pFile, name, "wb");
+	if (pFile == NULL)
+		return;
+
+	fwrite(data, 1, size, pFile);
 	fclose(pFile);
 	return;
 }

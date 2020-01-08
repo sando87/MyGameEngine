@@ -21,6 +21,6 @@ protected:
 	Property_Getter(int, Width)
 	Property_Getter(int, Height)
 	Property_Getter(int, BufferSize)
-	Property_Getter(string, FileName)
+	Property_Getter(string, FullName)
 };
 

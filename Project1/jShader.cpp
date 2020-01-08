@@ -1,6 +1,8 @@
 #include "jShader.h"
 #include "jRenderer.h"
 #include "jMesh.h"
+#include "jParserD3.h"
+#include "jCaches.h"
 
 #define VS_FUNCNAME "jVS"
 #define PS_FUNCNAME "jPS"
@@ -15,6 +17,18 @@ jShader::jShader()
 
 	mDev = jRenderer::GetInst().GetDevice();
 	mDevContext = jRenderer::GetInst().GetDeviceContext();
+}
+
+ID3D11ShaderResourceView * jShader::LoadDumpTexture(string fullname)
+{
+	ID3D11ShaderResourceView *pTexView = nullptr;
+	pTexView = (ID3D11ShaderResourceView *) jCaches::CacheGraphics(fullname, [](string _fullname) {
+		chars buf = jUtils::LoadFile2(_fullname);
+		MyRes_CreateTexture* rawData = (MyRes_CreateTexture*)&buf[0];
+		rawData->SetSubResMem();
+		return (ID3D11ShaderResourceView *)rawData->CreateResource(0, 0, nullptr);
+	});
+	return pTexView;
 }
 
 ID3D10Blob * jShader::CompileShader(string filename)

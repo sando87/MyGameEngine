@@ -228,7 +228,14 @@ bool jShaderDefault::CreateTexture()
 	if (compImage == nullptr)
 		return false;
 
-	string name = compImage->GetFileName() + ".texture";
+	string ext = jUtils::GetFileExtension(compImage->GetFullName());
+	if (ext == "dump")
+	{
+		mTextureView = LoadDumpTexture(compImage->GetFullName());
+		return true;
+	}
+
+	string name = compImage->GetFullName() + ".texture";
 	mTextureView = (ID3D11ShaderResourceView *)jCaches::CacheGraphics(name, [this, compImage](string name) {
 		ID3D11ShaderResourceView * textureView = nullptr;
 
