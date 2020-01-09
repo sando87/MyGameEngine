@@ -69,7 +69,7 @@ bool jGameObjectMgr::Initialize()
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 	
-	//(new ObjPlayer())->AddToMgr();
+	(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;

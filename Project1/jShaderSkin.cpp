@@ -54,6 +54,9 @@ bool jShaderSkin::OnRender()
 		return false;
 	}
 	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
+	//Matrix4 worldMat = GetGameObject()->GetTransport().getMatrix();
+	//Matrix4 retMat = worldMat * jLine3D::ProjMatGround(Vector3(-0.1, 0.1, -1), 0);
+	//dataPtr->world = retMat.transpose();
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
 	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();

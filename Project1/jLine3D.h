@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vectors.h"
+#include "Matrices.h"
 
 class jLine3D
 {
@@ -16,6 +17,7 @@ public:
 	Position2 GetYZ(double _x);
 	Position2 GetXZ(double _y);
 	Vector3 ClosePoint(Vector3 _pt);
+	static Matrix4 ProjMatGround(Vector3 dir, double _z);
 
 private:
 	Position3 mPoint;

@@ -27,3 +27,20 @@ Vector3 jLine3D::ClosePoint(Vector3 _pt)
 	double dot = mDirect.dot(_pt - mPoint);
 	return mDirect * dot + mPoint;
 }
+
+Matrix4 jLine3D::ProjMatGround(Vector3 dir, double _z)
+{
+	dir.normalize();
+	Matrix4 mat;
+	mat.identity();
+	mat[0] = 1;
+	mat[5] = 1;
+	mat[8] = -dir.x / dir.z;
+	mat[9] = -dir.y / dir.z;
+	mat[10] = 0;
+	mat[12] = dir.x * _z / dir.z;
+	mat[13] = dir.y * _z / dir.z;
+	mat[14] = _z;
+	mat[15] = 1;
+	return mat;
+}
