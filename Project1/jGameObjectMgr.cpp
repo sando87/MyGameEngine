@@ -69,12 +69,12 @@ bool jGameObjectMgr::Initialize()
 	ObjGroundAxis* obj = new ObjGroundAxis();
 	obj->AddToMgr();
 	
-	(new ObjPlayer())->AddToMgr();
+	//(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 159; i < 0; ++i)
+	for(int i = 157; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -83,10 +83,13 @@ bool jGameObjectMgr::Initialize()
 		vecObjs.push_back(obj0);
 	}
 
-	for (int i = 146; i < 0; ++i)
+	//jParserD3::LoadResources(1);
+	for (int i = 250; i < 0; ++i)
 	{
 		jParserD3 parser; 
-		parser.Init(i);
+		if (!parser.Init(i))
+			continue;
+
 		MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.vs_addr].first;
 		_printlog("%d v[%d]\n", i, pDataVS->head.crc);
 		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237 || pDataVS->head.crc == 194)

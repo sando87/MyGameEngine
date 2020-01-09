@@ -43,14 +43,14 @@ void ObjParser::OnStart()
 
 	mShader = new jShaderParser();
 	mShader->Load(mParser);
-	//mShader->SetVisiable(false);
+	mShader->SetVisiable(false);
 	AddComponent(mShader);
 
 	Vector3f basePos;
 	basePos.x = mParser->mCBMain.matWorld[3];
 	basePos.y = mParser->mCBMain.matWorld[7];
 	basePos.z = mParser->mCBMain.matWorld[11];
-	_printlog("%f %f %f \n", basePos.x, basePos.y, basePos.z);
+	//_printlog("%f %f %f \n", basePos.x, basePos.y, basePos.z);
 	Vector3 pos = mTransport->getPos();
 	//pos.x = mOff;
 	pos = basePos;

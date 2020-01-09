@@ -147,8 +147,6 @@ void jParserD3::Release()
 
 bool jParserD3::Init(int _fileIdx)
 {
-	LoadResources(1);
-
 	mFileIndex = _fileIdx;
 	string name = PATH_PARSER_DATA + to_string(_fileIdx) + "_RenderingContext.bin";
 	int size = 0;
@@ -156,7 +154,9 @@ bool jParserD3::Init(int _fileIdx)
 	jUtils::LoadFile(name, &size, (char**)&pBuf);
 	memcpy(&mContext, pBuf, sizeof(mContext));
 
-	InitCBMain();
+	if (!InitCBMain())
+		return false;
+
 	ReadyForData();
 	InitFuncConvTex();
 	InitTextureList();
@@ -551,7 +551,7 @@ void jParserD3::InitTextureList()
 		break;
 	}
 }
-void jParserD3::InitCBMain()
+bool jParserD3::InitCBMain()
 {
 	stringstream ss;
 	ss << mFileIndex << "_" << mContext.CBMain.addr << "_b.dump";
@@ -559,8 +559,12 @@ void jParserD3::InitCBMain()
 	int fileSize = 0;
 	MyRes_CreateBuffer* pData = nullptr;
 	jUtils::LoadFile(PATH_PARSER_DATA + ss.str(), &fileSize, (char**)&pData);
+	if (pData == nullptr)
+		return false;
+
 	memcpy(&mCBMain, pData->data, sizeof(mCBMain));
 	free(pData);
+	return true;
 }
 bool jParserD3::IsValid()
 {

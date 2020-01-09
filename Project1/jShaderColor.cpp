@@ -1,6 +1,7 @@
 #include "jShaderColor.h"
 #include "jMesh.h"
 #include "ObjCamera.h"
+#include "jRenderer.h"
 
 #define SHADER_COLOR_FILENAME "./color"
 
@@ -62,8 +63,13 @@ bool jShaderColor::OnRender()
 	mDevContext->VSSetShader(mVertexShader, NULL, 0);
 	mDevContext->PSSetShader(mPixelShader, NULL, 0);
 
+	ID3D11BlendState *bs = GetAlphaOn() ? jRenderer::GetInst().GetBS_AlphaOn() : jRenderer::GetInst().GetBS_AlphaOff();
+	mDevContext->OMSetBlendState(bs, nullptr, 0xffffffff);
+
+	ID3D11DepthStencilState *dss = GetDepthOn() ? jRenderer::GetInst().GetDSS_DepthOn() : jRenderer::GetInst().GetDSS_DepthOff();
+	mDevContext->OMSetDepthStencilState(dss, 1);
+
 	// 삼각형을 그립니다.
-	
 	mDevContext->Draw(mVertexCount, 0);
 	return true;
 }

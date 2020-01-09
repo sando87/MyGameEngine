@@ -2,6 +2,7 @@
 #include "ObjCamera.h"
 #include "jImage.h"
 #include "jMesh.h"
+#include "jRenderer.h"
 
 #define SHADER_TERRAIN_FILENAME "./terrain"
 
@@ -75,6 +76,12 @@ bool jShaderTerrain::OnRender()
 	
 	// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
 	mDevContext->PSSetSamplers(0, 1, &mSampleState);
+
+	ID3D11BlendState *bs = GetAlphaOn() ? jRenderer::GetInst().GetBS_AlphaOn() : jRenderer::GetInst().GetBS_AlphaOff();
+	mDevContext->OMSetBlendState(bs, nullptr, 0xffffffff);
+
+	ID3D11DepthStencilState *dss = GetDepthOn() ? jRenderer::GetInst().GetDSS_DepthOn() : jRenderer::GetInst().GetDSS_DepthOff();
+	mDevContext->OMSetDepthStencilState(dss, 1);
 
 	// 삼각형을 그립니다.
 	//mDevContext->DrawIndexed(mIndexCount, 0, 0);

@@ -101,7 +101,7 @@ public:
 	void InitFuncConvTex();
 	void ReadyForData();
 	void InitTextureList();
-	void InitCBMain();
+	bool InitCBMain();
 	bool IsValid();
 	void InitAnims();
 	
