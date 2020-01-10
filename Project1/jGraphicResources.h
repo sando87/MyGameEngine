@@ -31,12 +31,14 @@ public:
 	}
 	void * CacheResource(string name, function<void*(string)> _loader)
 	{
-		void* res = GetResource(name);
-		if (res == nullptr)
+		if (mResources.find(name) != mResources.end())
 		{
-			res = _loader(name);
-			SetResource(name, res);
+			mResources[name].referTime = clock();
+			return mResources[name].resource;
 		}
+
+		void *res = _loader(name);
+		SetResource(name, res);
 		return res;
 	}
 private:

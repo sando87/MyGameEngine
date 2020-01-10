@@ -35,8 +35,8 @@ void ObjTerrainMgr::OnUpdate()
 {
 	LoadingBlocks();
 	
-	if (mCachedBlocks.size() > 30)
-		ClearFarBlocks(15);
+	if (mCachedBlocks.size() > 100)
+		ClearFarBlocks(50);
 }
 
 

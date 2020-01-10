@@ -23,22 +23,17 @@ jShaderTerrain::~jShaderTerrain()
 
 bool jShaderTerrain::OnLoad()
 {
-	return true;
-}
-
-bool jShaderTerrain::OnRender()
-{
-	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
-	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
-	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
-	ID3D11Buffer *cbMatrix = CacheMatrixBuffer(ResName_Buffer_Matrix);
-	ID3D11Buffer *cbTexels = CacheTexelsBuffer(ResName_Buffer_Texels);
-	ID3D11SamplerState * sampler = CacheSamplerState(ResName_SamplerState_Default);
 	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
-	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetName());
-	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetName());
 
-	vector<ID3D11ShaderResourceView *> texViews;
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+	cbTexels			= CacheTexelsBuffer(ResName_Buffer_Texels);
+	sampler			= CacheSamplerState(ResName_SamplerState_Default);
+	vertBuf			= CacheVertexBuffer(mesh->GetName());
+	indiBuf			= CacheIndexedBuffer(mesh->GetName());
+
 	auto imgs = GetGameObject()->FindComponents<jImage>();
 	for (jImage *img : *imgs)
 	{
@@ -46,6 +41,12 @@ bool jShaderTerrain::OnRender()
 		if (texView != nullptr)
 			texViews.push_back(texView);
 	}
+	return true;
+}
+
+bool jShaderTerrain::OnRender()
+{
+	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
@@ -94,10 +95,10 @@ bool jShaderTerrain::OnRender()
 	mDevContext->VSSetConstantBuffers(1, 1, &cbTexels);
 
 	// 픽셀 셰이더에서 셰이더 텍스처 리소스를 설정합니다.
+	// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
 	for (int i = 0; i < texViews.size(); ++i)
 		mDevContext->PSSetShaderResources(i, 1, &texViews[i]);
-	
-	// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
+
 	mDevContext->PSSetSamplers(0, 1, &sampler);
 
 	ID3D11BlendState *bs = GetAlphaOn() ? jRenderer::GetInst().GetBS_AlphaOn() : jRenderer::GetInst().GetBS_AlphaOff();
@@ -114,7 +115,7 @@ bool jShaderTerrain::OnRender()
 	}
 	else
 	{
-		u32 vertCount = mesh->GetVerticies().size();
+		u32 vertCount = mesh->GetStream() ? mesh->GetStream()->size() / vertexStride : mesh->GetVerticies().size();
 		mDevContext->Draw(vertCount, 0);
 	}
 	return true;
@@ -181,17 +182,26 @@ ID3D11Buffer * jShaderTerrain::CacheVertexBuffer(string keyName)
 
 	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
 		ID3D11Buffer *vertBuf = nullptr;
-		vector<VertexFormatPT> vertices;
-		void* vbuf = nullptr;
-		u32 vbufSize = 0;
 		if (mesh->GetStream())
 		{
 			chars stream = mesh->GetStream();
-			vbuf = &stream[0];
-			vbufSize = stream->size();
+			D3D11_BUFFER_DESC desc;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.ByteWidth = stream->size();
+			desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			desc.StructureByteStride = 0;
+
+			D3D11_SUBRESOURCE_DATA vertexData;
+			vertexData.pSysMem = &stream[0];
+			vertexData.SysMemPitch = 0;
+			vertexData.SysMemSlicePitch = 0;
+			vertBuf = CreateConstBuffer(&desc, &vertexData);
 		}
 		else
 		{
+			vector<VertexFormatPT> vertices;
 			vector<VertexFormat>& meshVert = mesh->GetVerticies();
 			int cnt = meshVert.size();
 			for (int i = 0; i < cnt; ++i)
@@ -202,23 +212,21 @@ ID3D11Buffer * jShaderTerrain::CacheVertexBuffer(string keyName)
 
 				vertices.push_back(vertex);
 			}
-			vbuf = &vertices[0];
-			vbufSize = sizeof(VertexFormatPT) * vertices.size();
+			D3D11_BUFFER_DESC desc;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.ByteWidth = sizeof(VertexFormatPT) * vertices.size();
+			desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			desc.StructureByteStride = 0;
+
+			D3D11_SUBRESOURCE_DATA vertexData;
+			vertexData.pSysMem = &vertices[0];
+			vertexData.SysMemPitch = 0;
+			vertexData.SysMemSlicePitch = 0;
+			vertBuf = CreateConstBuffer(&desc, &vertexData);
 		}
-		D3D11_BUFFER_DESC desc;
-		desc.Usage = D3D11_USAGE_DEFAULT;
-		desc.ByteWidth = vbufSize;
-		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		desc.CPUAccessFlags = 0;
-		desc.MiscFlags = 0;
-		desc.StructureByteStride = 0;
 
-		D3D11_SUBRESOURCE_DATA vertexData;
-		vertexData.pSysMem = vbuf;
-		vertexData.SysMemPitch = 0;
-		vertexData.SysMemSlicePitch = 0;
-
-		vertBuf = CreateConstBuffer(&desc, &vertexData);
 		return vertBuf;
 	});
 	return res;

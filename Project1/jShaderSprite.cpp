@@ -123,7 +123,7 @@ bool jShaderSprite::OnRender()
 	}
 	else
 	{
-		u32 vertCount = mesh->GetVerticies().size();
+		u32 vertCount = mesh->GetStream() ? mesh->GetStream()->size() / vertexStride : mesh->GetVerticies().size();
 		mDevContext->Draw(vertCount, 0);
 	}
 	return true;
