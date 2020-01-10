@@ -4,6 +4,7 @@
 
 jMesh::jMesh(string _name)
 {
+	mPrimitive = PrimitiveMode::None;
 	if (_name.length() > 0)
 		Load(_name);
 }
@@ -28,6 +29,7 @@ bool jMesh::Load(string _name)
 	{
 		mStream = jUtils::LoadFile2(_name);
 		mName = _name;
+		mPrimitive = PrimitiveMode::TriangleList;
 		return true;
 	}
 
@@ -54,6 +56,7 @@ bool jMesh::Load(string _name)
 		//}
 	}
 
+	mPrimitive = PrimitiveMode::TriangleList;
 	mName = _name;
 	return true;
 }
@@ -94,6 +97,7 @@ bool jMesh::LoadCube(int size)
 	mIndicies[idx++] = 5;	mIndicies[idx++] = 4;	mIndicies[idx++] = 0; //bottom
 	mIndicies[idx++] = 5;	mIndicies[idx++] = 0;	mIndicies[idx++] = 1;
 
+	mPrimitive = PrimitiveMode::TriangleList;
 	mName = "Cube";
 	return true;
 }
@@ -116,6 +120,7 @@ bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
 	mIndicies[idx++] = 0;	mIndicies[idx++] = 2;	mIndicies[idx++] = 1;
 	mIndicies[idx++] = 1;	mIndicies[idx++] = 2;	mIndicies[idx++] = 3;
 
+	mPrimitive = PrimitiveMode::TriangleList;
 	mName = "Rect";
 	return true;
 }
@@ -161,6 +166,7 @@ bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 		mIndicies.push_back(cnt - 1);
 	}
 
+	mPrimitive = PrimitiveMode::LineList;
 	mName = "GroundGrid";
 	return true;
 }
@@ -258,7 +264,7 @@ bool jMesh::LoadAxis(int _len)
 		mIndicies.push_back(baseCnt + 5);
 	}
 
-
+	mPrimitive = PrimitiveMode::LineList;
 	mName = "Axis";
 
 	return true;

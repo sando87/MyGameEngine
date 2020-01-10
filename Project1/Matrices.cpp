@@ -31,7 +31,13 @@ Matrix4f& Matrix4f::transpose()
 	std::swap(m[6], m[9]);
 	std::swap(m[7], m[13]);
 	std::swap(m[11], m[14]);
+	return *this;
+}
 
+Matrix4f & Matrix4f::identity()
+{
+	memset(this, 0x00, sizeof(float) * 16);
+	m[0] = m[5] = m[10] = m[15] = 1;
 	return *this;
 }
 

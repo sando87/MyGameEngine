@@ -283,6 +283,7 @@ public:
 	float&	 operator[](int index);
 
 	Matrix4f& transpose();
+	Matrix4f& identity();
 private:
 	float m[16];
 };

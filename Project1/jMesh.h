@@ -12,6 +12,13 @@ struct VertexFormat
 	Vector4f weights;
 };
 
+enum PrimitiveMode
+{
+	None,
+	LineList,
+	TriangleList,
+};
+
 class jMesh :	public jComponent
 {
 public:
@@ -33,5 +40,6 @@ private:
 
 	Property_Getter(string, Name)
 	Property_Getter(chars, Stream)
+	Property_Getter(PrimitiveMode, Primitive)
 };
 

@@ -4,7 +4,12 @@
 #include "ObjCamera.h"
 #include "jImage.h"
 
-#define SHADER_SPRITE_FILENAME "./sprite"
+#define ResName_Layout "jShaderSprite.layout"
+#define ResName_Shader_Vertex "sprite.vs"
+#define ResName_Shader_Pixel "sprite.ps"
+#define ResName_Buffer_Matrix "jShaderSprite.cbMatrix"
+#define ResName_Buffer_Material "jShaderSprite.cbMaterial"
+#define ResName_Buffer_Sprite "jShaderSprite.cbSprite"
 
 
 jShaderSprite::jShaderSprite()
@@ -18,38 +23,50 @@ jShaderSprite::~jShaderSprite()
 
 bool jShaderSprite::OnLoad()
 {
-	bool ret = CreateShaderAndLayout();
-	if (ret) ret = CreateBuffers();
-	if (ret) ret = CreateSamplerState();
-	if (ret) ret = CreateInputBuffer();
-	if (ret) CreateTexture();
-
-	_warnif(!ret);
-	return ret;
+	return true;
 }
 
 bool jShaderSprite::OnRender()
 {
+	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
+	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
+	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
+	ID3D11Buffer *cbMatrix = CacheMatrixBuffer(ResName_Buffer_Matrix);
+	ID3D11Buffer *cbMatrial = CacheMaterialBuffer(ResName_Buffer_Material);
+	ID3D11Buffer *cbSprite = CacheSpriteBuffer(ResName_Buffer_Sprite);
+	ID3D11SamplerState * sampler = CacheSamplerState(ResName_SamplerState_Default);
+	string imgName = GetGameObject()->FindComponent<jImage>()->GetFullName();
+	ID3D11ShaderResourceView *texView = CacheTextureView(imgName);
+	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
+	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetName());
+	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetName());
+
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
+	u32 vertexStride = sizeof(VertexFormatPT);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
-	mDevContext->IASetVertexBuffers(0, 1, &mVertBuf, &mVertexStride, &offset);
+	mDevContext->IASetVertexBuffers(0, 1, &vertBuf, &vertexStride, &offset);
 
 	// 렌더링 할 수 있도록 입력 어셈블러에서 인덱스 버퍼를 활성으로 설정합니다.
-	//mDevContext->IASetIndexBuffer(mIdxBuf, DXGI_FORMAT_R32_UINT, 0);
-	mDevContext->IASetPrimitiveTopology(GetPrimitiveTriList() ? D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST : D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	if (indiBuf != nullptr)
+		mDevContext->IASetIndexBuffer(indiBuf, DXGI_FORMAT_R32_UINT, 0);
+
+	if (mesh->GetPrimitive() == PrimitiveMode::LineList)
+		mDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	else if (mesh->GetPrimitive() == PrimitiveMode::TriangleList)
+		mDevContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// 정점 입력 레이아웃을 설정합니다.
-	mDevContext->IASetInputLayout(mLayout);
+	mDevContext->IASetInputLayout(layout);
 
 	// 삼각형을 그릴 정점 셰이더와 픽셀 셰이더를 설정합니다.
-	mDevContext->VSSetShader(mVertexShader, NULL, 0);
-	mDevContext->PSSetShader(mPixelShader, NULL, 0);
+	mDevContext->VSSetShader(vertexShader, NULL, 0);
+	mDevContext->PSSetShader(pixelShader, NULL, 0);
 
 	// 상수 버퍼의 내용을 쓸 수 있도록 잠급니다.
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(mDevContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+	if (FAILED(mDevContext->Map(cbMatrix, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
 	{
 		return false;
 	}
@@ -57,21 +74,21 @@ bool jShaderSprite::OnRender()
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
 	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();
-	mDevContext->Unmap(mMatrixBuffer, 0);
-	mDevContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
+	mDevContext->Unmap(cbMatrix, 0);
+	mDevContext->VSSetConstantBuffers(0, 1, &cbMatrix);
 
 	// Material constant buffer를 잠글 수 있도록 기록한다.
-	if (FAILED(mDevContext->Map(mMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+	if (FAILED(mDevContext->Map(cbMatrial, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
 	{
 		return false;
 	}
 	ShaderBufferMaterial* dataPtrMaterial = (ShaderBufferMaterial*)mappedResource.pData;
 	dataPtrMaterial->ambient = mParams.ambient;
-	mDevContext->Unmap(mMaterialBuffer, 0);
-	mDevContext->PSSetConstantBuffers(0, 1, &mMaterialBuffer);
+	mDevContext->Unmap(cbMatrial, 0);
+	mDevContext->PSSetConstantBuffers(0, 1, &cbMatrial);
 
 	// light constant buffer를 잠글 수 있도록 기록한다.
-	if (FAILED(mDevContext->Map(mSpriteBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+	if (FAILED(mDevContext->Map(cbSprite, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
 	{
 		return false;
 	}
@@ -80,16 +97,16 @@ bool jShaderSprite::OnRender()
 	dataPtrLight->y = mParams.ImageIDX.y;
 	dataPtrLight->z = mParams.step.x;
 	dataPtrLight->w = mParams.step.y;
-	mDevContext->Unmap(mSpriteBuffer, 0);
-	mDevContext->PSSetConstantBuffers(1, 1, &mSpriteBuffer);
+	mDevContext->Unmap(cbSprite, 0);
+	mDevContext->PSSetConstantBuffers(1, 1, &cbSprite);
 
 
-	if (mTextureView != nullptr)
+	if (texView != nullptr)
 	{
 		// 픽셀 셰이더에서 셰이더 텍스처 리소스를 설정합니다.
-		mDevContext->PSSetShaderResources(0, 1, &mTextureView);
+		mDevContext->PSSetShaderResources(0, 1, &texView);
 		// 픽셀 쉐이더에서 샘플러 상태를 설정합니다.
-		mDevContext->PSSetSamplers(0, 1, &mSampleState);
+		mDevContext->PSSetSamplers(0, 1, &sampler);
 	}
 
 	ID3D11BlendState *bs = GetAlphaOn() ? jRenderer::GetInst().GetBS_AlphaOn() : jRenderer::GetInst().GetBS_AlphaOff();
@@ -99,224 +116,133 @@ bool jShaderSprite::OnRender()
 	mDevContext->OMSetDepthStencilState(dss, 1);
 
 	// 삼각형을 그립니다.
-	mDevContext->Draw(mVertexCount, 0);
+	if (indiBuf != nullptr)
+	{
+		u32 indexCount = mesh->GetIndicies().size();
+		mDevContext->DrawIndexed(indexCount, 0, 0);
+	}
+	else
+	{
+		u32 vertCount = mesh->GetVerticies().size();
+		mDevContext->Draw(vertCount, 0);
+	}
 	return true;
 }
 
-bool jShaderSprite::CreateShaderAndLayout()
+ID3D11InputLayout * jShaderSprite::CacheLayout(string keyName)
 {
-	ID3D10Blob* vertexShaderBuffer = CompileShader(SHADER_SPRITE_FILENAME);
-	if (vertexShaderBuffer == nullptr)
-		return false;
+	ID3D11InputLayout* res = (ID3D11InputLayout*)mGraphicResources->CacheResource(keyName, [this](string _name) {
+		D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+		polygonLayout[0].SemanticName = "POSITION";
+		polygonLayout[0].SemanticIndex = 0;
+		polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		polygonLayout[0].InputSlot = 0;
+		polygonLayout[0].AlignedByteOffset = 0;
+		polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		polygonLayout[0].InstanceDataStepRate = 0;
 
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
-	polygonLayout[0].SemanticName = "POSITION";
-	polygonLayout[0].SemanticIndex = 0;
-	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	polygonLayout[0].InputSlot = 0;
-	polygonLayout[0].AlignedByteOffset = 0;
-	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[0].InstanceDataStepRate = 0;
+		polygonLayout[1].SemanticName = "TEXCOORD";
+		polygonLayout[1].SemanticIndex = 0;
+		polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+		polygonLayout[1].InputSlot = 0;
+		polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		polygonLayout[1].InstanceDataStepRate = 0;
 
-	polygonLayout[1].SemanticName = "TEXCOORD";
-	polygonLayout[1].SemanticIndex = 0;
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	polygonLayout[1].InputSlot = 0;
-	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[1].InstanceDataStepRate = 0;
-
-	// 레이아웃의 요소 수를 가져옵니다.
-	unsigned int numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
-	// 정점 입력 레이아웃을 만듭니다.
-	if (FAILED(mDev->CreateInputLayout(polygonLayout, numElements,
-		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &mLayout)))
-	{
-		return false;
-	}
-
-	// 더 이상 사용되지 않는 정점 셰이더 퍼버와 픽셀 셰이더 버퍼를 해제합니다.
-	vertexShaderBuffer->Release();
-	vertexShaderBuffer = nullptr;
-	return true;
+		return CreateInputLayout(polygonLayout, 2, ResName_Shader_Vertex);
+	});
+	return res;
 }
-bool jShaderSprite::CreateBuffers()
+ID3D11Buffer * jShaderSprite::CacheMatrixBuffer(string keyName)
 {
-	// 행렬 상수 버퍼의 구조체를 작성합니다.
-	D3D11_BUFFER_DESC matrixBufferDesc;
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(ShaderBufferWVP);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
-	if (FAILED(mDev->CreateBuffer(&matrixBufferDesc, NULL, &mMatrixBuffer)))
-	{
-		return false;
-	}
-
-	// Material 상수 버퍼의 구조체를 작성합니다.
-	D3D11_BUFFER_DESC materialBufferDesc;
-	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	materialBufferDesc.ByteWidth = sizeof(ShaderBufferMaterial);
-	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	materialBufferDesc.MiscFlags = 0;
-	materialBufferDesc.StructureByteStride = 0;
-	if (FAILED(mDev->CreateBuffer(&materialBufferDesc, NULL, &mMaterialBuffer)))
-	{
-		return false;
-	}
-
-	// Material 상수 버퍼의 구조체를 작성합니다.
-	// D3D11_BIND_CONSTANT_BUFFER를 사용하면 ByteWidth가 항상 16의 배수 여야하며 그렇지 않으면 CreateBuffer가 실패합니다.
-	D3D11_BUFFER_DESC lightBufferDesc;
-	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(Vector4f);
-	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightBufferDesc.MiscFlags = 0;
-	lightBufferDesc.StructureByteStride = 0;
-	if (FAILED(mDev->CreateBuffer(&lightBufferDesc, NULL, &mSpriteBuffer)))
-	{
-		return false;
-	}
-
-	return true;
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string name) {
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.ByteWidth = sizeof(ShaderBufferWVP);
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+		return CreateConstBuffer(&desc, nullptr);
+	});
+	return res;
 }
-bool jShaderSprite::CreateSamplerState()
+ID3D11Buffer * jShaderSprite::CacheMaterialBuffer(string keyName)
 {
-	// 텍스처 샘플러 상태 구조체를 생성 및 설정합니다.
-	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	// 텍스처 샘플러 상태를 만듭니다.
-	if (FAILED(mDev->CreateSamplerState(&samplerDesc, &mSampleState)))
-	{
-		return false;
-	}
-	return true;
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string name) {
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.ByteWidth = sizeof(ShaderBufferMaterial);
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+		return CreateConstBuffer(&desc, nullptr);
+	});
+	return res;
 }
-bool jShaderSprite::CreateTexture()
+ID3D11Buffer * jShaderSprite::CacheSpriteBuffer(string keyName)
 {
-	jGameObject* gameObj = GetGameObject();
-	jImage* compImage = gameObj->FindComponent<jImage>();
-	if (compImage == nullptr)
-		return false;
-
-	int width = compImage->GetWidth();
-	int height = compImage->GetHeight();
-	int bufSize = compImage->GetBufferSize();
-	char* buf = compImage->GetBuffer();
-
-	//텍스처의 구조체를 설정합니다.
-	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Height = height;
-	textureDesc.Width = width;
-	textureDesc.MipLevels = 0;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-	// 빈 텍스처를 생성합니다.
-	ID3D11Texture2D* texture = nullptr;
-	if (FAILED(mDev->CreateTexture2D(&textureDesc, NULL, &texture)))
-	{
-		_echoS("failed create 2D texture");
-		return false;
-	}
-
-	//  targa 이미지 데이터의 너비 사이즈를 설정합니다.
-	UINT rowPitch = (width * 4) * sizeof(unsigned char);
-
-	// targa 이미지 데이터를 텍스처에 복사합니다.
-	mDevContext->UpdateSubresource(texture, 0, NULL, buf, rowPitch, 0);
-
-	// 셰이더 리소스 뷰 구조체를 설정합니다.
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = -1;
-
-	// 텍스처의 셰이더 리소스 뷰를 만듭니다.
-	if (FAILED(mDev->CreateShaderResourceView(texture, &srvDesc, &mTextureView)))
-	{
-		_echoS("failed create 2D textureResourceView");
-		return false;
-	}
-
-	// 이 텍스처에 대해 밉맵을 생성합니다.
-	mDevContext->GenerateMips(mTextureView);
-
-	texture->Release();
-	texture = nullptr;
-
-	return true;
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string name) {
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.ByteWidth = sizeof(Vector4f);
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+		return CreateConstBuffer(&desc, nullptr);
+	});
+	return res;
 }
-bool jShaderSprite::CreateInputBuffer()
+ID3D11Buffer * jShaderSprite::CacheVertexBuffer(string keyName)
 {
 	jGameObject* gameObj = GetGameObject();
 	jMesh* mesh = gameObj->FindComponent<jMesh>();
 	if (mesh == nullptr)
-		return false;
+		return nullptr;
 
-	vector<VertexFormat>& meshVert = mesh->GetVerticies();
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
+		ID3D11Buffer *vertBuf = nullptr;
+		vector<VertexFormatPT> vertices;
+		void* vbuf = nullptr;
+		u32 vbufSize = 0;
+		if (mesh->GetStream())
+		{
+			chars stream = mesh->GetStream();
+			vbuf = &stream[0];
+			vbufSize = stream->size();
+		}
+		else
+		{
+			vector<VertexFormat>& meshVert = mesh->GetVerticies();
+			int cnt = meshVert.size();
+			for (int i = 0; i < cnt; ++i)
+			{
+				VertexFormatPT vertex;
+				vertex.p = meshVert[i].position;
+				vertex.t = meshVert[i].texel;
 
-	vector<VertexFormatPT> vertices;
-	int cnt = meshVert.size();
-	for (int i = 0; i < cnt; ++i)
-	{
-		VertexFormatPT vertex;
-		vertex.p = meshVert[i].position;
-		vertex.t = meshVert[i].texel;
+				vertices.push_back(vertex);
+			}
+			vbuf = &vertices[0];
+			vbufSize = sizeof(VertexFormatPT) * vertices.size();
+		}
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.ByteWidth = vbufSize;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
 
-		vertices.push_back(vertex);
-	}
+		D3D11_SUBRESOURCE_DATA vertexData;
+		vertexData.pSysMem = vbuf;
+		vertexData.SysMemPitch = 0;
+		vertexData.SysMemSlicePitch = 0;
 
-	mVertexStride = sizeof(VertexFormatPT);
-	mVertexCount = vertices.size();
-
-	// 정적 정점 버퍼의 구조체를 설정합니다.
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = mVertexStride * mVertexCount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// subresource 구조에 정점 데이터에 대한 포인터를 제공합니다.
-	D3D11_SUBRESOURCE_DATA vertexData;
-	vertexData.pSysMem = &vertices[0];
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// 이제 정점 버퍼를 만듭니다.
-	if (FAILED(mDev->CreateBuffer(&vertexBufferDesc, &vertexData, &mVertBuf)))
-	{
-		_echoS("failed create VB");
-		return false;
-	}
-
-	return true;
+		vertBuf = CreateConstBuffer(&desc, &vertexData);
+		return vertBuf;
+	});
+	return res;
 }
-

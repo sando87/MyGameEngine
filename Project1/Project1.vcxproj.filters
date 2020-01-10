@@ -179,6 +179,9 @@
     <ClCompile Include="ObjEnemy.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
+    <ClCompile Include="jGraphicResources.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -333,6 +336,9 @@
     </ClInclude>
     <ClInclude Include="ObjEnemy.h">
       <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jGraphicResources.h">
+      <Filter>소스 파일\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

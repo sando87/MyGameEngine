@@ -13,16 +13,9 @@ public:
 	virtual bool OnRender();
 
 protected:
-	bool CreateShaderAndLayout();
-	bool CreateInputBuffer();
-	bool CreateBuffers();
-
-	ID3D11InputLayout* mLayout;
-	ID3D11Buffer* mMatrixBuffer;
-	ID3D11Buffer* mVertBuf;
-
-	unsigned int mVertexStride;
-	unsigned int mVertexCount;
+	ID3D11InputLayout * CacheLayout(string keyName);
+	ID3D11Buffer* CacheMatrixBuffer(string keyName);
+	ID3D11Buffer* CacheVertexBuffer(string keyName);
 
 };
 

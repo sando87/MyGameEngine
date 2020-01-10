@@ -70,15 +70,29 @@ struct ShaderParamsSkin //should be 16byte aligned
 	Matrix4f bones[45];
 	ShaderBufferMaterial material;
 	ShaderBufferLight light;
+	ShaderParamsSkin()
+	{
+		memset(this, 0x00, sizeof(ShaderParamsSkin));
+		for (int i = 0; i < 45; ++i)
+			bones[i].identity();
+		material.diffuse = Vector4f(1, 1, 1, 1);
+		light.direction = Vector4f(-1, -1, -1, 0);
+	}
 };
 struct ShaderParamsDefault //should be 16byte aligned
 {
 	ShaderBufferMaterial material;
 	ShaderBufferLight light;
+	ShaderParamsDefault()
+	{
+		material.diffuse = Vector4f(1, 1, 1, 1);
+		light.direction = Vector4f(-1, -1, -1, 0);
+	}
 };
 struct ShaderParamsTerrain //should be 16byte aligned
 {
 	Vector4f vectors[12];
+	ShaderParamsTerrain() { memset(this, 0x00, sizeof(ShaderParamsTerrain)); }
 };
 
 #pragma pack(pop)

@@ -14,23 +14,11 @@ public:
 	virtual bool OnRender();
 
 	ShaderParamsTerrain& GetParams() { return mParams; }
-
 protected:
-	bool CreateShaderAndLayout();
-	bool CreateBuffers();
-	bool CreateSamplerState();
-	bool CreateInputBuffer();
-	bool CreateTextures();
-
-	ID3D11InputLayout* mLayout;
-	ID3D11Buffer* mMatrixBuffer;
-	ID3D11Buffer* mTexelVectorBuffer;
-	ID3D11SamplerState* mSampleState;
-	ID3D11Buffer* mVertBuf;
-	 vector<ID3D11ShaderResourceView *> mTextureViews;
-
-	unsigned int mVertexStride;
-	unsigned int mVertexCount;
+	ID3D11InputLayout * CacheLayout(string keyName);
+	ID3D11Buffer* CacheMatrixBuffer(string keyName);
+	ID3D11Buffer* CacheTexelsBuffer(string keyName);
+	ID3D11Buffer* CacheVertexBuffer(string keyName);
 
 	ShaderParamsTerrain mParams;
 
