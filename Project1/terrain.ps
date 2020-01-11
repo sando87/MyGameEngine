@@ -55,7 +55,7 @@ float4 jPS(PixelInputType input) : SV_TARGET
 	reg2 = TextureD.Sample(SampleType, input.tex4);
 	reg2 = reg2 - reg1;
 	reg1 = (reg2 * reg0.w) + reg1;
-	//reg1.w = input.position.z;
+	reg1.w = input.position.z;
 
     return reg1;
 }
