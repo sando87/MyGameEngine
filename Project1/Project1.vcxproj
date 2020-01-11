@@ -129,6 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="jAnimCSV.cpp" />
+    <ClCompile Include="jBitmap.cpp" />
     <ClCompile Include="jBoneTree.cpp" />
     <ClCompile Include="jAStar.cpp" />
     <ClCompile Include="jBoneNode.cpp" />
@@ -137,6 +138,8 @@
     <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGrid.cpp" />
+    <ClCompile Include="jObjectMeta.cpp" />
+    <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
     <ClCompile Include="jParserSub.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
@@ -179,6 +182,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAnimCSV.h" />
+    <ClInclude Include="jBitmap.h" />
     <ClInclude Include="jCoroutine.h" />
     <ClInclude Include="jCrash.h" />
     <ClInclude Include="jDirectXheader.h" />
@@ -188,6 +192,8 @@
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGrid.h" />
+    <ClInclude Include="jObjectMeta.h" />
+    <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
     <ClInclude Include="jHeightMap.h" />

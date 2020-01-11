@@ -179,8 +179,14 @@
     <ClCompile Include="ObjEnemy.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="jGraphicResources.cpp">
-      <Filter>소스 파일\System</Filter>
+    <ClCompile Include="ObjCreateHeightmap.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jBitmap.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jObjectMeta.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -337,9 +343,11 @@
     <ClInclude Include="ObjEnemy.h">
       <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="jGraphicResources.h">
-      <Filter>소스 파일\System</Filter>
+    <ClInclude Include="ObjCreateHeightmap.h" />
+    <ClInclude Include="jBitmap.h">
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="jObjectMeta.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project1.rc">

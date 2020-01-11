@@ -25,8 +25,10 @@ jRenderer::~jRenderer()
 
 bool jRenderer::Initialize(HWND _hWnd, int _width, int _height, bool _isFullScreen, bool _isVsync)
 {
-	int screenWidth = _width;
-	int screenHeight = _height;
+	m_width = _width;
+	m_height = _height;
+	int screenWidth = m_width;
+	int screenHeight = m_height;
 	HWND hwnd = _hWnd;
 	bool fullscreen = _isFullScreen;
 	float screenDepth = SCREEN_FAR;
@@ -483,4 +485,49 @@ void jRenderer::BeginScene()
 void jRenderer::EndScene()
 {
 	m_swapChain->Present(m_vsync_enabled ? 1 : 0, 0);
+}
+
+chars jRenderer::CaptureBuffer()
+{
+	chars outbuf;
+	ID3D11Texture2D* pSurface;
+	HRESULT hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast< void** >(&pSurface));
+	if (pSurface)
+	{
+		//const int width = static_cast<int>(m_window->Bounds.Width * m_dpi / 96.0f);
+		//const int height = static_cast<int>(m_window->Bounds.Height * m_dpi / 96.0f);
+		unsigned int size = m_width * m_height * 4;
+		outbuf->resize(size);
+
+		D3D11_TEXTURE2D_DESC description;
+		pSurface->GetDesc(&description);
+		description.BindFlags = 0;
+		description.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+		description.Usage = D3D11_USAGE_STAGING;
+
+		ID3D11Texture2D* pNewTexture = nullptr;
+		HRESULT hr = m_device->CreateTexture2D(&description, nullptr, &pNewTexture);
+		if (pNewTexture)
+		{
+			m_deviceContext->CopyResource(pNewTexture, pSurface);
+			D3D11_MAPPED_SUBRESOURCE resource;
+			unsigned int subresource = D3D11CalcSubresource(0, 0, 0);
+			HRESULT hr = m_deviceContext->Map(pNewTexture, subresource, D3D11_MAP_READ_WRITE, 0, &resource);
+			//resource.pData; // TEXTURE DATA IS HERE
+
+			const int pitch = m_width << 2;
+			const unsigned char* source = static_cast< const unsigned char* >(resource.pData);
+			char* dest = &outbuf[0];
+			for (int i = 0; i < m_height; ++i)
+			{
+				memcpy(dest, source, m_width * 4);
+				source += pitch;
+				dest += pitch;
+			}
+			m_deviceContext->Unmap(pNewTexture, subresource);
+			pNewTexture->Release();
+		}
+		pSurface->Release();
+	}
+	return outbuf;
 }

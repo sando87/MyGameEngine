@@ -23,11 +23,14 @@ public:
 	bool Render();
 	void BeginScene();
 	void EndScene();
+	chars CaptureBuffer();
 
 	ID3D11Device* GetDevice() { return m_device; }
 	ID3D11DeviceContext* GetDeviceContext() { return m_deviceContext; }
 
 private:
+	int m_width;
+	int m_height;
 	bool m_vsync_enabled;
 	int m_videoCardMemory;
 	char m_videoCardDescription[128];

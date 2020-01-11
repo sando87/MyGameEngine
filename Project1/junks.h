@@ -1,5 +1,6 @@
 #pragma once
 
+#pragma warning(disable: 4200) //float map[]; 와 같은 비어있는 변수 선언시 발생
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4267)
 

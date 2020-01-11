@@ -22,13 +22,13 @@ enum PrimitiveMode
 class jMesh :	public jComponent
 {
 public:
-	jMesh(string _name = "");
+	jMesh(string _fullname = "");
 	virtual ~jMesh();
 
 	vector<VertexFormat>& GetVerticies() { return mVerticies; }
 	vector<u32>& GetIndicies() { return mIndicies; }
 
-	bool Load(string _name);
+	bool Load(string _fullname);
 	bool LoadCube(int size);
 	bool LoadRectangle(Vector2 center, Vector2 size);
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);

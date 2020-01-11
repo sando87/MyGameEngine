@@ -280,6 +280,18 @@ void jUtils::SaveToFile(string path, string filename, char * data, int size)
 	return;
 }
 
+void jUtils::SaveToFile(string fullname, char * data, int size)
+{
+	FILE *pFile = NULL;
+	fopen_s(&pFile, fullname.c_str(), "wb");
+	if (pFile == NULL)
+		return;
+
+	fwrite(data, 1, size, pFile);
+	fclose(pFile);
+	return;
+}
+
 string jUtils::MatToCSV(Matrix4f * mat)
 {
 	const float * p = mat->get();

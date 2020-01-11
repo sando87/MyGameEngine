@@ -61,6 +61,7 @@ float4 jPS(PixelInputType input) : SV_TARGET
 
     // 텍스처 픽셀과 최종 확산 색을 곱하여 최종 픽셀 색상 결과를 얻습니다.
     color = color * textureColor;
+	//color.w = input.position.z;
 
     return color;
 }

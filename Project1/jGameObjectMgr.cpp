@@ -8,6 +8,7 @@
 #include "ObjTerrainMgr.h"
 #include "ObjPlayer.h"
 #include "ObjEnemy.h"
+#include "ObjCreateHeightmap.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -66,9 +67,9 @@ bool jGameObjectMgr::Initialize()
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
 	
-	ObjGroundAxis* obj = new ObjGroundAxis();
-	obj->AddToMgr();
-	
+	(new ObjGroundAxis())->AddToMgr();
+	(new ObjCreateHeightmap())->AddToMgr();
+
 	//(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();
 

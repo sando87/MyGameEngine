@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <io.h>
+#include <direct.h>
 using namespace std;
 
 class Matrix4;
@@ -59,13 +60,22 @@ public:
 	static void MyCopyFile(string _from, string _to);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);
 	static void SaveToFile(string path, string filename, char* data, int size);
+	static void SaveToFile(string fullname, char* data, int size);
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);
 	}
+	static string GetFilenameOnly(string _fullname)
+	{
+		return _fullname.substr(_fullname.find_last_of("/") + 1);
+	}
 	static bool ExistFile(string _fullname)
 	{
 		return _access(_fullname.c_str(), 0) == 0 ? true : false;
+	}
+	static void MakeFolder(string _folderfullname)
+	{
+		_mkdir(_folderfullname.c_str());
 	}
 	static unsigned int Hash(string _str)
 	{

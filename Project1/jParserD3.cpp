@@ -1325,7 +1325,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 		int blockPosX = (int)(metaInfo.worldPosition.x / 240) * 240;
 		int blockPosY = (int)(metaInfo.worldPosition.y / 240) * 240;
 		folderPath = path + to_string(blockPosX) + "_" + to_string(blockPosY);
-		_mkdir(folderPath.c_str());
+		jUtils::MakeFolder(folderPath);
 	}
 	
 

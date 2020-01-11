@@ -14,19 +14,36 @@ ObjCamera::~ObjCamera()
 }
 void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar)
 {
+	mIsOrthogonal = false;
 	mWidth = _width;
 	mHeight = _height;
 	double aspect = (double)_width / _height;
 	GetPerspectiveFovLH(mMatProj, fovDeg, aspect, zNear, zFar);
-	//GetOrthogonalMat(mMatProj, -1, 1, -1, 1, 1, 1000);
 
 	mNear = zNear;
 	mFar = zFar;
 	mFovDegVerti = fovDeg;
 	mAspect = aspect;
-	double mFovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) * aspect);
-	mFovDegHori = RadToDeg(mFovRadVerti);
+	double fovRadVerti = atan(tan(DegToRad(fovDeg*0.5)) * aspect);
+	mFovDegHori = RadToDeg(fovRadVerti);
 	mFovDegHori *= 2;
+}
+void ObjCamera::setOrthogonalMatrix(int _width, int _height, double _left, double _right, double _bottom, double _top, double _near, double _far)
+{
+	mIsOrthogonal = true;
+	mWidth = _width;
+	mHeight = _height;
+	GetOrthogonalMat(mMatProj, _left, _right, _bottom, _top, _near, _far);
+
+	mNear = _near;
+	mFar = _far;
+	mAspect = (double)_width / _height;
+	mFovDegVerti = 0;
+	mFovDegHori = 0;
+
+	Vector3 pos = Vector3(_left, _bottom, _near);
+	Vector3 size = Vector3(_right, _top, _far) - pos;
+	mOrthRect.SetRect(pos, size);
 }
 void ObjCamera::GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far)
 {
@@ -45,12 +62,19 @@ void ObjCamera::GetOrthogonalMat(Matrix4& _mat, double _left, double _right, dou
 {
 	_mat.identity();
 	_mat[0] = 2 / (_right - _left);
-	//_mat[3] = -(_right + _left) / (_right - _left);
+	_mat[12] = -(_right + _left) / (_right - _left);
+
 	_mat[5] = 2 / (_top - _bottom);
-	//_mat[7] = -(_top + _bottom) / (_top - _bottom);
-	_mat[10] = 2 / (_far - _near); //if Opengl then * -1
-	_mat[11] = (_far + _near) / (_far - _near); //if Opengl then * -1
-	_mat[15] = 0;
+	_mat[13] = -(_top + _bottom) / (_top - _bottom);
+
+
+	_mat[10] = 1 / (_far - _near); //DirectX case
+	_mat[14] = -(_near) / (_far - _near); //DirectX case
+
+	//_mat[10] = -2 / (_far - _near); //Opengl case
+	//_mat[14] = -(_far + _near) / (_far - _near); //Opengl case
+
+	_mat[15] = 1;
 }
 
 void ObjCamera::OnStart()
@@ -106,6 +130,9 @@ void ObjCamera::OnUpdate()
 
 Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 {
+	if (mIsOrthogonal)
+		return GetTransport().getView();
+
 	double wh = (mWidth - 17) / 2; //Window 좌우 경계 픽셀 제외
 	double hh = (mHeight - 40) / 2; //window title 및 하단 경계 픽셀 제외
 	double pixelRateX = (_pixelX - wh) / wh;
@@ -129,23 +156,37 @@ Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 
 jRect ObjCamera::UpdateGroundRect()
 {
-	double width_half = tan(DegToRad(mFovDegHori*0.5));
-	double height_half = width_half / mAspect;
-	Vector3 dirA = mPos.getView() + width_half * mPos.getCross() + height_half * mPos.getUp();
-	jLine3D lineA(mPos.getPos(), dirA);
-	Vector2 gptA = lineA.GetXY(0);
-	Vector3 dirB = mPos.getView() + width_half * mPos.getCross() - height_half * mPos.getUp();
-	jLine3D lineB(mPos.getPos(), dirB);
-	Vector2 gptB = lineB.GetXY(0);
-	Vector3 dirC = mPos.getView() - width_half * mPos.getCross() + height_half * mPos.getUp();
-	jLine3D lineC(mPos.getPos(), dirC);
-	Vector2 gptC = lineC.GetXY(0);
-	Vector3 dirD = mPos.getView() - width_half * mPos.getCross() - height_half * mPos.getUp();
-	jLine3D lineD(mPos.getPos(), dirD);
-	Vector2 gptD = lineD.GetXY(0);
 	jRect rt;
-	rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
-	rt.ClipMinus();
+	if (mIsOrthogonal)
+	{
+		double width_half = mOrthRect.Size().x * 0.5;
+		double height_half = mOrthRect.Size().y * 0.5;
+		Vector3 posA = mPos.getPos() + width_half * mPos.getCross() + height_half * mPos.getUp();
+		Vector3 posB = mPos.getPos() + width_half * mPos.getCross() - height_half * mPos.getUp();
+		Vector3 posC = mPos.getPos() - width_half * mPos.getCross() + height_half * mPos.getUp();
+		Vector3 posD = mPos.getPos() - width_half * mPos.getCross() - height_half * mPos.getUp();
+		Vector2 gptA = jLine3D(posA, mPos.getView()).GetXY(0);
+		Vector2 gptB = jLine3D(posB, mPos.getView()).GetXY(0);
+		Vector2 gptC = jLine3D(posC, mPos.getView()).GetXY(0);
+		Vector2 gptD = jLine3D(posD, mPos.getView()).GetXY(0);
+		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+		rt.ClipMinus();
+	}
+	else
+	{
+		double width_half = tan(DegToRad(mFovDegHori*0.5));
+		double height_half = width_half / mAspect;
+		Vector3 dirA = mPos.getView() + width_half * mPos.getCross() + height_half * mPos.getUp();
+		Vector3 dirB = mPos.getView() + width_half * mPos.getCross() - height_half * mPos.getUp();
+		Vector3 dirC = mPos.getView() - width_half * mPos.getCross() + height_half * mPos.getUp();
+		Vector3 dirD = mPos.getView() - width_half * mPos.getCross() - height_half * mPos.getUp();
+		Vector2 gptA = jLine3D(mPos.getPos(), dirA).GetXY(0);
+		Vector2 gptB = jLine3D(mPos.getPos(), dirB).GetXY(0);
+		Vector2 gptC = jLine3D(mPos.getPos(), dirC).GetXY(0);
+		Vector2 gptD = jLine3D(mPos.getPos(), dirD).GetXY(0);
+		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+		rt.ClipMinus();
+	}
 	return rt;
 }
 

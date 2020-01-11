@@ -2,11 +2,11 @@
 #include "jLoader.h"
 
 
-jMesh::jMesh(string _name)
+jMesh::jMesh(string _fullname)
 {
 	mPrimitive = PrimitiveMode::None;
-	if (_name.length() > 0)
-		Load(_name);
+	if (_fullname.length() > 0)
+		Load(_fullname);
 }
 
 
@@ -14,21 +14,21 @@ jMesh::~jMesh()
 {
 }
 
-bool jMesh::Load(string _name)
+bool jMesh::Load(string _fullname)
 {
 	jLoader data;
-	if (jUtils::GetFileExtension(_name) == "obj")
+	if (jUtils::GetFileExtension(_fullname) == "obj")
 	{
-		data.LoadObjFile(_name);
+		data.LoadObjFile(_fullname);
 	}
-	else if (jUtils::GetFileExtension(_name) == "DAE")
+	else if (jUtils::GetFileExtension(_fullname) == "DAE")
 	{
-		data.LoadDaeFile(_name);
+		data.LoadDaeFile(_fullname);
 	}
-	else if (jUtils::GetFileExtension(_name) == "dump")
+	else if (jUtils::GetFileExtension(_fullname) == "dump")
 	{
-		mStream = jUtils::LoadFile2(_name);
-		mName = _name;
+		mStream = jUtils::LoadFile2(_fullname);
+		mName = _fullname;
 		mPrimitive = PrimitiveMode::TriangleList;
 		return true;
 	}
@@ -57,7 +57,7 @@ bool jMesh::Load(string _name)
 	}
 
 	mPrimitive = PrimitiveMode::TriangleList;
-	mName = _name;
+	mName = _fullname;
 	return true;
 }
 bool jMesh::LoadCube(int size)
