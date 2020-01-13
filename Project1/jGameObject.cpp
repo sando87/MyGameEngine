@@ -112,7 +112,7 @@ bool jGameObject::LoadTxt(string objName)
 		ShaderParamsDefault& param = shader->GetParams();
 		param.material.diffuse = Vector4f(1, 1, 1, 1);
 		param.light.direction = Vector4f(-1, -1, -1, 0);
-		if(metaInfo.alpha == false) //ObjCreateHeightMap 생성시 주석해제필요
+		//if(metaInfo.alpha == false) //ObjCreateHeightMap 생성시 주석해제필요
 		AddComponent(shader);
 	}
 	else if (metaInfo.type_shader == "skin")

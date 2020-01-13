@@ -69,14 +69,14 @@ void ObjPlayer::OnUpdate()
 	for (int i = 0; i < 45; ++i)
 		param.bones[i] = mats[i];
 
-	//Vector3 pos = GetTransport().getPos();
-	//float height = 0;
-	//bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
-	//if (ret)
-	//{
-	//	pos.z = height;
-	//	GetTransport().moveTo(pos);
-	//}
+	Vector3 pos = GetTransport().getPos();
+	float height = 0;
+	bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
+	if (ret)
+	{
+		pos.z = height;
+		GetTransport().moveTo(pos);
+	}
 }
 
 void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)

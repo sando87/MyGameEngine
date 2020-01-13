@@ -2,15 +2,14 @@
 #include "jGameObject.h"
 #include "jRect3D.h"
 
-class jHeightMap;
+class jZMapLoader;
 
 #define GRID_HASH(x, y) (u64)(((u64)(y) << 32) | (u64)(x))
 
 struct TerrainBlock
 {
-	jRect3D rect;
 	vector<jGameObject*> terrains;
-	jHeightMap* heightMap;
+	jZMapLoader* zMap;
 };
 
 class ObjTerrainMgr :

@@ -63,19 +63,34 @@ bool jZMapLoader::Load(string fullname)
 	if (!file)
 		return false;
 
-	if (Data)
-	{
-		free(Data);
-		Data = nullptr;
-	}
+	memcpy(&Header, &file[0], sizeof(Header));
+	int dataSize = file->size() - sizeof(Header);
+	char* pData = (char *)&file[0] + sizeof(Header);
+	Map.resize(dataSize / sizeof(float));
+	memcpy(&Map[0], pData, dataSize);
 
-	Data = (ZMapHeader *)malloc(file->size());
-	memcpy(Data, &file[0], file->size());
-
-	Vector3 min(Data->minX, Data->minY, Data->minZ);
-	Vector3 max(Data->maxX, Data->maxY, Data->maxZ);
+	Vector3 min(Header.minX, Header.minY, Header.minZ);
+	Vector3 max(Header.maxX, Header.maxY, Header.maxZ);
 	Rect3D.SetRect(min, max - min);
 	Filename = jUtils::GetFilenameOnly(fullname);
+	return true;
+}
+
+bool jZMapLoader::GetHeight(float worldX, float worldY, float& outHeight)
+{
+	if (!Rect3D.TopBottom().Contains(Vector2(worldX, worldY)))
+		return false;
+
+	float localX = worldX - Rect3D.Min().x;
+	float localY = worldY - Rect3D.Min().y;
+	int idxX = localX / Header.step;
+	int idxY = localY / Header.step;
+	int pitchCount = Rect3D.Size().x / Header.step;
+	int idx = idxY * pitchCount + idxX;
+	if (idx < 0 || idx >= Map.size())
+		return false;
+
+	outHeight = Map[idx];
 	return true;
 }
 
@@ -96,7 +111,7 @@ bool jZMapLoader::Save(string fullname, jRect3D rt, int step, u32 * pixels, int 
 	float maxZ = rt.Max().z;
 	float sizeZ = maxZ - minZ;
 	tmpXYZW * curPixels = (tmpXYZW *)pixels;
-	float *curHeight = outbuf->map;
+	float *curHeight = (float *)((char *)outbuf + sizeof(ZMapHeader));
 	for (int y = 0; y < cnt; ++y)
 	{
 		int off = imgWidth * y;

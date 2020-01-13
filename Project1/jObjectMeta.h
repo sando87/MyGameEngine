@@ -35,23 +35,19 @@ struct ZMapHeader
 	int maxX;
 	int maxY;
 	int maxZ;
-	float map[];
 };
 
 class jZMapLoader
 {
 public:
-	jZMapLoader() { Data = nullptr; }
-	~jZMapLoader() {
-		if (Data) {
-			free(Data);
-			Data = nullptr;
-		}
-	}
+	jZMapLoader() {}
+	~jZMapLoader() {}
 
 	string Filename;
 	jRect3D Rect3D;
-	ZMapHeader *Data;
+	ZMapHeader Header;
+	vector<float> Map;
 	bool Load(string fullname);
+	bool GetHeight(float worldX, float worldY, float& outHeight);
 	static bool Save(string fullname, jRect3D rt, int step, u32* pixels, int imgWidth);
 };

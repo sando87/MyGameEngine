@@ -3,6 +3,7 @@
 #include "ObjTerrain.h"
 #include "jHeightMap.h"
 #include "jMesh.h"
+#include "jObjectMeta.h"
 
 #define TERRAIN_SIZE 240
 #define TERRAIN_STEP 5
@@ -57,9 +58,14 @@ void ObjTerrainMgr::LoadingBlocks()
 
 			if (mCachedBlocks.find(key) == mCachedBlocks.end())
 			{
+				string filename = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE) + ".zmap";
+
 				TerrainBlock block;
-				block.heightMap = new jHeightMap(TERRAIN_SIZE, TERRAIN_SIZE, TERRAIN_STEP);
+				block.zMap = new jZMapLoader();
+				block.zMap->Load(PATH_RESOURCES + string("zmap/") + filename);
+
 				LoadBlock(idxX, idxY, block);
+
 				mCachedBlocks[key] = block;
 			}
 		}
@@ -68,7 +74,7 @@ void ObjTerrainMgr::LoadingBlocks()
 
 void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 {
-	string foldername = to_string(idxX * 240) + "_" + to_string(idxY * 240);
+	string foldername = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE);
 	u64 key = GRID_HASH(idxX, idxY);
 	vector<string>* names = mBlockResourcesAll[key];
 	for (string name : *names)
@@ -77,14 +83,7 @@ void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 		obj->Load(foldername + "/" + name);
 		obj->AddToMgr();
 		block.terrains.push_back(obj);
-		
-		jMesh* mesh = obj->FindComponent<jMesh>();
-		Vector3 basePos = obj->GetTransport().getPos();
-		block.heightMap->UpdateHeightMap(mesh, basePos);
 	}
-	float minZ = block.heightMap->MinHeight();
-	float maxZ = block.heightMap->MaxHeight();
-	block.rect = jRect3D(Vector3(idxX*TERRAIN_SIZE, idxY*TERRAIN_SIZE, minZ), Vector3(TERRAIN_SIZE, TERRAIN_SIZE, maxZ - minZ));
 	return;
 }
 void ObjTerrainMgr::ClearFarBlocks(int clearCount)
@@ -93,7 +92,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	vector<pair<double,u64>> distances;
 	for (auto item : mCachedBlocks)
 	{
-		jRect rect = item.second.rect.TopBottom();
+		jRect rect = item.second.zMap->Rect3D.TopBottom();
 		Vector2 pt = rect.Center();
 		u64 key = GRID_HASH(rect.Left(), rect.Bottom());
 		double dist = camRect.Center().distance(pt);
@@ -108,7 +107,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	{
 		u64 key = distances[i].second;
 		TerrainBlock& block = mCachedBlocks[key];
-		jRect rect = block.rect.TopBottom();
+		jRect rect = block.zMap->Rect3D.TopBottom();
 		if (camRect.Overlapped(rect))
 			break;
 
@@ -161,9 +160,8 @@ bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 		return false;
 
 	TerrainBlock& block = mCachedBlocks[key];
-	jRect rect = block.rect.TopBottom();
-	height = block.heightMap->GetHeightOfPos(worldX - rect.Left(), worldY - rect.Bottom());
-	return true;
+	bool ret = block.zMap->GetHeight(worldX, worldY, height);
+	return ret;
 }
 Vector3 ObjTerrainMgr::CalcGroundPos(Vector3 pos, Vector3 dir)
 {
