@@ -1,6 +1,7 @@
 #pragma once
 
 #include "junks.h"
+#include "jRect3D.h"
 
 class jBitmap
 {
@@ -19,4 +20,5 @@ public:
 	bool Save(const char* FileName);
 	void RedScale();
 	static bool Save(int width, int height, int rowpitch, int byteperpixel, char* data, const char* outfilename);
+	static bool SaveAlpha(jRect3D rt, int step, int srcWidth, char* srcData, string fullname);
 };

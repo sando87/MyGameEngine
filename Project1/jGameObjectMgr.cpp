@@ -68,15 +68,8 @@ bool jGameObjectMgr::Initialize()
 	mCamera = new ObjCamera();
 	mCamera->AddToMgr();
 
-	auto mm = new jGameObject();
-	auto mesh = new jMesh();
-	mesh->LoadCube(5);
-	mm->GetTransport().moveTo(Vector3(1231, 800, 30));
-	mm->AddComponent(mesh);
-	mm->AddToMgr();
-	
 	(new ObjGroundAxis())->AddToMgr();
-	//(new ObjCreateHeightmap())->AddToMgr();
+	(new ObjCreateHeightmap())->AddToMgr();
 
 	//(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();

@@ -97,16 +97,17 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 	if (img)
 	{
 		Vector4n cur = mBlocks[idx];
-		string filename = jUtils::ToString(cur.x) + "_" + jUtils::ToString(cur.y) + ".zmap";
+		string filename = jUtils::ToString(cur.x) + "_" + jUtils::ToString(cur.y) + ".bmp";
 		jUtils::MakeFolder(PATH_RESOURCES + string("zmap/"));
 		string fullName = PATH_RESOURCES + string("zmap/") + filename;
 		
 		Vector3 pos = Vector3(cur.x, cur.y, cur.z);
-		Vector3 size = Vector3(CONF_Size, CONF_Size, cur.w);
+		Vector3 size = Vector3(CONF_Size, CONF_Size, cur.w - cur.z);
 		jRect3D rt(pos, size);
-		jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], 640);
 
+		//jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], 640);
 		//jBitmap::Save(240, 240, 640 * 4, 4, &img[0], fullName.c_str());
+		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], fullName);
 	}
 }
 
@@ -116,8 +117,8 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 	if (metaInfo.Load(path_fullname) == false)
 		return false;
 
-	if (metaInfo.alpha)
-		return false;
+	//if (metaInfo.alpha)
+	//	return false;
 
 	jMesh mesh(PATH_RESOURCES + string("mesh/") + metaInfo.objname);
 	if (mesh.GetVerticies().size() > 0)

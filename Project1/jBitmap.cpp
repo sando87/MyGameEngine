@@ -1,4 +1,5 @@
 #include "jBitmap.h"
+#include "jObjectMeta.h"
 
 #define _LOBYTE(w)           ((u8)(((u32)(w)) & 0xff))
 #define _HIBYTE(w)           ((u8)((((u32)(w)) >> 8) & 0xff))
@@ -181,6 +182,88 @@ bool jBitmap::Save(int width, int height, int rowpitch, int byteperpixel, char* 
 
 	delete[] ColorsData;
 	return false;
+}
+bool jBitmap::SaveAlpha(jRect3D rt, int step, int srcWidth, char* srcData, string fullname)
+{
+	int cnt = (rt.Max().x - rt.Min().x) / step;
+	int byteperpixel = 1;
+	int dataSize = cnt * cnt * byteperpixel;
+	//int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + sizeof(ZMapHeader) + dataSize;
+	int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + sizeof(ZMapHeader) + dataSize;
+
+	_BITMAPFILEHEADER    BitmapFileHeader = {
+		0x4d42, //Bmp Mark
+		(u32)totalSize, //File Size
+		0,    //Not Used
+		0,    //Not Used
+		totalSize - dataSize     //Colors Offset in File
+	};
+
+	_BITMAPINFOHEADER    BitmapInfoHeader = {
+		sizeof(_BITMAPINFOHEADER),    //Structure Size
+		(u32)cnt,
+		(u32)cnt,
+		1,        //Number of Plans
+		(u16)(byteperpixel * 8),        //Bits Per colors 
+		0,        //Compression Ration
+		0,        //Original Image Size (When Compressed)
+		2835,    //Number of Pixel Per Meter (Vertical)
+		2835,    //Number of Pixel Per Meter (Horizontal)
+		0,        //Number of Used Colors (Indexed Mode)
+		0,        //Number of Important Colors (Indexed Mode)
+	};
+
+	ZMapHeader zmapHead;
+	memset(&zmapHead, 0x00, sizeof(zmapHead));
+	zmapHead.ext[0] = 'z'; zmapHead.ext[1] = 'm'; zmapHead.ext[2] = 'a'; zmapHead.ext[3] = 'p';
+	zmapHead.size = sizeof(ZMapHeader);
+	zmapHead.step = step;
+	zmapHead.minX = rt.Min().x; zmapHead.minY = rt.Min().y; zmapHead.minZ = rt.Min().z;
+	zmapHead.maxX = rt.Max().x; zmapHead.maxY = rt.Max().y; zmapHead.maxZ = rt.Max().z;
+
+	struct tmpXYZW { u8 x;	u8 y;	u8 z;	u8 w; };
+	tmpXYZW colorTable[256] = { 0, };
+	for (int i = 0; i < 256; ++i)
+	{
+		colorTable[i].x = i;
+		colorTable[i].y = i;
+		colorTable[i].z = i;
+		colorTable[i].w = 0;
+	}
+
+	chars outData;
+	outData->resize(dataSize);
+	float minZ = rt.Min().z;
+	float maxZ = rt.Max().z;
+	float sizeZ = maxZ - minZ;
+	tmpXYZW * curSrc = (tmpXYZW *)srcData;
+	char *curDest = &outData[0];
+	for (int y = cnt - 1; y >= 0; --y)  //texture y axis up-side-down compared to world y axis
+	{
+		int off = srcWidth * y;
+		for (int x = 0; x < cnt; ++x)
+		{
+			curDest[0] = 255 - curSrc[off + x].w;
+			//curDest[1] = 255 - curSrc[off + x].w;
+			curDest += 1;
+		}
+	}
+
+	chars outBuf;
+	outBuf->resize(totalSize);
+	char* curPos = &outBuf[0];
+	memcpy(curPos, (char *)&BitmapFileHeader, sizeof(BitmapFileHeader));
+	curPos += sizeof(BitmapFileHeader);
+	memcpy(curPos, (char *)&BitmapInfoHeader, sizeof(BitmapInfoHeader));
+	curPos += sizeof(BitmapInfoHeader);
+	memcpy(curPos, (char *)&colorTable, 1024);
+	curPos += 1024;
+	memcpy(curPos, (char *)&zmapHead, sizeof(zmapHead));
+	curPos += sizeof(zmapHead);
+	memcpy(curPos, (char *)&outData[0], dataSize);
+
+	jUtils::SaveToFile(fullname, (char *)&outBuf[0], totalSize);
+	return true;
 }
 void jBitmap::RedScale()
 {

@@ -40,10 +40,10 @@ void ObjPlayer::OnStart()
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
 
 		jGameObject* target = jGameObjectMgr::GetInst().RayCast(GetCamera().GetPosture().getPos(), view);
-		//Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
-		jLine3D line3d(GetCamera().GetPosture().getPos(), view);
-		Vector2 pt = line3d.GetXY(0);
-		WalkTo(pt, target);
+		Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
+		//jLine3D line3d(GetCamera().GetPosture().getPos(), view);
+		//Vector2 pt = line3d.GetXY(0);
+		WalkTo(Vector2(pt.x, pt.y), target);
 	};
 
 	AddComponent((new jCrash())->Init(1, 2, [this](jCrashs objs) {

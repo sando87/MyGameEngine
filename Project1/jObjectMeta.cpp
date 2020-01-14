@@ -112,7 +112,7 @@ bool jZMapLoader::Save(string fullname, jRect3D rt, int step, u32 * pixels, int 
 	float sizeZ = maxZ - minZ;
 	tmpXYZW * curPixels = (tmpXYZW *)pixels;
 	float *curHeight = (float *)((char *)outbuf + sizeof(ZMapHeader));
-	for (int y = 0; y < cnt; ++y)
+	for (int y = cnt - 1; y >= 0; --y)  //texture y axis up-side-down compared to world y axis
 	{
 		int off = imgWidth * y;
 		for (int x = 0; x < cnt; ++x)
