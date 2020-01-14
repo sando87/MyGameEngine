@@ -69,7 +69,7 @@ bool jGameObjectMgr::Initialize()
 	mCamera->AddToMgr();
 
 	(new ObjGroundAxis())->AddToMgr();
-	(new ObjCreateHeightmap())->AddToMgr();
+	//(new ObjCreateHeightmap())->AddToMgr();
 
 	//(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();

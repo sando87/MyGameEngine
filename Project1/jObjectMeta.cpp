@@ -1,5 +1,5 @@
 #include "jObjectMeta.h"
-
+#include "jBitmap.h"
 
 
 jObjectMeta::jObjectMeta()
@@ -63,11 +63,19 @@ bool jZMapLoader::Load(string fullname)
 	if (!file)
 		return false;
 
-	memcpy(&Header, &file[0], sizeof(Header));
-	int dataSize = file->size() - sizeof(Header);
-	char* pData = (char *)&file[0] + sizeof(Header);
-	Map.resize(dataSize / sizeof(float));
-	memcpy(&Map[0], pData, dataSize);
+	int zmapHeadOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024;
+	int dataOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + sizeof(ZMapHeader);
+
+	memcpy(&Header, &file[0] + zmapHeadOff, sizeof(Header));
+	int dataSize = file->size() - dataOff;
+	u8* pData = (u8*)&file[0] + dataOff;
+	Map.resize(dataSize);
+	float sizeZ = Header.maxZ - Header.minZ;
+	for (int i = 0; i < dataSize; ++i)
+	{
+		float rate = pData[i] / 255.0f;
+		Map[i] = Header.minZ + (rate * sizeZ);
+	}
 
 	Vector3 min(Header.minX, Header.minY, Header.minZ);
 	Vector3 max(Header.maxX, Header.maxY, Header.maxZ);
