@@ -8,7 +8,8 @@ class ObjCamera;
 class ObjTerrainMgr;
 class jComponent;
 class jMatrixControl;
-enum CoroutineReturn;
+enum CorCmd;
+struct CorMember;
 
 class jGameObject
 {
@@ -21,9 +22,9 @@ public:
 	void AddToMgr();
 	ObjCamera& GetCamera();
 	ObjTerrainMgr& GetTerrain();
-	void StartCoRoutine(string name, std::function<CoroutineReturn(void)> coroutine);
-	void StartCoRoutine(string name, float time_ms, std::function<CoroutineReturn(void)> coroutine);
-	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CoroutineReturn(void)> coroutine);
+	void StartCoRoutine(string name, std::function<CorCmd(CorMember&, bool)> coroutine);
+	void StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine);
+	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine);
 	void StopCoRoutine(string name);
 	void DeleteFromMgr() { mIsRemoved = true; }
 	jMatrixControl& GetTransport();

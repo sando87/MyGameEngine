@@ -20,7 +20,7 @@ bool jAStar::Route(u32 startIdxX, u32 startIdx, u32 endIdxX, u32 endIdxY, u32 li
 
 	mStartKey = ToU64(startIdxX, startIdx);
 	mEndKey = ToU64(endIdxX, endIdxY);
-	int curIdx = startIdx;
+	u64 curIdx = mStartKey;
 	u32 depth = 0;
 	mRunning = true;
 	while (mRunning)
@@ -28,12 +28,11 @@ bool jAStar::Route(u32 startIdxX, u32 startIdx, u32 endIdxX, u32 endIdxY, u32 li
 		depth++;
 		UpdateWeights(curIdx);
 		curIdx = FindNextKey();
-		if (curIdx == -1 || depth >= limitDepth)
+		if (curIdx == (u64)-1 || depth >= limitDepth)
 			return false;
 		else if (curIdx == mEndKey)
 			break;
 	}
-	SearchRouteResult();
 	mRunning = false;
 	return true;
 }
@@ -44,8 +43,10 @@ bool jAStar::UpdateWeights(u64 idx)
 	int GridY = ToU32y(idx);
 	for (int y = GridY - 1; y < GridY + 2; ++y)
 	{
+		if (y < 0) continue;
 		for (int x = GridX - 1; x < GridX + 2; ++x)
 		{
+			if (x < 0) continue;
 			u64 key = ToU64(x, y);
 			RouteInfo* pInfo = GetRouteInfo(key);
 			if (pInfo != nullptr && pInfo->state == StatePoint::NEW)
@@ -58,7 +59,7 @@ bool jAStar::UpdateWeights(u64 idx)
 	return true;
 }
 
-int jAStar::FindNextKey()
+u64 jAStar::FindNextKey()
 {
 	for (auto iter = mWeights.begin(); iter != mWeights.end(); )
 	{
@@ -99,32 +100,50 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 	return &info;
 }
 
-void jAStar::SearchRouteResult()
+void jAStar::SearchRouteResult(u64 targetIdx)
 {
-	mRouteResult.clear();
-	mRouteResult.push_back(mEndKey);
-	TrackBack(mEndKey);
+	mRouteResults.clear();
+	if (mIndexTable.find(targetIdx) == mIndexTable.end())
+	{
+		_warn();
+		return;
+	}
+	
+	mRouteResults.push_back(mEndKey);
+	u64 nextKey = mEndKey;
+	while (true)
+	{
+		nextKey = TrackBack(targetIdx, nextKey);
+		if (nextKey == -1)
+			break;
+		if (nextKey == targetIdx)
+			break;
+
+		mRouteResults.push_back(nextKey);
+	}
 }
 
-void jAStar::TrackBack(u64 targetIdx)
+u64 jAStar::TrackBack(u64 targetIdx, u64 curIdx)
 {
-	int GridX = ToU32x(targetIdx);
-	int GridY = ToU32y(targetIdx);
-	u64 retKey = 0;
+	int GridX = ToU32x(curIdx);
+	int GridY = ToU32y(curIdx);
+	u64 retKey = -1;
 	float minDist = -1;
 	for (int y = GridY - 1; y < GridY + 2; ++y)
 	{
+		if (y < 0) continue;
 		for (int x = GridX - 1; x < GridX + 2; ++x)
 		{
+			if (x < 0) continue;
 			u64 key = ToU64(x, y);
-			if (key == targetIdx)
+			if (key == curIdx)
 				continue;
 			if (mIndexTable.find(key) == mIndexTable.end())
 				continue;
 			if (mIndexTable[key].state != StatePoint::CHECKED)
 				continue;
 
-			float dist = CalcDistance(key, mStartKey);
+			float dist = CalcDistance(key, targetIdx);
 			if (minDist < 0 || dist < minDist)
 			{
 				retKey = key;
@@ -132,18 +151,17 @@ void jAStar::TrackBack(u64 targetIdx)
 			}
 		}
 	}
-	mIndexTable[retKey].state = StatePoint::DONE;
-	mRouteResult.push_back(retKey);
-	if (retKey != mStartKey)
-		TrackBack(retKey);
-	return;
+
+	if(mIndexTable.find(retKey) != mIndexTable.end())
+		mIndexTable[retKey].state = StatePoint::DONE;
+
+	return retKey;
 }
 
 void jAStar::Reset()
 {
 	mIndexTable.clear();
 	mWeights.clear();
-	mRouteResult.clear();
 	mStartKey = 0;
 	mEndKey = 0;
 	mRunning = false;

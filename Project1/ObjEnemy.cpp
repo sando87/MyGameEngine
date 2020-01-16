@@ -30,7 +30,7 @@ void ObjEnemy::OnStart()
 	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
 
 	mAnim->SetAnimation("idle");
-	StartCoRoutine("enemyTimer", 5000, [this]() {  //start timer every 5sec
+	StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
 		int cmd = jUtils::Random() % 4;
 		if (cmd == 1)
 		{
@@ -45,7 +45,7 @@ void ObjEnemy::OnStart()
 			StopCoRoutine("CoroutineWalk");
 		}
 
-		return CoroutineReturn::Keep;
+		return CorCmd::Keep;
 	});
 }
 
@@ -63,16 +63,16 @@ bool ObjEnemy::WalkTo(Vector3 target, float speed)
 	mAnim->SetAnimation("walk");
 
 	GetTransport().lookPos(target);
-	StartCoRoutine("CoroutineWalk", [target, speed, this]() {
+	StartCoRoutine("CoroutineWalk", [target, speed, this](CorMember& userData, bool first) {
 		float dist = GetTransport().getPos().distance(target);
 		if (dist < 1)
 		{
 			mAnim->SetAnimation("idle");
-			return CoroutineReturn::Stop;
+			return CorCmd::Stop;
 		}
 
 		GetTransport().goForward(jTime::Delta() * speed);
-		return CoroutineReturn::Keep;
+		return CorCmd::Keep;
 	});
 
 	return true;

@@ -71,7 +71,7 @@ bool jGameObjectMgr::Initialize()
 	(new ObjGroundAxis())->AddToMgr();
 	//(new ObjCreateHeightmap())->AddToMgr();
 
-	//(new ObjPlayer())->AddToMgr();
+	(new ObjPlayer())->AddToMgr();
 	//(new ObjEnemy())->AddToMgr();
 
 	static vector<ObjParser*> vecObjs;

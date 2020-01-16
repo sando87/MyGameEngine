@@ -16,7 +16,7 @@
 
 //HeightMap 생성시 해줘야 할 작업....
 //terrain, default  pixel shader 변경 필요
-//alpha사용하는 rendering skip필요 => ObjTerrain.cpp Load()함수
+//alpha false depth true => ObjTerrain.cpp Load()함수
 
 ObjCreateHeightmap::ObjCreateHeightmap()
 {
@@ -30,8 +30,9 @@ ObjCreateHeightmap::~ObjCreateHeightmap()
 void ObjCreateHeightmap::OnStart()
 {
 	LoadBlocksInfo();
-	jInput::GetInst().mKeyboard += [this](const unsigned char * info) mutable {
-		static int idx = 0;
+	int* _idx = new int();
+	jInput::GetInst().mKeyboard += [this, _idx](const unsigned char * info) {
+		int& idx = *_idx;
 		if (info[31])
 		{
 			idx = (idx + 1) % mBlocks.size();
@@ -106,8 +107,8 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 		jRect3D rt(pos, size);
 
 		//jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], 640);
-		//jBitmap::Save(240, 240, 640 * 4, 4, &img[0], fullName.c_str());
-		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], fullName);
+		jBitmap::Save(240, 240, 640 * 4, 4, &img[0], fullName.c_str());
+		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], fullName + ".alpha");
 	}
 }
 
@@ -116,9 +117,6 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 	jObjectMeta metaInfo;
 	if (metaInfo.Load(path_fullname) == false)
 		return false;
-
-	//if (metaInfo.alpha)
-	//	return false;
 
 	jMesh mesh(PATH_RESOURCES + string("mesh/") + metaInfo.objname);
 	if (mesh.GetVerticies().size() > 0)

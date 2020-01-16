@@ -24,7 +24,8 @@ void jCoroutine::StartCoroutine(CoroutineInfo coroutineInfo)
 }
 void jCoroutine::StopCoroutine(string name)
 {
-	mCoroutines[name].enabled = false;
+	if(mCoroutines.find(name) != mCoroutines.end())
+		mCoroutines[name].enabled = false;
 }
 
 void jCoroutine::RunCoroutines()
@@ -38,26 +39,28 @@ void jCoroutine::RunCoroutines()
 			continue;
 		}
 
-		if (cInfo.mode == CoroutineMode::Normal) //코루틴 호출 후 false반환시 종료
+		if (cInfo.mode == CorMode::Normal) //코루틴 호출 후 false반환시 종료
 		{
-			cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
+			cInfo.enabled = cInfo.coroutine(cInfo.userData, cInfo.firstCalled) == CorCmd::Keep ? true : false;
+			cInfo.firstCalled = false;
 		}
-		else if (cInfo.mode == CoroutineMode::Timer) //일정시간 지연 후 코루틴 호출
+		else if (cInfo.mode == CorMode::Timer) //일정시간 지연 후 코루틴 호출
 		{
 			cInfo.time_ms -= jTime::Delta() * 1000.0;
 			if (cInfo.time_ms <= 0)
 			{
-				cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
+				cInfo.enabled = cInfo.coroutine(cInfo.userData, cInfo.firstCalled) == CorCmd::Keep ? true : false;
 				cInfo.time_ms = cInfo.time_back_ms;
+				cInfo.firstCalled = false;
 			}
 		}
-		else if (cInfo.mode == CoroutineMode::Task) //쓰레드 완료 후 코루틴 호출
+		else if (cInfo.mode == CorMode::Task) //쓰레드 완료 후 코루틴 호출
 		{
 			if (cInfo.taskStarted == false)
 			{
 				cInfo.taskStarted = true;
 				cInfo.taskDone = false;
-				thread t1([&cInfo]() {
+				cInfo.pThread = new thread([&cInfo]() {
 					cInfo.task();
 					cInfo.taskDone = true;
 				});
@@ -65,9 +68,14 @@ void jCoroutine::RunCoroutines()
 
 			if (cInfo.taskDone)
 			{
-				cInfo.enabled = cInfo.coroutine() == CoroutineReturn::Keep ? true : false;
+				cInfo.pThread->join();
+				delete cInfo.pThread;
+				cInfo.pThread = nullptr;
+
+				cInfo.enabled = cInfo.coroutine(cInfo.userData, cInfo.firstCalled) == CorCmd::Keep ? true : false;
 				cInfo.taskStarted = false;
 				cInfo.taskDone = false;
+				cInfo.firstCalled = false;
 			}
 		}
 		++iter;
