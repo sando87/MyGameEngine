@@ -52,7 +52,7 @@ void ObjTerrainMgr::LoadingBlocks()
 	{
 		for (int idxX = idxStartX; idxX <= idxEndX; ++idxX)
 		{
-			u64 key = GRID_HASH(idxX, idxY);
+			u64 key = ToU64(idxX, idxY);
 			if (mBlockResourcesAll.find(key) == mBlockResourcesAll.end())
 				continue;
 
@@ -75,7 +75,7 @@ void ObjTerrainMgr::LoadingBlocks()
 void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 {
 	string foldername = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE);
-	u64 key = GRID_HASH(idxX, idxY);
+	u64 key = ToU64(idxX, idxY);
 	vector<string>* names = mBlockResourcesAll[key];
 	for (string name : *names)
 	{
@@ -94,7 +94,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	{
 		jRect rect = item.second.zMap->Rect3D.TopBottom();
 		Vector2 pt = rect.Center();
-		u64 key = GRID_HASH(rect.Left(), rect.Bottom());
+		u64 key = ToU64(rect.Left(), rect.Bottom());
 		double dist = camRect.Center().distance(pt);
 		distances.push_back(pair<double, u64>(dist, key));
 	}

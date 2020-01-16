@@ -64,3 +64,7 @@ typedef unsigned long long u64;
 
 #define CRASH_SIZE 8192
 #define CRASH_STEP 8
+
+#define ToU64(x, y) (u64)(((u64)(y) << 32) | (u64)(x))
+#define ToU32x(key) (u32)(key)
+#define ToU32y(key) (u32)(((u64)(key) >> 32))

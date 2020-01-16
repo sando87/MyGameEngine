@@ -72,6 +72,8 @@ void jGameObject::StartCoRoutine(string name, float time_ms, std::function<Corou
 	info.coroutine = coroutine;
 	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
+
+//name : 코루틴 이름, task : 쓰레드에서 수행되는 함수, coroutine : 쓰레드 완료시 수행되는 코루틴
 void jGameObject::StartCoRoutine(string name, std::function<void(void)> task, std::function<CoroutineReturn(void)> coroutine)
 {
 	CoroutineInfo info;

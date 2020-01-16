@@ -4,8 +4,6 @@
 
 class jZMapLoader;
 
-#define GRID_HASH(x, y) (u64)(((u64)(y) << 32) | (u64)(x))
-
 struct TerrainBlock
 {
 	vector<jGameObject*> terrains;
@@ -38,7 +36,7 @@ private:
 	{
 		int nx = (int)(x / mBlockSize);
 		int ny = (int)(y / mBlockSize);
-		u64 key = GRID_HASH(nx, ny);
+		u64 key = ToU64(nx, ny);
 		return key;
 	}
 

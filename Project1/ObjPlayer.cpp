@@ -12,14 +12,17 @@
 #include "jCrash.h"
 #include "jAnimCSV.h"
 #include "jLine3D.h"
+#include "jAStar.h"
 
 ObjPlayer::ObjPlayer()
 {
+	mAstar = new jAStar();
 }
 
 
 ObjPlayer::~ObjPlayer()
 {
+	delete mAstar;
 }
 
 void ObjPlayer::OnStart()
@@ -85,6 +88,47 @@ void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)
 	StartCoRoutine("MovePlayer", [this, obj, pos]() {
 		float speed = 10; //1초(60프레임)당 움직이는 속도
 		float speedRot = 30; //프레임당 회전하는 속도
+		float delta = jTime::Delta();
+		Vector3 target = (obj != nullptr) ? obj->GetTransport().getPos() : Vector3(pos.x, pos.y, 0);
+		target.z = GetTransport().getPos().z;
+		GetTransport().rotateToPos_OnGround(target, speedRot);
+		GetTransport().goForward(speed * delta);
+		if (GetTransport().getPos().distance(target) < 1)
+		{
+			mAnim->SetAnimation("idle");
+			return CoroutineReturn::Stop;
+		}
+
+		return CoroutineReturn::Keep;
+	});
+}
+
+void ObjPlayer::StartNavigate(Vector2 pos, jGameObject * obj)
+{
+	StopCoRoutine("NavigatePlayer");
+	mAstar->StopRouting();
+	mAstar->Moveable = [](u32 idxX, u32 idxY) {
+		return true;
+	};
+
+	StartCoRoutine("NavigatePlayer",
+	[this, pos]() {
+		// Route를 수행하여 최적의 경로정보를 산출하는 함수
+		u32 startIdxX = (u32)GetTransport().getPos().x;
+		u32 startIdxY = (u32)GetTransport().getPos().y;
+		u32 endIdxX = (u32)pos.x;
+		u32 endIdxY = (u32)pos.y;
+		mAstar->Route(startIdxX, startIdxY, endIdxX, endIdxY, 1000);
+	},
+	[this, obj, pos]() {
+		// Routing결과위치값들을 따라가는 동작 수행
+		vector<u64> rets = mAstar->GetResults();
+		if (rets.size() <= 0)
+			return CoroutineReturn::Stop; //Routing 실패시 아무것도 안함
+
+		StopCoRoutine("MovePlayer");
+		float speed = 10;
+		float speedRot = 30;
 		float delta = jTime::Delta();
 		Vector3 target = (obj != nullptr) ? obj->GetTransport().getPos() : Vector3(pos.x, pos.y, 0);
 		target.z = GetTransport().getPos().z;
