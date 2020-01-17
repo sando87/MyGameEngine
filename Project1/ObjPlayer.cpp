@@ -73,6 +73,8 @@ void ObjPlayer::OnUpdate()
 	for (int i = 0; i < 45; ++i)
 		param.bones[i] = mats[i];
 
+	UpdatePlayerPosition();
+
 	Vector3 pos = GetTransport().getPos();
 	float height = 0;
 	bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
@@ -83,7 +85,7 @@ void ObjPlayer::OnUpdate()
 	}
 }
 
-void ObjPlayer::MoveTo(Vector2 pos)
+Vector2 ObjPlayer::MoveTo(Vector2 pos)
 {
 	float speed = 10; //1초(60프레임)당 움직이는 속도
 	float speedRot = 30; //프레임당 회전하는 속도
@@ -94,6 +96,7 @@ void ObjPlayer::MoveTo(Vector2 pos)
 	nextDir.normalize();
 	Vector3 nextPos = GetTransport().getPos() + (nextDir * speed * delta);
 	GetTransport().moveTo(nextPos);
+	return nextPos;
 }
 
 void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)
@@ -119,58 +122,84 @@ void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)
 
 void ObjPlayer::StartNavigate(Vector2 pos)
 {
-	mStep = 5;
 	StopCoRoutine("NavigatePlayer");
 	mAstar->StopRouting();
-	mAstar->Moveable = [this](u32 idxX, u32 idxY) {
+	mAstar->Moveable = [this](Vector2 worldPos) {
 		float height = 0;
-		Vector2 worldPos = Vector2(idxX * mStep, idxY * mStep) + Vector2(mStep / 2, mStep / 2);
 		bool ret = GetTerrain().GetHeight(worldPos.x, worldPos.y, height);
-		return height > 0 && ret;
+		return ret;
 	};
 
 	StartCoRoutine("NavigatePlayer",
 	[this, pos]() {
 		// Route를 수행하여 최적의 경로정보를 산출하는 함수
-		u32 startIdxX = (u32)(GetTransport().getPos().x / mStep);
-		u32 startIdxY = (u32)(GetTransport().getPos().y / mStep);
-		u32 endIdxX = (u32)(pos.x / mStep);
-		u32 endIdxY = (u32)(pos.y / mStep);
-		mAstar->Route(startIdxX, startIdxY, endIdxX, endIdxY, 1000);
+		double step = 1;
+		mAstar->Route(GetTransport().getPos(), pos, 1000, step);
 	},
 	[this, pos](CorMember& userData, bool first) {
-		// Routing결과위치값들을 따라가는 동작 수행
+		// Routing 완료된 결과값들을 가지고 캐릭터를 움직임.
 		if (first)
 		{
-			u32 idxX = (u32)(GetTransport().getPos().x / mStep);
-			u32 idxY = (u32)(GetTransport().getPos().y / mStep);
-			u64 myPosKey = ToU64(idxX, idxY);
-			mAstar->SearchRouteResult(myPosKey);
-			if (mAstar->GetResults().size() == 0) //Routing 실패시 아무것도 안함
+			mAstar->SearchRouteResult(GetTransport().getPos(), 3.0);
+			vector<Vector2>& rets = mAstar->GetResults();
+			if (rets.size() == 0) //Routing 실패시 아무것도 안함
 				return CorCmd::Stop; 
 
+			Vector3 curPos = GetTransport().getPos();
+			OptimizeRouteResults(rets, rets.size(), curPos, mWayPoints);
+			
 			userData.intVal = mAstar->GetResults().size() - 2;
 			StopCoRoutine("MovePlayer");
 			mAnim->SetAnimation("walk");
 		}
-		vector<u64>& rets = mAstar->GetResults();
+
+		vector<Vector2>& rets = mAstar->GetResults();
 		if (userData.intVal < 0)
 		{
 			mAnim->SetAnimation("idle");
 			return CorCmd::Stop; //도착지 도달시 정상 종료
 		}
 
-		u64 targetKey = rets[userData.intVal];
-		Vector2 targetPos = Vector2(ToU32x(targetKey) * mStep, ToU32y(targetKey) * mStep) + Vector2(mStep/2, mStep /2);
+		Vector2 targetPos = rets[userData.intVal];
 		MoveTo(targetPos);
 
-		u32 nextX = (u32)(GetTransport().getPos().x / mStep);
-		u32 nextY = (u32)(GetTransport().getPos().y / mStep);
-		u64 nextKey = ToU64(nextX, nextY);
-		if (nextKey == targetKey)
+		Vector2 myPos = GetTransport().getPos();
+		if (myPos.distance(targetPos) < 0.5)
 			userData.intVal--;
 
 		return CorCmd::Keep;
 	});
 
+}
+
+void ObjPlayer::UpdatePlayerPosition()
+{
+	if (mWayPoints.empty())
+		return;
+
+	Vector2 targetPos = mWayPoints.front();
+	Vector2 nextPos = MoveTo(targetPos);
+	if (nextPos.distance(targetPos) < 1)
+	{
+		mWayPoints.pop_front();
+		if (mWayPoints.empty())
+			mAnim->SetAnimation("idle");
+	}
+}
+
+void ObjPlayer::OptimizeRouteResults(vector<Vector2>& inPoints, int count, Vector2 startPos, list<Vector2>& outPoints)
+{
+	if (count <= 0)
+		return;
+
+	Vector2* startData = &inPoints[0];
+	int retIdx = jUtils::BinarySearchEdge<Vector2>(startData, count, [this, startPos](Vector2& pt) {
+		double step = 1;
+		return GetTerrain().Reachable(startPos, pt, Vector2(), step);
+	});
+	_warnif((retIdx == count - 1))
+	int nextIdx = (retIdx == count - 1) ? retIdx : retIdx + 1;
+	Vector2 findPos = inPoints[nextIdx];
+	outPoints.push_front(findPos);
+	OptimizeRouteResults(inPoints, nextIdx, findPos, outPoints);
 }

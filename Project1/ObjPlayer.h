@@ -16,15 +16,17 @@ private:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
-	void MoveTo(Vector2 pos);
+	Vector2 MoveTo(Vector2 pos);
 	void WalkTo(Vector2 pos, jGameObject * obj);
 	void StartNavigate(Vector2 pos);
+	void UpdatePlayerPosition();
+	void OptimizeRouteResults(vector<Vector2>& inPoints, int startIdx, Vector2 startPos, list<Vector2>& outPoints);
 
 	jShaderSkin* mShader;
 	jAnimCSV* mAnim;
 	jAStar* mAstar;
 
+	list<Vector2> mWayPoints;
 	float mAnimTime = 0;
-	float mStep;
 };
 

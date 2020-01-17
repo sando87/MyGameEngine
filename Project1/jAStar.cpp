@@ -11,16 +11,18 @@ jAStar::~jAStar()
 {
 }
 
-bool jAStar::Route(u32 startIdxX, u32 startIdx, u32 endIdxX, u32 endIdxY, u32 limitDepth)
+bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, double step)
 {
 	if (mRunning)
 		return false;
 
 	Reset();
 
-	mStartKey = ToU64(startIdxX, startIdx);
-	mEndKey = ToU64(endIdxX, endIdxY);
-	u64 curIdx = mStartKey;
+	mStep = step;
+	mStartPos = startWorldPos;
+	mEndPos = endWorldPos;
+	u64 endKey = ToIndex(mEndPos);
+	u64 curIdx = ToIndex(mStartPos);
 	u32 depth = 0;
 	mRunning = true;
 	while (mRunning)
@@ -30,7 +32,7 @@ bool jAStar::Route(u32 startIdxX, u32 startIdx, u32 endIdxX, u32 endIdxY, u32 li
 		curIdx = FindNextKey();
 		if (curIdx == (u64)-1 || depth >= limitDepth)
 			return false;
-		else if (curIdx == mEndKey)
+		else if (curIdx == endKey)
 			break;
 	}
 	mRunning = false;
@@ -52,6 +54,7 @@ bool jAStar::UpdateWeights(u64 idx)
 			if (pInfo != nullptr && pInfo->state == StatePoint::NEW)
 			{
 				pInfo->state = StatePoint::WAIT;
+				pInfo->fromKey = idx;
 				mWeights.insert(pair<float, u64>(pInfo->weight, pInfo->key));
 			}
 		}
@@ -75,24 +78,19 @@ u64 jAStar::FindNextKey()
 	return -1;
 }
 
-float jAStar::CalcDistance(u64 idxA, u64 idxB)
-{
-	int dx = ToU32x(idxA) - ToU32x(idxB);
-	int dy = ToU32y(idxA) - ToU32y(idxB);
-	return sqrtf(dx * dx + dy * dy);
-}
-
 RouteInfo * jAStar::GetRouteInfo(u64 idx)
 {
-	if (!Moveable(ToU32x(idx), ToU32y(idx)))
+	if (!Moveable(ToWorld(idx)))
 		return nullptr;
 
 	if (mIndexTable.find(idx) == mIndexTable.end())
 	{
 		RouteInfo info = { 0, };
-		info.weight = CalcDistance(idx, mEndKey);
+		Vector2 curPos = ToWorld(idx);
+		info.weight = curPos.distance(mEndPos);
 		info.key = idx;
 		info.state = StatePoint::NEW;
+		info.fromKey = -1;
 		mIndexTable[idx] = info;
 	}
 
@@ -100,70 +98,66 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 	return &info;
 }
 
-void jAStar::SearchRouteResult(u64 targetIdx)
+void jAStar::SearchRouteResult(Vector2 startPos, double detectRange)
 {
 	mRouteResults.clear();
-	if (mIndexTable.find(targetIdx) == mIndexTable.end())
-	{
-		_warn();
-		return;
-	}
-	
-	mRouteResults.push_back(mEndKey);
-	u64 nextKey = mEndKey;
+	mRouteResults.push_back(mEndPos);
+	u64 nextKey = ToIndex(mEndPos);
 	while (true)
 	{
-		nextKey = TrackBack(targetIdx, nextKey);
-		if (nextKey == -1)
-			break;
-		if (nextKey == targetIdx)
+		nextKey = mIndexTable[nextKey].fromKey;
+		if (nextKey == (u64)-1)
 			break;
 
-		mRouteResults.push_back(nextKey);
+		Vector2 curPos = ToWorld(nextKey);
+		if (curPos.distance(startPos) <= detectRange)
+			break;
+
+		mRouteResults.push_back(ToWorld(nextKey));
 	}
-}
-
-u64 jAStar::TrackBack(u64 targetIdx, u64 curIdx)
-{
-	int GridX = ToU32x(curIdx);
-	int GridY = ToU32y(curIdx);
-	u64 retKey = -1;
-	float minDist = -1;
-	for (int y = GridY - 1; y < GridY + 2; ++y)
-	{
-		if (y < 0) continue;
-		for (int x = GridX - 1; x < GridX + 2; ++x)
-		{
-			if (x < 0) continue;
-			u64 key = ToU64(x, y);
-			if (key == curIdx)
-				continue;
-			if (mIndexTable.find(key) == mIndexTable.end())
-				continue;
-			if (mIndexTable[key].state != StatePoint::CHECKED)
-				continue;
-
-			float dist = CalcDistance(key, targetIdx);
-			if (minDist < 0 || dist < minDist)
-			{
-				retKey = key;
-				minDist = dist;
-			}
-		}
-	}
-
-	if(mIndexTable.find(retKey) != mIndexTable.end())
-		mIndexTable[retKey].state = StatePoint::DONE;
-
-	return retKey;
+	mRouteResults.push_back(startPos);
 }
 
 void jAStar::Reset()
 {
 	mIndexTable.clear();
 	mWeights.clear();
-	mStartKey = 0;
-	mEndKey = 0;
 	mRunning = false;
+	mStep = 0;
 }
+
+//u64 jAStar::TrackBack(u64 targetIdx, u64 curIdx)
+//{
+//	int GridX = ToU32x(curIdx);
+//	int GridY = ToU32y(curIdx);
+//	u64 retKey = -1;
+//	float minDist = -1;
+//	for (int y = GridY - 1; y < GridY + 2; ++y)
+//	{
+//		if (y < 0) continue;
+//		for (int x = GridX - 1; x < GridX + 2; ++x)
+//		{
+//			if (x < 0) continue;
+//			u64 key = ToU64(x, y);
+//			if (key == curIdx)
+//				continue;
+//			if (mIndexTable.find(key) == mIndexTable.end())
+//				continue;
+//			if (mIndexTable[key].state != StatePoint::CHECKED)
+//				continue;
+//
+//			float dist = CalcDistance(key, targetIdx);
+//			if (minDist < 0 || dist < minDist)
+//			{
+//				retKey = key;
+//				minDist = dist;
+//			}
+//		}
+//	}
+//
+//	if(mIndexTable.find(retKey) != mIndexTable.end())
+//		mIndexTable[retKey].state = StatePoint::DONE;
+//
+//	return retKey;
+//}
 

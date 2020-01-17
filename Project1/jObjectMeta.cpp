@@ -74,7 +74,7 @@ bool jZMapLoader::Load(string fullname)
 	for (int i = 0; i < dataSize; ++i)
 	{
 		float rate = pData[i] / 255.0f;
-		Map[i] = Header.minZ + (rate * sizeZ);
+		Map[i] = pData[i] == 0 ? -1000.0f : Header.minZ + (rate * sizeZ);
 	}
 
 	Vector3 min(Header.minX, Header.minY, Header.minZ);
@@ -95,7 +95,7 @@ bool jZMapLoader::GetHeight(float worldX, float worldY, float& outHeight)
 	int idxY = localY / Header.step;
 	int pitchCount = Rect3D.Size().x / Header.step;
 	int idx = idxY * pitchCount + idxX;
-	if (idx < 0 || idx >= Map.size())
+	if (idx < 0 || idx >= Map.size() || Map[idx] == -1000.0f)
 		return false;
 
 	outHeight = Map[idx];

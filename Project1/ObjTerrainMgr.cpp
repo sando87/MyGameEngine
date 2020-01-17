@@ -181,6 +181,27 @@ Vector3 ObjTerrainMgr::CalcGroundPos(Vector3 pos, Vector3 dir)
 	return Vector3();
 }
 
+bool ObjTerrainMgr::Reachable(Vector2 start, Vector2 end, Vector2 & lastPoint, double step)
+{
+	Vector2 dir = end - start;
+	dir.normalize();
+	dir *= step;
+	Vector2 curPos = start;
+	float height = 0;
+	while (curPos.distance(end) > step)
+	{
+		bool ret = GetHeight(curPos.x, curPos.y, height);
+		if (!ret)
+		{
+			lastPoint = curPos;
+			return false;
+		}
+		curPos += dir;
+	}
+	lastPoint = end;
+	return true;
+}
+
 //ObjTerrain* ObjTerrainMgr::GetTerrain(float worldX, float worldY)
 //{
 //	u64 key = CoordinateToKey(worldX, worldY);

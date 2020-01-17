@@ -32,6 +32,7 @@ struct Vector2
 	Vector2() : x(0), y(0) {};
 	Vector2(double x, double y) : x(x), y(y) {};
 	Vector2(const Vector2f& rhs);
+	Vector2(const Vector3& rhs);
 
 	// utils functions
 	void        set(double x, double y);
@@ -47,6 +48,7 @@ struct Vector2
 	Vector2     operator-() const;                      // unary operator (negate)
 	Vector2     operator+(const Vector2& rhs) const;    // add rhs
 	Vector2     operator-(const Vector2& rhs) const;    // subtract rhs
+	Vector2&    operator=(const Vector3& rhs);
 	Vector2&    operator+=(const Vector2& rhs);         // add rhs and update this object
 	Vector2&    operator-=(const Vector2& rhs);         // subtract rhs and update this object
 	Vector2     operator*(const double scale) const;     // scale
@@ -80,6 +82,7 @@ struct Vector3
 	Vector3() : x(0), y(0), z(0) {};
 	Vector3(double x, double y, double z) : x(x), y(y), z(z) {};
 	Vector3(const Vector3f& rhs);
+	Vector3(const Vector2& rhs);
 
 	// utils functions
 	void        set(double x, double y, double z);
@@ -94,6 +97,7 @@ struct Vector3
 	Vector3     operator-() const;                      // unary operator (negate)
 	Vector3     operator+(const Vector3& rhs) const;    // add rhs
 	Vector3     operator-(const Vector3& rhs) const;    // subtract rhs
+	Vector3&    operator=(const Vector2& rhs);
 	Vector3&    operator+=(const Vector3& rhs);         // add rhs and update this object
 	Vector3&    operator-=(const Vector3& rhs);         // subtract rhs and update this object
 	Vector3     operator*(const double scale) const;     // scale
@@ -429,6 +433,7 @@ struct Vector4n
 // inline functions for Vector2
 ///////////////////////////////////////////////////////////////////////////////
 inline Vector2::Vector2(const Vector2f& rhs) : x(rhs.x), y(rhs.y) {}
+inline Vector2::Vector2(const Vector3& rhs) : x(rhs.x), y(rhs.y) {}
 
 inline Vector2 Vector2::operator-() const {
 	return Vector2(-x, -y);
@@ -440,6 +445,10 @@ inline Vector2 Vector2::operator+(const Vector2& rhs) const {
 
 inline Vector2 Vector2::operator-(const Vector2& rhs) const {
 	return Vector2(x - rhs.x, y - rhs.y);
+}
+
+inline Vector2& Vector2::operator=(const Vector3& rhs) {
+	x = rhs.x; y = rhs.y; return *this;
 }
 
 inline Vector2& Vector2::operator+=(const Vector2& rhs) {
@@ -557,6 +566,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vector2& vec) {
 // inline functions for Vector3
 ///////////////////////////////////////////////////////////////////////////////
 inline Vector3::Vector3(const Vector3f& rhs) : x(rhs.x), y(rhs.y), z(rhs.z) {};
+inline Vector3::Vector3(const Vector2& rhs) : x(rhs.x), y(rhs.y), z(0) {};
 
 inline Vector3 Vector3::operator-() const {
 	return Vector3(-x, -y, -z);
@@ -568,6 +578,10 @@ inline Vector3 Vector3::operator+(const Vector3& rhs) const {
 
 inline Vector3 Vector3::operator-(const Vector3& rhs) const {
 	return Vector3(x - rhs.x, y - rhs.y, z - rhs.z);
+}
+
+inline Vector3& Vector3::operator=(const Vector2& rhs) {
+	x = rhs.x; y = rhs.y; return *this;
 }
 
 inline Vector3& Vector3::operator+=(const Vector3& rhs) {

@@ -107,6 +107,28 @@ public:
 	static string MatToCSV(Matrix4f* mat);
 	static bool CsvToMat(string line, vector<Matrix4>& mat);
 	static int Random();
+	template<typename Ty>
+	static int BinarySearchEdge(Ty* data, int count, function<bool(Ty&)> comp)
+	{
+		// ex) [false, false, false, true, true, true, true] 다음과 같은 배열에서 false -> true로의 변경위치 반환(예시의 경우 2 반환)
+		int s = 0;
+		int e = count - 1;
+
+		if (comp(data[s]))
+			return -1;
+		else if (!comp(data[e]))
+			return e;
+
+		int m;
+		while (s+1 < e) {
+			m = (s + e) / 2;
+			if (comp(data[m]))
+				e = m; 
+			else
+				s = m;
+		}
+		return s;
+	}
 };
 
 #endif
