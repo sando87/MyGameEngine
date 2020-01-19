@@ -41,7 +41,7 @@ private:
 	}
 
 public:
-	Vector3 CalcGroundPos(Vector3 pos, Vector3 dir);
+	bool RayCastTerrain(Vector3 pos, Vector3 dir, Vector2& outPoint);
 	bool Reachable(Vector2 start, Vector2 end, Vector2& lastPoint, double step);
 	bool GetHeight(float worldX, float worldY, float& height);
 	Vector3 GetTerrainCenter() { return mTerrainCenter; }

@@ -138,6 +138,7 @@
     <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGrid.cpp" />
+    <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jObjectMeta.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGrid.h" />
+    <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jObjectMeta.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEnemy.h" />

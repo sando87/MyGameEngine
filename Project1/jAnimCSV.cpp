@@ -28,7 +28,7 @@ bool jAnimCSV::Load(string _filename)
 		mAnims[clipName] = AnimCSVInfo();
 		AnimCSVInfo& clip = mAnims[clipName];
 		clip.name = clipName;
-		clip.frameRate = 1 / 60.0f;
+		clip.frameRate = 1 / 30.0f;
 
 		idx++;
 		while (idx < num)

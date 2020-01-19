@@ -112,7 +112,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 			break;
 
 		for(jGameObject* terrain : block.terrains)
-			terrain->DeleteFromMgr();
+			terrain->SetRemove(true);
 
 		mCachedBlocks.erase(key);
 	}
@@ -163,22 +163,36 @@ bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 	bool ret = block.zMap->GetHeight(worldX, worldY, height);
 	return ret;
 }
-Vector3 ObjTerrainMgr::CalcGroundPos(Vector3 pos, Vector3 dir)
+bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector2& outPoint)
 {
 	dir.normalize();
 	Vector3 currentPos = pos;
+	bool validPos = false; 
 	while (currentPos.z > 0)
 	{
 		currentPos += (dir * TERRAIN_STEP);
 
 		float height = 0;
 		if (!GetHeight(currentPos.x, currentPos.y, height))
+		{
+			if (validPos)
+			{
+				//클릭지점의 terrain값이 비정상적일 경우 마지막 유효했던 지점 출력(예외 루틴)
+				outPoint = currentPos - (dir * TERRAIN_STEP);
+				validPos = false;
+			}
 			continue;
+		}
 
+		validPos = true;
 		if (currentPos.z < height)
-			return currentPos;
+		{
+			//클릭지점의 terrain값이 정상적일 경우 유효한 지점 출력(정상적인 루틴)
+			outPoint = currentPos;
+			return true;
+		}
 	}
-	return Vector3();
+	return false;
 }
 
 bool ObjTerrainMgr::Reachable(Vector2 start, Vector2 end, Vector2 & lastPoint, double step)

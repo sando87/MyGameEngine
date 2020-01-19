@@ -12,6 +12,7 @@ jShader::jShader()
 	mVisiable = true;
 	mDepthOn = true;
 	mPrimitiveTriList = true;
+	mRenderOrder = 0;
 
 	mDev = jRenderer::GetInst().GetDevice();
 	mDevContext = jRenderer::GetInst().GetDeviceContext();

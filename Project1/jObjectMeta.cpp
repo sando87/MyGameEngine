@@ -32,8 +32,9 @@ bool jObjectMeta::Load(string name)
 	worldPos = position;
 
 	animName = lines[5];
+	renderingOrder = jUtils::ToDouble(lines[6]);
 
-	for (int i = 6; i < lines->size(); ++i)
+	for (int i = 7; i < lines->size(); ++i)
 	{
 		strings columns = jUtils::Split2(lines[i], " ");
 		if (columns->size() >= 3)

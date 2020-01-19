@@ -57,6 +57,7 @@ protected:
 	Property_GetSetter(bool, Visiable)
 	Property_GetSetter(bool, AlphaOn)
 	Property_GetSetter(bool, DepthOn)
+	Property_GetSetter(float, RenderOrder)
 	Property_GetSetter(bool, PrimitiveTriList)
 };
 

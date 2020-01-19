@@ -17,6 +17,7 @@
 ObjPlayer::ObjPlayer()
 {
 	mAstar = new jAStar();
+	mTarget = nullptr;
 }
 
 
@@ -42,29 +43,26 @@ void ObjPlayer::OnStart()
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
 
-		jGameObject* target = jGameObjectMgr::GetInst().RayCast(GetCamera().GetPosture().getPos(), view);
-		Vector3 pt = GetTerrain().CalcGroundPos(GetCamera().GetPosture().getPos(), view);
-		//jLine3D line3d(GetCamera().GetPosture().getPos(), view);
-		//Vector2 pt = line3d.GetXY(0);
-		//WalkTo(Vector2(pt.x, pt.y), target);
+		mTarget = jGameObjectMgr::GetInst().RayCast(GetCamera().GetPosture().getPos(), view);
+
+		Vector2 pt;
+		bool isVaild = GetTerrain().RayCastTerrain(GetCamera().GetPosture().getPos(), view, pt);
+		if (isVaild == false)
+		{
+			jLine3D line3d(GetCamera().GetPosture().getPos(), view);
+			Vector3 tmpPT = line3d.GetXY(GetTransport().getPos().z);
+			Vector3 moveStart = GetTransport().getPos();
+			moveStart.z = GetCamera().GetPosture().getPos().z;
+			GetTerrain().RayCastTerrain(moveStart, tmpPT - moveStart, pt);
+		}
 		StartNavigate(Vector2(pt.x, pt.y));
 	};
 
-	AddComponent((new jCrash())->Init(1, 2, [this](jCrashs objs) {
-		if (!objs) return;
-		StopCoRoutine("MovePlayer");
-		mAnim->SetAnimation("attack", "idle");
-	}));
-
-	//CrashCapsule shape;
-	//shape.round = 3;
-	//shape.height = 10;
-	//jCrash* crash = new jCrash();
-	//crash->Init(shape, [](jCrashs objs) {
-	//	jRect rect = objs[0]->GetRect();
-	//	_printlog("ObjPlayer %f\n", rect.Center().x);
-	//});
-	//AddComponent(crash);
+	//AddComponent((new jCrash())->Init(1, 2, [this](jCrashs objs) {
+	//	if (!objs) 
+	//		return;
+	//	mAnim->SetAnimation("attack", "idle");
+	//}));
 }
 void ObjPlayer::OnUpdate()
 {
@@ -73,21 +71,15 @@ void ObjPlayer::OnUpdate()
 	for (int i = 0; i < 45; ++i)
 		param.bones[i] = mats[i];
 
-	UpdatePlayerPosition();
+	FollowWayPoints();
+	GoToTarget();
 
-	Vector3 pos = GetTransport().getPos();
-	float height = 0;
-	bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
-	if (ret)
-	{
-		pos.z = height;
-		GetTransport().moveTo(pos);
-	}
+	StandOnTerrain();
 }
 
 Vector2 ObjPlayer::MoveTo(Vector2 pos)
 {
-	float speed = 10; //1초(60프레임)당 움직이는 속도
+	float speed = 20; //1초(60프레임)당 움직이는 속도
 	float speedRot = 30; //프레임당 회전하는 속도
 	float delta = jTime::Delta();
 	Vector3 target = Vector3(pos.x, pos.y, GetTransport().getPos().z);
@@ -97,27 +89,6 @@ Vector2 ObjPlayer::MoveTo(Vector2 pos)
 	Vector3 nextPos = GetTransport().getPos() + (nextDir * speed * delta);
 	GetTransport().moveTo(nextPos);
 	return nextPos;
-}
-
-void ObjPlayer::WalkTo(Vector2 pos, jGameObject * obj)
-{
-	mAnim->SetAnimation("walk");
-	StartCoRoutine("MovePlayer", [this, obj, pos](CorMember& userData, bool first) {
-		float speed = 10; //1초(60프레임)당 움직이는 속도
-		float speedRot = 30; //프레임당 회전하는 속도
-		float delta = jTime::Delta();
-		Vector3 target = (obj != nullptr) ? obj->GetTransport().getPos() : Vector3(pos.x, pos.y, 0);
-		target.z = GetTransport().getPos().z;
-		GetTransport().rotateToPos_OnGround(target, speedRot);
-		GetTransport().goForward(speed * delta);
-		if (GetTransport().getPos().distance(target) < 1)
-		{
-			mAnim->SetAnimation("idle");
-			return CorCmd::Stop;
-		}
-
-		return CorCmd::Keep;
-	});
 }
 
 void ObjPlayer::StartNavigate(Vector2 pos)
@@ -138,44 +109,32 @@ void ObjPlayer::StartNavigate(Vector2 pos)
 	},
 	[this, pos](CorMember& userData, bool first) {
 		// Routing 완료된 결과값들을 가지고 캐릭터를 움직임.
-		if (first)
-		{
-			mAstar->SearchRouteResult(GetTransport().getPos(), 3.0);
-			vector<Vector2>& rets = mAstar->GetResults();
-			if (rets.size() == 0) //Routing 실패시 아무것도 안함
-				return CorCmd::Stop; 
-
-			Vector3 curPos = GetTransport().getPos();
-			OptimizeRouteResults(rets, rets.size(), curPos, mWayPoints);
-			
-			userData.intVal = mAstar->GetResults().size() - 2;
-			StopCoRoutine("MovePlayer");
-			mAnim->SetAnimation("walk");
-		}
-
 		vector<Vector2>& rets = mAstar->GetResults();
-		if (userData.intVal < 0)
-		{
-			mAnim->SetAnimation("idle");
-			return CorCmd::Stop; //도착지 도달시 정상 종료
-		}
+		if (rets.size() == 0) //Routing 실패시 아무것도 안함
+			return CorCmd::Stop; 
 
-		Vector2 targetPos = rets[userData.intVal];
-		MoveTo(targetPos);
+		Vector3 curPos = GetTransport().getPos();
+		mWayPoints.clear();
+		OptimizeRouteResults(rets, rets.size(), curPos, mWayPoints);
+		
+		if(!mWayPoints.empty())
+			mAnim->SetAnimation("walk");
 
-		Vector2 myPos = GetTransport().getPos();
-		if (myPos.distance(targetPos) < 0.5)
-			userData.intVal--;
-
-		return CorCmd::Keep;
+		return CorCmd::Stop;
 	});
 
 }
 
-void ObjPlayer::UpdatePlayerPosition()
+void ObjPlayer::FollowWayPoints()
 {
 	if (mWayPoints.empty())
 		return;
+
+	if (mWayPoints.size() == 1 && mTarget != nullptr)
+	{
+		mWayPoints.clear();
+		return;
+	}
 
 	Vector2 targetPos = mWayPoints.front();
 	Vector2 nextPos = MoveTo(targetPos);
@@ -187,6 +146,44 @@ void ObjPlayer::UpdatePlayerPosition()
 	}
 }
 
+void ObjPlayer::GoToTarget()
+{
+	if (!mWayPoints.empty() || mTarget == nullptr)
+		return;
+	
+	if (mTarget->GetRemove())
+	{
+		mAnim->SetAnimation("idle");
+		mTarget = nullptr;
+		return;
+	}
+
+	string currentAnim = mAnim->GetCurrentAnim();
+	if (currentAnim == "walk")
+	{
+		Vector2 targetPos = mTarget->GetTransport().getPos();
+		Vector2 nextPos = MoveTo(targetPos);
+		if (nextPos.distance(targetPos) < 2)
+			mAnim->SetAnimation("attack", "idle");
+	}
+	else if (currentAnim == "idle")
+	{
+		Vector2 targetPos = mTarget->GetTransport().getPos();
+		Vector2 curMyPos = GetTransport().getPos();
+		if (curMyPos.distance(targetPos) < 2)
+			mAnim->SetAnimation("attack", "idle");
+		else
+		{
+			MoveTo(targetPos);
+			mAnim->SetAnimation("walk");
+		}
+	}
+	else if (currentAnim == "attack")
+	{
+		//Do Noting...
+	}
+}
+
 void ObjPlayer::OptimizeRouteResults(vector<Vector2>& inPoints, int count, Vector2 startPos, list<Vector2>& outPoints)
 {
 	if (count <= 0)
@@ -195,11 +192,12 @@ void ObjPlayer::OptimizeRouteResults(vector<Vector2>& inPoints, int count, Vecto
 	Vector2* startData = &inPoints[0];
 	int retIdx = jUtils::BinarySearchEdge<Vector2>(startData, count, [this, startPos](Vector2& pt) {
 		double step = 1;
-		return GetTerrain().Reachable(startPos, pt, Vector2(), step);
+		Vector2 pos;
+		return GetTerrain().Reachable(startPos, pt, pos, step);
 	});
 	_warnif((retIdx == count - 1))
 	int nextIdx = (retIdx == count - 1) ? retIdx : retIdx + 1;
 	Vector2 findPos = inPoints[nextIdx];
-	outPoints.push_front(findPos);
+	outPoints.push_back(findPos);
 	OptimizeRouteResults(inPoints, nextIdx, findPos, outPoints);
 }

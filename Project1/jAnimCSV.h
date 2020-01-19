@@ -29,7 +29,12 @@ public:
 	mat4s Animate(float _deltaTime);
 	void SetAnimation(string name);
 	void SetAnimation(string ToName, string BackName);
-	string GetAnimation() {	return mCurrentAnim->name; }
+	string GetCurrentAnim() { return mCurrentAnim->name; }
+	AnimCSVInfo* GetAnimationInfo(string name) { 
+		if (mAnims.find(name) == mAnims.end())
+			return nullptr;
+		return &mAnims[name];
+	}
 
 private:
 	float mCurrentTime;

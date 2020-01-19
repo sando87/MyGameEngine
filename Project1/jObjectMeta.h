@@ -15,6 +15,7 @@ public:
 	bool depth;
 	Vector3 worldPos;
 	string animName;
+	float renderingOrder;
 	vector<Vector4f> texels;
 	vector<string> imgFileNames;
 	bool Load(string name);

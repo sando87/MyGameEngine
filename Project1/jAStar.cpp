@@ -16,6 +16,9 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 	if (mRunning)
 		return false;
 
+	if (!Moveable(endWorldPos))
+		return false;
+
 	Reset();
 
 	mStep = step;
@@ -35,6 +38,7 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 		else if (curIdx == endKey)
 			break;
 	}
+	SearchRouteResult();
 	mRunning = false;
 	return true;
 }
@@ -85,12 +89,12 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 
 	if (mIndexTable.find(idx) == mIndexTable.end())
 	{
-		RouteInfo info = { 0, };
+		RouteInfo info;
 		Vector2 curPos = ToWorld(idx);
 		info.weight = curPos.distance(mEndPos);
 		info.key = idx;
 		info.state = StatePoint::NEW;
-		info.fromKey = -1;
+		info.fromKey = (u64)-1;
 		mIndexTable[idx] = info;
 	}
 
@@ -98,30 +102,30 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 	return &info;
 }
 
-void jAStar::SearchRouteResult(Vector2 startPos, double detectRange)
+void jAStar::SearchRouteResult()
 {
 	mRouteResults.clear();
 	mRouteResults.push_back(mEndPos);
 	u64 nextKey = ToIndex(mEndPos);
+	u64 startIdx = ToIndex(mStartPos);
 	while (true)
 	{
 		nextKey = mIndexTable[nextKey].fromKey;
-		if (nextKey == (u64)-1)
-			break;
-
-		Vector2 curPos = ToWorld(nextKey);
-		if (curPos.distance(startPos) <= detectRange)
+		if (nextKey == (u64)-1 || nextKey == startIdx)
 			break;
 
 		mRouteResults.push_back(ToWorld(nextKey));
 	}
-	mRouteResults.push_back(startPos);
+	mRouteResults.push_back(mStartPos);
 }
 
 void jAStar::Reset()
 {
 	mIndexTable.clear();
 	mWeights.clear();
+	mRouteResults.clear();
+	mStartPos = Vector2();
+	mEndPos = Vector2();
 	mRunning = false;
 	mStep = 0;
 }

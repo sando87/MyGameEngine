@@ -1328,7 +1328,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 		jUtils::MakeFolder(folderPath);
 	}
 	
-
+	float renderOrder = GetRenderOrder();
 	string ret = objname + "\n";
 	ret += type + "\n";
 	ret += alpha ? "TRUE\n" : "FALSE\n";
@@ -1337,6 +1337,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 	ret += to_string(metaInfo.worldPosition.y) + " ";
 	ret += to_string(metaInfo.worldPosition.z) + "\n";
 	ret += animName + "\n";
+	ret += to_string(renderOrder) + "\n";
 	int cnt = metaInfo.vectors.size();
 	for (int i = 0; i < cnt; ++i)
 	{
@@ -1372,4 +1373,17 @@ bool ExpMesh::Merge(ExpMesh * _mesh)
 
 	*ppMesh = _mesh;
 	return true;
+}
+
+float ExpMesh::GetRenderOrder()
+{
+	//jGameObjectMgr.cpp line : 257 Âü°í
+	if (type == "terrain")
+		return 1.0f;
+	else if (type == "default")
+		return alpha ? 5.0f : 3.0f;
+	else if (type == "skin")
+		return 4.0f;
+
+	return 0.0f;
 }

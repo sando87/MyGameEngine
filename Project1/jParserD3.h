@@ -49,17 +49,19 @@ struct ExpMesh
 	vector<Vector3n> indicies;
 	vector<string> animationInfo;
 	ExpMesh *pNext;
+
+	ExpMesh()
+	{
+		name = "";
+		pNext = nullptr;
+	}
 	bool ExportAnimInfo(string path);
 	bool ExportMetaInfo(string path);
 	bool ExportImage(string path);
 	bool ExportMesh(string _path, bool _isRoot, int _baseIdx);
 	bool ExportMeshDump(string _path);
 	bool Merge(ExpMesh *_mesh);
-	ExpMesh()
-	{
-		name = "";
-		pNext = nullptr;
-	}
+	float GetRenderOrder();
 	void Reset()
 	{
 		name = "";

@@ -72,11 +72,15 @@ bool jGameObjectMgr::Initialize()
 	//(new ObjCreateHeightmap())->AddToMgr();
 
 	(new ObjPlayer())->AddToMgr();
-	//(new ObjEnemy())->AddToMgr();
+	(new ObjEnemy())->AddToMgr();
 
+
+
+
+	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 157; i < 0; ++i)
+	for(int i = 264; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -85,7 +89,6 @@ bool jGameObjectMgr::Initialize()
 		vecObjs.push_back(obj0);
 	}
 
-	//jParserD3::LoadResources(1);
 	for (int i = 250; i < 0; ++i)
 	{
 		jParserD3 parser; 
@@ -117,8 +120,6 @@ bool jGameObjectMgr::Initialize()
 		//215 - UI종류같음
 		//213,22 - 불타는장작,커튼
 	}
-
-
 
 	jInput::GetInst().mKeyboard += [this](const unsigned char* key) {
 		//char keys[256] = { 0, };
@@ -185,7 +186,7 @@ void jGameObjectMgr::RunObjects()
 	for (auto it = mObjects.begin(); it != mObjects.end(); )
 	{
 		jGameObject* obj = *it;
-		if (obj->mIsRemoved)
+		if (obj->GetRemove())
 		{
 			delete obj;
 			mObjects.erase(it++);
@@ -208,7 +209,7 @@ void jGameObjectMgr::RunObjects()
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		if (!(*it)->mIsRemoved)
+		if (!(*it)->GetRemove())
 			(*it)->OnUpdate();
 
 		jCrash* crash = (*it)->FindComponent<jCrash>();
@@ -231,27 +232,42 @@ void jGameObjectMgr::RunObjects()
 			crash->CallbackCrash();
 	}
 
-	jRenderer::GetInst().BeginScene();
+	vector<jShader*> shaders;
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = *it;
-		if (!obj->mIsRemoved)
-		{
-			jShader* shader = obj->FindComponent<jShader>();
-			if (shader != nullptr)
-			{
-				if (!shader->mLoaded)
-				{
-					shader->OnLoad();
-					shader->mLoaded = true;
-				}
+		if (obj->GetRemove())
+			continue;
 
-				if(shader->GetVisiable())
-					shader->OnRender();
-			}
+		jShader* shader = obj->FindComponent<jShader>();
+		if (shader == nullptr)
+			continue;
+
+		if (!shader->mLoaded)
+		{
+			shader->OnLoad();
+			shader->mLoaded = true;
 		}
+
+		if (shader->GetVisiable())
+			shaders.push_back(shader);
 	}
+
+	//Sorting Rendering Order
+	//layer1 : terrain
+	//layer2 : terrain 바닥(바닥문양, 그림자, 스킬효과 순서) => 알파o, 깊이비교x, 깊이쓰기x  =>일단 보류...구분할 방법 없음... => layer5로 이동
+	//layer3 : terrain 주변(높이가 있는 주변 지형) => 알파x, 깊이비교o, 깊이쓰기o
+	//layer4 : 유닛(움직이는 유닛) => 알파x, 깊이비교o, 깊이쓰기o
+	//layer5 : 높이가 있는 알파(지형, 지형 효과, 스킬효과 카메라로부터 먼순서로) => 알파o, 깊이비교o, 깊이쓰기x
+	sort(shaders.begin(), shaders.end(), [](jShader* rhs, jShader* lhs) {
+		return rhs->GetRenderOrder() < lhs->GetRenderOrder();
+	});
+
+	jRenderer::GetInst().BeginScene();
+	for (jShader* shader : shaders)
+		shader->OnRender();
 	jRenderer::GetInst().EndScene();
+	shaders.clear();
 }
 void jGameObjectMgr::AddCrashs()
 {
@@ -259,7 +275,7 @@ void jGameObjectMgr::AddCrashs()
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = *it;
-		if (obj->mIsRemoved)
+		if (obj->GetRemove())
 			continue;
 
 		jCrash* crash = obj->FindComponent<jCrash>();
@@ -317,28 +333,21 @@ void jGameObjectMgr::StopCoroutine(string name)
 jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 {
 	jLine3D line(pos, dir);
-	jLine3D line2D(Vector3(pos.x, pos.y, 0), Vector3(dir.x, dir.y, 0));
 	
 	jGameObject* ret = nullptr;
-	double minDist = 1000.0;
+	double minDist = 10000.0;
 	for (jGameObject* obj : mObjects)
 	{
 		jCrash* crash = obj->FindComponent<jCrash>();
 		if (crash == nullptr)
 			continue;
 
-		Vector3 objPos = obj->GetTransport().getPos();
-		Vector3 onPT = line2D.ClosePoint(Vector3(objPos.x, objPos.y, 0));
-		double distOfShape = onPT.distance(Vector3(objPos.x, objPos.y, 0));
+		Vector3 posOnTarget = line.GetXY(obj->GetTransport().getPos().z);
+		double distOfShape = posOnTarget.distance(obj->GetTransport().getPos());
 		if (distOfShape > crash->GetShape().round)
 			continue;
 
-		jRect3D rt = crash->GetRect();
-		Vector2 posYZ = line.GetYZ(onPT.x);
-		if (rt.Min().z > posYZ.y || posYZ.y > rt.Max().z)
-			continue;
-
-		double distFar = mCamera->GetTransport().getPos().distance(onPT);
+		double distFar = mCamera->GetTransport().getPos().distance(posOnTarget);
 		if (distFar < minDist)
 		{
 			minDist = distFar;

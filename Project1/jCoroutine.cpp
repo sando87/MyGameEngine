@@ -33,7 +33,7 @@ void jCoroutine::RunCoroutines()
 	for (auto iter = mCoroutines.begin(); iter != mCoroutines.end();)
 	{
 		CoroutineInfo& cInfo = iter->second;
-		if (cInfo.enabled == false)
+		if (cInfo.enabled == false && cInfo.pThread == nullptr)
 		{
 			mCoroutines.erase(iter++);
 			continue;
@@ -68,14 +68,20 @@ void jCoroutine::RunCoroutines()
 
 			if (cInfo.taskDone)
 			{
-				cInfo.pThread->join();
-				delete cInfo.pThread;
-				cInfo.pThread = nullptr;
+				if (cInfo.pThread != nullptr)
+				{
+					cInfo.pThread->join();
+					delete cInfo.pThread;
+					cInfo.pThread = nullptr;
+				}
 
-				cInfo.enabled = cInfo.coroutine(cInfo.userData, cInfo.firstCalled) == CorCmd::Keep ? true : false;
+				if (cInfo.enabled)
+				{
+					cInfo.enabled = cInfo.coroutine(cInfo.userData, cInfo.firstCalled) == CorCmd::Keep ? true : false;
+					cInfo.firstCalled = false;
+				}
 				cInfo.taskStarted = false;
 				cInfo.taskDone = false;
-				cInfo.firstCalled = false;
 			}
 		}
 		++iter;

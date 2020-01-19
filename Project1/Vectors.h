@@ -14,10 +14,6 @@ struct Vector2f;
 struct Vector3f;
 struct Vector4f;
 
-typedef struct Vector2 Position2;
-typedef struct Vector3 Position3;
-typedef struct Vector4 Position4;
-
 typedef struct Vector4f Color;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -30,23 +30,23 @@ void ObjEnemy::OnStart()
 	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
 
 	mAnim->SetAnimation("idle");
-	StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
-		int cmd = jUtils::Random() % 4;
-		if (cmd == 1)
-		{
-			Vector3 pos = GetTransport().getPos();
-			pos.x += jUtils::Random() % 50 - 25;
-			pos.y += jUtils::Random() % 50 - 25;
-			WalkTo(pos, 10);
-		}
-		else if (cmd == 2)
-		{
-			mAnim->SetAnimation("attack", "idle");
-			StopCoRoutine("CoroutineWalk");
-		}
-
-		return CorCmd::Keep;
-	});
+	//StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
+	//	int cmd = jUtils::Random() % 4;
+	//	if (cmd == 1)
+	//	{
+	//		Vector3 pos = GetTransport().getPos();
+	//		pos.x += jUtils::Random() % 50 - 25;
+	//		pos.y += jUtils::Random() % 50 - 25;
+	//		WalkTo(pos, 10);
+	//	}
+	//	else if (cmd == 2)
+	//	{
+	//		mAnim->SetAnimation("attack", "idle");
+	//		StopCoRoutine("CoroutineWalk");
+	//	}
+	//
+	//	return CorCmd::Keep;
+	//});
 }
 
 void ObjEnemy::OnUpdate()
@@ -55,6 +55,8 @@ void ObjEnemy::OnUpdate()
 	ShaderParamsSkin& param = mShader->GetParams();
 	for (int i = 0; i < 45; ++i)
 		param.bones[i] = mats[i];
+
+	StandOnTerrain();
 }
 
 

@@ -30,9 +30,6 @@
     <Filter Include="소스 파일\CommonHeader">
       <UniqueIdentifier>{58369511-71be-45c1-be21-50bcc008e637}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{41a14542-496d-4624-99a2-16e9f2dae146}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -103,9 +100,6 @@
     </ClCompile>
     <ClCompile Include="jMesh.cpp">
       <Filter>소스 파일\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="jGameObjectMgr.cpp">
-      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="jInput.cpp">
       <Filter>소스 파일\System</Filter>
@@ -188,6 +182,12 @@
     <ClCompile Include="jObjectMeta.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="jGameObjectMgr.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jHealthPoint.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -234,9 +234,6 @@
     </ClInclude>
     <ClInclude Include="jGameObject.h">
       <Filter>소스 파일\GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="jGameObjectMgr.h">
-      <Filter>소스 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="jInput.h">
       <Filter>소스 파일\System</Filter>
@@ -351,6 +348,12 @@
     </ClInclude>
     <ClInclude Include="jObjectMeta.h">
       <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jGameObjectMgr.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jHealthPoint.h">
+      <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

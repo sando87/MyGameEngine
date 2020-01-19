@@ -28,7 +28,7 @@ void ObjCamera::OnStart()
 		if (info.middle & 0x80 && info.x != 0)
 		{
 			jLine3D line(mPos.getPos(), mPos.getView());
-			Position2 pos = line.GetXY(0);
+			Vector3 pos = line.GetXY(0);
 			mPos.rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), info.x);
 		}
 
@@ -146,10 +146,10 @@ Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 }
 Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 {
-	Position4 pt(0.5, 0, 0.999998, 1);
-	Position4 camPt = pt * getProjMat().invert();
-	Position4 projPt = camPt * getPosMat_D3D().invert();
-	Position3 worldPt(projPt.x / projPt.w, projPt.y / projPt.w, projPt.z / projPt.w);
+	Vector4 pt(0.5, 0, 0.999998, 1);
+	Vector4 camPt = pt * getProjMat().invert();
+	Vector4 projPt = camPt * getPosMat_D3D().invert();
+	Vector3 worldPt(projPt.x / projPt.w, projPt.y / projPt.w, projPt.z / projPt.w);
 	Vector3 view = worldPt - mPos.getPos();
 
 	return view.normalize();

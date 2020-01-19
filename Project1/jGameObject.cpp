@@ -16,7 +16,7 @@
 
 jGameObject::jGameObject()
 {
-	mIsRemoved = false;
+	mRemove = false;
 	mIsStarted = false;
 	mTransport = new jMatrixControl();
 	mTransport->init();
@@ -60,6 +60,7 @@ void jGameObject::StartCoRoutine(string name, std::function<CorCmd(CorMember&, b
 	info.name = name;
 	info.firstCalled = true;
 	info.coroutine = coroutine;
+	info.pThread = nullptr;
 	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
 void jGameObject::StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine)
@@ -72,6 +73,7 @@ void jGameObject::StartCoRoutine(string name, float time_ms, std::function<CorCm
 	info.time_back_ms = time_ms;
 	info.firstCalled = true;
 	info.coroutine = coroutine;
+	info.pThread = nullptr;
 	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
 
@@ -87,6 +89,7 @@ void jGameObject::StartCoRoutine(string name, std::function<void(void)> task, st
 	info.taskDone = false;
 	info.firstCalled = true;
 	info.coroutine = coroutine;
+	info.pThread = nullptr;
 	jGameObjectMgr::GetInst().StartCoroutine(info);
 }
 bool jGameObject::LoadTxt(string objName)
@@ -105,6 +108,7 @@ bool jGameObject::LoadTxt(string objName)
 		jShaderTerrain* shader = new jShaderTerrain();
 		shader->SetAlphaOn(metaInfo.alpha);
 		shader->SetDepthOn(metaInfo.depth);
+		shader->SetRenderOrder(metaInfo.renderingOrder);
 		ShaderParamsTerrain& param = shader->GetParams();
 		memcpy(param.vectors, &metaInfo.texels[0], sizeof(Vector4f) * metaInfo.texels.size());
 		AddComponent(shader);
@@ -114,16 +118,33 @@ bool jGameObject::LoadTxt(string objName)
 		jShaderDefault* shader = new jShaderDefault();
 		shader->SetAlphaOn(metaInfo.alpha); //ObjCreateHeightMap 积己矫 false
 		shader->SetDepthOn(metaInfo.depth); //ObjCreateHeightMap 积己矫 true
+		shader->SetRenderOrder(metaInfo.renderingOrder);
 		ShaderParamsDefault& param = shader->GetParams();
 		param.material.diffuse = Vector4f(1, 1, 1, 1);
 		param.light.direction = Vector4f(-1, -1, -1, 0);
 		AddComponent(shader);
 	}
 	else if (metaInfo.type_shader == "skin")
-		AddComponent(new jShaderSkin());
+	{
+		jShaderSkin* shader = new jShaderSkin();
+		shader->SetRenderOrder(metaInfo.renderingOrder);
+		AddComponent(shader);
+	}
+		
 
 	GetTransport().moveTo(metaInfo.worldPos);
 	return true;
+}
+void jGameObject::StandOnTerrain()
+{
+	Vector3 pos = GetTransport().getPos();
+	float height = 0;
+	bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
+	if (ret)
+	{
+		pos.z = height;
+		GetTransport().moveTo(pos);
+	}
 }
 void jGameObject::AddComponent(jComponent* comp)
 {

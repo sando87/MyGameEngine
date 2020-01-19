@@ -26,9 +26,9 @@ public:
 	void StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine);
 	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine);
 	void StopCoRoutine(string name);
-	void DeleteFromMgr() { mIsRemoved = true; }
 	jMatrixControl& GetTransport();
 	bool LoadTxt(string objName);
+	void StandOnTerrain();
 
 	void AddComponent(jComponent* comp);
 	void RemoveComponent(jComponent* comp);
@@ -58,10 +58,12 @@ protected:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
-	bool mIsRemoved;
 	bool mIsStarted;
 	list<jComponent*> mComponents;
 	jMatrixControl* mTransport;
+
+
+	Property_GetSetter(bool, Remove)
 
 };
 

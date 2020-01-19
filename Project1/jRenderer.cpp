@@ -367,9 +367,10 @@ bool jRenderer::InitRenderStates()
 	D3D11_DEPTH_STENCIL_DESC dssDesc;
 	memset(&dssDesc, 0x00, sizeof(dssDesc));
 	// Set up the description of the stencil state.
-	dssDesc.DepthEnable = false;
-	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthEnable = true;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	dssDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
 	dssDesc.StencilEnable = false;
 	dssDesc.StencilReadMask = 0xFF;
 	dssDesc.StencilWriteMask = 0xFF;
@@ -388,6 +389,8 @@ bool jRenderer::InitRenderStates()
 		return false;
 
 	dssDesc.DepthEnable = true;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	if (FAILED(m_device->CreateDepthStencilState(&dssDesc, &mDSS_DepthOn)))
 		return false;
 

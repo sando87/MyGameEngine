@@ -11,6 +11,12 @@ struct RouteInfo
 	StatePoint state;
 	u64 key;
 	u64 fromKey;
+	RouteInfo() {
+		state = StatePoint::NEW;
+		fromKey = (u64)-1;
+		key = (u64)-1;
+		weight = 0;
+	}
 };
 
 class jAStar
@@ -32,12 +38,13 @@ public:
 	void StopRouting() { mRunning = false; }
 	bool Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, double step);
 	vector<Vector2>& GetResults() { return mRouteResults; }
-	void SearchRouteResult(Vector2 startPos, double detectRange);
+	
 
 private:
 	bool UpdateWeights(u64 idx);
 	u64 FindNextKey();
 	RouteInfo* GetRouteInfo(u64 idx);
+	void SearchRouteResult();
 	//u64 TrackBack(u64 targetIdx, u64 curIdx);
 	void Reset();
 	Vector2 ToWorld(u64 idx) { return Vector2(ToU32x(idx) * mStep, ToU32y(idx) * mStep); }
