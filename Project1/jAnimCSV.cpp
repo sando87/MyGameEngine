@@ -50,7 +50,7 @@ bool jAnimCSV::Load(string _filename)
 mat4s jAnimCSV::Animate(float _deltaTime)
 {
 	mCurrentTime += _deltaTime;
-	mat4s mats = mCurrentAnim->GetMat(mCurrentTime);
+	mat4s mats = mCurrentAnim->Animate(mCurrentTime);
 	if (mCurrentTime > mCurrentAnim->endTime && mReturnAnim != nullptr)
 		SetAnimation(mReturnAnim->name);
 
@@ -62,6 +62,12 @@ void jAnimCSV::SetAnimation(string name)
 	mCurrentTime = 0;
 	mCurrentAnim = &mAnims[name];
 	mReturnAnim = nullptr;
+}
+
+void jAnimCSV::AddEvent(string name, float rate, function<void(void)> event)
+{
+	_warnif(mAnims.find(name) == mAnims.end());
+	mAnims[name].AddEvent(rate, event);
 }
 
 void jAnimCSV::SetAnimation(string ToName, string BackName)

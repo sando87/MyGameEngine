@@ -188,6 +188,9 @@
     <ClCompile Include="jHealthPoint.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="jStateMachine.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -355,6 +358,7 @@
     <ClInclude Include="jHealthPoint.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="jStateMachine.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project1.rc">

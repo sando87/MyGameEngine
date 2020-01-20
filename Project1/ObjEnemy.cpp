@@ -8,6 +8,8 @@
 #include "jInput.h"
 #include "jTime.h"
 #include "jCrash.h"
+#include "jHealthPoint.h"
+
 
 ObjEnemy::ObjEnemy()
 {
@@ -22,7 +24,14 @@ void ObjEnemy::OnStart()
 {
 	LoadTxt("MyObject_232.txt");
 	mAnim = FindComponent<jAnimCSV>();
+	mAnim->AddEvent("attack", 0.6f, []() {_trace(); });
 	mShader = FindComponent<jShaderSkin>();
+
+	mHP = new jHealthPoint();
+	AddComponent(mHP);
+
+	mStateMach = new StateMachEnemy();
+	AddComponent(mStateMach);
 
 	ShaderParamsSkin& param = mShader->GetParams();
 	param.material.diffuse = Vector4f(1, 1, 1, 1);
@@ -30,23 +39,23 @@ void ObjEnemy::OnStart()
 	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
 
 	mAnim->SetAnimation("idle");
-	//StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
-	//	int cmd = jUtils::Random() % 4;
-	//	if (cmd == 1)
-	//	{
-	//		Vector3 pos = GetTransport().getPos();
-	//		pos.x += jUtils::Random() % 50 - 25;
-	//		pos.y += jUtils::Random() % 50 - 25;
-	//		WalkTo(pos, 10);
-	//	}
-	//	else if (cmd == 2)
-	//	{
-	//		mAnim->SetAnimation("attack", "idle");
-	//		StopCoRoutine("CoroutineWalk");
-	//	}
-	//
-	//	return CorCmd::Keep;
-	//});
+	StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
+		int cmd = jUtils::Random() % 4;
+		if (cmd == 1)
+		{
+			//Vector3 pos = GetTransport().getPos();
+			//pos.x += jUtils::Random() % 50 - 25;
+			//pos.y += jUtils::Random() % 50 - 25;
+			//WalkTo(pos, 10);
+		}
+		else if (cmd == 2)
+		{
+			mAnim->SetAnimation("attack", "idle");
+			StopCoRoutine("CoroutineWalk");
+		}
+	
+		return CorCmd::Keep;
+	});
 }
 
 void ObjEnemy::OnUpdate()
@@ -57,6 +66,8 @@ void ObjEnemy::OnUpdate()
 		param.bones[i] = mats[i];
 
 	StandOnTerrain();
+
+	mStateMach->OnUpdate();
 }
 
 
@@ -78,4 +89,20 @@ bool ObjEnemy::WalkTo(Vector3 target, float speed)
 	});
 
 	return true;
+}
+
+void ObjEnemy::StateMachEnemy::OnPatrol()
+{
+}
+
+void ObjEnemy::StateMachEnemy::OnChase()
+{
+}
+
+void ObjEnemy::StateMachEnemy::OnAttack()
+{
+}
+
+void ObjEnemy::StateMachEnemy::OnDying()
+{
 }

@@ -8,14 +8,31 @@ struct AnimCSVInfo
 	string name;
 	float frameRate;
 	float endTime;
+	float prevPosRate;
 	vector<mat4s> keyMats;
-	mat4s GetMat(float _time)
+	vector<pair<float, function<void(void)>>> events;
+	mat4s Animate(float _time)
 	{
 		float a = _time / endTime;
 		float b = a - (int)a;
 		float c = b * endTime;
 		int n = (int)(c / frameRate);
+		ProcEvent(b);
 		return keyMats[n];
+	}
+	void AddEvent(float rate, function<void(void)> event)
+	{
+		events.push_back(make_pair(rate, event));
+	}
+	void ProcEvent(float currentRate)
+	{
+		for (auto item : events)
+		{
+			float eventRate = item.first;
+			if (prevPosRate < eventRate && eventRate < currentRate)
+				item.second();
+		}
+		prevPosRate = currentRate;
 	}
 };
 
@@ -28,6 +45,7 @@ public:
 	bool Load(string _filename);
 	mat4s Animate(float _deltaTime);
 	void SetAnimation(string name);
+	void AddEvent(string name, float rate, function<void(void)> event);
 	void SetAnimation(string ToName, string BackName);
 	string GetCurrentAnim() { return mCurrentAnim->name; }
 	AnimCSVInfo* GetAnimationInfo(string name) { 

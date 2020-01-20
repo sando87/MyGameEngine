@@ -140,6 +140,7 @@
     <ClCompile Include="jGrid.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jObjectMeta.cpp" />
+    <ClCompile Include="jStateMachine.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
     <ClCompile Include="jParserSub.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="jGrid.h" />
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jObjectMeta.h" />
+    <ClInclude Include="jStateMachine.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
