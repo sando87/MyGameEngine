@@ -64,6 +64,7 @@ protected:
 
 
 	Property_GetSetter(bool, Remove)
+	Property_GetSetter(string, Name)
 
 };
 

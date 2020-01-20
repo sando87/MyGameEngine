@@ -25,7 +25,9 @@ void ObjEnemy::OnStart()
 	LoadTxt("MyObject_232.txt");
 	mAnim = FindComponent<jAnimCSV>();
 	mAnim->AddEvent("attack", 0.6f, []() {_trace(); });
+	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mShader = FindComponent<jShaderSkin>();
+	mPlayer = jGameObjectMgr::GetInst().FindGameObject("ObjPlayer");
 
 	mHP = new jHealthPoint();
 	AddComponent(mHP);
@@ -50,7 +52,7 @@ void ObjEnemy::OnStart()
 		}
 		else if (cmd == 2)
 		{
-			mAnim->SetAnimation("attack", "idle");
+			mAnim->SetAnimation("attack");
 			StopCoRoutine("CoroutineWalk");
 		}
 	

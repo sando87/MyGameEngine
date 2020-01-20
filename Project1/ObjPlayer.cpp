@@ -30,6 +30,7 @@ void ObjPlayer::OnStart()
 {
 	LoadTxt("MyObject_397.txt");
 	mAnim = FindComponent<jAnimCSV>();
+	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mShader = FindComponent<jShaderSkin>();
 
 	ShaderParamsSkin& param = mShader->GetParams();
@@ -79,16 +80,9 @@ void ObjPlayer::OnUpdate()
 
 Vector2 ObjPlayer::MoveTo(Vector2 pos)
 {
-	float speed = 20; //1초(60프레임)당 움직이는 속도
-	float speedRot = 30; //프레임당 회전하는 속도
-	float delta = jTime::Delta();
-	Vector3 target = Vector3(pos.x, pos.y, GetTransport().getPos().z);
-	GetTransport().rotateToPos_OnGround(target, speedRot);
-	Vector3 nextDir = target - GetTransport().getPos();
-	nextDir.normalize();
-	Vector3 nextPos = GetTransport().getPos() + (nextDir * speed * delta);
-	GetTransport().moveTo(nextPos);
-	return nextPos;
+	double moveSpeed = 20;
+	GetTransport().moveSmoothlyToward2D(pos, moveSpeed, jTime::Delta());
+	return GetTransport().getPos();
 }
 
 void ObjPlayer::StartNavigate(Vector2 pos)
@@ -164,14 +158,14 @@ void ObjPlayer::GoToTarget()
 		Vector2 targetPos = mTarget->GetTransport().getPos();
 		Vector2 nextPos = MoveTo(targetPos);
 		if (nextPos.distance(targetPos) < 2)
-			mAnim->SetAnimation("attack", "idle");
+			mAnim->SetAnimation("attack");
 	}
 	else if (currentAnim == "idle")
 	{
 		Vector2 targetPos = mTarget->GetTransport().getPos();
 		Vector2 curMyPos = GetTransport().getPos();
 		if (curMyPos.distance(targetPos) < 2)
-			mAnim->SetAnimation("attack", "idle");
+			mAnim->SetAnimation("attack");
 		else
 		{
 			MoveTo(targetPos);

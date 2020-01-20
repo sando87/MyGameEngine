@@ -75,24 +75,27 @@ jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, dou
 
 	return (*this);
 }
-jMatrixControl& jMatrixControl::rotateToPos_OnGround(Vector3 pos, double degree)
+jMatrixControl & jMatrixControl::moveSmoothlyToward2D(Vector2 pos, double moveSpeed, double dt)
 {
-	pos.z = mPos.z;
-	Vector3 targetView = pos - mPos;
+	double rotateAngleSpeed = DegToRad(20); // 10 degree per frame speed
+	Vector2 targetView = pos - mPos;
 	targetView.normalize();
-	Vector3 turnDir = mView.cross(targetView);
-	if (turnDir.length() < 0.0001f)
-		return (*this);
-
-	turnDir.normalize();
-	Matrix4 rotMat;
-	rotMat.rotate(degree, 0, 0, turnDir.z);
-	mView = rotMat * mView;
-	float after = mView.cross(targetView).z;
-	if (turnDir.z * after < 0)
-		mView = targetView;
+	Vector2 curView = mView;
+	curView.normalize();
+	bool sameLook = curView.dot(targetView) > 0 ? true : false;
+	double cross = curView.cross(targetView);
+	if (sameLook && abs(cross) < sin(rotateAngleSpeed)) // 목표 방향보다 더 회전했을 경우 예외처리
+		curView = targetView;
+	else
+		curView.rotate(cross > 0 ? rotateAngleSpeed : -rotateAngleSpeed);
+	
+	mView = Vector3(curView);
+	mUp = Vector3(0, 0, 1);
 	mCross = mView.cross(mUp);
 	mCross.normalize();
+	Vector2 curPos = mPos;
+	Vector2 nextPos = curPos + (targetView * moveSpeed * dt);
+	mPos = (pos - nextPos).dot(targetView) < 0 ? pos : nextPos; //목표 지점보다 더 이동했을 경우 예외처리
 	return (*this);
 }
 Matrix4 jMatrixControl::refreshMatrix()

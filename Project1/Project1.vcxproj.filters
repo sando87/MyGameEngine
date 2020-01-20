@@ -189,7 +189,7 @@
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="jStateMachine.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -358,7 +358,12 @@
     <ClInclude Include="jHealthPoint.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
-    <ClInclude Include="jStateMachine.h" />
+    <ClInclude Include="jTypeToString.h">
+      <Filter>소스 파일\CommonHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="jStateMachine.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project1.rc">

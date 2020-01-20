@@ -26,10 +26,11 @@ struct AnimCSVInfo
 	}
 	void ProcEvent(float currentRate)
 	{
+		float fixedRate = currentRate < prevPosRate ? currentRate + 1.0f : currentRate;
 		for (auto item : events)
 		{
 			float eventRate = item.first;
-			if (prevPosRate < eventRate && eventRate < currentRate)
+			if (prevPosRate < eventRate && eventRate < fixedRate)
 				item.second();
 		}
 		prevPosRate = currentRate;
@@ -46,7 +47,6 @@ public:
 	mat4s Animate(float _deltaTime);
 	void SetAnimation(string name);
 	void AddEvent(string name, float rate, function<void(void)> event);
-	void SetAnimation(string ToName, string BackName);
 	string GetCurrentAnim() { return mCurrentAnim->name; }
 	AnimCSVInfo* GetAnimationInfo(string name) { 
 		if (mAnims.find(name) == mAnims.end())
@@ -57,7 +57,6 @@ public:
 private:
 	float mCurrentTime;
 	AnimCSVInfo* mCurrentAnim;
-	AnimCSVInfo* mReturnAnim;
 	unordered_map<string, AnimCSVInfo> mAnims;
 };
 

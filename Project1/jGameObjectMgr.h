@@ -11,6 +11,7 @@ class ObjTerrainMgr;
 class jCrash;
 
 
+typedef shared_ptr_array<jGameObject*> jGameObjects;
 class jGameObjectMgr
 {
 public:
@@ -22,7 +23,7 @@ private:
 
 	ObjCamera* mCamera;
 	ObjTerrainMgr* mTerrainMgr;
-	list<jGameObject*> mObjects;
+	unordered_multimap<string, jGameObject*> mObjects;
 	jGrid<list<jCrash*>> mCrashGrid;
 	jCoroutine mCoroutine;
 
@@ -39,7 +40,9 @@ public:
 
 	jGameObject* RayCast(Vector3 pos, Vector3 dir);
 
-	void AddGameObject(jGameObject* _obj) { mObjects.push_back(_obj); }
+	void AddGameObject(jGameObject* _obj, string objectName);
+	jGameObject* FindGameObject(string objectName);
+	jGameObjects FindGameObjects(string objectName);
 	ObjCamera& GetCamera() { return *mCamera; }
 	ObjTerrainMgr& GetTerrain() { return *mTerrainMgr; }
 };

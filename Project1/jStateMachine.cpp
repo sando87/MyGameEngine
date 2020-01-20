@@ -4,6 +4,7 @@
 
 jStateMachine::jStateMachine()
 {
+	mState = StateType::PATROL;
 }
 
 

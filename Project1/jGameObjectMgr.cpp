@@ -185,7 +185,7 @@ void jGameObjectMgr::RunObjects()
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); )
 	{
-		jGameObject* obj = *it;
+		jGameObject* obj = it->second;
 		if (obj->GetRemove())
 		{
 			delete obj;
@@ -197,11 +197,12 @@ void jGameObjectMgr::RunObjects()
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		if ((*it)->mIsStarted)
+		jGameObject* obj = it->second;
+		if (obj->mIsStarted)
 			continue;
 
-		(*it)->OnStart();
-		(*it)->mIsStarted = true;
+		obj->OnStart();
+		obj->mIsStarted = true;
 	}
 
 
@@ -209,10 +210,11 @@ void jGameObjectMgr::RunObjects()
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		if (!(*it)->GetRemove())
-			(*it)->OnUpdate();
+		jGameObject* obj = it->second;
+		if (!obj->GetRemove())
+			obj->OnUpdate();
 
-		jCrash* crash = (*it)->FindComponent<jCrash>();
+		jCrash* crash = obj->FindComponent<jCrash>();
 		if (crash != nullptr)
 		{
 			jRect3D rect = crash->GetRect();
@@ -226,7 +228,7 @@ void jGameObjectMgr::RunObjects()
 	AddCrashs();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		jGameObject* obj = *it;
+		jGameObject* obj = it->second;
 		jCrash* crash = obj->FindComponent<jCrash>();
 		if (crash != nullptr)
 			crash->CallbackCrash();
@@ -235,7 +237,7 @@ void jGameObjectMgr::RunObjects()
 	vector<jShader*> shaders;
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		jGameObject* obj = *it;
+		jGameObject* obj = it->second;
 		if (obj->GetRemove())
 			continue;
 
@@ -274,7 +276,7 @@ void jGameObjectMgr::AddCrashs()
 	//우선 게임 오브젝트 별로 루프를 돌며
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		jGameObject* obj = *it;
+		jGameObject* obj = it->second;
 		if (obj->GetRemove())
 			continue;
 
@@ -313,7 +315,7 @@ void jGameObjectMgr::Release()
 {
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
-		jGameObject* obj = *it;
+		jGameObject* obj = it->second;
 		delete obj;
 		obj = nullptr;
 	}
@@ -336,8 +338,9 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 	
 	jGameObject* ret = nullptr;
 	double minDist = 10000.0;
-	for (jGameObject* obj : mObjects)
+	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
+		jGameObject* obj = it->second;
 		jCrash* crash = obj->FindComponent<jCrash>();
 		if (crash == nullptr)
 			continue;
@@ -354,5 +357,30 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 			ret = obj;
 		}
 	}
+	return ret;
+}
+
+void jGameObjectMgr::AddGameObject(jGameObject* _obj, string objectName)
+{
+	mObjects.insert(make_pair(objectName, _obj));
+}
+jGameObject* jGameObjectMgr::FindGameObject(string objectName)
+{
+	if (mObjects.find(objectName) == mObjects.end())
+		return nullptr;
+
+	return mObjects.find(objectName)->second;
+}
+
+jGameObjects jGameObjectMgr::FindGameObjects(string objectName)
+{
+	jGameObjects ret;
+	if (mObjects.find(objectName) == mObjects.end())
+		return ret;
+
+	auto boundary = mObjects.equal_range(objectName);
+	for (auto iter = boundary.first; iter != boundary.second; ++iter)
+		ret->push_back(iter->second);
+
 	return ret;
 }

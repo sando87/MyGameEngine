@@ -22,6 +22,7 @@ private:
 	jAnimCSV* mAnim;
 	jShaderSkin* mShader;
 	jHealthPoint* mHP;
+	jGameObject* mPlayer;
 
 	class StateMachEnemy : public jStateMachine {
 		virtual void OnPatrol();

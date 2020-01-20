@@ -12,6 +12,7 @@
 #include "jShaderTerrain.h"
 #include "jShaderDefault.h"
 #include "jObjectMeta.h"
+#include "jTypeToString.h"
 
 
 jGameObject::jGameObject()
@@ -31,7 +32,9 @@ jGameObject::~jGameObject()
 
 void jGameObject::AddToMgr()
 {
-	jGameObjectMgr::GetInst().AddGameObject(this);
+	if(mName.length() == 0)
+		mName = TypeToString(this);
+	jGameObjectMgr::GetInst().AddGameObject(this, mName);
 }
 
 jMatrixControl & jGameObject::GetTransport()

@@ -33,7 +33,7 @@ public :
 	jMatrixControl&		moveTo(Vector3 pos);
 	jMatrixControl&		goTo(Vector3 dir);
 	jMatrixControl&		rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree);
-	jMatrixControl&		rotateToPos_OnGround(Vector3 pos, double degree);
+	jMatrixControl&		moveSmoothlyToward2D(Vector2 pos, double moveSpeed, double dt);
 };
 
 #endif	// __EZ_CAMERA_H__

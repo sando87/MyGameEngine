@@ -197,6 +197,7 @@
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jObjectMeta.h" />
     <ClInclude Include="jStateMachine.h" />
+    <ClInclude Include="jTypeToString.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
