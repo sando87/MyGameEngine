@@ -325,9 +325,13 @@ bool jUtils::CsvToMat(string line, vector<Matrix4>& mats)
 
 int jUtils::Random()
 {
-	static int seed = 0;
-	seed++;
-	srand(seed);
+	static bool isFirstCall = true;
+	if (isFirstCall)
+	{
+		isFirstCall = false;
+		int seed = (int)jTime::Now();
+		srand(seed);
+	}
 	return rand();
 }
 

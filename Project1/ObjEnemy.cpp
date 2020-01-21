@@ -40,24 +40,7 @@ void ObjEnemy::OnStart()
 	param.light.direction = Vector4f(-1, -1, -1, 0);
 	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
 
-	mAnim->SetAnimation("idle");
-	StartCoRoutine("enemyTimer", 5000, [this](CorMember& userData, bool first) {  //start timer every 5sec
-		int cmd = jUtils::Random() % 4;
-		if (cmd == 1)
-		{
-			//Vector3 pos = GetTransport().getPos();
-			//pos.x += jUtils::Random() % 50 - 25;
-			//pos.y += jUtils::Random() % 50 - 25;
-			//WalkTo(pos, 10);
-		}
-		else if (cmd == 2)
-		{
-			mAnim->SetAnimation("attack");
-			StopCoRoutine("CoroutineWalk");
-		}
-	
-		return CorCmd::Keep;
-	});
+	mStateMach->InitState();
 }
 
 void ObjEnemy::OnUpdate()
@@ -72,39 +55,100 @@ void ObjEnemy::OnUpdate()
 	mStateMach->OnUpdate();
 }
 
-
-bool ObjEnemy::WalkTo(Vector3 target, float speed)
+bool ObjEnemy::DetectPlayerAround(double round)
 {
-	mAnim->SetAnimation("walk");
-
-	GetTransport().lookPos(target);
-	StartCoRoutine("CoroutineWalk", [target, speed, this](CorMember& userData, bool first) {
-		float dist = GetTransport().getPos().distance(target);
-		if (dist < 1)
-		{
-			mAnim->SetAnimation("idle");
-			return CorCmd::Stop;
-		}
-
-		GetTransport().goForward(jTime::Delta() * speed);
-		return CorCmd::Keep;
-	});
-
-	return true;
+	Vector3 pos = GetTransport().getPos();
+	Vector3 playerPos = mPlayer->GetTransport().getPos();
+	return playerPos.distance(pos) < round;
 }
 
 void ObjEnemy::StateMachEnemy::OnPatrol()
 {
+	ObjEnemy* me = (ObjEnemy*)mGameObject;
+	mAccTime += jTime::Delta();
+	if (me->DetectPlayerAround(15))
+	{
+		mAccTime = 0;
+		SetState(StateType::CHASE);
+		me->mAnim->SetAnimation("walk");
+		return;
+	}
+
+	//5초마다 랜덤위치로 이동
+	if (mAccTime > 5)
+	{
+		mAccTime = 0;
+		Vector2 basePos(1390, 820);
+		int offX = jUtils::Random() % 20 - 10;
+		int offY = jUtils::Random() % 20 - 10;
+		mPatrolPos = basePos + Vector2(offX, offY);
+		me->mAnim->SetAnimation("walk");
+	}
+
+	Vector2 myPos = me->GetTransport().getPos();
+	double dist = myPos.distance(mPatrolPos);
+	if (dist > 1)
+	{
+		me->GetTransport().moveSmoothlyToward2D(mPatrolPos, 10, jTime::Delta());
+	}
+	else 
+	{
+		if (me->mAnim->GetCurrentAnim() == "walk")
+		{
+			me->mAnim->SetAnimation("idle");
+			mPatrolPos = me->GetTransport().getPos();
+		}
+	}
 }
 
 void ObjEnemy::StateMachEnemy::OnChase()
 {
+	ObjEnemy* me = (ObjEnemy*)mGameObject;
+	if (me->DetectPlayerAround(5))
+	{
+		SetState(StateType::ATTACK);
+		me->mAnim->SetAnimation("attack");
+	}
+	else if (!me->DetectPlayerAround(20))
+	{
+		SetState(StateType::PATROL);
+		me->mAnim->SetAnimation("idle");
+		mPatrolPos = me->GetTransport().getPos();
+		mAccTime = 0;
+	}
+	else
+	{
+		Vector2 pos = me->mPlayer->GetTransport().getPos();
+		me->GetTransport().moveSmoothlyToward2D(pos, 10, jTime::Delta());
+	}
 }
 
 void ObjEnemy::StateMachEnemy::OnAttack()
 {
+	ObjEnemy* me = (ObjEnemy*)mGameObject;
+	mAccTime += jTime::Delta();
+	//3초마다 다음 State선정
+	if (mAccTime > 3)
+	{
+		mAccTime = 0;
+		if (me->DetectPlayerAround(5))
+		{
+			SetState(StateType::ATTACK);
+			me->mAnim->SetAnimation("attack");
+		}
+		else
+		{
+			SetState(StateType::CHASE);
+			me->mAnim->SetAnimation("walk");
+		}
+	}
 }
 
-void ObjEnemy::StateMachEnemy::OnDying()
+void ObjEnemy::StateMachEnemy::InitState()
 {
+	ObjEnemy* me = (ObjEnemy*)mGameObject;
+	me->mAnim->SetAnimation("idle");
+	mPatrolPos = me->GetTransport().getPos();
+	mState = StateType::PATROL;
+	mAccTime = 0;
 }

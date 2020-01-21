@@ -16,7 +16,7 @@ public:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
-	bool WalkTo(Vector3 target, float speed);
+	bool DetectPlayerAround(double round);
 
 private:
 	jAnimCSV* mAnim;
@@ -25,10 +25,14 @@ private:
 	jGameObject* mPlayer;
 
 	class StateMachEnemy : public jStateMachine {
+	private:
+		double mAccTime;
+		Vector2 mPatrolPos;
 		virtual void OnPatrol();
 		virtual void OnChase();
 		virtual void OnAttack();
-		virtual void OnDying();
+	public:
+		void InitState();
 	};
 	StateMachEnemy* mStateMach;
 };
