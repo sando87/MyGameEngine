@@ -21,9 +21,10 @@ jShaderTerrain::~jShaderTerrain()
 }
 
 
-bool jShaderTerrain::OnLoad()
+void jShaderTerrain::OnLoad()
 {
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
+	jShader::OnLoad();
+	_warnif(mBasicMesh == nullptr);
 
 	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
 	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
@@ -31,22 +32,21 @@ bool jShaderTerrain::OnLoad()
 	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
 	cbTexels			= CacheTexelsBuffer(ResName_Buffer_Texels);
 	sampler			= CacheSamplerState(ResName_SamplerState_Default);
-	vertBuf			= CacheVertexBuffer(mesh->GetName());
-	indiBuf			= CacheIndexedBuffer(mesh->GetName());
+	vertBuf			= CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf			= CacheIndexedBuffer(mBasicMesh->GetFullname());
 
 	auto imgs = GetGameObject()->FindComponents<jImage>();
 	for (jImage *img : *imgs)
 	{
-		ID3D11ShaderResourceView *texView = CacheTextureView(img->GetFullName());
+		ID3D11ShaderResourceView *texView = CacheTextureView(img->GetFullname());
 		if (texView != nullptr)
 			texViews.push_back(texView);
 	}
-	return true;
 }
 
 bool jShaderTerrain::OnRender()
 {
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
+	jMesh* mesh = mBasicMesh;
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
@@ -175,12 +175,8 @@ ID3D11Buffer * jShaderTerrain::CacheTexelsBuffer(string keyName)
 }
 ID3D11Buffer * jShaderTerrain::CacheVertexBuffer(string keyName)
 {
-	jGameObject* gameObj = GetGameObject();
-	jMesh* mesh = gameObj->FindComponent<jMesh>();
-	if (mesh == nullptr)
-		return nullptr;
-
-	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string _name) {
+		jMesh* mesh = mBasicMesh;
 		ID3D11Buffer *vertBuf = nullptr;
 		if (mesh->GetStream())
 		{

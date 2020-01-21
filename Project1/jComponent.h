@@ -8,9 +8,15 @@ public:
 	jComponent();
 	virtual ~jComponent();
 
+	virtual void OnLoad() {}
+	virtual void OnUpdate() {}
+
+protected:
 	friend void jGameObject::AddComponent(jComponent* comp);
 
 	Property_Getter(jGameObject*, GameObject)
+	Property_GetSetter(bool, Enable)
+	Property_GetSetter(string, Fullname)
 };
 
 

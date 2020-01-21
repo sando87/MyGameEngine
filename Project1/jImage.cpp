@@ -2,33 +2,29 @@
 #include "jCaches.h"
 
 
-jImage::jImage(string _name)
+jImage::jImage(string fullname)
 {
 	mWidth = 0;
 	mHeight = 0;
-	mFullName = "";
-	if (_name.length() > 0)
-		Load(_name);
+	mBufferSize = 0;
+	mBuffer = nullptr;
+	mFullname = fullname;
 }
 
 jImage::~jImage()
 {
 }
 
-bool jImage::Load(string name)
+void jImage::OnLoad()
 {
-	string ext = jUtils::GetFileExtension(name);
-
+	string ext = jUtils::GetFileExtension(mFullname);
 	if (ext == "dump")
-	{
-		mFullName = name;
-		return true;
-	}
+		return;
 
-	char* data = (char*)jCaches::CacheClass(name, [](string filename) {
+	char* data = (char*)jCaches::CacheClass(mFullname, [](string fullname) {
 		int h = 0;
 		int w = 0;
-		chars buf = jUtils::LoadTarga(filename, h, w);
+		chars buf = jUtils::LoadTarga(fullname, h, w);
 		if (!buf)
 			return (char*)nullptr;
 	
@@ -41,9 +37,6 @@ bool jImage::Load(string name)
 	if (data != nullptr)
 	{
 		mBuffer = data;
-		mFullName = name;
-		jUtils::ReadTargaSize(name, mHeight, mWidth, mBufferSize);
+		jUtils::ReadTargaSize(mFullname, mHeight, mWidth, mBufferSize);
 	}
-	
-	return data == nullptr ? false : true;
 }

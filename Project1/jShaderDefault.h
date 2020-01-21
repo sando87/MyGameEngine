@@ -8,7 +8,7 @@ public:
 	jShaderDefault();
 	virtual ~jShaderDefault();
 
-	virtual bool OnLoad();
+	virtual void OnLoad();
 	virtual bool OnRender();
 
 	ShaderParamsDefault& GetParams() { return mParams; }

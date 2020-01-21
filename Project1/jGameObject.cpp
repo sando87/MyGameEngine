@@ -5,7 +5,7 @@
 #include "jComponent.h"
 #include "jMatrixControl.h"
 #include "jShader.h"
-#include "jAnimCSV.h"
+#include "jAnimator.h"
 #include "jMesh.h"
 #include "jImage.h"
 #include "jShaderSkin.h"
@@ -101,7 +101,7 @@ bool jGameObject::LoadTxt(string objName)
 	if (metaInfo.Load(objName) == false)
 		return false;
 
-	AddComponent(new jAnimCSV(metaInfo.GetAnimFullName()));
+	AddComponent(new jAnimator(metaInfo.GetAnimFullName()));
 	AddComponent(new jMesh(metaInfo.GetObjFullName()));
 	for(int i = 0; i < metaInfo.imgFileNames.size(); ++i)
 		AddComponent(new jImage(metaInfo.GetImgFullName(i)));
@@ -151,8 +151,9 @@ void jGameObject::StandOnTerrain()
 }
 void jGameObject::AddComponent(jComponent* comp)
 {
-	mComponents.push_back(comp);
+	comp->OnLoad();
 	comp->mGameObject = this;
+	mComponents.push_back(comp);
 }
 void jGameObject::RemoveComponent(jComponent* comp)
 {
@@ -172,4 +173,7 @@ void jGameObject::OnStart()
 
 void jGameObject::OnUpdate()
 {
+	for (jComponent* comp : mComponents)
+		if (comp->GetEnable())
+			comp->OnUpdate();
 }

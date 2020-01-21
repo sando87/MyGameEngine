@@ -4,6 +4,8 @@
 #include "ObjCamera.h"
 #include "jCaches.h"
 #include "jRenderer.h"
+#include "jAnimator.h"
+#include "jTime.h"
 
 #define ResName_Layout "jShaderSkin.layout"
 #define ResName_Shader_Vertex "test.vs"
@@ -21,10 +23,11 @@ jShaderSkin::~jShaderSkin()
 {
 }
 
-bool jShaderSkin::OnLoad()
+void jShaderSkin::OnLoad()
 {
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
-	jImage* img = GetGameObject()->FindComponent<jImage>();
+	jShader::OnLoad();
+	mAnim = GetGameObject()->FindComponent<jAnimator>();
+	_warnif(mBasicMesh == nullptr);
 
 	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
 	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
@@ -33,15 +36,24 @@ bool jShaderSkin::OnLoad()
 	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
 	cbLight			= CacheLightBuffer(ResName_Buffer_Lights);
 	sampler			= CacheSamplerState(ResName_SamplerState_Default);
-	vertBuf			= CacheVertexBuffer(mesh->GetName());
-	indiBuf			= CacheIndexedBuffer(mesh->GetName());
-	texView			= CacheTextureView(img->GetFullName());
-	return true;
+	vertBuf			= CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf			= CacheIndexedBuffer(mBasicMesh->GetFullname());
+	texView			= mBasicImage ? CacheTextureView(mBasicImage->GetFullname()) : nullptr;
+}
+
+void jShaderSkin::OnUpdate()
+{
+	if (mAnim != nullptr)
+	{
+		mat4s mats = mAnim->Animate(jTime::Delta());
+		for (int i = 0; i < 45; ++i)
+			mParams.bones[i] = mats[i];
+	}
 }
 
 bool jShaderSkin::OnRender()
 {
-	jMesh *mesh = GetGameObject()->FindComponent<jMesh>();
+	jMesh *mesh = mBasicMesh;
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	u32 offset = 0;
@@ -226,13 +238,9 @@ ID3D11Buffer * jShaderSkin::CacheLightBuffer(string keyName)
 }
 ID3D11Buffer * jShaderSkin::CacheVertexBuffer(string keyName)
 {
-	jGameObject* gameObj = GetGameObject();
-	jMesh* mesh = gameObj->FindComponent<jMesh>();
-	if (mesh == nullptr)
-		return nullptr;
-
-	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string _name) {
 		ID3D11Buffer *vertBuf = nullptr;
+		jMesh* mesh = mBasicMesh;
 		vector<VertexFormatPTNIW> vertices;
 		void* vbuf = nullptr;
 		u32 vbufSize = 0;

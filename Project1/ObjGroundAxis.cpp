@@ -20,7 +20,6 @@ void ObjGroundAxis::OnStart()
 	AddComponent(mesh);
 
 	jShaderColor* shader = new jShaderColor();
-	shader->SetPrimitiveTriList(false);
 	AddComponent(shader);
 }
 

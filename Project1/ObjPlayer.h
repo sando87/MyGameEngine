@@ -3,7 +3,7 @@
 #include "junks.h"
 
 class jShaderSkin;
-class jAnimCSV;
+class jAnimator;
 class jAStar;
 
 class ObjPlayer : public jGameObject
@@ -23,7 +23,7 @@ private:
 	void OptimizeRouteResults(vector<Vector2>& inPoints, int startIdx, Vector2 startPos, list<Vector2>& outPoints);
 
 	jShaderSkin* mShader;
-	jAnimCSV* mAnim;
+	jAnimator* mAnim;
 	jAStar* mAstar;
 	jGameObject* mTarget;
 

@@ -3,20 +3,29 @@
 #include "jMesh.h"
 #include "jParserD3.h"
 #include "jCaches.h"
-
+#include "jImage.h"
 
 jShader::jShader()
 {
-	memset(this, 0x00, sizeof(jShader));
-	
-	mVisiable = true;
-	mDepthOn = true;
-	mPrimitiveTriList = true;
-	mRenderOrder = 0;
-
 	mDev = jRenderer::GetInst().GetDevice();
 	mDevContext = jRenderer::GetInst().GetDeviceContext();
 	mGraphicResources = &jGraphicResources::GetInst();
+
+	mVertexShader = nullptr;
+	mPixelShader = nullptr;
+
+	mBasicMesh = nullptr;
+	mBasicImage = nullptr;
+
+	mAlphaOn = false;
+	mDepthOn = true;
+	mRenderOrder = 0;
+}
+
+void jShader::OnLoad()
+{
+	mBasicMesh = GetGameObject()->FindComponent<jMesh>();
+	mBasicImage = GetGameObject()->FindComponent<jImage>();
 }
 
 
@@ -234,14 +243,10 @@ ID3D11ShaderResourceView * jShader::CreateTextureView(ID3D11Texture2D* texture, 
 	//mDevContext->GenerateMips(texView);
 	return texView;
 }
-
-
-
 ID3D11ShaderResourceView * jShader::LoadDumpTexture(string name)
 {
 	return nullptr;
 }
-
 ID3D10Blob * jShader::CompileShader(string filename)
 {
 	string vsFileName = filename + ".vs";

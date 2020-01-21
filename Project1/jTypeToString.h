@@ -21,3 +21,4 @@ const char * TypeToString(Ty* object)
 	const char * name = typeid(*object).name();	//"class typename" 반환
 	return &name[6];		//"typename"로 split하여 반환
 }
+

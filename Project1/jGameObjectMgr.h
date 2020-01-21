@@ -16,6 +16,7 @@ class jGameObjectMgr
 {
 public:
 	static jGameObjectMgr& GetInst() { static jGameObjectMgr inst; return inst; }
+	static vector<jGameObject*> mmvec;
 
 private:
 	jGameObjectMgr();

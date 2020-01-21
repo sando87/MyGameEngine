@@ -190,9 +190,8 @@ bool jShaderParser::Load(jParserD3 * parser)
 
 	return true;
 }
-bool jShaderParser::OnLoad()
+void jShaderParser::OnLoad()
 {
-	return true;
 }
 bool jShaderParser::OnRender()
 {

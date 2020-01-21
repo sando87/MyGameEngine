@@ -18,6 +18,7 @@
 //terrain, default  pixel shader 변경 필요
 //alpha false depth true => ObjTerrain.cpp Load()함수
 
+
 ObjCreateHeightmap::ObjCreateHeightmap()
 {
 }

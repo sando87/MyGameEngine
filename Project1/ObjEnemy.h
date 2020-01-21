@@ -2,7 +2,7 @@
 #include "jGameObject.h"
 #include "jStateMachine.h"
 
-class jAnimCSV;
+class jAnimator;
 class jShaderSkin;
 class jHealthPoint;
 
@@ -19,7 +19,7 @@ public:
 	bool DetectPlayerAround(double round);
 
 private:
-	jAnimCSV* mAnim;
+	jAnimator* mAnim;
 	jShaderSkin* mShader;
 	jHealthPoint* mHP;
 	jGameObject* mPlayer;
@@ -28,6 +28,8 @@ private:
 	private:
 		double mAccTime;
 		Vector2 mPatrolPos;
+		ObjEnemy* mObject;
+		virtual void OnLoad() { mObject = (ObjEnemy*)GetGameObject(); }
 		virtual void OnPatrol();
 		virtual void OnChase();
 		virtual void OnAttack();

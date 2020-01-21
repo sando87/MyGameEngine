@@ -128,7 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="jAnimCSV.cpp" />
+    <ClCompile Include="jAnimator.cpp" />
     <ClCompile Include="jBitmap.cpp" />
     <ClCompile Include="jBoneTree.cpp" />
     <ClCompile Include="jAStar.cpp" />
@@ -183,7 +183,7 @@
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jAnimCSV.h" />
+    <ClInclude Include="jAnimator.h" />
     <ClInclude Include="jBitmap.h" />
     <ClInclude Include="jCoroutine.h" />
     <ClInclude Include="jCrash.h" />

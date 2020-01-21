@@ -21,7 +21,6 @@ public:
 	virtual void OnDying() {}
 	virtual void OnDeath() {}
 
-	virtual void OnLoad() {}
 	virtual void OnUpdate();
 
 	Property_GetSetter(StateType, State)

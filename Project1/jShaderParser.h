@@ -10,7 +10,7 @@ public:
 	jShaderParser();
 	virtual ~jShaderParser();
 
-	virtual bool OnLoad();
+	virtual void OnLoad();
 	virtual bool OnRender();
 
 	bool Load(jParserD3* parser);

@@ -21,13 +21,15 @@ jShaderSprite::~jShaderSprite()
 {
 }
 
-bool jShaderSprite::OnLoad()
+void jShaderSprite::OnLoad()
 {
-	return true;
+	jShader::OnLoad();
+	_warnif(mBasicMesh == nullptr);
 }
 
 bool jShaderSprite::OnRender()
 {
+	jMesh * mesh = mBasicMesh;
 	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
 	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
 	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
@@ -35,11 +37,9 @@ bool jShaderSprite::OnRender()
 	ID3D11Buffer *cbMatrial = CacheMaterialBuffer(ResName_Buffer_Material);
 	ID3D11Buffer *cbSprite = CacheSpriteBuffer(ResName_Buffer_Sprite);
 	ID3D11SamplerState * sampler = CacheSamplerState(ResName_SamplerState_Default);
-	string imgName = GetGameObject()->FindComponent<jImage>()->GetFullName();
-	ID3D11ShaderResourceView *texView = CacheTextureView(imgName);
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
-	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetName());
-	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetName());
+	ID3D11ShaderResourceView *texView = mBasicImage ? CacheTextureView(mBasicImage->GetFullname()) : nullptr;
+	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetFullname());
+	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetFullname());
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
@@ -197,13 +197,9 @@ ID3D11Buffer * jShaderSprite::CacheSpriteBuffer(string keyName)
 }
 ID3D11Buffer * jShaderSprite::CacheVertexBuffer(string keyName)
 {
-	jGameObject* gameObj = GetGameObject();
-	jMesh* mesh = gameObj->FindComponent<jMesh>();
-	if (mesh == nullptr)
-		return nullptr;
-
-	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string _name) {
 		ID3D11Buffer *vertBuf = nullptr;
+		jMesh * mesh = mBasicMesh;
 		vector<VertexFormatPT> vertices;
 		void* vbuf = nullptr;
 		u32 vbufSize = 0;

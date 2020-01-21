@@ -8,7 +8,7 @@ public:
 	jShaderTerrain();
 	~jShaderTerrain();
 
-	virtual bool OnLoad();
+	virtual void OnLoad();
 	virtual bool OnRender();
 
 	ShaderParamsTerrain& GetParams() { return mParams; }

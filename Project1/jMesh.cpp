@@ -4,33 +4,33 @@
 
 jMesh::jMesh(string _fullname)
 {
-	mPrimitive = PrimitiveMode::None;
-	if (_fullname.length() > 0)
-		Load(_fullname);
+	Reset();
+	mFullname = _fullname;
 }
 
 
 jMesh::~jMesh()
 {
+	Reset();
 }
 
-bool jMesh::Load(string _fullname)
+void jMesh::OnLoad()
 {
+	Reset();
 	jLoader data;
-	if (jUtils::GetFileExtension(_fullname) == "obj")
+	if (jUtils::GetFileExtension(mFullname) == "obj")
 	{
-		data.LoadObjFile(_fullname);
+		data.LoadObjFile(mFullname);
 	}
-	else if (jUtils::GetFileExtension(_fullname) == "DAE")
+	else if (jUtils::GetFileExtension(mFullname) == "DAE")
 	{
-		data.LoadDaeFile(_fullname);
+		data.LoadDaeFile(mFullname);
 	}
-	else if (jUtils::GetFileExtension(_fullname) == "dump")
+	else if (jUtils::GetFileExtension(mFullname) == "dump")
 	{
-		mStream = jUtils::LoadFile2(_fullname);
-		mName = _fullname;
+		mStream = jUtils::LoadFile2(mFullname);
 		mPrimitive = PrimitiveMode::TriangleList;
-		return true;
+		return;
 	}
 
 	ObjectInfo& info = data.mObjects[0];
@@ -57,11 +57,10 @@ bool jMesh::Load(string _fullname)
 	}
 
 	mPrimitive = PrimitiveMode::TriangleList;
-	mName = _fullname;
-	return true;
 }
 bool jMesh::LoadCube(int size)
 {
+	Reset();
 	mVerticies.resize(8);
 	mVerticies[0].position = Vector3(0, size, 0);
 	mVerticies[1].position = Vector3(size, size, 0);
@@ -98,11 +97,12 @@ bool jMesh::LoadCube(int size)
 	mIndicies[idx++] = 5;	mIndicies[idx++] = 0;	mIndicies[idx++] = 1;
 
 	mPrimitive = PrimitiveMode::TriangleList;
-	mName = "Cube";
+	mFullname = "Cube";
 	return true;
 }
 bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
 {
+	Reset();
 	mVerticies.resize(4);
 	mVerticies[0].position = Vector3(-size.x * 0.5, 0, -size.y * 0.5);
 	mVerticies[1].position = Vector3(size.x * 0.5, 0, -size.y * 0.5);
@@ -121,11 +121,12 @@ bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
 	mIndicies[idx++] = 1;	mIndicies[idx++] = 2;	mIndicies[idx++] = 3;
 
 	mPrimitive = PrimitiveMode::TriangleList;
-	mName = "Rect";
+	mFullname = "Rect";
 	return true;
 }
 bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 {
+	Reset();
 	int left = _x;
 	int top = _y;
 	int right = _x + _w;
@@ -167,11 +168,12 @@ bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 	}
 
 	mPrimitive = PrimitiveMode::LineList;
-	mName = "GroundGrid";
+	mFullname = "GroundGrid";
 	return true;
 }
 bool jMesh::LoadAxis(int _len)
 {
+	Reset();
 	float arrowLen = 0.5f;
 
 	{ //Axis X
@@ -265,7 +267,15 @@ bool jMesh::LoadAxis(int _len)
 	}
 
 	mPrimitive = PrimitiveMode::LineList;
-	mName = "Axis";
+	mFullname = "Axis";
 
 	return true;
+}
+
+void jMesh::Reset()
+{
+	mVerticies.clear();
+	mIndicies.clear();
+	mStream->clear();
+	mPrimitive = PrimitiveMode::None;
 }

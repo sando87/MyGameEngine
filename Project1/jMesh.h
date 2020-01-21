@@ -25,20 +25,20 @@ public:
 	jMesh(string _fullname = "");
 	virtual ~jMesh();
 
-	vector<VertexFormat>& GetVerticies() { return mVerticies; }
-	vector<u32>& GetIndicies() { return mIndicies; }
+	virtual void OnLoad();
 
-	bool Load(string _fullname);
 	bool LoadCube(int size);
 	bool LoadRectangle(Vector2 center, Vector2 size);
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);
 	bool LoadAxis(int _len);
+	void Reset();
+	vector<VertexFormat>& GetVerticies() { return mVerticies; }
+	vector<u32>& GetIndicies() { return mIndicies; }
 
 private:
 	vector<VertexFormat> mVerticies;
 	vector<u32> mIndicies;
 
-	Property_Getter(string, Name)
 	Property_Getter(chars, Stream)
 	Property_Getter(PrimitiveMode, Primitive)
 };

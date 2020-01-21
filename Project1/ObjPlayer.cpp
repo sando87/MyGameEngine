@@ -10,7 +10,7 @@
 #include "jBoneTree.h"
 #include "jOS_APIs.h"
 #include "jCrash.h"
-#include "jAnimCSV.h"
+#include "jAnimator.h"
 #include "jLine3D.h"
 #include "jAStar.h"
 
@@ -29,7 +29,7 @@ ObjPlayer::~ObjPlayer()
 void ObjPlayer::OnStart()
 {
 	LoadTxt("MyObject_397.txt");
-	mAnim = FindComponent<jAnimCSV>();
+	mAnim = FindComponent<jAnimator>();
 	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mShader = FindComponent<jShaderSkin>();
 
@@ -67,11 +67,6 @@ void ObjPlayer::OnStart()
 }
 void ObjPlayer::OnUpdate()
 {
-	mat4s mats = mAnim->Animate(jTime::Delta());
-	ShaderParamsSkin& param = mShader->GetParams();
-	for (int i = 0; i < 45; ++i)
-		param.bones[i] = mats[i];
-
 	FollowWayPoints();
 	GoToTarget();
 
@@ -152,7 +147,7 @@ void ObjPlayer::GoToTarget()
 		return;
 	}
 
-	string currentAnim = mAnim->GetCurrentAnim();
+	string currentAnim = mAnim->GetAnimation();
 	if (currentAnim == "walk")
 	{
 		Vector2 targetPos = mTarget->GetTransport().getPos();

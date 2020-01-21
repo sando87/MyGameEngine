@@ -52,10 +52,10 @@ strings jUtils::Split2(string _str, const char* _del)
 	}
 	return rets;
 }
-void jUtils::ReadTargaSize(string filename, int& height, int& width, int& size)
+void jUtils::ReadTargaSize(string fullname, int& height, int& width, int& size)
 {
 	FILE* filePtr;
-	if (fopen_s(&filePtr, filename.c_str(), "rb") != 0)
+	if (fopen_s(&filePtr, fullname.c_str(), "rb") != 0)
 		return;
 
 	TargaHeader targaFileHeader;
@@ -69,13 +69,13 @@ void jUtils::ReadTargaSize(string filename, int& height, int& width, int& size)
 
 	fclose(filePtr);
 }
-chars jUtils::LoadTarga(string filename, int& height, int& width, bool _isInvert)
+chars jUtils::LoadTarga(string fullname, int& height, int& width, bool _isInvert)
 {
 	// targa 파일을 바이너리 모드로 파일을 엽니다.
 	FILE* filePtr = nullptr;
-	if(fopen_s(&filePtr, filename.c_str(), "rb") != 0)
+	if(fopen_s(&filePtr, fullname.c_str(), "rb") != 0)
 	{
-		_printlog("fail to load %s\n", filename.c_str());
+		_printlog("fail to load %s\n", fullname.c_str());
 		return chars();
 	}
 

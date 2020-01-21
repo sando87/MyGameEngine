@@ -44,9 +44,6 @@
     <ClCompile Include="jParserSub.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="jAnimCSV.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="jShaderColor.cpp">
       <Filter>소스 파일\Shaders</Filter>
     </ClCompile>
@@ -191,6 +188,9 @@
     <ClCompile Include="jStateMachine.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="jAnimator.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -325,9 +325,6 @@
     <ClInclude Include="resource.h">
       <Filter>소스 파일\CommonHeader</Filter>
     </ClInclude>
-    <ClInclude Include="jAnimCSV.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="jParserD3.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -362,6 +359,9 @@
       <Filter>소스 파일\CommonHeader</Filter>
     </ClInclude>
     <ClInclude Include="jStateMachine.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jAnimator.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>

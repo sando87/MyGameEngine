@@ -127,9 +127,9 @@ bool jGameObjectMgr::Initialize()
 		
 		if (key[78] != 0)
 		{
-			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(false);
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(false);
 			tmpIdx = (tmpIdx + 1) % vecObjs.size();
-			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(true);
 
 			jParserD3* parser = vecObjs[tmpIdx]->mParser;
 			MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.vs_addr].first;
@@ -148,10 +148,10 @@ bool jGameObjectMgr::Initialize()
 		}
 		else if (key[74] != 0)
 		{
-			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(false);
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(false);
 			tmpIdx--;
 			tmpIdx = tmpIdx < 0 ? vecObjs.size() - 1 : tmpIdx;
-			vecObjs[tmpIdx]->FindComponent<jShader>()->SetVisiable(true);
+			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(true);
 
 			jParserD3* parser = vecObjs[tmpIdx]->mParser;
 			MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser->mMapRes[parser->mContext.vs_addr].first;
@@ -245,13 +245,7 @@ void jGameObjectMgr::RunObjects()
 		if (shader == nullptr)
 			continue;
 
-		if (!shader->mLoaded)
-		{
-			shader->OnLoad();
-			shader->mLoaded = true;
-		}
-
-		if (shader->GetVisiable())
+		if (shader->GetEnable())
 			shaders.push_back(shader);
 	}
 

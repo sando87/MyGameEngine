@@ -8,7 +8,7 @@ public:
 	jShaderSprite();
 	virtual ~jShaderSprite();
 
-	virtual bool OnLoad();
+	virtual void OnLoad();
 	virtual bool OnRender();
 
 	ShaderParamsSprite& GetParams() { return mParams; }

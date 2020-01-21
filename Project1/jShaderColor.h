@@ -9,7 +9,7 @@ public:
 	jShaderColor();
 	virtual ~jShaderColor();
 
-	virtual bool OnLoad();
+	virtual void OnLoad();
 	virtual bool OnRender();
 
 protected:

@@ -17,20 +17,21 @@ jShaderColor::~jShaderColor()
 }
 
 
-bool jShaderColor::OnLoad()
+void jShaderColor::OnLoad()
 {
-	return true;
+	jShader::OnLoad();
+	_warnif(mBasicMesh == nullptr);
 }
 
 bool jShaderColor::OnRender()
 {
+	jMesh * mesh = mBasicMesh;
 	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
 	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
 	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
 	ID3D11Buffer *cbMatrix = CacheMatrixBuffer(ResName_Buffer_Matrix);
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
-	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetName());
-	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetName());
+	ID3D11Buffer *vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	u32 offset = 0;
@@ -128,13 +129,9 @@ ID3D11Buffer * jShaderColor::CacheMatrixBuffer(string keyName)
 }
 ID3D11Buffer * jShaderColor::CacheVertexBuffer(string keyName)
 {
-	jGameObject* gameObj = GetGameObject();
-	jMesh* mesh = gameObj->FindComponent<jMesh>();
-	if (mesh == nullptr)
-		return nullptr;
-
-	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this, mesh](string _name) {
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(keyName, [this](string _name) {
 		ID3D11Buffer *vertBuf = nullptr;
+		jMesh * mesh = mBasicMesh;
 		vector<VertexFormatPC> vertices;
 		void* vbuf = nullptr;
 		u32 vbufSize = 0;
