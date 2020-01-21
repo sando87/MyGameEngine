@@ -44,6 +44,8 @@ void ObjEnemy::OnStart()
 
 void ObjEnemy::OnUpdate()
 {
+	jGameObject::OnUpdate();
+
 	StandOnTerrain();
 
 	mStateMach->OnUpdate();
@@ -82,7 +84,7 @@ void ObjEnemy::StateMachEnemy::OnPatrol()
 	double dist = myPos.distance(mPatrolPos);
 	if (dist > 1)
 	{
-		mObject->GetTransport().moveSmoothlyToward2D(mPatrolPos, 10, jTime::Delta());
+		mObject->GetTransport().moveSmoothlyToward2D(mPatrolPos, 5, jTime::Delta());
 	}
 	else 
 	{
@@ -111,7 +113,7 @@ void ObjEnemy::StateMachEnemy::OnChase()
 	else
 	{
 		Vector2 pos = mObject->mPlayer->GetTransport().getPos();
-		mObject->GetTransport().moveSmoothlyToward2D(pos, 10, jTime::Delta());
+		mObject->GetTransport().moveSmoothlyToward2D(pos, 5, jTime::Delta());
 	}
 }
 

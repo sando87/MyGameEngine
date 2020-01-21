@@ -16,22 +16,34 @@ jShaderColor::~jShaderColor()
 {
 }
 
+void jShaderColor::LoadDefault()
+{
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+}
+
+void jShaderColor::LoadMesh(jMesh * mesh)
+{
+	if (mesh == nullptr)
+		return;
+
+	mBasicMesh = mesh;
+	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
+}
 
 void jShaderColor::OnLoad()
 {
-	jShader::OnLoad();
+	LoadDefault();
+	LoadMesh(mGameObject->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
 
 bool jShaderColor::OnRender()
 {
 	jMesh * mesh = mBasicMesh;
-	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
-	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
-	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
-	ID3D11Buffer *cbMatrix = CacheMatrixBuffer(ResName_Buffer_Matrix);
-	ID3D11Buffer *vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
-	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	u32 offset = 0;

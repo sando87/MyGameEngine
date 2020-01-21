@@ -151,8 +151,8 @@ void jGameObject::StandOnTerrain()
 }
 void jGameObject::AddComponent(jComponent* comp)
 {
-	comp->OnLoad();
 	comp->mGameObject = this;
+	comp->OnLoad();
 	mComponents.push_back(comp);
 }
 void jGameObject::RemoveComponent(jComponent* comp)

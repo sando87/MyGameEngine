@@ -1,6 +1,8 @@
 #pragma once
 #include "jShader.h"
 
+typedef shared_ptr_array<jImage*> jImages;
+
 class jShaderTerrain :
 	public jShader
 {
@@ -11,6 +13,9 @@ public:
 	virtual void OnLoad();
 	virtual bool OnRender();
 
+	void LoadDefault();
+	void LoadMesh(jMesh * mesh);
+	void LoadTextures(jImages imgs);
 	ShaderParamsTerrain& GetParams() { return mParams; }
 protected:
 	ID3D11InputLayout * CacheLayout(string keyName);

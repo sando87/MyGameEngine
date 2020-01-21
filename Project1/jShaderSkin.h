@@ -1,7 +1,6 @@
 #pragma once
 #include "jShader.h"
 
-class jAnimator;
 
 class jShaderSkin :
 	public jShader
@@ -13,7 +12,11 @@ public:
 	virtual void OnLoad();
 	virtual void OnUpdate();
 	virtual bool OnRender();
-	
+
+	void LoadDefault();
+	void LoadMesh(jMesh * mesh);
+	void LoadTexture(jImage * img);
+	void LoadAnim(jAnimator * anim);
 	ShaderParamsSkin& GetParams() { return mParams; }
 protected:
 
@@ -36,6 +39,5 @@ protected:
 	ID3D11Buffer *						indiBuf			;
 	ID3D11ShaderResourceView *	texView			;
 
-	jAnimator * mAnim;
 };
 

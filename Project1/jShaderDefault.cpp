@@ -23,19 +23,10 @@ jShaderDefault::~jShaderDefault()
 
 void jShaderDefault::OnLoad()
 {
-	jShader::OnLoad();
+	LoadDefault();
+	LoadTexture(mGameObject->FindComponent<jImage>());
+	LoadMesh(mGameObject->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
-
-	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
-	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
-	layout				= CacheLayout(ResName_Layout);
-	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
-	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
-	cbLight			= CacheLightBuffer(ResName_Buffer_Lights);
-	sampler			= CacheSamplerState(ResName_SamplerState_Default);
-	texView			= mBasicImage ? CacheTextureView(mBasicImage->GetFullname()) : nullptr;
-	vertBuf			= CacheVertexBuffer(mBasicMesh->GetFullname());
-	indiBuf			= CacheIndexedBuffer(mBasicMesh->GetFullname());
 }
 
 bool jShaderDefault::OnRender()
@@ -125,6 +116,36 @@ bool jShaderDefault::OnRender()
 		mDevContext->Draw(vertCount, 0);
 	}
 	return true;
+}
+
+void jShaderDefault::LoadDefault()
+{
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
+	cbLight			= CacheLightBuffer(ResName_Buffer_Lights);
+	sampler			= CacheSamplerState(ResName_SamplerState_Default);
+}
+
+void jShaderDefault::LoadMesh(jMesh * mesh)
+{
+	if (mesh == nullptr)
+		return;
+
+	mBasicMesh = mesh;
+	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
+}
+
+void jShaderDefault::LoadTexture(jImage * img)
+{
+	if (img == nullptr)
+		return;
+
+	mBasicImage = img;
+	texView = CacheTextureView(mBasicImage->GetFullname());
 }
 
 ID3D11InputLayout * jShaderDefault::CacheLayout(string keyName)

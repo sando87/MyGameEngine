@@ -25,27 +25,18 @@ jShaderSkin::~jShaderSkin()
 
 void jShaderSkin::OnLoad()
 {
-	jShader::OnLoad();
-	mAnim = GetGameObject()->FindComponent<jAnimator>();
+	LoadDefault();
+	LoadTexture(mGameObject->FindComponent<jImage>());
+	LoadAnim(mGameObject->FindComponent<jAnimator>());
+	LoadMesh(mGameObject->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
-
-	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
-	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
-	layout				= CacheLayout(ResName_Layout);
-	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
-	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
-	cbLight			= CacheLightBuffer(ResName_Buffer_Lights);
-	sampler			= CacheSamplerState(ResName_SamplerState_Default);
-	vertBuf			= CacheVertexBuffer(mBasicMesh->GetFullname());
-	indiBuf			= CacheIndexedBuffer(mBasicMesh->GetFullname());
-	texView			= mBasicImage ? CacheTextureView(mBasicImage->GetFullname()) : nullptr;
 }
 
 void jShaderSkin::OnUpdate()
 {
-	if (mAnim != nullptr)
+	if (mBasicAnimator != nullptr)
 	{
-		mat4s mats = mAnim->Animate(jTime::Delta());
+		mat4s mats = mBasicAnimator->Animate(jTime::Delta());
 		for (int i = 0; i < 45; ++i)
 			mParams.bones[i] = mats[i];
 	}
@@ -143,6 +134,44 @@ bool jShaderSkin::OnRender()
 		mDevContext->Draw(vertCount, 0);
 	}
 	return true;
+}
+
+void jShaderSkin::LoadDefault()
+{
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
+	cbLight			= CacheLightBuffer(ResName_Buffer_Lights);
+	sampler			= CacheSamplerState(ResName_SamplerState_Default);
+}
+
+void jShaderSkin::LoadMesh(jMesh * mesh)
+{
+	if (mesh == nullptr)
+		return;
+
+	mBasicMesh = mesh;
+	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
+}
+
+void jShaderSkin::LoadTexture(jImage * img)
+{
+	if (img == nullptr)
+		return;
+
+	mBasicImage = img;
+	texView = CacheTextureView(mBasicImage->GetFullname());
+}
+
+void jShaderSkin::LoadAnim(jAnimator * anim)
+{
+	if (anim == nullptr)
+		return;
+
+	mBasicAnimator = anim;
 }
 
 

@@ -32,10 +32,12 @@ public:
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);
 	bool LoadAxis(int _len);
 	void Reset();
+
 	vector<VertexFormat>& GetVerticies() { return mVerticies; }
 	vector<u32>& GetIndicies() { return mIndicies; }
 
-private:
+protected:
+
 	vector<VertexFormat> mVerticies;
 	vector<u32> mIndicies;
 

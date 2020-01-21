@@ -23,25 +23,10 @@ jShaderTerrain::~jShaderTerrain()
 
 void jShaderTerrain::OnLoad()
 {
-	jShader::OnLoad();
+	LoadDefault();
+	LoadTextures(mGameObject->FindComponents<jImage>());
+	LoadMesh(mGameObject->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
-
-	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
-	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
-	layout				= CacheLayout(ResName_Layout);
-	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
-	cbTexels			= CacheTexelsBuffer(ResName_Buffer_Texels);
-	sampler			= CacheSamplerState(ResName_SamplerState_Default);
-	vertBuf			= CacheVertexBuffer(mBasicMesh->GetFullname());
-	indiBuf			= CacheIndexedBuffer(mBasicMesh->GetFullname());
-
-	auto imgs = GetGameObject()->FindComponents<jImage>();
-	for (jImage *img : *imgs)
-	{
-		ID3D11ShaderResourceView *texView = CacheTextureView(img->GetFullname());
-		if (texView != nullptr)
-			texViews.push_back(texView);
-	}
 }
 
 bool jShaderTerrain::OnRender()
@@ -121,6 +106,36 @@ bool jShaderTerrain::OnRender()
 	return true;
 }
 
+void jShaderTerrain::LoadDefault()
+{
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+	cbTexels			= CacheTexelsBuffer(ResName_Buffer_Texels);
+	sampler			= CacheSamplerState(ResName_SamplerState_Default);
+}
+void jShaderTerrain::LoadMesh(jMesh * mesh)
+{
+	if (mesh == nullptr)
+		return;
+
+	mBasicMesh = mesh;
+	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
+}
+void jShaderTerrain::LoadTextures(jImages imgs)
+{
+	if (!imgs)
+		return;
+
+	for (jImage *img : *imgs)
+	{
+		ID3D11ShaderResourceView *texView = CacheTextureView(img->GetFullname());
+		if (texView != nullptr)
+			texViews.push_back(texView);
+	}
+}
 ID3D11InputLayout * jShaderTerrain::CacheLayout(string keyName)
 {
 	ID3D11InputLayout* res = (ID3D11InputLayout*)mGraphicResources->CacheResource(keyName, [this](string _name) {

@@ -67,6 +67,8 @@ void ObjPlayer::OnStart()
 }
 void ObjPlayer::OnUpdate()
 {
+	jGameObject::OnUpdate();
+
 	FollowWayPoints();
 	GoToTarget();
 

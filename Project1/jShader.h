@@ -14,6 +14,7 @@
 
 class jMesh;
 class jImage;
+class jAnimator;
 
 class jShader : public jComponent
 {
@@ -21,9 +22,9 @@ public:
 	jShader();
 	virtual ~jShader() {}
 
-	virtual void OnLoad();
+	virtual void OnLoad() {}
 	virtual void OnUpdate() {}
-	virtual bool OnRender() { return true; }
+	virtual bool OnRender() = 0;
 
 protected:
 	ID3D11VertexShader *			CacheVertexShader(string keyName);
@@ -52,6 +53,7 @@ protected:
 
 	jMesh *						mBasicMesh;
 	jImage *						mBasicImage;
+	jAnimator *					mBasicAnimator;
 
 	Property_GetSetter(bool, AlphaOn)
 	Property_GetSetter(bool, DepthOn)

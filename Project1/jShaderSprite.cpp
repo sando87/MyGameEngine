@@ -3,6 +3,7 @@
 #include "jMesh.h"
 #include "ObjCamera.h"
 #include "jImage.h"
+#include "jAnimator.h"
 
 #define ResName_Layout "jShaderSprite.layout"
 #define ResName_Shader_Vertex "sprite.vs"
@@ -23,23 +24,16 @@ jShaderSprite::~jShaderSprite()
 
 void jShaderSprite::OnLoad()
 {
-	jShader::OnLoad();
+	LoadDefault();
+	LoadTexture(mGameObject->FindComponent<jImage>());
+	LoadAnim(mGameObject->FindComponent<jAnimator>());
+	LoadMesh(mGameObject->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
 
 bool jShaderSprite::OnRender()
 {
 	jMesh * mesh = mBasicMesh;
-	ID3D11VertexShader *vertexShader = CacheVertexShader(ResName_Shader_Vertex);
-	ID3D11PixelShader *pixelShader = CachePixelShader(ResName_Shader_Pixel);
-	ID3D11InputLayout *layout = CacheLayout(ResName_Layout);
-	ID3D11Buffer *cbMatrix = CacheMatrixBuffer(ResName_Buffer_Matrix);
-	ID3D11Buffer *cbMatrial = CacheMaterialBuffer(ResName_Buffer_Material);
-	ID3D11Buffer *cbSprite = CacheSpriteBuffer(ResName_Buffer_Sprite);
-	ID3D11SamplerState * sampler = CacheSamplerState(ResName_SamplerState_Default);
-	ID3D11ShaderResourceView *texView = mBasicImage ? CacheTextureView(mBasicImage->GetFullname()) : nullptr;
-	ID3D11Buffer *vertBuf = CacheVertexBuffer(mesh->GetFullname());
-	ID3D11Buffer *indiBuf = CacheIndexedBuffer(mesh->GetFullname());
 
 	// 정점 버퍼의 단위와 오프셋을 설정합니다.
 	unsigned int offset = 0;
@@ -129,6 +123,40 @@ bool jShaderSprite::OnRender()
 	return true;
 }
 
+void jShaderSprite::LoadDefault()
+{
+	vertexShader	= CacheVertexShader(ResName_Shader_Vertex);
+	pixelShader		= CachePixelShader(ResName_Shader_Pixel);
+	layout				= CacheLayout(ResName_Layout);
+	cbMatrix			= CacheMatrixBuffer(ResName_Buffer_Matrix);
+	cbMatrial		= CacheMaterialBuffer(ResName_Buffer_Material);
+	cbSprite			= CacheSpriteBuffer(ResName_Buffer_Sprite);
+	sampler			= CacheSamplerState(ResName_SamplerState_Default);
+}
+void jShaderSprite::LoadMesh(jMesh * mesh)
+{
+	if (mesh == nullptr)
+		return;
+
+	mBasicMesh = mesh;
+	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
+	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
+}
+void jShaderSprite::LoadTexture(jImage * img)
+{
+	if (img == nullptr)
+		return;
+
+	mBasicImage = img;
+	texView = CacheTextureView(mBasicImage->GetFullname());
+}
+void jShaderSprite::LoadAnim(jAnimator * anim)
+{
+	if (anim == nullptr)
+		return;
+
+	mBasicAnimator = anim;
+}
 ID3D11InputLayout * jShaderSprite::CacheLayout(string keyName)
 {
 	ID3D11InputLayout* res = (ID3D11InputLayout*)mGraphicResources->CacheResource(keyName, [this](string _name) {

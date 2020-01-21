@@ -12,6 +12,9 @@ public:
 	virtual bool OnRender();
 
 	ShaderParamsDefault& GetParams() { return mParams; }
+	void LoadDefault();
+	void LoadMesh(jMesh * mesh);
+	void LoadTexture(jImage * img);
 
 protected:
 	ID3D11InputLayout * CacheLayout(string keyName);

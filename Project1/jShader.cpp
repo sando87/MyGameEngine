@@ -16,18 +16,12 @@ jShader::jShader()
 
 	mBasicMesh = nullptr;
 	mBasicImage = nullptr;
+	mBasicAnimator = nullptr;
 
 	mAlphaOn = false;
 	mDepthOn = true;
 	mRenderOrder = 0;
 }
-
-void jShader::OnLoad()
-{
-	mBasicMesh = GetGameObject()->FindComponent<jMesh>();
-	mBasicImage = GetGameObject()->FindComponent<jImage>();
-}
-
 
 ID3D11VertexShader * jShader::CacheVertexShader(string keyName)
 {
@@ -157,13 +151,12 @@ ID3D11ShaderResourceView * jShader::CacheTextureView(string keyName)
 }
 ID3D11Buffer * jShader::CacheIndexedBuffer(string keyName)
 {
-	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
-	if (mesh->GetIndicies().size() <= 0)
+	if (mBasicMesh == nullptr || mBasicMesh->GetIndicies().size() <= 0)
 		return nullptr;
 
 	string ibKeyName = keyName + ".indexed";
-	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(ibKeyName, [this, mesh](string name) {
-		vector<u32>& indicies = mesh->GetIndicies();
+	ID3D11Buffer *res = (ID3D11Buffer *)mGraphicResources->CacheResource(ibKeyName, [this](string name) {
+		vector<u32>& indicies = mBasicMesh->GetIndicies();
 		ID3D11Buffer *indiBuf = nullptr;
 
 		D3D11_BUFFER_DESC desc;
