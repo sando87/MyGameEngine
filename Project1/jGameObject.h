@@ -4,12 +4,8 @@
 #include "junks.h"
 
 class jGameObjectMgr;
-class ObjCamera;
-class ObjTerrainMgr;
 class jComponent;
 class jMatrixControl;
-enum CorCmd;
-struct CorMember;
 
 class jGameObject
 {
@@ -19,19 +15,9 @@ public:
 	jGameObject();
 	virtual ~jGameObject();
 
-	void AddToMgr();
-	ObjCamera& GetCamera();
-	ObjTerrainMgr& GetTerrain();
-	void StartCoRoutine(string name, std::function<CorCmd(CorMember&, bool)> coroutine);
-	void StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine);
-	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine);
-	void StopCoRoutine(string name);
 	jMatrixControl& GetTransport();
-	bool LoadTxt(string objName);
-	void StandOnTerrain();
-
+	jGameObjectMgr& GetEngine();
 	void AddComponent(jComponent* comp);
-	void RemoveComponent(jComponent* comp);
 	template<typename T> T* FindComponent()
 	{
 		for (jComponent* comp : mComponents)
@@ -57,15 +43,22 @@ public:
 protected:
 	virtual void OnStart();
 	virtual void OnUpdate();
+	
+	void RemoveComponent(jComponent* comp);
+	void LoadComponents();
+	void UpdateComponents();
 
-	bool mIsStarted;
+	bool LoadTxt(string objName);
+	void StandOnTerrain();
+
 	list<jComponent*> mComponents;
 	jMatrixControl* mTransport;
+	jGameObjectMgr* mEngine;
 
 
-	Property_GetSetter(bool, Remove)
-	Property_GetSetter(string, Name)
-
+	Property_GetSetter(bool, Remove, false)
+	Property_Getter(bool, Started, false)
+	Property_Getter(string, Name, "")
 };
 
 #endif

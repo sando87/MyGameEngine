@@ -4,14 +4,14 @@
 
 jAnimator::jAnimator(string name)
 {
-	mFullname = name;
+	SetFullname(name);
 }
 jAnimator::~jAnimator()
 {
 }
 void jAnimator::OnLoad()
 {
-	strings lines = jUtils::LoadLines(mFullname);
+	strings lines = jUtils::LoadLines(GetFullname());
 	if (!lines)
 		return;
 

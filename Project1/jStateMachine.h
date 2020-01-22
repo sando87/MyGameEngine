@@ -23,6 +23,6 @@ public:
 
 	virtual void OnUpdate();
 
-	Property_GetSetter(StateType, State)
+	Property_GetSetter(StateType, State, StateType::PATROL)
 };
 

@@ -37,14 +37,17 @@ void ObjEnemy::OnStart()
 	ShaderParamsSkin& param = mShader->GetParams();
 	param.material.diffuse = Vector4f(1, 1, 1, 1);
 	param.light.direction = Vector4f(-1, -1, -1, 0);
-	AddComponent((new jCrash())->Init(1, 2, [](jCrashs objs) {}) );
+
+	jCrash* crash = new jCrash();
+	crash->SetShape(new ShapeCapsule());
+	crash->SetEventEnter([](jCrashInfos objs) {});
 
 	mStateMach->InitState();
 }
 
 void ObjEnemy::OnUpdate()
 {
-	jGameObject::OnUpdate();
+	UpdateComponents();
 
 	StandOnTerrain();
 
@@ -141,6 +144,6 @@ void ObjEnemy::StateMachEnemy::InitState()
 {
 	mObject->mAnim->SetAnimation("idle");
 	mPatrolPos = mObject->GetTransport().getPos();
-	mState = StateType::PATROL;
+	SetState(StateType::PATROL);
 	mAccTime = 0;
 }

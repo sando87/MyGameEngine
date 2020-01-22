@@ -2,14 +2,11 @@
 
 jMatrixControl::jMatrixControl()
 {
+	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
 
 jMatrixControl::~jMatrixControl()
 {
-}
-void jMatrixControl::init()
-{
-	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
 jMatrixControl& jMatrixControl::lookDir(Vector3 view)
 {

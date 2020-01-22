@@ -45,10 +45,10 @@ private:
 
 
 
-	Property_Getter(ID3D11BlendState *, BS_AlphaOff)
-	Property_Getter(ID3D11BlendState *, BS_AlphaOn)
-	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOff)
-	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOn)
+	Property_Getter(ID3D11BlendState *, BS_AlphaOff, nullptr)
+	Property_Getter(ID3D11BlendState *, BS_AlphaOn, nullptr)
+	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOff, nullptr)
+	Property_Getter(ID3D11DepthStencilState *, DSS_DepthOn, nullptr)
 	
 };
 

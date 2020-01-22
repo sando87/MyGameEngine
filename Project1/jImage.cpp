@@ -4,11 +4,7 @@
 
 jImage::jImage(string fullname)
 {
-	mWidth = 0;
-	mHeight = 0;
-	mBufferSize = 0;
-	mBuffer = nullptr;
-	mFullname = fullname;
+	SetFullname(fullname);
 }
 
 jImage::~jImage()
@@ -17,11 +13,12 @@ jImage::~jImage()
 
 void jImage::OnLoad()
 {
-	string ext = jUtils::GetFileExtension(mFullname);
+	string fullname = GetFullname();
+	string ext = jUtils::GetFileExtension(fullname);
 	if (ext == "dump")
 		return;
 
-	char* data = (char*)jCaches::CacheClass(mFullname, [](string fullname) {
+	char* data = (char*)jCaches::CacheClass(fullname, [](string fullname) {
 		int h = 0;
 		int w = 0;
 		chars buf = jUtils::LoadTarga(fullname, h, w);
@@ -37,6 +34,6 @@ void jImage::OnLoad()
 	if (data != nullptr)
 	{
 		mBuffer = data;
-		jUtils::ReadTargaSize(mFullname, mHeight, mWidth, mBufferSize);
+		jUtils::ReadTargaSize(fullname, mHeight, mWidth, mBufferSize);
 	}
 }

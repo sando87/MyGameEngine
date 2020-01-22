@@ -41,7 +41,7 @@ protected:
 	vector<VertexFormat> mVerticies;
 	vector<u32> mIndicies;
 
-	Property_Getter(chars, Stream)
-	Property_Getter(PrimitiveMode, Primitive)
+	Property_Getter(chars, Stream, chars())
+	Property_Getter(PrimitiveMode, Primitive, PrimitiveMode::None)
 };
 

@@ -5,6 +5,8 @@
 class jShaderSkin;
 class jAnimator;
 class jAStar;
+class ObjCamera;
+class ObjTerrainMgr;
 
 class ObjPlayer : public jGameObject
 {
@@ -26,6 +28,8 @@ private:
 	jAnimator* mAnim;
 	jAStar* mAstar;
 	jGameObject* mTarget;
+	ObjCamera * mCamera;
+	ObjTerrainMgr * mTerrain;
 
 	list<Vector2> mWayPoints;
 	float mAnimTime = 0;

@@ -4,9 +4,15 @@
 #include "jHeightMap.h"
 #include "jMesh.h"
 #include "jObjectMeta.h"
+#include "jGameObjectMgr.h"
 
 #define TERRAIN_SIZE 240
 #define TERRAIN_STEP 5
+
+INITIALIZER(terrain)
+{
+	jGameObjectMgr::GetInst().AddGameObject(new ObjTerrainMgr());
+}
 
 ObjTerrainMgr::ObjTerrainMgr()
 {
@@ -43,7 +49,7 @@ void ObjTerrainMgr::OnUpdate()
 
 void ObjTerrainMgr::LoadingBlocks()
 {
-	jRect rect = GetCamera().GetGroundRect();
+	jRect rect = mEngine->GetCamera().GetGroundRect();
 	int idxStartX = (int)(rect.Left() / mBlockSize);
 	int idxEndX =  (int)(rect.Right() / mBlockSize);
 	int idxStartY = (int)(rect.Bottom() / mBlockSize);
@@ -81,14 +87,14 @@ void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 	{
 		ObjTerrain* obj = new ObjTerrain();
 		obj->Load(foldername + "/" + name);
-		obj->AddToMgr();
+		mEngine->AddGameObject(obj);
 		block.terrains.push_back(obj);
 	}
 	return;
 }
 void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 {
-	jRect camRect = GetCamera().GetGroundRect();
+	jRect camRect = mEngine->GetCamera().GetGroundRect();
 	vector<pair<double,u64>> distances;
 	for (auto item : mCachedBlocks)
 	{
@@ -130,9 +136,6 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 
 		int x = atoi(coordinates[0].c_str());
 		int y = atoi(coordinates[1].c_str());
-		mTerrainCenter.x += x;
-		mTerrainCenter.y += y;
-		mTerrainCenter.z += 1;
 		u64 key = CoordinateToKey(x, y);
 		if (mBlockResourcesAll.find(key) == mBlockResourcesAll.end())
 			mBlockResourcesAll[key] = new vector<string>;
@@ -147,11 +150,6 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 		return true;
 	});
 
-	mTerrainCenter.x /= mTerrainCenter.z;
-	mTerrainCenter.y /= mTerrainCenter.z;
-	mTerrainCenter.x = 1271;
-	mTerrainCenter.y = 822;
-	mTerrainCenter.z = 0;
 }
 bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 {

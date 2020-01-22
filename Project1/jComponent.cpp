@@ -4,9 +4,6 @@
 
 jComponent::jComponent()
 {
-	mGameObject = nullptr;
-	mEnable = true;
-	mFullname = "";
 }
 
 

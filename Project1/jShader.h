@@ -55,8 +55,8 @@ protected:
 	jImage *						mBasicImage;
 	jAnimator *					mBasicAnimator;
 
-	Property_GetSetter(bool, AlphaOn)
-	Property_GetSetter(bool, DepthOn)
-	Property_GetSetter(float, RenderOrder)
+	Property_GetSetter(bool, AlphaOn, false)
+	Property_GetSetter(bool, DepthOn, true)
+	Property_GetSetter(float, RenderOrder, 0)
 };
 

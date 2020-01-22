@@ -18,7 +18,6 @@ public:
 	void OnUpdate();
 	Vector3 GetViewOnMouse(int _x, int _y);
 	Vector3 ScreenToWorldView(int _pixelX, int _pixelY);
-	jMatrixControl& GetPosture() { return mPos; }
 	jRect GetGroundRect() { return mGroundRect; }
 
 	void		setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar);
@@ -34,9 +33,9 @@ private:
 	double mAspect;  // Width/Height
 	bool mIsOrthogonal;
 	Matrix4 mMatProj;
-	jMatrixControl mPos;
 	jRect mGroundRect;
 	jRect3D mOrthRect;
+	jGameObject * mPlayer;
 
 	void		GetPerspectiveFovLH(Matrix4& _mat, double _fovDeg, double _aspect, double _near, double _far);
 	void		GetOrthogonalMat(Matrix4& _mat, double _left, double _right, double _bottom, double _top, double _near, double _far);

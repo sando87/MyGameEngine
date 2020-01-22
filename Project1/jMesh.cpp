@@ -5,7 +5,7 @@
 jMesh::jMesh(string _fullname)
 {
 	Reset();
-	mFullname = _fullname;
+	SetFullname(_fullname);
 }
 
 
@@ -16,21 +16,22 @@ jMesh::~jMesh()
 
 void jMesh::OnLoad()
 {
-	if (mFullname.length() <= 0)
+	string fullname = GetFullname();
+	if (fullname.length() <= 0)
 		return;
 
 	jLoader data;
-	if (jUtils::GetFileExtension(mFullname) == "obj")
+	if (jUtils::GetFileExtension(fullname) == "obj")
 	{
-		data.LoadObjFile(mFullname);
+		data.LoadObjFile(fullname);
 	}
-	else if (jUtils::GetFileExtension(mFullname) == "DAE")
+	else if (jUtils::GetFileExtension(fullname) == "DAE")
 	{
-		data.LoadDaeFile(mFullname);
+		data.LoadDaeFile(fullname);
 	}
-	else if (jUtils::GetFileExtension(mFullname) == "dump")
+	else if (jUtils::GetFileExtension(fullname) == "dump")
 	{
-		mStream = jUtils::LoadFile2(mFullname);
+		mStream = jUtils::LoadFile2(fullname);
 		mPrimitive = PrimitiveMode::TriangleList;
 		return;
 	}
@@ -268,7 +269,7 @@ bool jMesh::LoadAxis(int _len)
 
 void jMesh::Reset()
 {
-	mFullname = "";
+	SetFullname("");
 	mVerticies.clear();
 	mIndicies.clear();
 	mStream->clear();

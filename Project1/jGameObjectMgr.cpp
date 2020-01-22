@@ -15,14 +15,13 @@
 #include "jCrash.h"
 #include "jInput.h"
 #include "jLine3D.h"
+#include "jTypeToString.h"
 
 #include "jParserD3.h"
 #include "jMesh.h"
 
 jGameObjectMgr::jGameObjectMgr() : mCrashGrid(CRASH_SIZE, CRASH_STEP)
 {
-	mCamera = nullptr;
-	mTerrainMgr = nullptr;
 }
 jGameObjectMgr::~jGameObjectMgr()
 {
@@ -62,19 +61,18 @@ bool jGameObjectMgr::Initialize()
 	//00007FFEA8D34300
 	//00007FFEA8D30000
 
-	mTerrainMgr = new ObjTerrainMgr();
-	mTerrainMgr->AddToMgr();
+	mTerrain = (ObjTerrainMgr*)FindGameObject("ObjTerrainMgr");
+	mCamera = (ObjCamera*)FindGameObject("ObjCamera");
 
-	mCamera = new ObjCamera();
-	mCamera->AddToMgr();
+	AddGameObject(new ObjGroundAxis());
+	//AddGameObject(new ObjCreateHeightmap());
 
-	(new ObjGroundAxis())->AddToMgr();
-	//(new ObjCreateHeightmap())->AddToMgr();
+	jGameObject* tmp = new jGameObject();
+	tmp->LoadTxt("MyObject_397.txt");
+	AddGameObject(tmp);
 
-	(new ObjPlayer())->AddToMgr();
-	(new ObjEnemy())->AddToMgr();
-
-
+	AddGameObject(new ObjPlayer());
+	AddGameObject(new ObjEnemy());
 
 
 	//jParserD3::LoadResources(1);
@@ -85,7 +83,7 @@ bool jGameObjectMgr::Initialize()
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
 		//obj0->mOff = (i - 192) * 20.0f;
-		obj0->AddToMgr();
+		AddGameObject(obj0);
 		vecObjs.push_back(obj0);
 	}
 
@@ -198,49 +196,35 @@ void jGameObjectMgr::RunObjects()
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
-		if (obj->mIsStarted)
+		if (obj->mStarted)
 			continue;
 
 		obj->OnStart();
-		obj->mIsStarted = true;
+		obj->mStarted = true;
 	}
 
 
 	mCoroutine.RunCoroutines();
 
+
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
-		if (!obj->GetRemove())
-			obj->OnUpdate();
-
 		jCrash* crash = obj->FindComponent<jCrash>();
-		if (crash != nullptr)
-		{
-			jRect3D rect = crash->GetRect();
-			vector<list<jCrash*>*> grids;
-			mCrashGrid.GetGrids(rect.TopBottom().ClipMinus(), grids);
-			for (list<jCrash*>* grid : grids)
-				grid->push_back(crash);
-		}
+		if (crash != nullptr && crash->GetEnable())
+			crash->OnAddToGrid();
 	}
 
-	AddCrashs();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
-		jCrash* crash = obj->FindComponent<jCrash>();
-		if (crash != nullptr)
-			crash->CallbackCrash();
+		obj->OnUpdate();
 	}
 
 	vector<jShader*> shaders;
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
-		if (obj->GetRemove())
-			continue;
-
 		jShader* shader = obj->FindComponent<jShader>();
 		if (shader == nullptr)
 			continue;
@@ -265,46 +249,6 @@ void jGameObjectMgr::RunObjects()
 	jRenderer::GetInst().EndScene();
 	shaders.clear();
 }
-void jGameObjectMgr::AddCrashs()
-{
-	//우선 게임 오브젝트 별로 루프를 돌며
-	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-	{
-		jGameObject* obj = it->second;
-		if (obj->GetRemove())
-			continue;
-
-		jCrash* crash = obj->FindComponent<jCrash>();
-		if (crash == nullptr)
-			continue;
-
-		jRect3D rect = crash->GetRect();
-		vector<list<jCrash*>*> grids;
-		mCrashGrid.GetGrids(rect.TopBottom().ClipMinus(), grids);
-		//현재 오브젝트의 걸친 충돌 grid들을 찾고
-		for (list<jCrash*> *grid : grids)
-		{
-			//각각의 grid안에 있는 오브젝트 충돌체를 검사한다.
-			list<jCrash*>::iterator me;
-			for (auto iter = grid->begin(); iter != grid->end(); ++iter)
-			{
-				jCrash* target = *iter;
-				if (crash == target)
-				{
-					me = iter;
-					continue;
-				}
-
-				if (crash->Crashed(target))
-				{
-					crash->AddCrashed(target);
-					target->AddCrashed(crash);
-				}
-			}
-			grid->erase(me);
-		}
-	}
-}
 void jGameObjectMgr::Release()
 {
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
@@ -317,13 +261,49 @@ void jGameObjectMgr::Release()
 
 }
 
-void jGameObjectMgr::StartCoroutine(CoroutineInfo coroutineInfo)
-{ 
-	mCoroutine.StartCoroutine(coroutineInfo);
-}
-void jGameObjectMgr::StopCoroutine(string name)
+void jGameObjectMgr::StopCoRoutine(string name)
 {
 	mCoroutine.StopCoroutine(name);
+}
+void jGameObjectMgr::StartCoRoutine(string name, std::function<CorCmd(CorMember&, bool)> coroutine)
+{
+	CoroutineInfo info;
+	info.enabled = true;
+	info.mode = CorMode::Normal;
+	info.name = name;
+	info.firstCalled = true;
+	info.coroutine = coroutine;
+	info.pThread = nullptr;
+	mCoroutine.StartCoroutine(info);
+}
+void jGameObjectMgr::StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine)
+{
+	CoroutineInfo info;
+	info.enabled = true;
+	info.mode = CorMode::Timer;
+	info.name = name;
+	info.time_ms = time_ms;
+	info.time_back_ms = time_ms;
+	info.firstCalled = true;
+	info.coroutine = coroutine;
+	info.pThread = nullptr;
+	mCoroutine.StartCoroutine(info);
+}
+
+//name : 코루틴 이름, task : 쓰레드에서 수행되는 함수, coroutine : 쓰레드 완료시 수행되는 코루틴
+void jGameObjectMgr::StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine)
+{
+	CoroutineInfo info;
+	info.enabled = true;
+	info.mode = CorMode::Task;
+	info.name = name;
+	info.task = task;
+	info.taskStarted = false;
+	info.taskDone = false;
+	info.firstCalled = true;
+	info.coroutine = coroutine;
+	info.pThread = nullptr;
+	mCoroutine.StartCoroutine(info);
 }
 
 jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
@@ -331,7 +311,7 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 	jLine3D line(pos, dir);
 	
 	jGameObject* ret = nullptr;
-	double minDist = 10000.0;
+	double minDist = 1000000.0;
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
@@ -339,12 +319,10 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 		if (crash == nullptr)
 			continue;
 
-		Vector3 posOnTarget = line.GetXY(obj->GetTransport().getPos().z);
-		double distOfShape = posOnTarget.distance(obj->GetTransport().getPos());
-		if (distOfShape > crash->GetShape().round)
+		if (!crash->IsCrash(line))
 			continue;
 
-		double distFar = mCamera->GetTransport().getPos().distance(posOnTarget);
+		double distFar = obj->GetTransport().getPos().distance(pos);
 		if (distFar < minDist)
 		{
 			minDist = distFar;
@@ -354,9 +332,12 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 	return ret;
 }
 
-void jGameObjectMgr::AddGameObject(jGameObject* _obj, string objectName)
+void jGameObjectMgr::AddGameObject(jGameObject* _obj)
 {
-	mObjects.insert(make_pair(objectName, _obj));
+	if (_obj->mName.length() == 0)
+		_obj->mName = TypeToString(_obj);
+
+	mObjects.insert(make_pair(_obj->mName, _obj));
 }
 jGameObject* jGameObjectMgr::FindGameObject(string objectName)
 {
@@ -377,4 +358,19 @@ jGameObjects jGameObjectMgr::FindGameObjects(string objectName)
 		ret->push_back(iter->second);
 
 	return ret;
+}
+
+ObjCamera & jGameObjectMgr::GetCamera()
+{
+	return *mCamera;
+}
+
+ObjTerrainMgr & jGameObjectMgr::GetTerrain()
+{
+	return *mTerrain;
+}
+
+jGrid<list<jCrash*>>* jGameObjectMgr::GetCrashGrid()
+{
+	return &mCrashGrid;
 }

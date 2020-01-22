@@ -13,9 +13,9 @@ public:
 
 protected:
 
-	Property_Getter(char*, Buffer)
-	Property_Getter(int, Width)
-	Property_Getter(int, Height)
-	Property_Getter(int, BufferSize)
+	Property_Getter(char*, Buffer, nullptr)
+	Property_Getter(int, Width, 0)
+	Property_Getter(int, Height, 0)
+	Property_Getter(int, BufferSize, 0)
 };
 

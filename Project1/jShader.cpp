@@ -18,9 +18,6 @@ jShader::jShader()
 	mBasicImage = nullptr;
 	mBasicAnimator = nullptr;
 
-	mAlphaOn = false;
-	mDepthOn = true;
-	mRenderOrder = 0;
 }
 
 ID3D11VertexShader * jShader::CacheVertexShader(string keyName)

@@ -26,9 +26,9 @@ jShaderSkin::~jShaderSkin()
 void jShaderSkin::OnLoad()
 {
 	LoadDefault();
-	LoadTexture(mGameObject->FindComponent<jImage>());
-	LoadAnim(mGameObject->FindComponent<jAnimator>());
-	LoadMesh(mGameObject->FindComponent<jMesh>());
+	LoadTexture(GetGameObject()->FindComponent<jImage>());
+	LoadAnim(GetGameObject()->FindComponent<jAnimator>());
+	LoadMesh(GetGameObject()->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
 
@@ -80,8 +80,8 @@ bool jShaderSkin::OnRender()
 	//Matrix4 retMat = worldMat * jLine3D::ProjMatGround(Vector3(-0.1, 0.1, -1), 0);
 	//dataPtr->world = retMat.transpose();
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
-	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();
+	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
+	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	for (int i = 0; i<45; ++i)
 		dataPtr->bones[i] = mParams.bones[i];
 	mDevContext->Unmap(cbMatrix, 0);

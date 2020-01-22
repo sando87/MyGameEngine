@@ -15,8 +15,6 @@ public :
 	jMatrixControl();
 	virtual ~jMatrixControl();
 
-	void		init();
-
 	Matrix4		getMatrix() { return refreshMatrix(); }
 	Vector3		getView() { return mView; }
 	Vector3		getUp() { return mUp; }

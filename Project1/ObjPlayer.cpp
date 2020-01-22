@@ -28,6 +28,8 @@ ObjPlayer::~ObjPlayer()
 
 void ObjPlayer::OnStart()
 {
+	mCamera = &mEngine->GetCamera();
+	mTerrain = &mEngine->GetTerrain();
 	LoadTxt("MyObject_397.txt");
 	mAnim = FindComponent<jAnimator>();
 	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
@@ -42,19 +44,19 @@ void ObjPlayer::OnStart()
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
-		Vector3 view = GetCamera().ScreenToWorldView(screenPt.x, screenPt.y);
+		Vector3 view = mCamera->ScreenToWorldView(screenPt.x, screenPt.y);
 
-		mTarget = jGameObjectMgr::GetInst().RayCast(GetCamera().GetPosture().getPos(), view);
+		mTarget = jGameObjectMgr::GetInst().RayCast(mCamera->GetTransport().getPos(), view);
 
 		Vector2 pt;
-		bool isVaild = GetTerrain().RayCastTerrain(GetCamera().GetPosture().getPos(), view, pt);
+		bool isVaild = mTerrain->RayCastTerrain(mCamera->GetTransport().getPos(), view, pt);
 		if (isVaild == false)
 		{
-			jLine3D line3d(GetCamera().GetPosture().getPos(), view);
+			jLine3D line3d(mCamera->GetTransport().getPos(), view);
 			Vector3 tmpPT = line3d.GetXY(GetTransport().getPos().z);
 			Vector3 moveStart = GetTransport().getPos();
-			moveStart.z = GetCamera().GetPosture().getPos().z;
-			GetTerrain().RayCastTerrain(moveStart, tmpPT - moveStart, pt);
+			moveStart.z = mCamera->GetTransport().getPos().z;
+			mTerrain->RayCastTerrain(moveStart, tmpPT - moveStart, pt);
 		}
 		StartNavigate(Vector2(pt.x, pt.y));
 	};
@@ -67,7 +69,7 @@ void ObjPlayer::OnStart()
 }
 void ObjPlayer::OnUpdate()
 {
-	jGameObject::OnUpdate();
+	UpdateComponents();
 
 	FollowWayPoints();
 	GoToTarget();
@@ -84,15 +86,15 @@ Vector2 ObjPlayer::MoveTo(Vector2 pos)
 
 void ObjPlayer::StartNavigate(Vector2 pos)
 {
-	StopCoRoutine("NavigatePlayer");
+	mEngine->StopCoRoutine("NavigatePlayer");
 	mAstar->StopRouting();
 	mAstar->Moveable = [this](Vector2 worldPos) {
 		float height = 0;
-		bool ret = GetTerrain().GetHeight(worldPos.x, worldPos.y, height);
+		bool ret = mTerrain->GetHeight(worldPos.x, worldPos.y, height);
 		return ret;
 	};
 
-	StartCoRoutine("NavigatePlayer",
+	mEngine->StartCoRoutine("NavigatePlayer",
 	[this, pos]() {
 		// Route를 수행하여 최적의 경로정보를 산출하는 함수
 		double step = 1;
@@ -184,7 +186,7 @@ void ObjPlayer::OptimizeRouteResults(vector<Vector2>& inPoints, int count, Vecto
 	int retIdx = jUtils::BinarySearchEdge<Vector2>(startData, count, [this, startPos](Vector2& pt) {
 		double step = 1;
 		Vector2 pos;
-		return GetTerrain().Reachable(startPos, pt, pos, step);
+		return mTerrain->Reachable(startPos, pt, pos, step);
 	});
 	_warnif((retIdx == count - 1))
 	int nextIdx = (retIdx == count - 1) ? retIdx : retIdx + 1;

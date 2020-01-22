@@ -16,14 +16,13 @@ class jGameObjectMgr
 {
 public:
 	static jGameObjectMgr& GetInst() { static jGameObjectMgr inst; return inst; }
-	static vector<jGameObject*> mmvec;
 
 private:
 	jGameObjectMgr();
 	~jGameObjectMgr();
 
 	ObjCamera* mCamera;
-	ObjTerrainMgr* mTerrainMgr;
+	ObjTerrainMgr* mTerrain;
 	unordered_multimap<string, jGameObject*> mObjects;
 	jGrid<list<jCrash*>> mCrashGrid;
 	jCoroutine mCoroutine;
@@ -34,18 +33,21 @@ public:
 	bool Initialize();
 	void Release();
 	void RunObjects();
-	void AddCrashs();
 
-	void StartCoroutine(CoroutineInfo coroutineInfo);
-	void StopCoroutine(string name);
+
+	void StartCoRoutine(string name, std::function<CorCmd(CorMember&, bool)> coroutine);
+	void StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine);
+	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine);
+	void StopCoRoutine(string name);
 
 	jGameObject* RayCast(Vector3 pos, Vector3 dir);
 
-	void AddGameObject(jGameObject* _obj, string objectName);
+	void AddGameObject(jGameObject* _obj);
 	jGameObject* FindGameObject(string objectName);
 	jGameObjects FindGameObjects(string objectName);
-	ObjCamera& GetCamera() { return *mCamera; }
-	ObjTerrainMgr& GetTerrain() { return *mTerrainMgr; }
+	ObjCamera& GetCamera();
+	ObjTerrainMgr& GetTerrain();
+	jGrid<list<jCrash*>>* GetCrashGrid();
 };
 
 #endif

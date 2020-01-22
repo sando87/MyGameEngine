@@ -24,8 +24,8 @@ jShaderTerrain::~jShaderTerrain()
 void jShaderTerrain::OnLoad()
 {
 	LoadDefault();
-	LoadTextures(mGameObject->FindComponents<jImage>());
-	LoadMesh(mGameObject->FindComponent<jMesh>());
+	LoadTextures(GetGameObject()->FindComponents<jImage>());
+	LoadMesh(GetGameObject()->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
 
@@ -64,8 +64,8 @@ bool jShaderTerrain::OnRender()
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
-	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();
+	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
+	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);
 	mDevContext->VSSetConstantBuffers(0, 1, &cbMatrix);
 

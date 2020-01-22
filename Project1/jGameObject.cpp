@@ -12,15 +12,12 @@
 #include "jShaderTerrain.h"
 #include "jShaderDefault.h"
 #include "jObjectMeta.h"
-#include "jTypeToString.h"
 
 
 jGameObject::jGameObject()
 {
-	mRemove = false;
-	mIsStarted = false;
 	mTransport = new jMatrixControl();
-	mTransport->init();
+	mEngine = &jGameObjectMgr::GetInst();
 }
 
 
@@ -30,71 +27,16 @@ jGameObject::~jGameObject()
 		delete mTransport;
 }
 
-void jGameObject::AddToMgr()
-{
-	if(mName.length() == 0)
-		mName = TypeToString(this);
-	jGameObjectMgr::GetInst().AddGameObject(this, mName);
-}
-
 jMatrixControl & jGameObject::GetTransport()
 {
 	return *mTransport;
 }
-ObjCamera & jGameObject::GetCamera()
+
+jGameObjectMgr & jGameObject::GetEngine()
 {
-	jGameObjectMgr& inst = jGameObjectMgr::GetInst();
-	return inst.GetCamera();
-	//return jGameObjectMgr::GetInst().GetCamera();
-}
-ObjTerrainMgr & jGameObject::GetTerrain()
-{
-	return jGameObjectMgr::GetInst().GetTerrain();
-}
-void jGameObject::StopCoRoutine(string name)
-{
-	jGameObjectMgr::GetInst().StopCoroutine(name);
-}
-void jGameObject::StartCoRoutine(string name, std::function<CorCmd(CorMember&, bool)> coroutine)
-{
-	CoroutineInfo info;
-	info.enabled = true;
-	info.mode = CorMode::Normal;
-	info.name = name;
-	info.firstCalled = true;
-	info.coroutine = coroutine;
-	info.pThread = nullptr;
-	jGameObjectMgr::GetInst().StartCoroutine(info);
-}
-void jGameObject::StartCoRoutine(string name, float time_ms, std::function<CorCmd(CorMember&, bool)> coroutine)
-{
-	CoroutineInfo info;
-	info.enabled = true;
-	info.mode = CorMode::Timer;
-	info.name = name;
-	info.time_ms = time_ms;
-	info.time_back_ms = time_ms;
-	info.firstCalled = true;
-	info.coroutine = coroutine;
-	info.pThread = nullptr;
-	jGameObjectMgr::GetInst().StartCoroutine(info);
+	return *mEngine;
 }
 
-//name : 코루틴 이름, task : 쓰레드에서 수행되는 함수, coroutine : 쓰레드 완료시 수행되는 코루틴
-void jGameObject::StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine)
-{
-	CoroutineInfo info;
-	info.enabled = true;
-	info.mode = CorMode::Task;
-	info.name = name;
-	info.task = task;
-	info.taskStarted = false;
-	info.taskDone = false;
-	info.firstCalled = true;
-	info.coroutine = coroutine;
-	info.pThread = nullptr;
-	jGameObjectMgr::GetInst().StartCoroutine(info);
-}
 bool jGameObject::LoadTxt(string objName)
 {
 	jObjectMeta metaInfo;
@@ -142,7 +84,7 @@ void jGameObject::StandOnTerrain()
 {
 	Vector3 pos = GetTransport().getPos();
 	float height = 0;
-	bool ret = GetTerrain().GetHeight(pos.x, pos.y, height);
+	bool ret = mEngine->GetTerrain().GetHeight(pos.x, pos.y, height);
 	if (ret)
 	{
 		pos.z = height;
@@ -172,6 +114,17 @@ void jGameObject::OnStart()
 }
 
 void jGameObject::OnUpdate()
+{
+}
+
+void jGameObject::LoadComponents()
+{
+	for (jComponent* comp : mComponents)
+		if (comp->GetEnable())
+			comp->OnLoad();
+}
+
+void jGameObject::UpdateComponents()
 {
 	for (jComponent* comp : mComponents)
 		if (comp->GetEnable())

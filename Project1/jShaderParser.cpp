@@ -215,8 +215,8 @@ bool jShaderParser::OnRender()
 	}
 	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
 	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
-	dataPtr->view = GetGameObject()->GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetCamera().getProjMat().transpose();
+	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
+	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	for (int i = 0; i<45; ++i)
 		dataPtr->bones[i] = mBones[i];
 	mDevContext->Unmap(mMatrixBuffer, 0);

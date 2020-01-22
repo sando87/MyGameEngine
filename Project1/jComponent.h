@@ -14,9 +14,9 @@ public:
 protected:
 	friend void jGameObject::AddComponent(jComponent* comp);
 
-	Property_Getter(jGameObject*, GameObject)
-	Property_GetSetter(bool, Enable)
-	Property_GetSetter(string, Fullname)
+	Property_Getter(jGameObject*, GameObject, nullptr)
+	Property_GetSetter(bool, Enable, true)
+	Property_GetSetter(string, Fullname, "")
 };
 
 

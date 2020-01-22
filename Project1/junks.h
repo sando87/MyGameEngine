@@ -37,16 +37,16 @@ using namespace std;
 #include "jUtils.h"
 
 
-#define Property_Getter(type, Name)		\
-protected: type m##Name; \
+#define Property_Getter(type, Name, def)		\
+private:	type m##Name = def; \
 public:	 type Get##Name() { return m##Name; }
 
-#define Property_Setter(type, Name)		\
-protected: type m##Name; \
+#define Property_Setter(type, Name, def)		\
+private:	type m##Name = def; \
 public:	 void Set##Name(type val) { m##Name = val; }
 
-#define Property_GetSetter(type, Name)		\
-protected: type m##Name; \
+#define Property_GetSetter(type, Name, def)		\
+private:	type m##Name = def; \
 public:	 type Get##Name() { return m##Name; } \
 public:	 void Set##Name(type val) { m##Name = val; }
 
