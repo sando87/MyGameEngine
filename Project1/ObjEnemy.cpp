@@ -19,39 +19,41 @@ ObjEnemy::~ObjEnemy()
 {
 }
 
-void ObjEnemy::OnStart()
+void ObjEnemy::OnLoad()
 {
 	LoadTxt("MyObject_232.txt");
-	mAnim = FindComponent<jAnimator>();
-	mAnim->AddEvent("attack", 0.6f, []() {_trace(); });
-	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
-	mShader = FindComponent<jShaderSkin>();
-	mPlayer = jGameObjectMgr::GetInst().FindGameObject("ObjPlayer");
 
 	mHP = new jHealthPoint();
 	AddComponent(mHP);
 
 	mStateMach = new StateMachEnemy();
 	AddComponent(mStateMach);
+}
 
-	ShaderParamsSkin& param = mShader->GetParams();
-	param.material.diffuse = Vector4f(1, 1, 1, 1);
-	param.light.direction = Vector4f(-1, -1, -1, 0);
+void ObjEnemy::OnStart()
+{
+	mAnim = FindComponent<jAnimator>();
+	mAnim->AddEvent("attack", 0.6f, []() {_trace(); });
+	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
+
+	mPlayer = GetEngine().FindGameObject("ObjPlayer");
+	mTerrain = (ObjTerrainMgr *)GetEngine().FindGameObject("ObjTerrainMgr");
 
 	jCrash* crash = new jCrash();
 	crash->SetShape(new ShapeCapsule());
 	crash->SetEventEnter([](jCrashInfos objs) {});
-
-	mStateMach->InitState();
 }
 
 void ObjEnemy::OnUpdate()
 {
-	UpdateComponents();
-
-	StandOnTerrain();
-
-	mStateMach->OnUpdate();
+	Vector3 pos = GetTransport().getPos();
+	float height = 0;
+	bool ret = mTerrain->GetHeight(pos.x, pos.y, height);
+	if (ret)
+	{
+		pos.z = height;
+		GetTransport().moveTo(pos);
+	}
 }
 
 bool ObjEnemy::DetectPlayerAround(double round)
@@ -59,6 +61,15 @@ bool ObjEnemy::DetectPlayerAround(double round)
 	Vector3 pos = GetTransport().getPos();
 	Vector3 playerPos = mPlayer->GetTransport().getPos();
 	return playerPos.distance(pos) < round;
+}
+
+void ObjEnemy::StateMachEnemy::OnLoad()
+{
+	mObject = (ObjEnemy*)GetGameObject();
+	mObject->FindComponent<jAnimator>()->SetAnimation("idle");
+	mPatrolPos = mObject->GetTransport().getPos();
+	SetState(StateType::PATROL);
+	mAccTime = 0;
 }
 
 void ObjEnemy::StateMachEnemy::OnPatrol()
@@ -87,7 +98,7 @@ void ObjEnemy::StateMachEnemy::OnPatrol()
 	double dist = myPos.distance(mPatrolPos);
 	if (dist > 1)
 	{
-		mObject->GetTransport().moveSmoothlyToward2D(mPatrolPos, 5, jTime::Delta());
+		mObject->GetTransport().moveSmoothlyToward2D(mPatrolPos, 10, jTime::Delta());
 	}
 	else 
 	{
@@ -116,7 +127,7 @@ void ObjEnemy::StateMachEnemy::OnChase()
 	else
 	{
 		Vector2 pos = mObject->mPlayer->GetTransport().getPos();
-		mObject->GetTransport().moveSmoothlyToward2D(pos, 5, jTime::Delta());
+		mObject->GetTransport().moveSmoothlyToward2D(pos, 10, jTime::Delta());
 	}
 }
 
@@ -140,10 +151,3 @@ void ObjEnemy::StateMachEnemy::OnAttack()
 	}
 }
 
-void ObjEnemy::StateMachEnemy::InitState()
-{
-	mObject->mAnim->SetAnimation("idle");
-	mPatrolPos = mObject->GetTransport().getPos();
-	SetState(StateType::PATROL);
-	mAccTime = 0;
-}

@@ -36,6 +36,7 @@ void ObjTerrainMgr::OnStart()
 	//obj->AddToMgr();
 
 	mBlockSize = TERRAIN_SIZE;
+	mCamera = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
 	LoadTerrainGridMetaInfo();
 }
 void ObjTerrainMgr::OnUpdate()
@@ -49,7 +50,7 @@ void ObjTerrainMgr::OnUpdate()
 
 void ObjTerrainMgr::LoadingBlocks()
 {
-	jRect rect = mEngine->GetCamera().GetGroundRect();
+	jRect rect = mCamera->GetGroundRect();
 	int idxStartX = (int)(rect.Left() / mBlockSize);
 	int idxEndX =  (int)(rect.Right() / mBlockSize);
 	int idxStartY = (int)(rect.Bottom() / mBlockSize);
@@ -87,14 +88,14 @@ void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 	{
 		ObjTerrain* obj = new ObjTerrain();
 		obj->Load(foldername + "/" + name);
-		mEngine->AddGameObject(obj);
+		GetEngine().AddGameObject(obj);
 		block.terrains.push_back(obj);
 	}
 	return;
 }
 void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 {
-	jRect camRect = mEngine->GetCamera().GetGroundRect();
+	jRect camRect = mCamera->GetGroundRect();
 	vector<pair<double,u64>> distances;
 	for (auto item : mCachedBlocks)
 	{
@@ -214,11 +215,3 @@ bool ObjTerrainMgr::Reachable(Vector2 start, Vector2 end, Vector2 & lastPoint, d
 	return true;
 }
 
-//ObjTerrain* ObjTerrainMgr::GetTerrain(float worldX, float worldY)
-//{
-//	u64 key = CoordinateToKey(worldX, worldY);
-//	if (mCachedBlocks.find(key) == mCachedBlocks.end())
-//		return nullptr;
-//
-//	return mCachedBlocks[key];
-//}

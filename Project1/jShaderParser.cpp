@@ -193,7 +193,7 @@ bool jShaderParser::Load(jParserD3 * parser)
 void jShaderParser::OnLoad()
 {
 }
-bool jShaderParser::OnRender()
+bool jShaderParser::OnRender(ObjCamera* cam)
 {
 	// 렌더링 할 수 있도록 입력 어셈블러에서 정점 버퍼를 활성으로 설정합니다.
 	mDevContext->IASetVertexBuffers(0, 1, &mVertBuffer, &mIASetVertexBuffersStride, (const UINT *)&mIASetVertexBuffersOff);
@@ -215,8 +215,8 @@ bool jShaderParser::OnRender()
 	}
 	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
 	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
-	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
+	dataPtr->view = cam->getPosMat_D3D().transpose();
+	dataPtr->projection = cam->getProjMat().transpose();
 	for (int i = 0; i<45; ++i)
 		dataPtr->bones[i] = mBones[i];
 	mDevContext->Unmap(mMatrixBuffer, 0);

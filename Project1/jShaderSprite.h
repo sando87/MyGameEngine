@@ -9,7 +9,7 @@ public:
 	virtual ~jShaderSprite();
 
 	virtual void OnLoad();
-	virtual bool OnRender();
+	virtual bool OnRender(ObjCamera* cam);
 
 	void LoadDefault();
 	void LoadMesh(jMesh * mesh);

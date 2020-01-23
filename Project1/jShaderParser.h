@@ -11,7 +11,7 @@ public:
 	virtual ~jShaderParser();
 
 	virtual void OnLoad();
-	virtual bool OnRender();
+	virtual bool OnRender(ObjCamera* cam);
 
 	bool Load(jParserD3* parser);
 

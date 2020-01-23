@@ -3,6 +3,7 @@
 #include "jRect3D.h"
 
 class jZMapLoader;
+class ObjCamera;
 
 struct TerrainBlock
 {
@@ -24,13 +25,13 @@ private:
 	
 	unordered_map<uint64_t, vector<string>*> mBlockResourcesAll;
 	unordered_map<uint64_t, TerrainBlock> mCachedBlocks;
+	ObjCamera* mCamera;
 	int mBlockSize;
 
 	void LoadTerrainGridMetaInfo();
 	void LoadingBlocks();
 	void ClearFarBlocks(int clearCount);
 	void LoadBlock(int idxX, int idxY, TerrainBlock& block);
-	//ObjTerrain* GetTerrain(float worldX, float worldY);
 	u64 CoordinateToKey(float x, float y)
 	{
 		int nx = (int)(x / mBlockSize);

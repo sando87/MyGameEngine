@@ -27,7 +27,7 @@ ObjPlayer::~ObjPlayer()
 	delete mAstar;
 }
 
-void ObjPlayer::OnStart()
+void ObjPlayer::OnLoad()
 {
 	jParserMeta meta;
 	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_397_P.txt");
@@ -39,17 +39,20 @@ void ObjPlayer::OnStart()
 		jGameObject* child = new jGameObject();
 		child->LoadTxt(fullnameChild);
 		AddChild(child);
-		mEngine->AddGameObject(child);
+		GetEngine().AddGameObject(child);
 		mAnim->AddChild(child->FindComponent<jAnimator>());
 	}
 
 	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mAnim->SetAnimation("idle");
 
-	mCamera = &mEngine->GetCamera();
-	mTerrain = &mEngine->GetTerrain();
-
 	GetTransport().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
+}
+
+void ObjPlayer::OnStart()
+{
+	mCamera = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
+	mTerrain = (ObjTerrainMgr *)GetEngine().FindGameObject("ObjTerrainMgr");
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
@@ -79,12 +82,17 @@ void ObjPlayer::OnStart()
 }
 void ObjPlayer::OnUpdate()
 {
-	UpdateComponents();
-	
 	FollowWayPoints();
 	GoToTarget();
 	
-	StandOnTerrain();
+	Vector3 pos = GetTransport().getPos();
+	float height = 0;
+	bool ret = mTerrain->GetHeight(pos.x, pos.y, height);
+	if (ret)
+	{
+		pos.z = height;
+		GetTransport().moveTo(pos);
+	}
 }
 
 Vector2 ObjPlayer::MoveTo(Vector2 pos)
@@ -96,7 +104,7 @@ Vector2 ObjPlayer::MoveTo(Vector2 pos)
 
 void ObjPlayer::StartNavigate(Vector2 pos)
 {
-	mEngine->StopCoRoutine("NavigatePlayer");
+	GetEngine().StopCoRoutine("NavigatePlayer");
 	mAstar->StopRouting();
 	mAstar->Moveable = [this](Vector2 worldPos) {
 		float height = 0;
@@ -104,7 +112,7 @@ void ObjPlayer::StartNavigate(Vector2 pos)
 		return ret;
 	};
 
-	mEngine->StartCoRoutine("NavigatePlayer",
+	GetEngine().StartCoRoutine("NavigatePlayer",
 	[this, pos]() {
 		// Route를 수행하여 최적의 경로정보를 산출하는 함수
 		double step = 1;

@@ -30,7 +30,7 @@ void jShaderSkin::OnLoad()
 	_warnif(mBasicMesh == nullptr);
 }
 
-bool jShaderSkin::OnRender()
+bool jShaderSkin::OnRender(ObjCamera* cam)
 {
 	jMesh *mesh = mBasicMesh;
 
@@ -68,8 +68,8 @@ bool jShaderSkin::OnRender()
 	//Matrix4 retMat = worldMat * jLine3D::ProjMatGround(Vector3(-0.1, 0.1, -1), 0);
 	//dataPtr->world = retMat.transpose();
 	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
-	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
+	dataPtr->view = cam->getPosMat_D3D().transpose();
+	dataPtr->projection = cam->getProjMat().transpose();
 	for (int i = 0; i<45; ++i)
 		dataPtr->bones[i] = mParams.bones[i];
 	mDevContext->Unmap(cbMatrix, 0);
@@ -140,6 +140,7 @@ void jShaderSkin::LoadMesh(jMesh * mesh)
 	if (mesh == nullptr)
 		return;
 
+	mesh->Load();
 	mBasicMesh = mesh;
 	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
 	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());

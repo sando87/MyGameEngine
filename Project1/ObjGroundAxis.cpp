@@ -12,7 +12,7 @@ ObjGroundAxis::~ObjGroundAxis()
 {
 }
 
-void ObjGroundAxis::OnStart()
+void ObjGroundAxis::OnLoad()
 {
 	jMesh* mesh = new jMesh();
 	mesh->LoadGrid(-100, 100, 200, 200, 10);
@@ -22,4 +22,5 @@ void ObjGroundAxis::OnStart()
 	jShaderColor* shader = new jShaderColor();
 	AddComponent(shader);
 }
+
 

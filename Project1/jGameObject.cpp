@@ -1,7 +1,6 @@
 #include "jGameObject.h"
 #include "jGameObjectMgr.h"
 #include "ObjCamera.h"
-#include "ObjTerrainMgr.h"
 #include "jComponent.h"
 #include "jMatrixControl.h"
 #include "jShader.h"
@@ -96,17 +95,6 @@ bool jGameObject::LoadTxt(string filename)
 	GetTransport().moveTo(parse.GetValue<Vector3>(MF_WorldPos));
 	return true;
 }
-void jGameObject::StandOnTerrain()
-{
-	Vector3 pos = GetTransport().getPos();
-	float height = 0;
-	bool ret = mEngine->GetTerrain().GetHeight(pos.x, pos.y, height);
-	if (ret)
-	{
-		pos.z = height;
-		GetTransport().moveTo(pos);
-	}
-}
 void jGameObject::AddChild(jGameObject* child)
 {
 	mChilds.push_back(child);
@@ -120,7 +108,6 @@ Matrix4 jGameObject::GetWorldMat()
 void jGameObject::AddComponent(jComponent* comp)
 {
 	comp->mGameObject = this;
-	comp->OnLoad();
 	mComponents.push_back(comp);
 }
 void jGameObject::RemoveComponent(jComponent* comp)
@@ -135,20 +122,22 @@ void jGameObject::RemoveComponent(jComponent* comp)
 	}
 }
 
+void jGameObject::OnLoad()
+{
+}
+
 void jGameObject::OnStart()
 {
 }
 
 void jGameObject::OnUpdate()
 {
-	UpdateComponents();
 }
 
 void jGameObject::LoadComponents()
 {
 	for (jComponent* comp : mComponents)
-		if (comp->GetEnable())
-			comp->OnLoad();
+		comp->Load();
 }
 
 void jGameObject::UpdateComponents()

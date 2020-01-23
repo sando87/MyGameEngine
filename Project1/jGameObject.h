@@ -43,6 +43,7 @@ public:
 	}
 
 protected:
+	virtual void OnLoad();
 	virtual void OnStart();
 	virtual void OnUpdate();
 	
@@ -50,7 +51,6 @@ protected:
 	void LoadComponents();
 	void UpdateComponents();
 
-	void StandOnTerrain();
 	void AddChild(jGameObject* child);
 
 	list<jComponent*> mComponents;
@@ -61,7 +61,6 @@ protected:
 
 
 	Property_GetSetter(bool, Remove, false)
-	Property_Getter(bool, Started, false)
 	Property_Getter(string, Name, "")
 };
 

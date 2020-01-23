@@ -25,6 +25,7 @@ public:
 	virtual ~ObjPlayer();
 
 private:
+	virtual void OnLoad();
 	virtual void OnStart();
 	virtual void OnUpdate();
 

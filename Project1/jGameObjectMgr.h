@@ -7,7 +7,6 @@
 
 class jGameObject;
 class ObjCamera;
-class ObjTerrainMgr;
 class jCrash;
 
 
@@ -21,8 +20,7 @@ private:
 	jGameObjectMgr();
 	~jGameObjectMgr();
 
-	ObjCamera* mCamera;
-	ObjTerrainMgr* mTerrain;
+	list<jGameObject*> mNewObjects;
 	unordered_multimap<string, jGameObject*> mObjects;
 	jGrid<list<jCrash*>> mCrashGrid;
 	jCoroutine mCoroutine;
@@ -45,8 +43,6 @@ public:
 	void AddGameObject(jGameObject* _obj);
 	jGameObject* FindGameObject(string objectName);
 	jGameObjects FindGameObjects(string objectName);
-	ObjCamera& GetCamera();
-	ObjTerrainMgr& GetTerrain();
 	jGrid<list<jCrash*>>* GetCrashGrid();
 };
 

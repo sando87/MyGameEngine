@@ -9,7 +9,7 @@ public:
 	virtual ~jShaderDefault();
 
 	virtual void OnLoad();
-	virtual bool OnRender();
+	virtual bool OnRender(ObjCamera* cam);
 
 	ShaderParamsDefault& GetParams() { return mParams; }
 	void LoadDefault();

@@ -14,6 +14,7 @@
 
 class jMesh;
 class jImage;
+class ObjCamera;
 
 class jShader : public jComponent
 {
@@ -23,7 +24,7 @@ public:
 
 	virtual void OnLoad() {}
 	virtual void OnUpdate() {}
-	virtual bool OnRender() = 0;
+	virtual bool OnRender(ObjCamera* cam) = 0;
 
 protected:
 	ID3D11VertexShader *			CacheVertexShader(string keyName);

@@ -29,6 +29,7 @@ void jShaderColor::LoadMesh(jMesh * mesh)
 	if (mesh == nullptr)
 		return;
 
+	mesh->Load();
 	mBasicMesh = mesh;
 	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
 	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
@@ -41,7 +42,7 @@ void jShaderColor::OnLoad()
 	_warnif(mBasicMesh == nullptr);
 }
 
-bool jShaderColor::OnRender()
+bool jShaderColor::OnRender(ObjCamera* cam)
 {
 	jMesh * mesh = mBasicMesh;
 
@@ -76,8 +77,8 @@ bool jShaderColor::OnRender()
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
 	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
-	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
-	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
+	dataPtr->view = cam->getPosMat_D3D().transpose();
+	dataPtr->projection = cam->getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);
 	mDevContext->VSSetConstantBuffers(0, 1, &cbMatrix);
 

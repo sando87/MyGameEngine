@@ -9,7 +9,7 @@ public:
 	virtual ~ObjGroundAxis();
 
 private:
-	void OnStart();
+	void OnLoad();
 
 };
 

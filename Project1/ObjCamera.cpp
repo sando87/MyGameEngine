@@ -21,7 +21,7 @@ ObjCamera::~ObjCamera()
 
 void ObjCamera::OnStart()
 {
-	mPlayer = mEngine->FindGameObject("ObjPlayer");
+	mPlayer = GetEngine().FindGameObject("ObjPlayer");
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
 	GetTransport().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse += [&](auto info)

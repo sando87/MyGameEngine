@@ -13,7 +13,7 @@ public:
 	void LoadMesh(jMesh * mesh);
 
 	virtual void OnLoad();
-	virtual bool OnRender();
+	virtual bool OnRender(ObjCamera* cam);
 
 protected:
 	ID3D11InputLayout * CacheLayout(string keyName);

@@ -60,9 +60,6 @@ bool jGameObjectMgr::Initialize()
 	//00007FFEA8D34300
 	//00007FFEA8D30000
 
-	mTerrain = (ObjTerrainMgr*)FindGameObject("ObjTerrainMgr");
-	mCamera = (ObjCamera*)FindGameObject("ObjCamera");
-
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
 
@@ -188,19 +185,26 @@ void jGameObjectMgr::RunObjects()
 			++it;
 	}
 
-	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-	{
-		jGameObject* obj = it->second;
-		if (obj->mStarted)
-			continue;
 
-		obj->OnStart();
-		obj->mStarted = true;
+	for (auto iter = mNewObjects.begin(); iter != mNewObjects.end(); ++iter)
+	{
+		jGameObject* obj = *iter;
+		if (obj->mName.length() == 0)
+			obj->mName = TypeToString(obj);
+
+		obj->OnLoad();
+		obj->LoadComponents();
+		mObjects.insert(make_pair(obj->mName, obj));
 	}
 
+	for (auto iter = mNewObjects.begin(); iter != mNewObjects.end(); )
+	{
+		jGameObject* obj = *iter;
+		obj->OnStart();
+		mNewObjects.erase(iter++);
+	}
 
 	mCoroutine.RunCoroutines();
-
 
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
@@ -213,6 +217,7 @@ void jGameObjectMgr::RunObjects()
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
+		obj->UpdateComponents();
 		obj->OnUpdate();
 	}
 
@@ -238,9 +243,10 @@ void jGameObjectMgr::RunObjects()
 		return rhs->GetRenderOrder() < lhs->GetRenderOrder();
 	});
 
+	ObjCamera * cam = (ObjCamera *)FindGameObject("ObjCamera");
 	jRenderer::GetInst().BeginScene();
 	for (jShader* shader : shaders)
-		shader->OnRender();
+		shader->OnRender(cam);
 	jRenderer::GetInst().EndScene();
 	shaders.clear();
 }
@@ -329,10 +335,7 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 
 void jGameObjectMgr::AddGameObject(jGameObject* _obj)
 {
-	if (_obj->mName.length() == 0)
-		_obj->mName = TypeToString(_obj);
-
-	mObjects.insert(make_pair(_obj->mName, _obj));
+	mNewObjects.push_back(_obj);
 }
 jGameObject* jGameObjectMgr::FindGameObject(string objectName)
 {
@@ -353,16 +356,6 @@ jGameObjects jGameObjectMgr::FindGameObjects(string objectName)
 		ret->push_back(iter->second);
 
 	return ret;
-}
-
-ObjCamera & jGameObjectMgr::GetCamera()
-{
-	return *mCamera;
-}
-
-ObjTerrainMgr & jGameObjectMgr::GetTerrain()
-{
-	return *mTerrain;
 }
 
 jGrid<list<jCrash*>>* jGameObjectMgr::GetCrashGrid()
