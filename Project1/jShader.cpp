@@ -16,7 +16,6 @@ jShader::jShader()
 
 	mBasicMesh = nullptr;
 	mBasicImage = nullptr;
-	mBasicAnimator = nullptr;
 
 }
 

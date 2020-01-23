@@ -17,6 +17,8 @@ public:
 
 	jMatrixControl& GetTransport();
 	jGameObjectMgr& GetEngine();
+	Matrix4 GetWorldMat();
+	bool LoadTxt(string filename);
 	void AddComponent(jComponent* comp);
 	template<typename T> T* FindComponent()
 	{
@@ -48,12 +50,14 @@ protected:
 	void LoadComponents();
 	void UpdateComponents();
 
-	bool LoadTxt(string objName);
 	void StandOnTerrain();
+	void AddChild(jGameObject* child);
 
 	list<jComponent*> mComponents;
 	jMatrixControl* mTransport;
 	jGameObjectMgr* mEngine;
+	jGameObject* mParent;
+	vector<jGameObject*> mChilds;
 
 
 	Property_GetSetter(bool, Remove, false)

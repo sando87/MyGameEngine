@@ -11,7 +11,7 @@
 #include "jShaderSkin.h"
 #include "jShaderTerrain.h"
 #include "jShaderDefault.h"
-#include "jObjectMeta.h"
+#include "jParserMeta.h"
 
 
 jGameObject::jGameObject()
@@ -36,48 +36,64 @@ jGameObjectMgr & jGameObject::GetEngine()
 {
 	return *mEngine;
 }
-
-bool jGameObject::LoadTxt(string objName)
+bool jGameObject::LoadTxt(string filename)
 {
-	jObjectMeta metaInfo;
-	if (metaInfo.Load(objName) == false)
+	jParserMeta parse;
+	bool ret = parse.Load(PATH_RESOURCES + string("meta/") + filename);
+	if (!ret)
+	{
+		_warn();
 		return false;
+	}
 
-	AddComponent(new jAnimator(metaInfo.GetAnimFullName()));
-	AddComponent(new jMesh(metaInfo.GetObjFullName()));
-	for(int i = 0; i < metaInfo.imgFileNames.size(); ++i)
-		AddComponent(new jImage(metaInfo.GetImgFullName(i)));
+	mName = parse.GetValue("name");
+	string filenameObj = parse.GetValue("mesh");
+	vector<string> filenameImgs = parse.GetValues("img");
+	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + filenameObj));
+	for(int i = 0; i < filenameImgs.size(); ++i)
+		AddComponent(new jImage(PATH_RESOURCES + string("img/") + filenameImgs[i]));
 
-	if (metaInfo.type_shader == "terrain")
+	string shaderType = parse.GetValue("shader");
+	if (shaderType == "terrain")
 	{
 		jShaderTerrain* shader = new jShaderTerrain();
-		shader->SetAlphaOn(metaInfo.alpha);
-		shader->SetDepthOn(metaInfo.depth);
-		shader->SetRenderOrder(metaInfo.renderingOrder);
+		shader->SetAlphaOn(parse.GetValue<bool>("alpha"));
+		shader->SetDepthOn(parse.GetValue<bool>("depth"));
+		shader->SetRenderOrder(parse.GetValue<double>("order"));
+		vector<Vector3> texels = parse.GetValues<Vector3>("texel");
 		ShaderParamsTerrain& param = shader->GetParams();
-		memcpy(param.vectors, &metaInfo.texels[0], sizeof(Vector4f) * metaInfo.texels.size());
+		int cnt = min(sizeof(param.vectors) / sizeof(param.vectors[0]), texels.size());
+		for (int i = 0; i < cnt; ++i)
+		{
+			param.vectors[i].x = texels[i].x;
+			param.vectors[i].y = texels[i].y;
+			param.vectors[i].z = texels[i].z;
+			param.vectors[i].w = 0;
+		}
 		AddComponent(shader);
 	}
-	else if (metaInfo.type_shader == "default")
+	else if (shaderType == "default")
 	{
 		jShaderDefault* shader = new jShaderDefault();
-		shader->SetAlphaOn(metaInfo.alpha); //ObjCreateHeightMap 积己矫 false
-		shader->SetDepthOn(metaInfo.depth); //ObjCreateHeightMap 积己矫 true
-		shader->SetRenderOrder(metaInfo.renderingOrder);
+		shader->SetAlphaOn(parse.GetValue<bool>("alpha")); //ObjCreateHeightMap 积己矫 false
+		shader->SetDepthOn(parse.GetValue<bool>("depth")); //ObjCreateHeightMap 积己矫 true
+		shader->SetRenderOrder(parse.GetValue<double>("order"));
 		ShaderParamsDefault& param = shader->GetParams();
 		param.material.diffuse = Vector4f(1, 1, 1, 1);
 		param.light.direction = Vector4f(-1, -1, -1, 0);
 		AddComponent(shader);
 	}
-	else if (metaInfo.type_shader == "skin")
+	else if (shaderType == "skin")
 	{
 		jShaderSkin* shader = new jShaderSkin();
-		shader->SetRenderOrder(metaInfo.renderingOrder);
+		shader->SetRenderOrder(parse.GetValue<double>("order"));
 		AddComponent(shader);
 	}
-		
 
-	GetTransport().moveTo(metaInfo.worldPos);
+	string filenameAnim = parse.GetValue("anim");
+	AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + filenameAnim));
+
+	GetTransport().moveTo(parse.GetValue<Vector3>("worldPos"));
 	return true;
 }
 void jGameObject::StandOnTerrain()
@@ -90,6 +106,16 @@ void jGameObject::StandOnTerrain()
 		pos.z = height;
 		GetTransport().moveTo(pos);
 	}
+}
+void jGameObject::AddChild(jGameObject* child)
+{
+	mChilds.push_back(child);
+	child->mParent = this;
+}
+Matrix4 jGameObject::GetWorldMat()
+{
+	Matrix4 parentMat = mParent != nullptr ? mParent->GetWorldMat() : Matrix4();
+	return GetTransport().getMatrix() * parentMat;
 }
 void jGameObject::AddComponent(jComponent* comp)
 {
@@ -115,6 +141,7 @@ void jGameObject::OnStart()
 
 void jGameObject::OnUpdate()
 {
+	UpdateComponents();
 }
 
 void jGameObject::LoadComponents()

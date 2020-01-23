@@ -12,6 +12,11 @@ Resource
 - 중복된 Vertex제거를 위한 index드로잉 방식으로 개선이 필요
 - Camera GetPosture정리
 - jMesh, jImage, jAnim OnLoad시 자체 캐쉬 필요
+- GameObject 생성 및 소멸 매커니즘 정리 필요(추가로 다른 객체들도...)
+- transport 컴포넌트화 필요...
+- shader rendering, params 정리필요
+- GameObject, Component Loading시스템 개선 필요
+- GameObject Naiming 시스템 정리 필요
 Terrain
 Combat Game Logic
 (enemy AI, regen, attack, health, death...)

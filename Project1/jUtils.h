@@ -25,7 +25,6 @@ typedef shared_ptr_array<Matrix4> mat4s;
 typedef shared_ptr_array<string> strings;
 typedef shared_ptr_array<char> chars;
 
-
 struct TargaHeader
 {
 	unsigned char data1[12];
@@ -53,7 +52,7 @@ public:
 	static void ReadTargaSize(string fullname, int& height, int& width, int& size);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);
 	static chars LoadFile2(string path);
-	static strings LoadLines(string path);
+	static strings LoadLines(string fullname);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
 	static string FindFile(string _path, string _filter);
@@ -128,6 +127,7 @@ public:
 		}
 		return s;
 	}
+
 	
 };
 

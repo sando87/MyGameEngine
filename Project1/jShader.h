@@ -14,7 +14,6 @@
 
 class jMesh;
 class jImage;
-class jAnimator;
 
 class jShader : public jComponent
 {
@@ -53,7 +52,6 @@ protected:
 
 	jMesh *						mBasicMesh;
 	jImage *						mBasicImage;
-	jAnimator *					mBasicAnimator;
 
 	Property_GetSetter(bool, AlphaOn, false)
 	Property_GetSetter(bool, DepthOn, true)

@@ -75,7 +75,7 @@ bool jShaderColor::OnRender()
 		return false;
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
-	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
+	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
 	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);

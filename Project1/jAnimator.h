@@ -4,6 +4,7 @@
 #include "jComponent.h"
 
 class AnimationClip;
+class jShaderSkin;
 
 class jAnimator : public jComponent
 {
@@ -12,16 +13,20 @@ public:
 	~jAnimator();
 
 	virtual void OnLoad();
+	virtual void OnUpdate();
 
-	mat4s Animate(float _deltaTime);
-	void AddEvent(string name, float rate, function<void(void)> event);
-	void SetAnimation(string name);
+	//jAnimator객체 생성 후 OnLoad가 수행되기전에 세팅되는 함수들이므로 그 부분을 감안해서 구현이 필요함.
 	string GetAnimation();
+	void SetAnimation(string name);
+	void AddEvent(string name, float rate, function<void(void)> event);
 
-private:
+protected:
 	float mCurrentTime;
+	jShaderSkin* mShader;
 	AnimationClip* mCurrentAnim;
 	unordered_map<string, AnimationClip> mAnims;
+
+	mat4s Animate(float _deltaTime);
 };
 
 class AnimationClip

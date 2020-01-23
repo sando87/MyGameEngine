@@ -14,7 +14,6 @@ public:
 	void LoadDefault();
 	void LoadMesh(jMesh * mesh);
 	void LoadTexture(jImage * img);
-	void LoadAnim(jAnimator * anim);
 	ShaderParamsSprite& GetParams() { return mParams; }
 protected:
 	ID3D11InputLayout * CacheLayout(string keyName);

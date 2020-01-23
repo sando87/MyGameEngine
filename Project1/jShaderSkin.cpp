@@ -4,7 +4,6 @@
 #include "ObjCamera.h"
 #include "jCaches.h"
 #include "jRenderer.h"
-#include "jAnimator.h"
 #include "jTime.h"
 
 #define ResName_Layout "jShaderSkin.layout"
@@ -27,19 +26,8 @@ void jShaderSkin::OnLoad()
 {
 	LoadDefault();
 	LoadTexture(GetGameObject()->FindComponent<jImage>());
-	LoadAnim(GetGameObject()->FindComponent<jAnimator>());
 	LoadMesh(GetGameObject()->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
-}
-
-void jShaderSkin::OnUpdate()
-{
-	if (mBasicAnimator != nullptr)
-	{
-		mat4s mats = mBasicAnimator->Animate(jTime::Delta());
-		for (int i = 0; i < 45; ++i)
-			mParams.bones[i] = mats[i];
-	}
 }
 
 bool jShaderSkin::OnRender()
@@ -76,10 +64,10 @@ bool jShaderSkin::OnRender()
 		return false;
 	}
 	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
-	//Matrix4 worldMat = GetGameObject()->GetTransport().getMatrix();
+	//Matrix4 worldMat = GetGameObject()->GetWorldMat();
 	//Matrix4 retMat = worldMat * jLine3D::ProjMatGround(Vector3(-0.1, 0.1, -1), 0);
 	//dataPtr->world = retMat.transpose();
-	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
+	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
 	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	for (int i = 0; i<45; ++i)
@@ -165,15 +153,6 @@ void jShaderSkin::LoadTexture(jImage * img)
 	mBasicImage = img;
 	texView = CacheTextureView(mBasicImage->GetFullname());
 }
-
-void jShaderSkin::LoadAnim(jAnimator * anim)
-{
-	if (anim == nullptr)
-		return;
-
-	mBasicAnimator = anim;
-}
-
 
 ID3D11InputLayout * jShaderSkin::CacheLayout(string keyName)
 {

@@ -182,11 +182,11 @@ chars jUtils::LoadFile2(string path)
 	fclose(filePtr);
 	return pBuf;
 }
-strings jUtils::LoadLines(string path)
+strings jUtils::LoadLines(string fullname)
 {
 	FILE* filePtr = NULL;
 	int filesize = 0;
-	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+	if (fopen_s(&filePtr, fullname.c_str(), "rb") != 0)
 		return strings();
 
 	fseek(filePtr, 0, SEEK_END);

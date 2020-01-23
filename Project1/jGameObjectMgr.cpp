@@ -27,7 +27,6 @@ jGameObjectMgr::~jGameObjectMgr()
 {
 	Release();
 }
-
 bool jGameObjectMgr::Initialize()
 {
 	ID3D11Device* pDev = jRenderer::GetInst().GetDevice();
@@ -66,10 +65,6 @@ bool jGameObjectMgr::Initialize()
 
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
-
-	jGameObject* tmp = new jGameObject();
-	tmp->LoadTxt("MyObject_397.txt");
-	AddGameObject(tmp);
 
 	AddGameObject(new ObjPlayer());
 	AddGameObject(new ObjEnemy());

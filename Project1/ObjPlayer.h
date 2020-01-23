@@ -1,12 +1,22 @@
 #pragma once
 #include "jGameObject.h"
 #include "junks.h"
+#include "jAnimator.h"
 
-class jShaderSkin;
-class jAnimator;
 class jAStar;
 class ObjCamera;
 class ObjTerrainMgr;
+
+class jAnimatorGroup
+{
+public:
+	void AddChild(jAnimator* anim);
+	string GetAnimation();
+	void SetAnimation(string name);
+	void AddEvent(string name, float rate, function<void(void)> event);
+protected:
+	vector<jAnimator*> mChildAnimators;
+};
 
 class ObjPlayer : public jGameObject
 {
@@ -24,14 +34,14 @@ private:
 	void GoToTarget();
 	void OptimizeRouteResults(vector<Vector2>& inPoints, int startIdx, Vector2 startPos, list<Vector2>& outPoints);
 
-	jShaderSkin* mShader;
-	jAnimator* mAnim;
 	jAStar* mAstar;
 	jGameObject* mTarget;
 	ObjCamera * mCamera;
 	ObjTerrainMgr * mTerrain;
+	jAnimatorGroup* mAnim;
 
 	list<Vector2> mWayPoints;
 	float mAnimTime = 0;
+
 };
 

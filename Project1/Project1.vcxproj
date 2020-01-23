@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{8476D6F3-789F-4090-9FCE-2FD6154C129C}</ProjectGuid>
     <RootNamespace>Project1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -139,7 +139,8 @@
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGrid.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
-    <ClCompile Include="jObjectMeta.cpp" />
+    <ClCompile Include="jZMapLoader.cpp" />
+    <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
@@ -195,7 +196,8 @@
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGrid.h" />
     <ClInclude Include="jHealthPoint.h" />
-    <ClInclude Include="jObjectMeta.h" />
+    <ClInclude Include="jZMapLoader.h" />
+    <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />
     <ClInclude Include="jTypeToString.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />

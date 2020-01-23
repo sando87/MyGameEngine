@@ -3,7 +3,6 @@
 #include "jMesh.h"
 #include "ObjCamera.h"
 #include "jImage.h"
-#include "jAnimator.h"
 
 #define ResName_Layout "jShaderSprite.layout"
 #define ResName_Shader_Vertex "sprite.vs"
@@ -26,7 +25,6 @@ void jShaderSprite::OnLoad()
 {
 	LoadDefault();
 	LoadTexture(GetGameObject()->FindComponent<jImage>());
-	LoadAnim(GetGameObject()->FindComponent<jAnimator>());
 	LoadMesh(GetGameObject()->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
@@ -65,7 +63,7 @@ bool jShaderSprite::OnRender()
 		return false;
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
-	dataPtr->world = GetGameObject()->GetTransport().getMatrix().transpose();
+	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
 	dataPtr->view = GetGameObject()->GetEngine().GetCamera().getPosMat_D3D().transpose();
 	dataPtr->projection = GetGameObject()->GetEngine().GetCamera().getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);
@@ -149,13 +147,6 @@ void jShaderSprite::LoadTexture(jImage * img)
 
 	mBasicImage = img;
 	texView = CacheTextureView(mBasicImage->GetFullname());
-}
-void jShaderSprite::LoadAnim(jAnimator * anim)
-{
-	if (anim == nullptr)
-		return;
-
-	mBasicAnimator = anim;
 }
 ID3D11InputLayout * jShaderSprite::CacheLayout(string keyName)
 {

@@ -22,9 +22,8 @@ ObjCamera::~ObjCamera()
 void ObjCamera::OnStart()
 {
 	mPlayer = mEngine->FindGameObject("ObjPlayer");
-	Vector3 pos = mPlayer->GetTransport().getPos();
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
-	GetTransport().lookat(pos + Vector3(25, 25, 50), pos, Vector3(0, 0, 1));
+	GetTransport().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse += [&](auto info)
 	{
 		if (info.z > 0)
@@ -63,8 +62,11 @@ void ObjCamera::OnStart()
 }
 void ObjCamera::OnUpdate()
 {
-	Vector3 pos = mPlayer->GetTransport().getPos();
-	GetTransport().moveTo(pos + Vector3(25, 25, 50));
+	if (mPlayer != nullptr)
+	{
+		Vector3 pos = mPlayer->GetTransport().getPos();
+		GetTransport().moveTo(pos + Vector3(25, 25, 50));
+	}
 
 	mGroundRect = UpdateGroundRect();
 	Vector2 center = mGroundRect.Center();

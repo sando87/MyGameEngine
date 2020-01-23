@@ -1,6 +1,6 @@
 #include "jAnimator.h"
-
-
+#include "jShaderSkin.h"
+#include "jTime.h"
 
 jAnimator::jAnimator(string name)
 {
@@ -21,7 +21,8 @@ void jAnimator::OnLoad()
 	{
 		strings pieces = jUtils::Split2(lines[idx], ",");
 		string clipName = pieces[0];
-		mAnims[clipName] = AnimationClip();
+		if(mAnims.find(clipName) == mAnims.end())
+			mAnims[clipName] = AnimationClip();
 		AnimationClip& clip = mAnims[clipName];
 		clip.name = clipName;
 		clip.frameRate = 1 / 30.0f;
@@ -39,6 +40,18 @@ void jAnimator::OnLoad()
 
 		clip.endTime = clip.frameRate * clip.keyMats.size();
 	}
+	SetAnimation("idle");
+	mShader = GetGameObject()->FindComponent<jShaderSkin>();
+}
+void jAnimator::OnUpdate()
+{
+	if (mShader != nullptr)
+	{
+		mat4s mats = Animate(jTime::Delta());
+		ShaderParamsSkin& param = mShader->GetParams();
+		for (int i = 0; i < 45; ++i)
+			param.bones[i] = mats[i];
+	}
 }
 mat4s jAnimator::Animate(float _deltaTime)
 {
@@ -48,19 +61,24 @@ mat4s jAnimator::Animate(float _deltaTime)
 }
 void jAnimator::AddEvent(string name, float rate, function<void(void)> event)
 {
-	_warnif(mAnims.find(name) == mAnims.end());
+	if (mAnims.find(name) == mAnims.end())
+		mAnims[name] = AnimationClip();
+
 	mAnims[name].AddEvent(rate, event);
 }
 
 void jAnimator::SetAnimation(string name)
 {
+	if (mAnims.find(name) == mAnims.end())
+		mAnims[name] = AnimationClip();
+
 	mCurrentTime = 0;
 	mCurrentAnim = &mAnims[name];
 }
 
 string jAnimator::GetAnimation()
 {
-	return mCurrentAnim->name;
+	return mCurrentAnim == nullptr ? "" : mCurrentAnim->name;
 }
 
 

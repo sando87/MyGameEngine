@@ -1,5 +1,5 @@
 #include "jBitmap.h"
-#include "jObjectMeta.h"
+#include "jZMapLoader.h"
 
 
 jBitmap::jBitmap()

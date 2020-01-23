@@ -3,7 +3,7 @@
 #include "ObjTerrain.h"
 #include "jHeightMap.h"
 #include "jMesh.h"
-#include "jObjectMeta.h"
+#include "jZMapLoader.h"
 #include "jGameObjectMgr.h"
 
 #define TERRAIN_SIZE 240

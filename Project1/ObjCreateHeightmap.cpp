@@ -6,7 +6,8 @@
 #include "jRenderer.h"
 #include "jBitmap.h"
 #include "ObjCamera.h"
-#include "jObjectMeta.h"
+#include "jZMapLoader.h"
+#include "jParserMeta.h"
 #include "jShaderHeader.h"
 
 #define CONF_Width (640)
@@ -116,24 +117,26 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 
 bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 {
-	jObjectMeta metaInfo;
-	if (metaInfo.Load(path_fullname) == false)
-		return false;
+	jParserMeta parse;
+	bool ret = parse.Load(path_fullname);
+	_warnif(!ret);
 
-	jMesh mesh(PATH_RESOURCES + string("mesh/") + metaInfo.objname);
+	jMesh mesh(PATH_RESOURCES + string("mesh/") + parse.GetValue("mesh"));
+	Vector3 worldPos = parse.GetValue<Vector3>("worldPos");
 	if (mesh.GetVerticies().size() > 0)
 	{
 		vector<VertexFormat>& vecs = mesh.GetVerticies();
 		auto val = minmax_element(vecs.begin(), vecs.end(), [](const VertexFormat& lhs, const VertexFormat& rhs) {
 			return lhs.position.z < rhs.position.z;
 		});
-		result.x = metaInfo.worldPos.z + val.first->position.z;
-		result.y = metaInfo.worldPos.z + val.second->position.z;
+		result.x = worldPos.z + val.first->position.z;
+		result.y = worldPos.z + val.second->position.z;
 	}
 	else if(mesh.GetStream())
 	{
+		string shaderType = parse.GetValue("shader");
 		chars stream = mesh.GetStream();
-		if (metaInfo.type_shader == "terrain")
+		if (shaderType == "terrain")
 		{
 			VertexFormatPT* pVert = (VertexFormatPT*)&stream[0];
 			int vertCnt = stream->size() / sizeof(VertexFormatPT);
@@ -143,10 +146,10 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 			auto val = minmax_element(vecs.begin(), vecs.end(), [](const VertexFormatPT* lhs, const VertexFormatPT* rhs) {
 				return lhs->p.z < rhs->p.z;
 			});
-			result.x = metaInfo.worldPos.z + (*val.first)->p.z;
-			result.y = metaInfo.worldPos.z + (*val.second)->p.z;
+			result.x = worldPos.z + (*val.first)->p.z;
+			result.y = worldPos.z + (*val.second)->p.z;
 		}
-		else if (metaInfo.type_shader == "default")
+		else if (shaderType == "default")
 		{
 			VertexFormatPTN* pVert = (VertexFormatPTN*)&stream[0];
 			int vertCnt = stream->size() / sizeof(VertexFormatPTN);
@@ -156,8 +159,8 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 			auto val = minmax_element(vecs.begin(), vecs.end(), [](const VertexFormatPTN* lhs, const VertexFormatPTN* rhs) {
 				return lhs->p.z < rhs->p.z;
 			});
-			result.x = metaInfo.worldPos.z + (*val.first)->p.z;
-			result.y = metaInfo.worldPos.z + (*val.second)->p.z;
+			result.x = worldPos.z + (*val.first)->p.z;
+			result.y = worldPos.z + (*val.second)->p.z;
 		}
 	}
 

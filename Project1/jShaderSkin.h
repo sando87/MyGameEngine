@@ -10,13 +10,11 @@ public:
 	virtual ~jShaderSkin();
 
 	virtual void OnLoad();
-	virtual void OnUpdate();
 	virtual bool OnRender();
 
 	void LoadDefault();
 	void LoadMesh(jMesh * mesh);
 	void LoadTexture(jImage * img);
-	void LoadAnim(jAnimator * anim);
 	ShaderParamsSkin& GetParams() { return mParams; }
 protected:
 

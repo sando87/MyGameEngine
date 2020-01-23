@@ -176,9 +176,6 @@
     <ClCompile Include="ObjCreateHeightmap.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="jObjectMeta.cpp">
-      <Filter>소스 파일\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="jGameObjectMgr.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
@@ -190,6 +187,12 @@
     </ClCompile>
     <ClCompile Include="jAnimator.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jZMapLoader.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jParserMeta.cpp">
+      <Filter>소스 파일\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -346,9 +349,6 @@
     <ClInclude Include="ObjCreateHeightmap.h">
       <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="jObjectMeta.h">
-      <Filter>소스 파일\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="jGameObjectMgr.h">
       <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
@@ -363,6 +363,12 @@
     </ClInclude>
     <ClInclude Include="jAnimator.h">
       <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jZMapLoader.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jParserMeta.h">
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

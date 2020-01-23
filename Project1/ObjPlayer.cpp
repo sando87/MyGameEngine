@@ -13,6 +13,7 @@
 #include "jAnimator.h"
 #include "jLine3D.h"
 #include "jAStar.h"
+#include "jParserMeta.h"
 
 ObjPlayer::ObjPlayer()
 {
@@ -28,26 +29,35 @@ ObjPlayer::~ObjPlayer()
 
 void ObjPlayer::OnStart()
 {
+	jParserMeta meta;
+	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_397_P.txt");
+
+	mAnim = new jAnimatorGroup();
+	vector<string> childs = meta.GetValues("child");
+	for (string fullnameChild : childs)
+	{
+		jGameObject* child = new jGameObject();
+		child->LoadTxt(fullnameChild);
+		AddChild(child);
+		mEngine->AddGameObject(child);
+		mAnim->AddChild(child->FindComponent<jAnimator>());
+	}
+
+	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
+	mAnim->SetAnimation("idle");
+
 	mCamera = &mEngine->GetCamera();
 	mTerrain = &mEngine->GetTerrain();
-	LoadTxt("MyObject_397.txt");
-	mAnim = FindComponent<jAnimator>();
-	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
-	mShader = FindComponent<jShaderSkin>();
 
-	ShaderParamsSkin& param = mShader->GetParams();
-	param.material.diffuse = Vector4f(1, 1, 1, 1);
-	param.light.direction = Vector4f(-1, -1, -1, 0);
-
-	mAnim->SetAnimation("idle");
+	GetTransport().moveTo(meta.GetValue<Vector3>("worldPos"));
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = mCamera->ScreenToWorldView(screenPt.x, screenPt.y);
-
-		mTarget = jGameObjectMgr::GetInst().RayCast(mCamera->GetTransport().getPos(), view);
-
+	
+		mTarget = GetEngine().RayCast(mCamera->GetTransport().getPos(), view);
+	
 		Vector2 pt;
 		bool isVaild = mTerrain->RayCastTerrain(mCamera->GetTransport().getPos(), view, pt);
 		if (isVaild == false)
@@ -70,10 +80,10 @@ void ObjPlayer::OnStart()
 void ObjPlayer::OnUpdate()
 {
 	UpdateComponents();
-
+	
 	FollowWayPoints();
 	GoToTarget();
-
+	
 	StandOnTerrain();
 }
 
@@ -194,3 +204,27 @@ void ObjPlayer::OptimizeRouteResults(vector<Vector2>& inPoints, int count, Vecto
 	outPoints.push_back(findPos);
 	OptimizeRouteResults(inPoints, nextIdx, findPos, outPoints);
 }
+
+void jAnimatorGroup::AddChild(jAnimator * anim)
+{
+	mChildAnimators.push_back(anim);
+}
+
+string jAnimatorGroup::GetAnimation()
+{
+	jAnimator* firstAnimator = mChildAnimators.front();
+	return firstAnimator->GetAnimation();
+}
+
+void jAnimatorGroup::SetAnimation(string name)
+{
+	for (jAnimator* animator : mChildAnimators)
+		animator->SetAnimation(name);
+}
+
+void jAnimatorGroup::AddEvent(string name, float rate, function<void(void)> event)
+{
+	jAnimator* firstAnimator = mChildAnimators.front();
+	firstAnimator->AddEvent(name, rate, event);
+}
+
