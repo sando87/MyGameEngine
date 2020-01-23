@@ -46,20 +46,20 @@ void ObjEnemy::OnStart()
 
 void ObjEnemy::OnUpdate()
 {
-	Vector3 pos = GetTransport().getPos();
+	Vector3 pos = GetTransform().getPos();
 	float height = 0;
 	bool ret = mTerrain->GetHeight(pos.x, pos.y, height);
 	if (ret)
 	{
 		pos.z = height;
-		GetTransport().moveTo(pos);
+		GetTransform().moveTo(pos);
 	}
 }
 
 bool ObjEnemy::DetectPlayerAround(double round)
 {
-	Vector3 pos = GetTransport().getPos();
-	Vector3 playerPos = mPlayer->GetTransport().getPos();
+	Vector3 pos = GetTransform().getPos();
+	Vector3 playerPos = mPlayer->GetTransform().getPos();
 	return playerPos.distance(pos) < round;
 }
 
@@ -67,7 +67,7 @@ void ObjEnemy::StateMachEnemy::OnLoad()
 {
 	mObject = (ObjEnemy*)GetGameObject();
 	mObject->FindComponent<jAnimator>()->SetAnimation("idle");
-	mPatrolPos = mObject->GetTransport().getPos();
+	mPatrolPos = mObject->GetTransform().getPos();
 	SetState(StateType::PATROL);
 	mAccTime = 0;
 }
@@ -94,18 +94,18 @@ void ObjEnemy::StateMachEnemy::OnPatrol()
 		mObject->mAnim->SetAnimation("walk");
 	}
 
-	Vector2 myPos = mObject->GetTransport().getPos();
+	Vector2 myPos = mObject->GetTransform().getPos();
 	double dist = myPos.distance(mPatrolPos);
 	if (dist > 1)
 	{
-		mObject->GetTransport().moveSmoothlyToward2D(mPatrolPos, 10, jTime::Delta());
+		mObject->GetTransform().moveSmoothlyToward2D(mPatrolPos, 10, jTime::Delta());
 	}
 	else 
 	{
 		if (mObject->mAnim->GetAnimation() == "walk")
 		{
 			mObject->mAnim->SetAnimation("idle");
-			mPatrolPos = mObject->GetTransport().getPos();
+			mPatrolPos = mObject->GetTransform().getPos();
 		}
 	}
 }
@@ -121,13 +121,13 @@ void ObjEnemy::StateMachEnemy::OnChase()
 	{
 		SetState(StateType::PATROL);
 		mObject->mAnim->SetAnimation("idle");
-		mPatrolPos = mObject->GetTransport().getPos();
+		mPatrolPos = mObject->GetTransform().getPos();
 		mAccTime = 0;
 	}
 	else
 	{
-		Vector2 pos = mObject->mPlayer->GetTransport().getPos();
-		mObject->GetTransport().moveSmoothlyToward2D(pos, 10, jTime::Delta());
+		Vector2 pos = mObject->mPlayer->GetTransform().getPos();
+		mObject->GetTransform().moveSmoothlyToward2D(pos, 10, jTime::Delta());
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "jShaderParser.h"
 #include "jParserD3.h"
 #include "ObjCamera.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jCaches.h"
 #include "jRenderer.h"
 
@@ -214,7 +214,7 @@ bool jShaderParser::OnRender(ObjCamera* cam)
 		return false;
 	}
 	ShaderBufferMatrixs* dataPtr = (ShaderBufferMatrixs*)mappedResource.pData;
-	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
+	dataPtr->world = GetGameObject()->GetTransform().getWorldMatrix().transpose();
 	dataPtr->view = cam->getPosMat_D3D().transpose();
 	dataPtr->projection = cam->getProjMat().transpose();
 	for (int i = 0; i<45; ++i)

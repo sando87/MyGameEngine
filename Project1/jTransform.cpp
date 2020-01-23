@@ -1,24 +1,24 @@
-#include "jMatrixControl.h"
+#include "jTransform.h"
 
-jMatrixControl::jMatrixControl()
+jTransform::jTransform()
 {
 	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 }
 
-jMatrixControl::~jMatrixControl()
+jTransform::~jTransform()
 {
 }
-jMatrixControl& jMatrixControl::lookDir(Vector3 view)
+jTransform& jTransform::lookDir(Vector3 view)
 {
 	lookat(mPos, mPos + view, Vector3(0,0,1));
 	return (*this);
 }
-jMatrixControl& jMatrixControl::lookPos(Vector3 pos)
+jTransform& jTransform::lookPos(Vector3 pos)
 {
 	lookat(mPos, pos, Vector3(0, 0, 1));
 	return (*this);
 }
-jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jTransform& jTransform::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -40,25 +40,25 @@ jMatrixControl& jMatrixControl::lookat(Vector3 _eye, Vector3 _lookat, Vector3 _u
 	//refreshMatrix();
 	return (*this);
 }
-jMatrixControl& jMatrixControl::goForward(double dist)
+jTransform& jTransform::goForward(double dist)
 {
 	mPos = mPos + mView*dist;
 	//refreshMatrix();
 	return (*this);
 }
-jMatrixControl& jMatrixControl::moveTo(Vector3 pos)
+jTransform& jTransform::moveTo(Vector3 pos)
 {
 	mPos = pos;
 	//refreshMatrix();
 	return (*this);
 }
-jMatrixControl& jMatrixControl::goTo(Vector3 dir)
+jTransform& jTransform::goTo(Vector3 dir)
 {
 	mPos = mPos + dir;
 	//refreshMatrix();
 	return (*this);
 }
-jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree)
+jTransform& jTransform::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree)
 {
 	axisUP.normalize();
 	Matrix4 rotMat;
@@ -72,7 +72,7 @@ jMatrixControl& jMatrixControl::rotateAxis(Vector3 groundPt, Vector3 axisUP, dou
 
 	return (*this);
 }
-jMatrixControl & jMatrixControl::moveSmoothlyToward2D(Vector2 pos, double moveSpeed, double dt)
+jTransform & jTransform::moveSmoothlyToward2D(Vector2 pos, double moveSpeed, double dt)
 {
 	double rotateAngleSpeed = DegToRad(20); // 10 degree per frame speed
 	Vector2 targetView = pos - mPos;
@@ -95,7 +95,7 @@ jMatrixControl & jMatrixControl::moveSmoothlyToward2D(Vector2 pos, double moveSp
 	mPos = (pos - nextPos).dot(targetView) < 0 ? pos : nextPos; //목표 지점보다 더 이동했을 경우 예외처리
 	return (*this);
 }
-Matrix4 jMatrixControl::refreshMatrix()
+Matrix4 jTransform::refreshMatrix()
 {
 	Matrix4 mat;
 	mat.identity();
@@ -106,7 +106,7 @@ Matrix4 jMatrixControl::refreshMatrix()
 	return mat;
 }
 
-void jMatrixControl::refreshAxis(Matrix4 _mat)
+void jTransform::refreshAxis(Matrix4 _mat)
 {
 	Vector3 mCross(_mat[0], _mat[1], _mat[2]);
 	Vector3 mView(_mat[4], _mat[5], _mat[6]);
@@ -117,9 +117,23 @@ void jMatrixControl::refreshAxis(Matrix4 _mat)
 	mUp.normalize();
 }
 
+Matrix4 jTransform::getLocalMatrix()
+{
+	return refreshMatrix();
+}
+
+Matrix4 jTransform::getWorldMatrix()
+{
+	jGameObject* parent = GetGameObject()->GetParent();
+	if (parent == nullptr)
+		return refreshMatrix();
+
+	return refreshMatrix() * parent->GetTransform().getWorldMatrix();
+}
+
 
 /*
-void jMatrixControl::refreshAxis()
+void jTransform::refreshAxis()
 {
 	Vector3 cross(mMat[0], mMat[4], mMat[8]);
 	Vector3 view(mMat[1], mMat[5], mMat[9]);
@@ -147,7 +161,7 @@ void jMatrixControl::refreshAxis()
 //DirectX좌표계 (Cross:X, View:Z, Up:Y), Projection Mat은 고정
 
 //RightHand (Cross:X, View:Y, Up:Z) To DirectX Projection Mat
-jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jTransform& jTransform::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -178,7 +192,7 @@ jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _
 }
 
 //LeftHand (Cross:X, View:Z, Up:Y) To DirectX Projection Mat
-jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jTransform& jTransform::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;
@@ -209,7 +223,7 @@ jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _
 }
 
 //RightHand (Cross:X, View:Y, Up:Z) To OpenGL Projection Mat
-jMatrixControl& jMatrixControl::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
+jTransform& jTransform::lookat2(Vector3 _eye, Vector3 _lookat, Vector3 _up)
 {
 	Vector3 view = _lookat - _eye;
 	Vector3 up = _up;

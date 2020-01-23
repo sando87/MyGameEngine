@@ -2,7 +2,7 @@
 #include "jParserD3.h"
 #include "jParserS2.h"
 #include "jShaderParser.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jInput.h"
 
 #define IS_DIABLO
@@ -51,10 +51,10 @@ void ObjParser::OnStart()
 	basePos.y = mParser->mCBMain.matWorld[7];
 	basePos.z = mParser->mCBMain.matWorld[11];
 	//_printlog("%f %f %f \n", basePos.x, basePos.y, basePos.z);
-	Vector3 pos = mTransport->getPos();
+	Vector3 pos = GetTransform().getPos();
 	//pos.x = mOff;
 	pos = basePos;
-	mTransport->moveTo(pos);
+	GetTransform().moveTo(pos);
 
 	if (mParser->mAnims.size() > 0)
 	{

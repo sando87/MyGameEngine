@@ -148,7 +148,7 @@
     <ClCompile Include="jHeightMap.cpp" />
     <ClCompile Include="jImage.cpp" />
     <ClCompile Include="jLine3D.cpp" />
-    <ClCompile Include="jMatrixControl.cpp" />
+    <ClCompile Include="jTransform.cpp" />
     <ClCompile Include="jMesh.cpp" />
     <ClCompile Include="jOS_APIs.cpp" />
     <ClCompile Include="jParserD3.cpp" />
@@ -206,7 +206,7 @@
     <ClInclude Include="jHeightMap.h" />
     <ClInclude Include="jImage.h" />
     <ClInclude Include="jLine3D.h" />
-    <ClInclude Include="jMatrixControl.h" />
+    <ClInclude Include="jTransform.h" />
     <ClInclude Include="jMesh.h" />
     <ClInclude Include="jOS_APIs.h" />
     <ClInclude Include="jParserD3.h" />

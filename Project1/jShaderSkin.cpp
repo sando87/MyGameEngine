@@ -67,7 +67,7 @@ bool jShaderSkin::OnRender(ObjCamera* cam)
 	//Matrix4 worldMat = GetGameObject()->GetWorldMat();
 	//Matrix4 retMat = worldMat * jLine3D::ProjMatGround(Vector3(-0.1, 0.1, -1), 0);
 	//dataPtr->world = retMat.transpose();
-	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
+	dataPtr->world = GetGameObject()->GetTransform().getWorldMatrix().transpose();
 	dataPtr->view = cam->getPosMat_D3D().transpose();
 	dataPtr->projection = cam->getProjMat().transpose();
 	for (int i = 0; i<45; ++i)

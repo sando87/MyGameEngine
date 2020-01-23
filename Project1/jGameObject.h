@@ -5,7 +5,7 @@
 
 class jGameObjectMgr;
 class jComponent;
-class jMatrixControl;
+class jTransform;
 
 class jGameObject
 {
@@ -15,32 +15,13 @@ public:
 	jGameObject();
 	virtual ~jGameObject();
 
-	jMatrixControl& GetTransport();
+	jGameObject * GetParent();
+	jTransform& GetTransform();
 	jGameObjectMgr& GetEngine();
-	Matrix4 GetWorldMat();
 	bool LoadTxt(string filename);
 	void AddComponent(jComponent* comp);
-	template<typename T> T* FindComponent()
-	{
-		for (jComponent* comp : mComponents)
-		{
-			T* pp = dynamic_cast<T*>(comp);
-			if (pp)
-				return pp;
-		}
-		return nullptr;
-	}
-	template<typename T> shared_ptr_array<T*> FindComponents()
-	{
-		shared_ptr_array<T*> rets;
-		for (jComponent* comp : mComponents)
-		{
-			T* pp = dynamic_cast<T*>(comp);
-			if (pp)
-				rets->push_back(pp);
-		}
-		return rets;
-	}
+	template<typename T = jComponent> T* FindComponent();
+	template<typename T = jComponent> vector<T*> FindComponents();
 
 protected:
 	virtual void OnLoad();
@@ -54,7 +35,7 @@ protected:
 	void AddChild(jGameObject* child);
 
 	list<jComponent*> mComponents;
-	jMatrixControl* mTransport;
+	jTransform* mTransform;
 	jGameObjectMgr* mEngine;
 	jGameObject* mParent;
 	vector<jGameObject*> mChilds;
@@ -63,5 +44,31 @@ protected:
 	Property_GetSetter(bool, Remove, false)
 	Property_Getter(string, Name, "")
 };
+
+
+template<typename T>
+inline T * jGameObject::FindComponent()
+{
+	for (jComponent* comp : mComponents)
+	{
+		T* pp = dynamic_cast<T*>(comp);
+		if (pp)
+			return pp;
+	}
+	return nullptr;
+}
+
+template<typename T>
+inline vector<T*> jGameObject::FindComponents()
+{
+	vector<T*> rets;
+	for (jComponent* comp : mComponents)
+	{
+		T* pp = dynamic_cast<T*>(comp);
+		if (pp)
+			rets.push_back(pp);
+	}
+	return rets;
+}
 
 #endif

@@ -24,7 +24,8 @@ jShaderTerrain::~jShaderTerrain()
 void jShaderTerrain::OnLoad()
 {
 	LoadDefault();
-	LoadTextures(GetGameObject()->FindComponents<jImage>());
+	vector<jImage*> imgs = GetGameObject()->FindComponents<jImage>();
+	LoadTextures(imgs);
 	LoadMesh(GetGameObject()->FindComponent<jMesh>());
 	_warnif(mBasicMesh == nullptr);
 }
@@ -63,7 +64,7 @@ bool jShaderTerrain::OnRender(ObjCamera* cam)
 		return false;
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
-	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
+	dataPtr->world = GetGameObject()->GetTransform().getWorldMatrix().transpose();
 	dataPtr->view = cam->getPosMat_D3D().transpose();
 	dataPtr->projection = cam->getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);
@@ -125,12 +126,12 @@ void jShaderTerrain::LoadMesh(jMesh * mesh)
 	vertBuf = CacheVertexBuffer(mBasicMesh->GetFullname());
 	indiBuf = CacheIndexedBuffer(mBasicMesh->GetFullname());
 }
-void jShaderTerrain::LoadTextures(jImages imgs)
+void jShaderTerrain::LoadTextures(vector<jImage*>& imgs)
 {
-	if (!imgs)
+	if (imgs.empty())
 		return;
 
-	for (jImage *img : *imgs)
+	for (jImage *img : imgs)
 	{
 		ID3D11ShaderResourceView *texView = CacheTextureView(img->GetFullname());
 		if (texView != nullptr)

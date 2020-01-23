@@ -63,7 +63,7 @@ bool jShaderDefault::OnRender(ObjCamera* cam)
 		return false;
 	}
 	ShaderBufferWVP* dataPtr = (ShaderBufferWVP*)mappedResource.pData;
-	dataPtr->world = GetGameObject()->GetWorldMat().transpose();
+	dataPtr->world = GetGameObject()->GetTransform().getWorldMatrix().transpose();
 	dataPtr->view = cam->getPosMat_D3D().transpose();
 	dataPtr->projection = cam->getProjMat().transpose();
 	mDevContext->Unmap(cbMatrix, 0);

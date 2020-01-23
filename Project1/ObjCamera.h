@@ -1,6 +1,6 @@
 #pragma once
 #include "jGameObject.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jRect3D.h"
 
 class ObjCamera :

@@ -3,7 +3,7 @@
 #include "jHeightMap.h"
 #include "jMesh.h"
 #include "jImage.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jShaderDefault.h"
 
 #define META_OBJNAME 0

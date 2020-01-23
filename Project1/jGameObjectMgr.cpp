@@ -193,13 +193,13 @@ void jGameObjectMgr::RunObjects()
 			obj->mName = TypeToString(obj);
 
 		obj->OnLoad();
-		obj->LoadComponents();
 		mObjects.insert(make_pair(obj->mName, obj));
 	}
 
 	for (auto iter = mNewObjects.begin(); iter != mNewObjects.end(); )
 	{
 		jGameObject* obj = *iter;
+		obj->LoadComponents();
 		obj->OnStart();
 		mNewObjects.erase(iter++);
 	}
@@ -323,7 +323,7 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 		if (!crash->IsCrash(line))
 			continue;
 
-		double distFar = obj->GetTransport().getPos().distance(pos);
+		double distFar = obj->GetTransform().getPos().distance(pos);
 		if (distFar < minDist)
 		{
 			minDist = distFar;
@@ -336,6 +336,15 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 void jGameObjectMgr::AddGameObject(jGameObject* _obj)
 {
 	mNewObjects.push_back(_obj);
+}
+bool jGameObjectMgr::Added(jGameObject * obj)
+{
+	string name = obj->GetName();
+	jGameObjects objs = FindGameObjects(name);
+	for (jGameObject * candi : *objs)
+		if (candi == obj)
+			return true;
+	return false;
 }
 jGameObject* jGameObjectMgr::FindGameObject(string objectName)
 {

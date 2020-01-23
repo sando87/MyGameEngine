@@ -3,7 +3,7 @@
 #include "ObjTerrainMgr.h"
 #include "jMesh.h"
 #include "jShaderSkin.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jImage.h"
 #include "jTime.h"
 #include "jInput.h"
@@ -46,7 +46,7 @@ void ObjPlayer::OnLoad()
 	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mAnim->SetAnimation("idle");
 
-	GetTransport().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
+	GetTransform().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
 }
 
 void ObjPlayer::OnStart()
@@ -59,16 +59,16 @@ void ObjPlayer::OnStart()
 		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
 		Vector3 view = mCamera->ScreenToWorldView(screenPt.x, screenPt.y);
 	
-		mTarget = GetEngine().RayCast(mCamera->GetTransport().getPos(), view);
+		mTarget = GetEngine().RayCast(mCamera->GetTransform().getPos(), view);
 	
 		Vector2 pt;
-		bool isVaild = mTerrain->RayCastTerrain(mCamera->GetTransport().getPos(), view, pt);
+		bool isVaild = mTerrain->RayCastTerrain(mCamera->GetTransform().getPos(), view, pt);
 		if (isVaild == false)
 		{
-			jLine3D line3d(mCamera->GetTransport().getPos(), view);
-			Vector3 tmpPT = line3d.GetXY(GetTransport().getPos().z);
-			Vector3 moveStart = GetTransport().getPos();
-			moveStart.z = mCamera->GetTransport().getPos().z;
+			jLine3D line3d(mCamera->GetTransform().getPos(), view);
+			Vector3 tmpPT = line3d.GetXY(GetTransform().getPos().z);
+			Vector3 moveStart = GetTransform().getPos();
+			moveStart.z = mCamera->GetTransform().getPos().z;
 			mTerrain->RayCastTerrain(moveStart, tmpPT - moveStart, pt);
 		}
 		StartNavigate(Vector2(pt.x, pt.y));
@@ -85,21 +85,21 @@ void ObjPlayer::OnUpdate()
 	FollowWayPoints();
 	GoToTarget();
 	
-	Vector3 pos = GetTransport().getPos();
+	Vector3 pos = GetTransform().getPos();
 	float height = 0;
 	bool ret = mTerrain->GetHeight(pos.x, pos.y, height);
 	if (ret)
 	{
 		pos.z = height;
-		GetTransport().moveTo(pos);
+		GetTransform().moveTo(pos);
 	}
 }
 
 Vector2 ObjPlayer::MoveTo(Vector2 pos)
 {
 	double moveSpeed = 20;
-	GetTransport().moveSmoothlyToward2D(pos, moveSpeed, jTime::Delta());
-	return GetTransport().getPos();
+	GetTransform().moveSmoothlyToward2D(pos, moveSpeed, jTime::Delta());
+	return GetTransform().getPos();
 }
 
 void ObjPlayer::StartNavigate(Vector2 pos)
@@ -116,7 +116,7 @@ void ObjPlayer::StartNavigate(Vector2 pos)
 	[this, pos]() {
 		// Route를 수행하여 최적의 경로정보를 산출하는 함수
 		double step = 1;
-		mAstar->Route(GetTransport().getPos(), pos, 1000, step);
+		mAstar->Route(GetTransform().getPos(), pos, 1000, step);
 	},
 	[this, pos](CorMember& userData, bool first) {
 		// Routing 완료된 결과값들을 가지고 캐릭터를 움직임.
@@ -124,7 +124,7 @@ void ObjPlayer::StartNavigate(Vector2 pos)
 		if (rets.size() == 0) //Routing 실패시 아무것도 안함
 			return CorCmd::Stop; 
 
-		Vector3 curPos = GetTransport().getPos();
+		Vector3 curPos = GetTransform().getPos();
 		mWayPoints.clear();
 		OptimizeRouteResults(rets, rets.size(), curPos, mWayPoints);
 		
@@ -172,15 +172,15 @@ void ObjPlayer::GoToTarget()
 	string currentAnim = mAnim->GetAnimation();
 	if (currentAnim == "walk")
 	{
-		Vector2 targetPos = mTarget->GetTransport().getPos();
+		Vector2 targetPos = mTarget->GetTransform().getPos();
 		Vector2 nextPos = MoveTo(targetPos);
 		if (nextPos.distance(targetPos) < 2)
 			mAnim->SetAnimation("attack");
 	}
 	else if (currentAnim == "idle")
 	{
-		Vector2 targetPos = mTarget->GetTransport().getPos();
-		Vector2 curMyPos = GetTransport().getPos();
+		Vector2 targetPos = mTarget->GetTransform().getPos();
+		Vector2 curMyPos = GetTransform().getPos();
 		if (curMyPos.distance(targetPos) < 2)
 			mAnim->SetAnimation("attack");
 		else

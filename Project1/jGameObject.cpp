@@ -2,7 +2,7 @@
 #include "jGameObjectMgr.h"
 #include "ObjCamera.h"
 #include "jComponent.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jShader.h"
 #include "jAnimator.h"
 #include "jMesh.h"
@@ -15,20 +15,27 @@
 
 jGameObject::jGameObject()
 {
-	mTransport = new jMatrixControl();
 	mEngine = &jGameObjectMgr::GetInst();
+
+	mTransform = new jTransform();
+	AddComponent(mTransform);
+	
 }
 
 
 jGameObject::~jGameObject()
 {
-	if (mTransport)
-		delete mTransport;
+	delete mTransform;
 }
 
-jMatrixControl & jGameObject::GetTransport()
+jGameObject * jGameObject::GetParent()
 {
-	return *mTransport;
+	return mParent;
+}
+
+jTransform & jGameObject::GetTransform()
+{
+	return *mTransform;
 }
 
 jGameObjectMgr & jGameObject::GetEngine()
@@ -47,8 +54,10 @@ bool jGameObject::LoadTxt(string filename)
 
 	mName = parse.GetValue(MF_Name);
 	string filenameObj = parse.GetValue(MF_Mesh);
+	string filenameAnim = parse.GetValue(MF_Anim);
 	vector<string> filenameImgs = parse.GetValues(MF_Img);
 	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + filenameObj));
+	AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + filenameAnim));
 	for(int i = 0; i < filenameImgs.size(); ++i)
 		AddComponent(new jImage(PATH_RESOURCES + string("img/") + filenameImgs[i]));
 
@@ -89,10 +98,7 @@ bool jGameObject::LoadTxt(string filename)
 		AddComponent(shader);
 	}
 
-	string filenameAnim = parse.GetValue(MF_Anim);
-	AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + filenameAnim));
-
-	GetTransport().moveTo(parse.GetValue<Vector3>(MF_WorldPos));
+	GetTransform().moveTo(parse.GetValue<Vector3>(MF_WorldPos));
 	return true;
 }
 void jGameObject::AddChild(jGameObject* child)
@@ -100,14 +106,11 @@ void jGameObject::AddChild(jGameObject* child)
 	mChilds.push_back(child);
 	child->mParent = this;
 }
-Matrix4 jGameObject::GetWorldMat()
-{
-	Matrix4 parentMat = mParent != nullptr ? mParent->GetWorldMat() : Matrix4();
-	return GetTransport().getMatrix() * parentMat;
-}
 void jGameObject::AddComponent(jComponent* comp)
 {
 	comp->mGameObject = this;
+	if (GetEngine().Added(this))
+		comp->Load();
 	mComponents.push_back(comp);
 }
 void jGameObject::RemoveComponent(jComponent* comp)

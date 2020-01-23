@@ -1,5 +1,5 @@
 #include "jCrash.h"
-#include "jMatrixControl.h"
+#include "jTransform.h"
 #include "jGameObjectMgr.h"
 
 jCrash::jCrash()
@@ -69,7 +69,7 @@ bool jCrash::IsCrash(jLine3D line)
 }
 jRect3D jCrash::GetRect()
 {
-	Vector3 parentPos = GetGameObject()->GetTransport().getPos();
+	Vector3 parentPos = GetGameObject()->GetTransform().getPos();
 	return mShape->GetRect(parentPos);
 }
 CrashInfo jCrash::CheckCrashed(jCrash * left, jCrash * right)

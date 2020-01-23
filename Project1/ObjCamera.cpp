@@ -23,39 +23,39 @@ void ObjCamera::OnStart()
 {
 	mPlayer = GetEngine().FindGameObject("ObjPlayer");
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
-	GetTransport().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
+	GetTransform().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
 	jInput::GetInst().mMouse += [&](auto info)
 	{
 		if (info.z > 0)
-			GetTransport().goForward(10.0f);
+			GetTransform().goForward(10.0f);
 		else if (info.z < 0)
-			GetTransport().goForward(-10.0f);
+			GetTransform().goForward(-10.0f);
 
 		if (info.middle & 0x80 && info.x != 0)
 		{
-			jLine3D line(GetTransport().getPos(), GetTransport().getView());
+			jLine3D line(GetTransform().getPos(), GetTransform().getView());
 			Vector3 pos = line.GetXY(0);
-			GetTransport().rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), info.x);
+			GetTransform().rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), info.x);
 		}
 
 		if (info.left & 0x80)
 		{
 			if (info.x != 0)
 			{
-				float sensX = -info.x * 0.01f * GetTransport().getPos().z;
-				Vector3 cross = GetTransport().getCross();
+				float sensX = -info.x * 0.01f * GetTransform().getPos().z;
+				Vector3 cross = GetTransform().getCross();
 				cross.normalize();
-				Vector3 newPos = GetTransport().getPos() + (cross * sensX);
-				GetTransport().moveTo(newPos);
+				Vector3 newPos = GetTransform().getPos() + (cross * sensX);
+				GetTransform().moveTo(newPos);
 			}
 			if (info.y != 0)
 			{
-				float sensY = info.y * 0.01f * GetTransport().getPos().z;
-				Vector3 up = GetTransport().getUp();
+				float sensY = info.y * 0.01f * GetTransform().getPos().z;
+				Vector3 up = GetTransform().getUp();
 				up.z = 0;
 				up.normalize();
-				Vector3 newPos = GetTransport().getPos() + (up * sensY);
-				GetTransport().moveTo(newPos);
+				Vector3 newPos = GetTransform().getPos() + (up * sensY);
+				GetTransform().moveTo(newPos);
 			}
 		}
 	};
@@ -64,8 +64,8 @@ void ObjCamera::OnUpdate()
 {
 	if (mPlayer != nullptr)
 	{
-		Vector3 pos = mPlayer->GetTransport().getPos();
-		GetTransport().moveTo(pos + Vector3(25, 25, 50));
+		Vector3 pos = mPlayer->GetTransform().getPos();
+		GetTransform().moveTo(pos + Vector3(25, 25, 50));
 	}
 
 	mGroundRect = UpdateGroundRect();
@@ -144,7 +144,7 @@ void ObjCamera::GetOrthogonalMat(Matrix4& _mat, double _left, double _right, dou
 Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 {
 	if (mIsOrthogonal)
-		return GetTransport().getView();
+		return GetTransform().getView();
 
 	double wh = (mWidth - 17) / 2; //Window 좌우 경계 픽셀 제외
 	double hh = (mHeight - 40) / 2; //window title 및 하단 경계 픽셀 제외
@@ -152,7 +152,7 @@ Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 	double pixelRateY = (hh - _pixelY) / hh;
 	double width_half = tan(DegToRad(mFovDegHori*0.5));
 	double height_half = width_half / mAspect;
-	Vector3 dirA = GetTransport().getView() + width_half * pixelRateX * GetTransport().getCross() + height_half * pixelRateY * GetTransport().getUp();
+	Vector3 dirA = GetTransform().getView() + width_half * pixelRateX * GetTransform().getCross() + height_half * pixelRateY * GetTransform().getUp();
 	dirA.normalize();
 	return dirA;
 }
@@ -162,7 +162,7 @@ Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 	Vector4 camPt = pt * getProjMat().invert();
 	Vector4 projPt = camPt * getPosMat_D3D().invert();
 	Vector3 worldPt(projPt.x / projPt.w, projPt.y / projPt.w, projPt.z / projPt.w);
-	Vector3 view = worldPt - GetTransport().getPos();
+	Vector3 view = worldPt - GetTransform().getPos();
 
 	return view.normalize();
 }
@@ -174,14 +174,14 @@ jRect ObjCamera::UpdateGroundRect()
 	{
 		double width_half = mOrthRect.Size().x * 0.5;
 		double height_half = mOrthRect.Size().y * 0.5;
-		Vector3 posA = GetTransport().getPos() + width_half * GetTransport().getCross() + height_half * GetTransport().getUp();
-		Vector3 posB = GetTransport().getPos() + width_half * GetTransport().getCross() - height_half * GetTransport().getUp();
-		Vector3 posC = GetTransport().getPos() - width_half * GetTransport().getCross() + height_half * GetTransport().getUp();
-		Vector3 posD = GetTransport().getPos() - width_half * GetTransport().getCross() - height_half * GetTransport().getUp();
-		Vector2 gptA = jLine3D(posA, GetTransport().getView()).GetXY(0);
-		Vector2 gptB = jLine3D(posB, GetTransport().getView()).GetXY(0);
-		Vector2 gptC = jLine3D(posC, GetTransport().getView()).GetXY(0);
-		Vector2 gptD = jLine3D(posD, GetTransport().getView()).GetXY(0);
+		Vector3 posA = GetTransform().getPos() + width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
+		Vector3 posB = GetTransform().getPos() + width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
+		Vector3 posC = GetTransform().getPos() - width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
+		Vector3 posD = GetTransform().getPos() - width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
+		Vector2 gptA = jLine3D(posA, GetTransform().getView()).GetXY(0);
+		Vector2 gptB = jLine3D(posB, GetTransform().getView()).GetXY(0);
+		Vector2 gptC = jLine3D(posC, GetTransform().getView()).GetXY(0);
+		Vector2 gptD = jLine3D(posD, GetTransform().getView()).GetXY(0);
 		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
 		rt.ClipMinus();
 	}
@@ -189,14 +189,14 @@ jRect ObjCamera::UpdateGroundRect()
 	{
 		double width_half = tan(DegToRad(mFovDegHori*0.5));
 		double height_half = width_half / mAspect;
-		Vector3 dirA = GetTransport().getView() + width_half * GetTransport().getCross() + height_half * GetTransport().getUp();
-		Vector3 dirB = GetTransport().getView() + width_half * GetTransport().getCross() - height_half * GetTransport().getUp();
-		Vector3 dirC = GetTransport().getView() - width_half * GetTransport().getCross() + height_half * GetTransport().getUp();
-		Vector3 dirD = GetTransport().getView() - width_half * GetTransport().getCross() - height_half * GetTransport().getUp();
-		Vector2 gptA = jLine3D(GetTransport().getPos(), dirA).GetXY(0);
-		Vector2 gptB = jLine3D(GetTransport().getPos(), dirB).GetXY(0);
-		Vector2 gptC = jLine3D(GetTransport().getPos(), dirC).GetXY(0);
-		Vector2 gptD = jLine3D(GetTransport().getPos(), dirD).GetXY(0);
+		Vector3 dirA = GetTransform().getView() + width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
+		Vector3 dirB = GetTransform().getView() + width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
+		Vector3 dirC = GetTransform().getView() - width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
+		Vector3 dirD = GetTransform().getView() - width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
+		Vector2 gptA = jLine3D(GetTransform().getPos(), dirA).GetXY(0);
+		Vector2 gptB = jLine3D(GetTransform().getPos(), dirB).GetXY(0);
+		Vector2 gptC = jLine3D(GetTransform().getPos(), dirC).GetXY(0);
+		Vector2 gptD = jLine3D(GetTransform().getPos(), dirD).GetXY(0);
 		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
 		rt.ClipMinus();
 	}
@@ -206,10 +206,10 @@ jRect ObjCamera::UpdateGroundRect()
 Matrix4 ObjCamera::getPosMat_D3D()
 {
 	Matrix4 mat;
-	Vector3 pos = GetTransport().getPos();
-	Vector3 cross = GetTransport().getCross();
-	Vector3 view = GetTransport().getView();
-	Vector3 up = GetTransport().getUp();
+	Vector3 pos = GetTransform().getPos();
+	Vector3 cross = GetTransform().getCross();
+	Vector3 view = GetTransform().getView();
+	Vector3 up = GetTransform().getUp();
 	mat.identity();
 	mat.setColumn(0, cross);
 	mat.setColumn(1, up);
@@ -222,10 +222,10 @@ Matrix4 ObjCamera::getPosMat_D3D()
 Matrix4 ObjCamera::getPosMat_GL()
 {
 	Matrix4 mat;
-	Vector3 pos = GetTransport().getPos();
-	Vector3 cross = GetTransport().getCross();
-	Vector3 view = GetTransport().getView();
-	Vector3 up = GetTransport().getUp();
+	Vector3 pos = GetTransform().getPos();
+	Vector3 cross = GetTransform().getCross();
+	Vector3 view = GetTransform().getView();
+	Vector3 up = GetTransform().getUp();
 	mat.identity();
 	mat.setColumn(0, cross);
 	mat.setColumn(1, up);
@@ -261,7 +261,7 @@ void ObjCamera::getFrustumInfo(float& left, float& right, float& bottom, float& 
 }
 void ObjCamera::getOrthofInfo(float& left, float& right, float& bottom, float& top, float& zNear, float& zFar)
 {
-	float h_half = (float)GetTransport().z * (float)tan(mFov*DegToRad);
+	float h_half = (float)GetTransform().z * (float)tan(mFov*DegToRad);
 	top = h_half;
 	bottom = -top;
 	left = bottom*(float)mAspect;
