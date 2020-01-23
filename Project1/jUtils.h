@@ -47,7 +47,8 @@ public:
 	static void Split(string _str, const char* _del, vector<string>& _vec);
 	static strings Split2(string _str, const char* _del);
 	static double ToDouble(string _str) { return stod(_str); }
-	static string ToString(int _val) { return to_string(_val); }
+	template<typename Ty>
+	static string ToString(Ty _val) { return to_string(_val); }
 	static chars LoadTarga(string fullname, int& height, int& width, bool _isInvert = false);
 	static void ReadTargaSize(string fullname, int& height, int& width, int& size);
 	static bool LoadFile(string path, int* _bufSize, char** _buf);

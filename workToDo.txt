@@ -17,6 +17,7 @@ Resource
 - shader rendering, params 정리필요
 - GameObject, Component Loading시스템 개선 필요
 - GameObject Naiming 시스템 정리 필요
+- 경로 정리
 Terrain
 Combat Game Logic
 (enemy AI, regen, attack, health, death...)

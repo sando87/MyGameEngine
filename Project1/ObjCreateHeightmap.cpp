@@ -121,8 +121,8 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 	bool ret = parse.Load(path_fullname);
 	_warnif(!ret);
 
-	jMesh mesh(PATH_RESOURCES + string("mesh/") + parse.GetValue("mesh"));
-	Vector3 worldPos = parse.GetValue<Vector3>("worldPos");
+	jMesh mesh(PATH_RESOURCES + string("mesh/") + parse.GetValue(MF_Mesh));
+	Vector3 worldPos = parse.GetValue<Vector3>(MF_WorldPos);
 	if (mesh.GetVerticies().size() > 0)
 	{
 		vector<VertexFormat>& vecs = mesh.GetVerticies();
@@ -134,7 +134,7 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 	}
 	else if(mesh.GetStream())
 	{
-		string shaderType = parse.GetValue("shader");
+		string shaderType = parse.GetValue(MF_Shader);
 		chars stream = mesh.GetStream();
 		if (shaderType == "terrain")
 		{

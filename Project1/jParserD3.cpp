@@ -1,6 +1,7 @@
 #include "jParserD3.h"
 #include "jRenderer.h"
 #include "jShaderHeader.h"
+#include "jParserMeta.h"
 
 #define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
@@ -1329,28 +1330,23 @@ bool ExpMesh::ExportMetaInfo(string path)
 	}
 	
 	float renderOrder = GetRenderOrder();
-	string ret = objname + "\n";
-	ret += type + "\n";
-	ret += alpha ? "TRUE\n" : "FALSE\n";
-	ret += depth ? "TRUE\n" : "FALSE\n";
-	ret += to_string(metaInfo.worldPosition.x) + " ";
-	ret += to_string(metaInfo.worldPosition.y) + " ";
-	ret += to_string(metaInfo.worldPosition.z) + "\n";
-	ret += animName + "\n";
-	ret += to_string(renderOrder) + "\n";
+	jParserMeta meta;
+	meta.SetValue(MF_Mesh, objname);
+	meta.SetValue(MF_Shader, type);
+	meta.SetValue(MF_Alpha, alpha ? "TRUE" : "FALSE");
+	meta.SetValue(MF_Depth, depth ? "TRUE" : "FALSE");
+	meta.SetValue(MF_WorldPos, jUtils::ToString(metaInfo.worldPosition.x) + " " + jUtils::ToString(metaInfo.worldPosition.y) + " " + jUtils::ToString(metaInfo.worldPosition.z));
+	meta.SetValue(MF_Anim, animName);
+	meta.SetValue(MF_Order, jUtils::ToString(renderOrder));
 	int cnt = metaInfo.vectors.size();
 	for (int i = 0; i < cnt; ++i)
-	{
-		ret += to_string(metaInfo.vectors[i].x) + " ";
-		ret += to_string(metaInfo.vectors[i].y) + " ";
-		ret += to_string(metaInfo.vectors[i].z) + "\n";
-	}
+		meta.SetValue(MF_Texel, jUtils::ToString(metaInfo.vectors[i].x) + " " + jUtils::ToString(metaInfo.vectors[i].y) + " " + jUtils::ToString(metaInfo.vectors[i].z));
 
 	cnt = metaInfo.images.size();
 	for (int i = 0; i < cnt; ++i)
-		ret += metaInfo.images[i] + "\n";
+		meta.SetValue(MF_Img, metaInfo.images[i]);
 
-	jUtils::SaveToFile(folderPath, name + ".txt", ret);
+	jUtils::SaveToFile(folderPath, name + ".txt", meta.ToString());
 	
 	return true;
 }

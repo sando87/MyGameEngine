@@ -10,22 +10,6 @@ jParserMeta::jParserMeta()
 jParserMeta::~jParserMeta()
 {
 }
-
-//string jParserMeta::GetValue(string field)
-//{
-//	auto iter = mData.find(field);
-//	return iter == mData.end() ? "" : iter->second;
-//}
-//
-//strings jParserMeta::GetValues(string field)
-//{
-//	strings ret;
-//	auto range = mData.equal_range(field);
-//	for (auto iter = range.first; iter != range.second; ++iter)
-//		ret->push_back(iter->second);
-//	return ret;
-//}
-
 bool jParserMeta::Load(string fullname)
 {
 	strings lines = jUtils::LoadLines(fullname);
@@ -37,4 +21,18 @@ bool jParserMeta::Load(string fullname)
 	}
 
 	return mData.empty() ? false : true;
+}
+
+string jParserMeta::ToString()
+{
+	string ret = "";
+	for (auto iter : mData)
+		ret += iter.first + "\t\t:" + iter.second + "\r\n";
+
+	return ret;
+}
+
+void jParserMeta::SetValue(string field, string value)
+{
+	mData.insert(make_pair(field, value));
 }

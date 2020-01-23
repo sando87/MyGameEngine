@@ -1,2 +1,0 @@
-worldPos:1271.000000 822.000000 0.000000
-child	:MyObject_397.txt

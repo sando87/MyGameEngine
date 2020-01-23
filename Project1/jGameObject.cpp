@@ -46,21 +46,21 @@ bool jGameObject::LoadTxt(string filename)
 		return false;
 	}
 
-	mName = parse.GetValue("name");
-	string filenameObj = parse.GetValue("mesh");
-	vector<string> filenameImgs = parse.GetValues("img");
+	mName = parse.GetValue(MF_Name);
+	string filenameObj = parse.GetValue(MF_Mesh);
+	vector<string> filenameImgs = parse.GetValues(MF_Img);
 	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + filenameObj));
 	for(int i = 0; i < filenameImgs.size(); ++i)
 		AddComponent(new jImage(PATH_RESOURCES + string("img/") + filenameImgs[i]));
 
-	string shaderType = parse.GetValue("shader");
+	string shaderType = parse.GetValue(MF_Shader);
 	if (shaderType == "terrain")
 	{
 		jShaderTerrain* shader = new jShaderTerrain();
-		shader->SetAlphaOn(parse.GetValue<bool>("alpha"));
-		shader->SetDepthOn(parse.GetValue<bool>("depth"));
-		shader->SetRenderOrder(parse.GetValue<double>("order"));
-		vector<Vector3> texels = parse.GetValues<Vector3>("texel");
+		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha));
+		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth));
+		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
+		vector<Vector3> texels = parse.GetValues<Vector3>(MF_Texel);
 		ShaderParamsTerrain& param = shader->GetParams();
 		int cnt = min(sizeof(param.vectors) / sizeof(param.vectors[0]), texels.size());
 		for (int i = 0; i < cnt; ++i)
@@ -75,9 +75,9 @@ bool jGameObject::LoadTxt(string filename)
 	else if (shaderType == "default")
 	{
 		jShaderDefault* shader = new jShaderDefault();
-		shader->SetAlphaOn(parse.GetValue<bool>("alpha")); //ObjCreateHeightMap 积己矫 false
-		shader->SetDepthOn(parse.GetValue<bool>("depth")); //ObjCreateHeightMap 积己矫 true
-		shader->SetRenderOrder(parse.GetValue<double>("order"));
+		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha)); //ObjCreateHeightMap 积己矫 false
+		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth)); //ObjCreateHeightMap 积己矫 true
+		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
 		ShaderParamsDefault& param = shader->GetParams();
 		param.material.diffuse = Vector4f(1, 1, 1, 1);
 		param.light.direction = Vector4f(-1, -1, -1, 0);
@@ -86,14 +86,14 @@ bool jGameObject::LoadTxt(string filename)
 	else if (shaderType == "skin")
 	{
 		jShaderSkin* shader = new jShaderSkin();
-		shader->SetRenderOrder(parse.GetValue<double>("order"));
+		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
 		AddComponent(shader);
 	}
 
-	string filenameAnim = parse.GetValue("anim");
+	string filenameAnim = parse.GetValue(MF_Anim);
 	AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + filenameAnim));
 
-	GetTransport().moveTo(parse.GetValue<Vector3>("worldPos"));
+	GetTransport().moveTo(parse.GetValue<Vector3>(MF_WorldPos));
 	return true;
 }
 void jGameObject::StandOnTerrain()

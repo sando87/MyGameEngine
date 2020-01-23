@@ -1,6 +1,18 @@
 #pragma once
 #include "junks.h"
 
+#define MF_Name			"name"
+#define MF_WorldPos	"worldPos"
+#define MF_Mesh			"mesh"
+#define MF_Shader		"shader"
+#define MF_Alpha			"alpha"
+#define MF_Depth			"depth"
+#define MF_Anim			"anim"
+#define MF_Order			"order"
+#define MF_Texel			"texel"
+#define MF_Img			"img"
+#define MF_Child			"child"
+
 class jParserMeta
 {
 public:
@@ -8,6 +20,8 @@ public:
 	~jParserMeta();
 
 	bool Load(string fullname);
+	string ToString();
+	void SetValue(string field, string value);
 	template<typename Ty = string> Ty GetValue(string field);
 	template<typename Ty = string> vector<Ty> GetValues(string field);
 private:

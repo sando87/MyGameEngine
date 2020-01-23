@@ -33,7 +33,7 @@ void ObjPlayer::OnStart()
 	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_397_P.txt");
 
 	mAnim = new jAnimatorGroup();
-	vector<string> childs = meta.GetValues("child");
+	vector<string> childs = meta.GetValues(MF_Child);
 	for (string fullnameChild : childs)
 	{
 		jGameObject* child = new jGameObject();
@@ -49,7 +49,7 @@ void ObjPlayer::OnStart()
 	mCamera = &mEngine->GetCamera();
 	mTerrain = &mEngine->GetTerrain();
 
-	GetTransport().moveTo(meta.GetValue<Vector3>("worldPos"));
+	GetTransport().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
 
 	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
 	{
