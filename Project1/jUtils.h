@@ -51,8 +51,8 @@ public:
 	static string ToString(Ty _val) { return to_string(_val); }
 	static chars LoadTarga(string fullname, int& height, int& width, bool _isInvert = false);
 	static void ReadTargaSize(string fullname, int& height, int& width, int& size);
-	static bool LoadFile(string path, int* _bufSize, char** _buf);
-	static chars LoadFile2(string path);
+	static bool LoadFile(string fullname, int* _bufSize, char** _buf);
+	static chars LoadFile2(string fullname);
 	static strings LoadLines(string fullname);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);

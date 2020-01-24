@@ -14,20 +14,23 @@ jImage::~jImage()
 void jImage::OnLoad()
 {
 	string fullname = GetFullname();
-	string ext = jUtils::GetFileExtension(fullname);
-	if (ext == "dump")
-		return;
-
-	char* data = (char*)jCaches::CacheClass(fullname, [](string fullname) {
-		int h = 0;
-		int w = 0;
-		chars buf = jUtils::LoadTarga(fullname, h, w);
-		if (!buf)
-			return (char*)nullptr;
 	
-		int size = buf->size();
-		char* img = new char[size];
-		memcpy(img, &buf[0], size);
+	char* data = (char*)jCaches::CacheClass(fullname, [](string _fullname) {
+		string ext = jUtils::GetFileExtension(_fullname);
+		chars buf;
+		int h, w = 0;
+		if (ext == "dump")
+			buf = jUtils::LoadFile2(_fullname);
+		else
+			buf = jUtils::LoadTarga(_fullname, h, w);
+	
+		char* img = nullptr;
+		if (buf)
+		{
+			int size = buf->size();
+			img = new char[size];
+			memcpy(img, &buf[0], size);
+		}
 		return img;
 	});
 	

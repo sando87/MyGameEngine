@@ -69,14 +69,14 @@ bool jGameObject::LoadTxt(string filename)
 		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth));
 		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
 		vector<Vector3> texels = parse.GetValues<Vector3>(MF_Texel);
-		ShaderParamsTerrain& param = shader->GetParams();
-		int cnt = min(sizeof(param.vectors) / sizeof(param.vectors[0]), texels.size());
+		ShaderBufferBasic& param = shader->GetParamBasic();
+		int cnt = min(sizeof(param.texels) / sizeof(param.texels[0]), texels.size());
 		for (int i = 0; i < cnt; ++i)
 		{
-			param.vectors[i].x = texels[i].x;
-			param.vectors[i].y = texels[i].y;
-			param.vectors[i].z = texels[i].z;
-			param.vectors[i].w = 0;
+			param.texels[i].x = texels[i].x;
+			param.texels[i].y = texels[i].y;
+			param.texels[i].z = texels[i].z;
+			param.texels[i].w = 0;
 		}
 		AddComponent(shader);
 	}
@@ -86,9 +86,6 @@ bool jGameObject::LoadTxt(string filename)
 		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha)); //ObjCreateHeightMap 积己矫 false
 		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth)); //ObjCreateHeightMap 积己矫 true
 		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
-		ShaderParamsDefault& param = shader->GetParams();
-		param.material.diffuse = Vector4f(1, 1, 1, 1);
-		param.light.direction = Vector4f(-1, -1, -1, 0);
 		AddComponent(shader);
 	}
 	else if (shaderType == "skin")

@@ -30,7 +30,40 @@ struct VertexFormatPC
 	Vector4f c;
 };
 
-
+struct ShaderBufferBasic
+{
+	Matrix4f worldMat;
+	Matrix4f viewMat;
+	Matrix4f projectionMat;
+	Vector4f matAmbient;
+	Vector4f matDiffuse;
+	Vector4f matSpecular;
+	Vector4f matShininess;
+	Vector4f lightPosition;
+	Vector4f lightDirection;
+	Vector4f lightColor;
+	Vector4f lightReserve;
+	Vector2f spriteIndex;
+	Vector2f spriteStep;
+	Vector4f texels[12];
+	ShaderBufferBasic() { 
+		memset(this, 0x00, sizeof(ShaderBufferBasic));
+		worldMat.identity();
+		viewMat.identity();
+		projectionMat.identity();
+		matDiffuse = Vector4f(1, 1, 1, 1);
+		lightDirection = Vector4f(-1, -1, -1, 0);
+	}
+};
+struct ShaderBufferSkin
+{
+	Matrix4f bones[45];
+	ShaderBufferSkin() 
+	{
+		for (int i = 0; i < 45; ++i)
+			bones[i].identity();
+	}
+};
 struct ShaderBufferWVP //should be 16byte aligned
 {
 	Matrix4f world;

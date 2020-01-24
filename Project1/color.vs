@@ -6,11 +6,21 @@
 /////////////
 // GLOBALS //
 /////////////
-cbuffer MatrixBuffer
+cbuffer BasicBuffer : register(b0)
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
+    float4 g_ambient;
+    float4 g_diffuse;
+	float4 g_specular;
+	float4 g_shininess;
+    float4 g_position;
+    float4 g_direction;
+	float4 g_color;
+	float4 g_reserve;
+    float4 g_uvInfo;
+	float4 texels[12];
 };
 
 

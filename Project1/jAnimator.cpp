@@ -1,6 +1,7 @@
 #include "jAnimator.h"
 #include "jShaderSkin.h"
 #include "jTime.h"
+#include "jCaches.h"
 
 jAnimator::jAnimator(string name)
 {
@@ -11,35 +12,53 @@ jAnimator::~jAnimator()
 }
 void jAnimator::OnLoad()
 {
-	strings lines = jUtils::LoadLines(GetFullname());
-	if (!lines)
-		return;
+	string keyFullname = GetFullname();
+	vector<AnimationClip> * rets = (vector<AnimationClip> *)jCaches::CacheClass(keyFullname, [](string _fullname) {
+		vector<AnimationClip> * clips = nullptr;
 
-	int num = lines->size();
-	int idx = 0;
-	while(idx < num)
-	{
-		strings pieces = jUtils::Split2(lines[idx], ",");
-		string clipName = pieces[0];
-		if(mAnims.find(clipName) == mAnims.end())
-			mAnims[clipName] = AnimationClip();
-		AnimationClip& clip = mAnims[clipName];
-		clip.name = clipName;
-		clip.frameRate = 1 / 30.0f;
-
-		idx++;
-		while (idx < num)
+		strings lines = jUtils::LoadLines(_fullname);
+		if (lines)
 		{
-			mat4s key;
-			if (jUtils::CsvToMat(lines[idx], *key) == false)
-				break;
+			clips = new vector<AnimationClip>();
+			int num = lines->size();
+			int idx = 0;
+			while (idx < num)
+			{
+				strings pieces = jUtils::Split2(lines[idx], ",");
+				string clipName = pieces[0];
+				clips->push_back(AnimationClip());
+				AnimationClip& clip = clips->back();
+				clip.name = clipName;
+				clip.frameRate = 1 / 30.0f;
 
-			clip.keyMats.push_back(key);
-			idx++;
+				idx++;
+				while (idx < num)
+				{
+					mat4s key;
+					if (jUtils::CsvToMat(lines[idx], *key) == false)
+						break;
+
+					clip.keyMats.push_back(key);
+					idx++;
+				}
+
+				clip.endTime = clip.frameRate * clip.keyMats.size();
+			}
 		}
 
-		clip.endTime = clip.frameRate * clip.keyMats.size();
+		return clips;
+	});
+
+	if (rets != nullptr)
+	{
+		for (int i = 0; i < rets->size(); ++i)
+		{
+			AnimationClip& clip = (*rets)[i];
+			mAnims[clip.name] = clip;
+		}
 	}
+
+	
 	SetAnimation("idle");
 	mShader = GetGameObject()->FindComponent<jShaderSkin>();
 }
@@ -48,9 +67,11 @@ void jAnimator::OnUpdate()
 	if (mShader != nullptr)
 	{
 		mat4s mats = Animate(jTime::Delta());
-		ShaderParamsSkin& param = mShader->GetParams();
+		ShaderBufferSkin& param = mShader->GetParamSkin();
 		for (int i = 0; i < 45; ++i)
+		{
 			param.bones[i] = mats[i];
+		}
 	}
 }
 mat4s jAnimator::Animate(float _deltaTime)

@@ -6,16 +6,21 @@
 /////////////
 // GLOBALS //
 /////////////
-cbuffer MatrixBuffer : register(b0)
+cbuffer BasicBuffer : register(b0)
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
-};
-
-cbuffer TexelVector : register(b1)
-{
-	float4 vectors[12];
+    float4 g_ambient;
+    float4 g_diffuse;
+	float4 g_specular;
+	float4 g_shininess;
+    float4 g_position;
+    float4 g_direction;
+	float4 g_color;
+	float4 g_reserve;
+    float4 g_uvInfo;
+	float4 texels[12];
 };
 
 
@@ -58,18 +63,18 @@ PixelInputType jVS(VertexInputType input)
 	// 픽셀 쉐이더의 텍스처 좌표를 저장한다.
 	input.tex0.z = 1.0f;
 	input.tex0.w = 0;
-    output.tex0.x = dot(input.tex0, vectors[0]);
-	output.tex0.y = dot(input.tex0, vectors[1]);
-    output.tex1.x = dot(input.tex0, vectors[2]);
-	output.tex1.y = dot(input.tex0, vectors[3]);
-    output.tex2.x = dot(input.tex0, vectors[4]);
-	output.tex2.y = dot(input.tex0, vectors[5]);
-    output.tex3.x = dot(input.tex0, vectors[6]);
-	output.tex3.y = dot(input.tex0, vectors[7]);
-    output.tex4.x = dot(input.tex0, vectors[8]);
-	output.tex4.y = dot(input.tex0, vectors[9]);
-    output.tex5.x = dot(input.tex0, vectors[10]);
-	output.tex5.y = dot(input.tex0, vectors[11]);    
+    output.tex0.x = dot(input.tex0, texels[0]);
+	output.tex0.y = dot(input.tex0, texels[1]);
+    output.tex1.x = dot(input.tex0, texels[2]);
+	output.tex1.y = dot(input.tex0, texels[3]);
+    output.tex2.x = dot(input.tex0, texels[4]);
+	output.tex2.y = dot(input.tex0, texels[5]);
+    output.tex3.x = dot(input.tex0, texels[6]);
+	output.tex3.y = dot(input.tex0, texels[7]);
+    output.tex4.x = dot(input.tex0, texels[8]);
+	output.tex4.y = dot(input.tex0, texels[9]);
+    output.tex5.x = dot(input.tex0, texels[10]);
+	output.tex5.y = dot(input.tex0, texels[11]);    
     
     return output;
 }

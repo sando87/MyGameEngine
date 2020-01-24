@@ -144,11 +144,11 @@ chars jUtils::LoadTarga(string fullname, int& height, int& width, bool _isInvert
 	return pBuf;
 }
 
-bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
+bool jUtils::LoadFile(string fullname, int* _bufSize, char** _buf)
 {
 	FILE* filePtr = NULL;
 	int filesize = 0;
-	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+	if (fopen_s(&filePtr, fullname.c_str(), "rb") != 0)
 		return false;
 
 	fseek(filePtr, 0, SEEK_END);
@@ -164,11 +164,11 @@ bool jUtils::LoadFile(string path, int* _bufSize, char** _buf)
 	fclose(filePtr);
 	return true;
 }
-chars jUtils::LoadFile2(string path)
+chars jUtils::LoadFile2(string fullname)
 {
 	FILE* filePtr = NULL;
 	int filesize = 0;
-	if (fopen_s(&filePtr, path.c_str(), "rb") != 0)
+	if (fopen_s(&filePtr, fullname.c_str(), "rb") != 0)
 		return chars();
 
 	fseek(filePtr, 0, SEEK_END);

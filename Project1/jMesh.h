@@ -27,6 +27,7 @@ public:
 
 	virtual void OnLoad();
 
+	bool LoadFile();
 	bool LoadCube(int size);
 	bool LoadRectangle(Vector2 center, Vector2 size);
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);

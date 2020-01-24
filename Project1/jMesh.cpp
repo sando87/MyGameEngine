@@ -1,6 +1,6 @@
 #include "jMesh.h"
 #include "jLoader.h"
-
+#include "jCaches.h"
 
 jMesh::jMesh(string _fullname)
 {
@@ -20,6 +20,24 @@ void jMesh::OnLoad()
 	if (fullname.length() <= 0)
 		return;
 
+	jMesh * ret = (jMesh *)jCaches::CacheClass(fullname, [](string _fullname) {
+		jMesh * mesh = new jMesh();
+		mesh->SetFullname(_fullname);
+		mesh->LoadFile();
+		return mesh;
+	});
+
+	if (ret != nullptr)
+	{
+		mStream = ret->mStream;
+		mPrimitive = ret->mPrimitive;
+		mVerticies = ret->mVerticies;
+		mIndicies = ret->mIndicies;
+	}
+}
+bool jMesh::LoadFile()
+{
+	string fullname = GetFullname();
 	jLoader data;
 	if (jUtils::GetFileExtension(fullname) == "obj")
 	{
@@ -33,7 +51,7 @@ void jMesh::OnLoad()
 	{
 		mStream = jUtils::LoadFile2(fullname);
 		mPrimitive = PrimitiveMode::TriangleList;
-		return;
+		return true;
 	}
 
 	ObjectInfo& info = data.mObjects[0];
@@ -46,7 +64,7 @@ void jMesh::OnLoad()
 		vertex.texel = info.UV[vertIdx.y];
 		vertex.normal = info.Normal[vertIdx.z];
 		vertex.boneIndexs = info.BoneIndexs.size() > 0 ? info.BoneIndexs[vertIdx.x] : Vector4n();
-		vertex.weights = info.Weights.size() > 0 ? info.Weights[vertIdx.x] : Vector4f(1,0,0,0);
+		vertex.weights = info.Weights.size() > 0 ? info.Weights[vertIdx.x] : Vector4f(1, 0, 0, 0);
 
 		mVerticies.push_back(vertex);
 
@@ -60,6 +78,7 @@ void jMesh::OnLoad()
 	}
 
 	mPrimitive = PrimitiveMode::TriangleList;
+	return true;
 }
 bool jMesh::LoadCube(int size)
 {
