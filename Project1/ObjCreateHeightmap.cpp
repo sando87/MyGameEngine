@@ -2,13 +2,20 @@
 #include "jMesh.h"
 #include "jImage.h"
 #include "jShaderColor.h"
-#include "jInput.h"
 #include "jRenderer.h"
 #include "jBitmap.h"
 #include "ObjCamera.h"
 #include "jZMapLoader.h"
 #include "jParserMeta.h"
 #include "jShaderHeader.h"
+#include "jInputEvent.h"
+
+class jEventHeightMap : public jInputEvent
+{
+private:
+	int mIndex = 0;
+	virtual void OnKeyDown(char ch);
+};
 
 #define CONF_Width (640)
 #define CONF_Height (480)
@@ -31,27 +38,8 @@ ObjCreateHeightmap::~ObjCreateHeightmap()
 
 void ObjCreateHeightmap::OnStart()
 {
+	AddComponent(new jEventHeightMap());
 	LoadBlocksInfo();
-	int* _idx = new int();
-	jInput::GetInst().mKeyboard += [this, _idx](const unsigned char * info) {
-		int& idx = *_idx;
-		if (info[31])
-		{
-			idx = (idx + 1) % mBlocks.size();
-			Vector4n cur = mBlocks[idx];
-			double min = cur.z;
-			double max = cur.w;
-			SetCamera(cur.x, cur.y, min, max);
-			Sleep(100);
-		}
-		else if (info[30])
-		{
-			CaptureAndSaveHeightMap(idx);
-			Sleep(100);
-		}
-
-	};
-	
 }
 
 void ObjCreateHeightmap::LoadBlocksInfo()
@@ -167,3 +155,19 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 	return true;
 }
 
+void jEventHeightMap::OnKeyDown(char ch)
+{
+	ObjCreateHeightmap* obj = (ObjCreateHeightmap*)GetGameObject();
+	if (ch == 's')
+	{
+		mIndex = (mIndex + 1) % obj->mBlocks.size();
+		Vector4n cur = obj->mBlocks[mIndex];
+		double min = cur.z;
+		double max = cur.w;
+		obj->SetCamera(cur.x, cur.y, min, max);
+	}
+	else if (ch == 'a')
+	{
+		obj->CaptureAndSaveHeightMap(mIndex);
+	}
+}

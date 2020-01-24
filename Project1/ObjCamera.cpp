@@ -1,8 +1,15 @@
 #include "ObjCamera.h"
 #include "junks.h"
 #include "jLine3D.h"
-#include "jInput.h"
 #include "jGameObjectMgr.h"
+#include "jInputEvent.h"
+
+class jEventCamera : public jInputEvent
+{
+private:
+	virtual void OnMouseDrag(Vector2n delta, int type);
+	virtual void OnMouseWheel(int delta);
+};
 
 INITIALIZER(camera)
 {
@@ -19,46 +26,16 @@ ObjCamera::~ObjCamera()
 {
 }
 
+void ObjCamera::OnLoad()
+{
+	AddComponent(new jEventCamera());
+}
+
 void ObjCamera::OnStart()
 {
 	mPlayer = GetEngine().FindGameObject("ObjPlayer");
 	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
 	GetTransform().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
-	jInput::GetInst().mMouse += [&](auto info)
-	{
-		if (info.z > 0)
-			GetTransform().goForward(10.0f);
-		else if (info.z < 0)
-			GetTransform().goForward(-10.0f);
-
-		if (info.middle & 0x80 && info.x != 0)
-		{
-			jLine3D line(GetTransform().getPos(), GetTransform().getView());
-			Vector3 pos = line.GetXY(0);
-			GetTransform().rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), info.x);
-		}
-
-		if (info.left & 0x80)
-		{
-			if (info.x != 0)
-			{
-				float sensX = -info.x * 0.01f * GetTransform().getPos().z;
-				Vector3 cross = GetTransform().getCross();
-				cross.normalize();
-				Vector3 newPos = GetTransform().getPos() + (cross * sensX);
-				GetTransform().moveTo(newPos);
-			}
-			if (info.y != 0)
-			{
-				float sensY = info.y * 0.01f * GetTransform().getPos().z;
-				Vector3 up = GetTransform().getUp();
-				up.z = 0;
-				up.normalize();
-				Vector3 newPos = GetTransform().getPos() + (up * sensY);
-				GetTransform().moveTo(newPos);
-			}
-		}
-	};
 }
 void ObjCamera::OnUpdate()
 {
@@ -270,3 +247,37 @@ void ObjCamera::getOrthofInfo(float& left, float& right, float& bottom, float& t
 	zFar = (float)mFar;
 }
 */
+
+
+void jEventCamera::OnMouseDrag(Vector2n delta, int type)
+{
+	Vector3 pos = GetGameObject()->GetTransform().getPos();
+	Vector3 view = GetGameObject()->GetTransform().getView();
+	jTransform& trans = GetGameObject()->GetTransform();
+	if (type == 2) //middle
+	{
+		jLine3D line(pos, view);
+		Vector3 pos = line.GetXY(0);
+		trans.rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), delta.x);
+	}
+	else if (type == 0) //left
+	{
+		float sensX = -delta.x * 0.01f * pos.z;
+		float sensY = delta.y * 0.01f * pos.z;
+		Vector3 cross = trans.getCross();
+		Vector3 up = trans.getUp();
+		up.z = 0;
+		cross.normalize();
+		up.normalize();
+		Vector3 newPos = pos + (cross * sensX) + (up * sensY);
+		trans.moveTo(newPos);
+	}
+}
+
+void jEventCamera::OnMouseWheel(int delta)
+{
+	if (delta > 0)
+		GetGameObject()->GetTransform().goForward(10.0f);
+	else if (delta < 0)
+		GetGameObject()->GetTransform().goForward(-10.0f);
+}

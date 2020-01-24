@@ -4,21 +4,15 @@
 #include "junks.h"
 #include "jDirectXheader.h"
 
+enum DetectType
+{
+	MouseUp, MouseDown, MouseMove, MouseWheel, KeyUp, KeyDown
+};
+
 class jInput
 {
 public:
 	static jInput& GetInst() { static jInput inst; return inst; }
-	typedef struct _jMouseInfo {
-		int    x;
-		int    y;
-		int    z;
-		unsigned char   left;
-		unsigned char   right;
-		unsigned char   middle;
-		unsigned char   reserve;
-		int    fixedX;
-		int    fixedY;
-	} jMouseInfo;
 
 private:
 	jInput();
@@ -28,24 +22,36 @@ public:
 	void Release();
 	bool Update();
 
-	jFuncPtrList<void(jMouseInfo)> mMouse;
-	jFuncPtrList<void(jMouseInfo)> mMouseDown;
-	//std::function<void(jMouseInfo)> mMouse;
-	jFuncPtrList<void(const unsigned char*)> mKeyboard;
+	jFuncPtrList<void(Vector2n, int)> MouseUp;
+	jFuncPtrList<void(Vector2n, int)> MouseDown;
+	jFuncPtrList<void(Vector2n, Vector2n)> MouseMove;
+	jFuncPtrList<void(int)> MouseWheel;
+	jFuncPtrList<void(char)> KeyUp;
+	jFuncPtrList<void(char)> KeyDown;
+
+	list<pair<DetectType, int>>& GetDetectedInputs() { return mDetectedInputs; }
+	Vector2n GetMouseDelta() { return Vector2n(mMouseState.lX, mMouseState.lY); }
+	Vector2n GetMousePoint() { return mMousePosition; }
 
 private:
-	IDirectInput8 * m_directInput = nullptr;
-	IDirectInputDevice8* m_keyboard = nullptr;
-	IDirectInputDevice8* m_mouse = nullptr;
+	IDirectInput8 * mDirectInput = nullptr;
+	IDirectInputDevice8* mKeyboardDev = nullptr;
+	IDirectInputDevice8* mMouseDev = nullptr;
 
-	DIMOUSESTATE mMousePreviousInfo;
-	unsigned char m_keyboardState[256] = { 0, };
-	DIMOUSESTATE m_mouseState;
-	bool isKeyIN();
-	bool isMouseIN();
-	bool isMouseDown();
-	int m_screenWidth = 0;
-	int m_screenHeight = 0;
+	unordered_map<char, char> mToAscii;
+	DIMOUSESTATE mMousePrevState = { 0, };
+	DIMOUSESTATE mMouseState = { 0, };
+	unsigned char mKeyboardPrevState[256] = { 0, };
+	unsigned char mKeyboardState[256] = { 0, };
+
+	list<pair<DetectType, int>> mDetectedInputs;
+	
+	Vector2n mMousePosition;
+	int mScreenWidth = 0;
+	int mScreenHeight = 0;
+
+	void DetectInputs();
+	void CallEvents();
 };
 
 #endif

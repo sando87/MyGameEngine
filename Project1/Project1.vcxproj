@@ -139,6 +139,7 @@
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGrid.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
+    <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGrid.h" />
     <ClInclude Include="jHealthPoint.h" />
+    <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />

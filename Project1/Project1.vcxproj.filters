@@ -194,6 +194,9 @@
     <ClCompile Include="jTransform.cpp">
       <Filter>소스 파일\Math</Filter>
     </ClCompile>
+    <ClCompile Include="jInputEvent.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -369,6 +372,9 @@
     </ClInclude>
     <ClInclude Include="jTransform.h">
       <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jInputEvent.h">
+      <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

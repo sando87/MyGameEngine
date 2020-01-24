@@ -5,7 +5,6 @@
 #include "jImage.h"
 #include "jShaderSkin.h"
 #include "ObjTerrainMgr.h"
-#include "jInput.h"
 #include "jTime.h"
 #include "jCrash.h"
 #include "jHealthPoint.h"

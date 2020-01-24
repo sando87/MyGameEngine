@@ -21,6 +21,7 @@ protected:
 class ObjPlayer : public jGameObject
 {
 public:
+	friend class jEventPlayer;
 	ObjPlayer();
 	virtual ~ObjPlayer();
 

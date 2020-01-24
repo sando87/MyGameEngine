@@ -7,6 +7,8 @@ class jShaderParser;
 class ObjParser : public jGameObject
 {
 public:
+	friend class jEventParser;
+
 	ObjParser();
 	~ObjParser();
 
@@ -18,6 +20,5 @@ public:
 	jParserD3* mParser;
 	jShaderParser* mShader;
 
-	int animIndex = 0;
 };
 

@@ -4,6 +4,7 @@
 class ObjCreateHeightmap : public jGameObject
 {
 public:
+	friend class jEventHeightMap;
 	ObjCreateHeightmap();
 	virtual ~ObjCreateHeightmap();
 

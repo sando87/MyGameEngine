@@ -14,8 +14,9 @@ public:
 	Matrix4 getPosMat_GL();
 	Matrix4 getProjMat() { return mMatProj; }
 
-	void OnStart();
-	void OnUpdate();
+	virtual void OnLoad();
+	virtual void OnStart();
+	virtual void OnUpdate();
 	Vector3 GetViewOnMouse(int _x, int _y);
 	Vector3 ScreenToWorldView(int _pixelX, int _pixelY);
 	jRect GetGroundRect() { return mGroundRect; }

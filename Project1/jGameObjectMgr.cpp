@@ -111,11 +111,8 @@ bool jGameObjectMgr::Initialize()
 		//213,22 - 불타는장작,커튼
 	}
 
-	jInput::GetInst().mKeyboard += [this](const unsigned char* key) {
-		//char keys[256] = { 0, };
-		//memcpy(keys, key, 256);
-		
-		if (key[78] != 0)
+	jInput::GetInst().KeyDown += [this](char key) {
+		if (key == '+')
 		{
 			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(false);
 			tmpIdx = (tmpIdx + 1) % vecObjs.size();
@@ -134,9 +131,8 @@ bool jGameObjectMgr::Initialize()
 				pDataVS->head.crc, pDataVS->head.totalSize, 
 				pDataPS->head.crc, pDataPS->head.totalSize,
 				pos.x, pos.y, pos.z);
-			Sleep(200);
 		}
-		else if (key[74] != 0)
+		else if (key == '-')
 		{
 			vecObjs[tmpIdx]->FindComponent<jShader>()->SetEnable(false);
 			tmpIdx--;
@@ -156,15 +152,7 @@ bool jGameObjectMgr::Initialize()
 				pDataVS->head.crc, pDataVS->head.totalSize,
 				pDataPS->head.crc, pDataPS->head.totalSize,
 				pos.x, pos.y, pos.z);
-			Sleep(200);
 		}
-		// enter key[41]
-		// a key[30]
-		// 1 key[2]
-		// num9 key[73]
-		// unm6 key[77]
-		// + key[78]
-		// - key[74]
 	};
 
 	return true;

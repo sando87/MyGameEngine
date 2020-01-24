@@ -6,7 +6,6 @@
 #include "jTransform.h"
 #include "jImage.h"
 #include "jTime.h"
-#include "jInput.h"
 #include "jBoneTree.h"
 #include "jOS_APIs.h"
 #include "jCrash.h"
@@ -14,6 +13,13 @@
 #include "jLine3D.h"
 #include "jAStar.h"
 #include "jParserMeta.h"
+#include "jInputEvent.h"
+
+class jEventPlayer : public jInputEvent
+{
+private:
+	virtual void OnMouseDown(Vector2n pt, int type);
+};
 
 ObjPlayer::ObjPlayer()
 {
@@ -47,6 +53,8 @@ void ObjPlayer::OnLoad()
 	mAnim->SetAnimation("idle");
 
 	GetTransform().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
+
+	AddComponent(new jEventPlayer());
 }
 
 void ObjPlayer::OnStart()
@@ -54,25 +62,6 @@ void ObjPlayer::OnStart()
 	mCamera = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
 	mTerrain = (ObjTerrainMgr *)GetEngine().FindGameObject("ObjTerrainMgr");
 
-	jInput::GetInst().mMouseDown += [this](jInput::jMouseInfo info)
-	{
-		Vector2 screenPt = jOS_APIs::GetCursorScreenPos();
-		Vector3 view = mCamera->ScreenToWorldView(screenPt.x, screenPt.y);
-	
-		mTarget = GetEngine().RayCast(mCamera->GetTransform().getPos(), view);
-	
-		Vector2 pt;
-		bool isVaild = mTerrain->RayCastTerrain(mCamera->GetTransform().getPos(), view, pt);
-		if (isVaild == false)
-		{
-			jLine3D line3d(mCamera->GetTransform().getPos(), view);
-			Vector3 tmpPT = line3d.GetXY(GetTransform().getPos().z);
-			Vector3 moveStart = GetTransform().getPos();
-			moveStart.z = mCamera->GetTransform().getPos().z;
-			mTerrain->RayCastTerrain(moveStart, tmpPT - moveStart, pt);
-		}
-		StartNavigate(Vector2(pt.x, pt.y));
-	};
 
 	//AddComponent((new jCrash())->Init(1, 2, [this](jCrashs objs) {
 	//	if (!objs) 
@@ -236,3 +225,22 @@ void jAnimatorGroup::AddEvent(string name, float rate, function<void(void)> even
 	firstAnimator->AddEvent(name, rate, event);
 }
 
+void jEventPlayer::OnMouseDown(Vector2n pt, int type)
+{
+	ObjPlayer* player = (ObjPlayer*)GetGameObject();
+	Vector3 view = player->mCamera->ScreenToWorldView(pt.x, pt.y);
+
+	player->mTarget = player->GetEngine().RayCast(player->mCamera->GetTransform().getPos(), view);
+
+	Vector2 groundPT;
+	bool isVaild = player->mTerrain->RayCastTerrain(player->mCamera->GetTransform().getPos(), view, groundPT);
+	if (isVaild == false)
+	{
+		jLine3D line3d(player->mCamera->GetTransform().getPos(), view);
+		Vector3 tmpPT = line3d.GetXY(player->GetTransform().getPos().z);
+		Vector3 moveStart = player->GetTransform().getPos();
+		moveStart.z = player->mCamera->GetTransform().getPos().z;
+		player->mTerrain->RayCastTerrain(moveStart, tmpPT - moveStart, groundPT);
+	}
+	player->StartNavigate(Vector2(groundPT.x, groundPT.y));
+}

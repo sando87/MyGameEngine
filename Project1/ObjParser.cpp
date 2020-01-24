@@ -3,7 +3,15 @@
 #include "jParserS2.h"
 #include "jShaderParser.h"
 #include "jTransform.h"
-#include "jInput.h"
+#include "jInputEvent.h"
+
+class jEventParser : public jInputEvent
+{
+private:
+	int mAnimIndex = 0;
+	virtual void OnKeyDown(char ch);
+	virtual void OnKeyPressed(char ch);
+};
 
 #define IS_DIABLO
 
@@ -57,34 +65,38 @@ void ObjParser::OnStart()
 	GetTransform().moveTo(pos);
 
 	if (mParser->mAnims.size() > 0)
+		AddComponent(new jEventParser());
+}
+
+void jEventParser::OnKeyDown(char ch)
+{
+	ObjParser* obj = (ObjParser*)GetGameObject();
+	if (ch == 'z')
 	{
-		jInput::GetInst().mKeyboard += [this](const unsigned char* key)
-		{
-			_echoN(animIndex);
-			for (int i = 0; i < 45; ++i)
-				mShader->mBones[i] = mParser->mAnims[0].keys[animIndex][i];
-
-
-			if (key[30] != 0)
-			{
-				animIndex++;
-				animIndex %= mParser->mAnims[0].keys.size();
-				Sleep(500);
-			}
-			else if (key[31] != 0)
-			{
-				animIndex--;
-				animIndex = animIndex < 0 ? mParser->mAnims[0].keys.size() - 1 : animIndex;
-				Sleep(500);
-			}
-			else
-			{
-				animIndex++;
-				animIndex %= mParser->mAnims[0].keys.size();
-			}
-
-	
-		};
+		mAnimIndex++;
+		mAnimIndex %= obj->mParser->mAnims[0].keys.size();
+		_echoN(mAnimIndex);
+		for (int i = 0; i < 45; ++i)
+			obj->mShader->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
+	}
+	else if (ch == 'x')
+	{
+		mAnimIndex--;
+		mAnimIndex = mAnimIndex < 0 ? obj->mParser->mAnims[0].keys.size() - 1 : mAnimIndex;
+		_echoN(mAnimIndex);
+		for (int i = 0; i < 45; ++i)
+			obj->mShader->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
 	}
 }
 
+void jEventParser::OnKeyPressed(char ch)
+{
+	ObjParser* obj = (ObjParser*)GetGameObject();
+	if (ch == 'c')
+	{
+		mAnimIndex++;
+		mAnimIndex %= obj->mParser->mAnims[0].keys.size();
+		for (int i = 0; i < 45; ++i)
+			obj->mShader->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
+	}
+}
