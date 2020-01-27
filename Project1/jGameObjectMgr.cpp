@@ -20,7 +20,7 @@
 #include "jParserD3.h"
 #include "jMesh.h"
 
-jGameObjectMgr::jGameObjectMgr() : mCrashGrid(CRASH_SIZE, CRASH_STEP)
+jGameObjectMgr::jGameObjectMgr()
 {
 }
 jGameObjectMgr::~jGameObjectMgr()
@@ -194,14 +194,8 @@ void jGameObjectMgr::RunObjects()
 
 	mCoroutine.RunCoroutines();
 
-	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
-	{
-		jGameObject* obj = it->second;
-		jCrash* crash = obj->FindComponent<jCrash>();
-		if (crash != nullptr && crash->GetEnable())
-			crash->OnAddToGrid();
-	}
 
+	jCrash::Clear();
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
@@ -355,7 +349,3 @@ jGameObjects jGameObjectMgr::FindGameObjects(string objectName)
 	return ret;
 }
 
-jGrid<list<jCrash*>>* jGameObjectMgr::GetCrashGrid()
-{
-	return &mCrashGrid;
-}

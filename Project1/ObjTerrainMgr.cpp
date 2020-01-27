@@ -194,7 +194,7 @@ bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector2& outPoint)
 	return false;
 }
 
-bool ObjTerrainMgr::Reachable(Vector2 start, Vector2 end, Vector2 & lastPoint, double step)
+bool ObjTerrainMgr::FindObstacle(Vector2 start, Vector2 end, Vector2 & obstaclePos, double step)
 {
 	Vector2 dir = end - start;
 	dir.normalize();
@@ -206,12 +206,12 @@ bool ObjTerrainMgr::Reachable(Vector2 start, Vector2 end, Vector2 & lastPoint, d
 		bool ret = GetHeight(curPos.x, curPos.y, height);
 		if (!ret)
 		{
-			lastPoint = curPos;
-			return false;
+			obstaclePos = curPos;
+			return true;
 		}
 		curPos += dir;
 	}
-	lastPoint = end;
-	return true;
+	obstaclePos = end;
+	return false;
 }
 

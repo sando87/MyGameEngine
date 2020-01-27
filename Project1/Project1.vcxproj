@@ -137,9 +137,10 @@
     <ClCompile Include="jCoroutine.cpp" />
     <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
-    <ClCompile Include="jGrid.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
+    <ClCompile Include="jNavigator.cpp" />
+    <ClCompile Include="jTerrainCollider.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
@@ -195,9 +196,10 @@
     <ClInclude Include="jBoneNode.h" />
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
-    <ClInclude Include="jGrid.h" />
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
+    <ClInclude Include="jNavigator.h" />
+    <ClInclude Include="jTerrainCollider.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />

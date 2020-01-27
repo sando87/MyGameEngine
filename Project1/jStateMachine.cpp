@@ -15,8 +15,8 @@ void jStateMachine::OnUpdate()
 {
 	switch (mState)
 	{
-	case StateType::PATROL: OnPatrol(); break;
-	case StateType::CHASE: OnChase(); break;
+	case StateType::IDLE: OnIdle(); break;
+	case StateType::MOVE: OnMove(); break;
 	case StateType::ATTACK: OnAttack(); break;
 	case StateType::DAMAGED: OnDamaged(); break;
 	case StateType::STERNED: OnSterned(); break;

@@ -2,6 +2,10 @@
 #include "jTransform.h"
 #include "jGameObjectMgr.h"
 
+#define CrashGridStep 8
+
+unordered_multimap<u64, jCrash*> jCrash::mCrashGrid;
+
 jCrash::jCrash()
 {
 }
@@ -9,118 +13,92 @@ jCrash::jCrash()
 
 jCrash::~jCrash()
 {
-	if (mShape)
-		delete mShape;
 }
 
 void jCrash::OnLoad()
 {
-	mCrashGrid = GetGameObject()->GetEngine().GetCrashGrid();
-}
-void jCrash::OnAddToGrid()
-{
-	jRect3D rect = GetRect();
-	jRect rect2D = rect.TopBottom().ClipMinus();
-	vector<list<jCrash*>*> grids;
-	mCrashGrid->GetGrids(rect2D, grids);
-	for (list<jCrash*>* grid : grids)
-		grid->push_back(this);
 }
 void jCrash::OnUpdate()
 {
 	jRect3D rect = GetRect();
 	jRect rect2D = rect.TopBottom().ClipMinus();
-	vector<list<jCrash*>*> grids;
-	mCrashGrid->GetGrids(rect2D, grids);
-	for (list<jCrash*>* grid : grids)
+	vector<pair<u64,jCrashes>> grids;
+	GetGrids(rect2D, grids);
+	for (auto grid : grids)
 	{
-		list<jCrash*>::iterator me;
-		for (auto iter = grid->begin(); iter != grid->end(); ++iter)
+		u64 key = grid.first;
+		jCrashes crashes = grid.second;
+		for (auto iter = crashes->begin(); iter != crashes->end(); ++iter)
 		{
 			jCrash* candidate = *iter;
-			if (candidate == this)
-			{
-				me = iter;
+			if (!candidate->GetEnable())
 				continue;
-			}
 
 			CrashInfo result = CheckCrashed(this, candidate);
 			if (result.crashed)
 			{
 				result.target = candidate;
-				AddCrashedResult(result);
+				OnCollision(result);
 				result.target = this;
-				candidate->AddCrashedResult(result);
+				candidate->OnCollision(result);
 			}
 		}
-		grid->erase(me);
+		mCrashGrid.insert(make_pair(key, this));
 	}
 
-	CallbackCrashedObjects();
 }
 
 
 bool jCrash::IsCrash(jLine3D line)
 {
-	Vector3 center = mShape->GetCenter();
+	Vector3 center = GetCenter();
 	Vector3 pt = line.ClosePoint(center);
 	double dist = center.distance(pt);
-	return dist < mShape->round;
+	return dist < GetRound();
 }
 jRect3D jCrash::GetRect()
 {
 	Vector3 parentPos = GetGameObject()->GetTransform().getPos();
-	return mShape->GetRect(parentPos);
+	jRect3D rect = mShape.GetRect();
+	rect.Move(parentPos);
+	return rect;
+}
+Vector3 jCrash::GetCenter()
+{
+	Vector3 parentPos = GetGameObject()->GetTransform().getPos();
+	Vector3 center = mShape.GetCenter();
+	return center + parentPos;
+}
+void jCrash::Clear()
+{
+	mCrashGrid.clear();
 }
 CrashInfo jCrash::CheckCrashed(jCrash * left, jCrash * right)
 {
-	return CrashInfo();
+	CrashInfo ret;
+	Vector2 lPos = left->GetCenter();
+	Vector2 rPos = right->GetCenter();
+	double dist = lPos.distance(rPos);
+	ret.crashed = dist < left->GetRound() + right->GetRound();
+	ret.dist = dist;
+	return ret;
 }
-void jCrash::AddCrashedResult(CrashInfo result)
+
+void jCrash::GetGrids(jRect rect, vector<pair<u64, jCrashes>>& grids)
 {
-	jCrash* target = result.target;
-	if (mCrashedList.find(target) != mCrashedList.end())
-	{
-		mCrashedList[target].isNew = false;
-		mCrashedList[target].isKeep = true;
-		mCrashedList[target].info = result;
-	}
-	else
-	{
-		CrashTrigInfo info;
-		info.isNew = true;
-		info.isKeep = false;
-		info.info = result;
-		mCrashedList[target] = info;
-	}
-}
-void jCrash::CallbackCrashedObjects()
-{
-	jCrashInfos crashesEnter;
-	jCrashInfos crashesKeep;
-	jCrashInfos crashesLeave;
-	for (auto iter = mCrashedList.begin(); iter != mCrashedList.end(); )
-	{
-		if (iter->second.isNew)
+	int leftIdx = rect.Left() / CrashGridStep;
+	int rightIdx = rect.Right() / CrashGridStep;
+	int btnIdx = rect.Bottom() / CrashGridStep;
+	int topIdx = rect.Top() / CrashGridStep;
+	for(int y = btnIdx; y <= topIdx; ++y)
+		for (int x = leftIdx; x <= rightIdx; ++x)
 		{
-			iter->second.isNew = false;
-			iter->second.isKeep = false;
-			crashesEnter->push_back(iter->second.info);
-			++iter;
+			jCrashes crashes;
+			u64 key = ToU64(x, y);
+			auto range = mCrashGrid.equal_range(key);
+			for (auto iter = range.first; iter != range.second; ++iter)
+				crashes->push_back(iter->second);
+
+			grids.push_back(make_pair(key, crashes));
 		}
-		else if (iter->second.isKeep)
-		{
-			iter->second.isKeep = false;
-			crashesKeep->push_back(iter->second.info);
-			++iter;
-		}
-		else
-		{
-			crashesLeave->push_back(iter->second.info);
-			mCrashedList.erase(iter++);
-		}
-	}
-	if (mCallbacksEnter) mCallbacksEnter(crashesEnter);
-	if (mCallbacksKeep) mCallbacksKeep(crashesKeep);
-	if (mCallbacksLeave) mCallbacksLeave(crashesLeave);
 }

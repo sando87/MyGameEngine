@@ -2,7 +2,6 @@
 #define __JGAMEOBJECTMGR_H__
 
 #include "junks.h"
-#include "jGrid.h"
 #include "jCoroutine.h"
 
 class jGameObject;
@@ -22,7 +21,6 @@ private:
 
 	list<jGameObject*> mNewObjects;
 	unordered_multimap<string, jGameObject*> mObjects;
-	jGrid<list<jCrash*>> mCrashGrid;
 	jCoroutine mCoroutine;
 
 	int tmpIdx;
@@ -46,7 +44,6 @@ public:
 	template<typename Ty = jGameObject> shared_ptr_array<Ty*> FindGameObjects();
 	jGameObject* FindGameObject(string objectName);
 	jGameObjects FindGameObjects(string objectName);
-	jGrid<list<jCrash*>>* GetCrashGrid();
 };
 
 template<typename Ty>

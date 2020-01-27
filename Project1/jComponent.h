@@ -2,6 +2,8 @@
 #include "junks.h"
 #include "jGameObject.h"
 
+class jGameObjectMgr;
+
 class jComponent
 {
 public:
@@ -12,10 +14,12 @@ public:
 	virtual void OnUpdate() {}
 
 	void Load();
+	jGameObjectMgr& GetEngine();
 
 protected:
 	friend void jGameObject::AddComponent(jComponent* comp);
 
+	jGameObjectMgr* mEngine = nullptr;
 	Property_Getter(jGameObject*, GameObject, nullptr)
 	Property_GetSetter(bool, Enable, true)
 	Property_GetSetter(bool, Loaded, false)

@@ -106,6 +106,7 @@ void jGameObject::AddChild(jGameObject* child)
 void jGameObject::AddComponent(jComponent* comp)
 {
 	comp->mGameObject = this;
+	comp->mEngine = mEngine;
 	if (GetEngine().Added(this))
 		comp->Load();
 	mComponents.push_back(comp);

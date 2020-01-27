@@ -140,9 +140,6 @@
     <ClCompile Include="jFuncPtrList.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="jGrid.cpp">
-      <Filter>소스 파일\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="jHeightMap.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
@@ -197,6 +194,12 @@
     <ClCompile Include="jInputEvent.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="jTerrainCollider.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jNavigator.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -227,9 +230,6 @@
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="jFuncPtrList.h">
-      <Filter>소스 파일\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="jGrid.h">
       <Filter>소스 파일\Utils</Filter>
     </ClInclude>
     <ClInclude Include="jHeightMap.h">
@@ -374,6 +374,12 @@
       <Filter>소스 파일\Math</Filter>
     </ClInclude>
     <ClInclude Include="jInputEvent.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jTerrainCollider.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jNavigator.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>

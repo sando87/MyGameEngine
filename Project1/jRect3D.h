@@ -19,6 +19,7 @@ private:
 
 public:
 	void SetRect(Vector3 pos, Vector3 size) { mMinXYZ = pos; mMaxXYZ = pos + size; }
+	void Move(Vector3 delta) { mMaxXYZ += delta; mMinXYZ += delta; }
 	Vector3 Center() { return (mMinXYZ + mMaxXYZ) * 0.5; }
 	Vector3 Pos() { return mMinXYZ; }
 	Vector3 Min() { return mMinXYZ; }

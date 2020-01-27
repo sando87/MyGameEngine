@@ -4,7 +4,7 @@
 
 enum StateType
 {
-	NONE, PATROL, CHASE, ATTACK, DAMAGED, STERNED, DYING, DEATH
+	NONE, IDLE, MOVE, ATTACK, DAMAGED, STERNED, DYING, DEATH
 };
 
 class jStateMachine : public jComponent
@@ -13,8 +13,8 @@ public:
 	jStateMachine();
 	virtual ~jStateMachine();
 
-	virtual void OnPatrol() {}
-	virtual void OnChase() {}
+	virtual void OnIdle() {}
+	virtual void OnMove() {}
 	virtual void OnAttack() {}
 	virtual void OnDamaged() {}
 	virtual void OnSterned() {}
@@ -23,6 +23,6 @@ public:
 
 	virtual void OnUpdate();
 
-	Property_GetSetter(StateType, State, StateType::PATROL)
+	Property_GetSetter(StateType, State, StateType::IDLE)
 };
 
