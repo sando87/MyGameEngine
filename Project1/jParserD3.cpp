@@ -89,7 +89,7 @@ void jParserD3::LoadResources(int idx)
 	string path = PATH_PARSER_DATA;
 	string filter = "*.dump";
 	jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
-
+	
 		vector<string> rets;
 		jUtils::Split(_str, "_.", rets);
 		unsigned long long nAddr = 0;
@@ -99,7 +99,7 @@ void jParserD3::LoadResources(int idx)
 		void* id = (void*)nAddr;
 		if (mMapRes.find(id) != mMapRes.end() || rets[idx + 1] == "c")
 			return true;
-
+	
 		int filesize = 0;
 		MyResBase* pBuf = nullptr;
 		bool ret = jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
@@ -108,12 +108,13 @@ void jParserD3::LoadResources(int idx)
 			_warn();
 			return true;
 		}
-
+	
 		mMapRes[id] = make_pair(pBuf, nullptr);
 		return true;
 	});
 
 
+	//map<int, Vector2n> mmap;
 	//path = PATH_PARSER_DATA;
 	//filter = "*_RenderingContext.bin";
 	//jUtils::ForEachFiles2(nullptr, (path + filter).c_str(), [&](void* _obj, string _str) {
@@ -125,6 +126,14 @@ void jParserD3::LoadResources(int idx)
 	//	int filesize = 0;
 	//	RenderContext* pBuf = nullptr;
 	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
+	//
+	//
+	//	if (260 < idx  && idx < 263)
+	//	{
+	//		u32 vsCrc = mMapRes[pBuf->vs_addr].first->crc;
+	//		u32 psCrc = mMapRes[pBuf->ps_addr].first->crc;
+	//		mmap[idx] = Vector2n(vsCrc, psCrc);
+	//	}
 	//
 	//	free(pBuf);
 	//	return KEEPGOING;

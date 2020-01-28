@@ -51,17 +51,17 @@ void ObjParser::OnStart()
 
 	mShader = new jShaderParser();
 	mShader->Load(mParser);
-	mShader->SetEnable(false);
+	//mShader->SetEnable(false);
 	AddComponent(mShader);
 
 	Vector3f basePos;
-	basePos.x = mParser->mCBMain.matWorld[3];
-	basePos.y = mParser->mCBMain.matWorld[7];
-	basePos.z = mParser->mCBMain.matWorld[11];
+	//basePos.x = mParser->mCBMain.matWorld[3];
+	//basePos.y = mParser->mCBMain.matWorld[7];
+	//basePos.z = mParser->mCBMain.matWorld[11];
 	//_printlog("%f %f %f \n", basePos.x, basePos.y, basePos.z);
 	Vector3 pos = GetTransform().getPos();
-	//pos.x = mOff;
-	pos = basePos;
+	pos.x = mOff;
+	//pos = basePos;
 	GetTransform().moveTo(pos);
 
 	if (mParser->mAnims.size() > 0)
