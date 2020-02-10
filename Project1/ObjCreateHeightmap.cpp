@@ -57,7 +57,7 @@ void ObjCreateHeightmap::LoadBlocksInfo()
 		double maxHeight = -1000;
 		jUtils::ForEachFiles2(nullptr, (path + foldername + "/*.txt").c_str(), [&](void *obj, string filename) {
 			Vector2 minmax;
-			bool ret = FindMinMaxHeight(foldername + "/" + filename, minmax);
+			bool ret = FindMinMaxHeight(path + foldername + "/" + filename, minmax);
 			if (ret)
 			{
 				minHeight = min(minHeight, minmax.x);
@@ -89,7 +89,12 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 	if (img)
 	{
 		Vector4n cur = mBlocks[idx];
-		string filename = jUtils::ToString(cur.x) + "_" + jUtils::ToString(cur.y) + ".bmp";
+		string posX = jUtils::ToString(cur.x);
+		string posY = jUtils::ToString(cur.y);
+		string minZ = jUtils::ToString(cur.z);
+		string maxZ = jUtils::ToString(cur.w);
+		string step = jUtils::ToString(CONF_Step);
+		string filename = posX + "_" + posY + "_" + step + "_" + minZ + "_" + maxZ + ".bmp";
 		jUtils::MakeFolder(PATH_RESOURCES + string("zmap/"));
 		string fullName = PATH_RESOURCES + string("zmap/") + filename;
 		
@@ -103,13 +108,14 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 	}
 }
 
-bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
+bool ObjCreateHeightmap::FindMinMaxHeight(string fullname, Vector2& result)
 {
 	jParserMeta parse;
-	bool ret = parse.Load(path_fullname);
+	bool ret = parse.Load(fullname);
 	_warnif(!ret);
 
 	jMesh mesh(PATH_RESOURCES + string("mesh/") + parse.GetValue(MF_Mesh));
+	mesh.Load();
 	Vector3 worldPos = parse.GetValue<Vector3>(MF_WorldPos);
 	if (mesh.GetVerticies().size() > 0)
 	{
@@ -120,14 +126,14 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 		result.x = worldPos.z + val.first->position.z;
 		result.y = worldPos.z + val.second->position.z;
 	}
-	else if(mesh.GetStream())
+	else if(!mesh.GetStream().empty())
 	{
 		string shaderType = parse.GetValue(MF_Shader);
-		chars stream = mesh.GetStream();
+		vector<char>& stream = mesh.GetStream();
 		if (shaderType == "terrain")
 		{
 			VertexFormatPT* pVert = (VertexFormatPT*)&stream[0];
-			int vertCnt = stream->size() / sizeof(VertexFormatPT);
+			int vertCnt = stream.size() / sizeof(VertexFormatPT);
 			vector<VertexFormatPT*> vecs;
 			for (int i = 0; i < vertCnt; ++i)
 				vecs.push_back(&pVert[i]);
@@ -140,7 +146,7 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 		else if (shaderType == "default")
 		{
 			VertexFormatPTN* pVert = (VertexFormatPTN*)&stream[0];
-			int vertCnt = stream->size() / sizeof(VertexFormatPTN);
+			int vertCnt = stream.size() / sizeof(VertexFormatPTN);
 			vector<VertexFormatPTN*> vecs;
 			for (int i = 0; i < vertCnt; ++i)
 				vecs.push_back(&pVert[i]);
@@ -158,7 +164,7 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string path_fullname, Vector2& result)
 void jEventHeightMap::OnKeyDown(char ch)
 {
 	ObjCreateHeightmap* obj = (ObjCreateHeightmap*)GetGameObject();
-	if (ch == 's')
+	if (ch == 'M')
 	{
 		mIndex = (mIndex + 1) % obj->mBlocks.size();
 		Vector4n cur = obj->mBlocks[mIndex];
@@ -166,7 +172,7 @@ void jEventHeightMap::OnKeyDown(char ch)
 		double max = cur.w;
 		obj->SetCamera(cur.x, cur.y, min, max);
 	}
-	else if (ch == 'a')
+	else if (ch == 'C')
 	{
 		obj->CaptureAndSaveHeightMap(mIndex);
 	}

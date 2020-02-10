@@ -33,6 +33,7 @@ public:
 	string GetAnimation();
 	void SetAnimation(string name);
 	void AddEvent(string name, float rate, function<void(void)> event);
+	void AddAnimationClip(string name);
 protected:
 	vector<jAnimator*> mChildAnimators;
 };
@@ -73,7 +74,7 @@ ObjPlayer::~ObjPlayer()
 void ObjPlayer::OnLoad()
 {
 	jParserMeta meta;
-	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_397_P.txt");
+	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_Player.txt");
 
 	mAnim = new jAnimatorGroup();
 	vector<string> childs = meta.GetValues(MF_Child);
@@ -86,7 +87,12 @@ void ObjPlayer::OnLoad()
 		mAnim->AddChild(child->FindComponent<jAnimator>());
 	}
 
-	mAnim->AddEvent("attack", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
+	mAnim->AddAnimationClip("idle");
+	mAnim->AddAnimationClip("walk");
+	mAnim->AddAnimationClip("attack1");
+	mAnim->AddAnimationClip("attack2");
+	mAnim->AddAnimationClip("attack3");
+	mAnim->AddEvent("attack1", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 	mAnim->SetAnimation("idle");
 
 	GetTransform().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
@@ -135,6 +141,12 @@ void jAnimatorGroup::AddEvent(string name, float rate, function<void(void)> even
 {
 	jAnimator* firstAnimator = mChildAnimators.front();
 	firstAnimator->AddEvent(name, rate, event);
+}
+
+void jAnimatorGroup::AddAnimationClip(string name)
+{
+	for (jAnimator* animator : mChildAnimators)
+		animator->AddAnimationClip(name);
 }
 
 void jEventPlayer::OnLoad()
@@ -197,7 +209,7 @@ void StateMachPlayer::OnMove()
 			if (CloseEnoughToTarget())
 			{
 				SetState(StateType::ATTACK);
-				mPlayer->mAnim->SetAnimation("attack");
+				mPlayer->mAnim->SetAnimation("attack1");
 			}
 		}
 		else
@@ -248,7 +260,7 @@ void StateMachPlayer::OnAttack()
 	if (CloseEnoughToTarget())
 	{
 		if (mPlayer->mAnim->GetAnimation() == "idle")
-			mPlayer->mAnim->SetAnimation("attack");
+			mPlayer->mAnim->SetAnimation("attack1");
 	}
 	else
 	{

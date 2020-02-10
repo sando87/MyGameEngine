@@ -83,8 +83,10 @@ bool jGameObject::LoadTxt(string filename)
 	else if (shaderType == "default")
 	{
 		jShaderDefault* shader = new jShaderDefault();
-		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha)); //ObjCreateHeightMap 积己矫 false
-		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth)); //ObjCreateHeightMap 积己矫 true
+		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha)); 
+		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth)); 
+		//shader->SetAlphaOn(false); //ObjCreateHeightMap 积己矫 false
+		//shader->SetDepthOn(true); //ObjCreateHeightMap 积己矫 true
 		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
 		AddComponent(shader);
 	}

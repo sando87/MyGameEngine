@@ -44,7 +44,7 @@ bool jShaderDefault::OnRender(ObjCamera* cam)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	u32 stride = sizeof(VertexFormatPTN);
-	u32 vertCount = mMesh->GetStream() ? mMesh->GetStream()->size() / stride : mMesh->GetVerticies().size();
+	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
 	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
 	return true;
 }
@@ -85,10 +85,10 @@ void jShaderDefault::LoadMesh()
 	mMesh->Load();
 	string key = mMesh->GetFullname();
 
-	if (mMesh->GetStream())
+	if (!mMesh->GetStream().empty())
 	{
-		chars stream = mMesh->GetStream();
-		CacheCBVertex(&stream[0], stream->size(), key);
+		vector<char>& stream = mMesh->GetStream();
+		CacheCBVertex(&stream[0], stream.size(), key);
 	}
 	else
 	{

@@ -57,13 +57,17 @@ void ObjEnemy::OnLoad()
 	AddComponent(crash);
 
 	AddComponent(new jTerrainCollider(crash->GetRound()));
+
+	jAnimator* anim = FindComponent<jAnimator>();
+	anim->AddAnimationClip("idle");
+	anim->AddAnimationClip("walk");
+	anim->AddAnimationClip("attack");
+	anim->AddEvent("attack", 0.6f, []() {_trace(); });
+	anim->AddEvent("attack", 1.0f, [anim]() { anim->SetAnimation("idle"); });
 }
 
 void ObjEnemy::OnStart()
 {
-	jAnimator* anim = FindComponent<jAnimator>();
-	anim->AddEvent("attack", 0.6f, []() {_trace(); });
-	anim->AddEvent("attack", 1.0f, [anim]() { anim->SetAnimation("idle"); });
 }
 
 void ObjEnemy::OnUpdate()

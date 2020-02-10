@@ -123,19 +123,19 @@ void jParserD3::LoadResources(int idx)
 	//	jUtils::Split(_str, "_.", rets);
 	//	int idx = atoi(rets[0].c_str());
 	//
-	//	int filesize = 0;
-	//	RenderContext* pBuf = nullptr;
-	//	jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
-	//
-	//
-	//	if (260 < idx  && idx < 263)
+	//	if (147 < idx  && idx < 182)
 	//	{
+	//		int filesize = 0;
+	//		RenderContext* pBuf = nullptr;
+	//		jUtils::LoadFile(path + _str, &filesize, (char**)&pBuf);
+	//
+	//
 	//		u32 vsCrc = mMapRes[pBuf->vs_addr].first->crc;
 	//		u32 psCrc = mMapRes[pBuf->ps_addr].first->crc;
 	//		mmap[idx] = Vector2n(vsCrc, psCrc);
+	//		free(pBuf);
 	//	}
 	//
-	//	free(pBuf);
 	//	return KEEPGOING;
 	//});
 
@@ -1120,8 +1120,8 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 		stringstream ss;
 		void* pTexAddr = GetTexResAddr(i);
 		//ss << "*_" << pTexAddr << "_*.tga";
-		ss << "*_" << pTexAddr << "_*.dump";
-		string imageName = jUtils::FindFile(PATH_PARSER_DATA, ss.str());
+		ss << "*_" << pTexAddr << "_t.dump";
+		string imageName = jUtils::FindFile(PATH_PARSER_DATA + ss.str());
 		mExportInfo.metaInfo.images.push_back(imageName);
 
 		Matrix4f& mat = mCBMain.matTex[i + 1];

@@ -36,13 +36,14 @@ public:
 
 	vector<VertexFormat>& GetVerticies() { return mVerticies; }
 	vector<u32>& GetIndicies() { return mIndicies; }
+	vector<char>& GetStream() { return mStream; }
 
 protected:
 
 	vector<VertexFormat> mVerticies;
 	vector<u32> mIndicies;
+	vector<char> mStream;
 
-	Property_Getter(chars, Stream, chars())
 	Property_Getter(PrimitiveMode, Primitive, PrimitiveMode::None)
 };
 

@@ -65,11 +65,12 @@ void ObjTerrainMgr::LoadingBlocks()
 
 			if (mCachedBlocks.find(key) == mCachedBlocks.end())
 			{
-				string filename = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE) + ".zmap";
+				string name = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE);
 
 				TerrainBlock block;
 				block.zMap = new jZMapLoader();
-				block.zMap->Load(PATH_RESOURCES + string("zmap/") + filename);
+				block.zMap->LoadHeights(PATH_RESOURCES + string("zmap/") + name);
+				block.zMap->LoadAccessables(PATH_RESOURCES + string("zmap/") + name);
 
 				LoadBlock(idxX, idxY, block);
 
@@ -166,24 +167,12 @@ bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector2& outPoint)
 {
 	dir.normalize();
 	Vector3 currentPos = pos;
-	bool validPos = false; 
-	while (currentPos.z > 0)
+	while (true)
 	{
 		currentPos += (dir * TERRAIN_STEP);
 
 		float height = 0;
-		if (!GetHeight(currentPos.x, currentPos.y, height))
-		{
-			if (validPos)
-			{
-				//클릭지점의 terrain값이 비정상적일 경우 마지막 유효했던 지점 출력(예외 루틴)
-				outPoint = currentPos - (dir * TERRAIN_STEP);
-				validPos = false;
-			}
-			continue;
-		}
-
-		validPos = true;
+		GetHeight(currentPos.x, currentPos.y, height);
 		if (currentPos.z < height)
 		{
 			//클릭지점의 terrain값이 정상적일 경우 유효한 지점 출력(정상적인 루틴)

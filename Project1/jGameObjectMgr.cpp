@@ -63,23 +63,23 @@ bool jGameObjectMgr::Initialize()
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
 
-	//AddGameObject(new ObjPlayer());
+	AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
 
 
-	jParserD3::LoadResources(1);
+	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 145; i < 0; ++i)
+	for(int i = 3; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
-		obj0->mOff = (i - 145) * 20.0f;
+		obj0->mOff = (i - 0) * 20.0f;
 		AddGameObject(obj0);
 		vecObjs.push_back(obj0);
 	}
 
-	for (int i = 250; i < 0; ++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		jParserD3 parser; 
 		if (!parser.Init(i))

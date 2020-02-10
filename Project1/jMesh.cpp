@@ -49,7 +49,8 @@ bool jMesh::LoadFile()
 	}
 	else if (jUtils::GetFileExtension(fullname) == "dump")
 	{
-		mStream = jUtils::LoadFile2(fullname);
+		chars buf = jUtils::LoadFile2(fullname);
+		mStream = *buf;
 		mPrimitive = PrimitiveMode::TriangleList;
 		return true;
 	}
@@ -291,6 +292,6 @@ void jMesh::Reset()
 	SetFullname("");
 	mVerticies.clear();
 	mIndicies.clear();
-	mStream->clear();
+	mStream.clear();
 	mPrimitive = PrimitiveMode::None;
 }

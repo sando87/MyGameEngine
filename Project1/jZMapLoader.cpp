@@ -1,33 +1,61 @@
 #include "jZMapLoader.h"
 #include "jBitmap.h"
 
-bool jZMapLoader::Load(string fullname)
-{
-	if (jUtils::GetFileExtension(fullname) != "zmap")
-		return false;
+#define GRID_SIZE 240
 
+bool jZMapLoader::LoadHeights(string name)
+{
+	string filter = name + "_*.heights";
+	string fullname = jUtils::FindFile(filter);
 	chars file = jUtils::LoadFile2(fullname);
 	if (!file)
 		return false;
 
-	int zmapHeadOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024;
-	int dataOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + sizeof(ZMapHeader);
+	string filename = jUtils::GetFilename(fullname);
+	strings pieces = jUtils::Split2(filename, "_");
+	_warnif(pieces->size() != 5);
+	int posX = jUtils::ToDouble(pieces[0]);
+	int posY = jUtils::ToDouble(pieces[1]);
+	int step = jUtils::ToDouble(pieces[2]);
+	int minZ = jUtils::ToDouble(pieces[3]);
+	int maxZ = jUtils::ToDouble(pieces[4]);
+	Header.step = step;
+	Header.minZ = minZ;
+	Header.maxZ = maxZ;
 
-	memcpy(&Header, &file[0] + zmapHeadOff, sizeof(Header));
+	int dataOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024;
 	int dataSize = file->size() - dataOff;
 	u8* pData = (u8*)&file[0] + dataOff;
-	Map.resize(dataSize);
+	Heights.resize(dataSize);
 	float sizeZ = Header.maxZ - Header.minZ;
 	for (int i = 0; i < dataSize; ++i)
 	{
 		float rate = pData[i] / 255.0f;
-		Map[i] = pData[i] == 0 ? -1000.0f : Header.minZ + (rate * sizeZ);
+		Heights[i] = Header.minZ + (rate * sizeZ);
 	}
 
-	Vector3 min(Header.minX, Header.minY, Header.minZ);
-	Vector3 max(Header.maxX, Header.maxY, Header.maxZ);
+	Vector3 min(posX, posY, Header.minZ);
+	Vector3 max(posX + GRID_SIZE, posY + GRID_SIZE, Header.maxZ);
 	Rect3D.SetRect(min, max - min);
-	Filename = jUtils::GetFilenameOnly(fullname);
+	Filename = name;
+	return true;
+}
+
+bool jZMapLoader::LoadAccessables(string name)
+{
+	string fullname = name + ".aces";
+	chars file = jUtils::LoadFile2(fullname);
+	if (!file)
+		return false;
+
+	int dataOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024;
+	int dataSize = file->size() - dataOff;
+	u8* pData = (u8*)&file[0] + dataOff;
+	Accessable.resize(dataSize);
+	for (int i = 0; i < dataSize; ++i)
+		Accessable[i] = pData[i] == 0 ? false : true;
+
+	Filename = name;
 	return true;
 }
 
@@ -42,11 +70,11 @@ bool jZMapLoader::GetHeight(float worldX, float worldY, float& outHeight)
 	int idxY = localY / Header.step;
 	int pitchCount = Rect3D.Size().x / Header.step;
 	int idx = idxY * pitchCount + idxX;
-	if (idx < 0 || idx >= Map.size() || Map[idx] == -1000.0f)
+	if (idx < 0 || idx >= Heights.size())
 		return false;
 
-	outHeight = Map[idx];
-	return true;
+	outHeight = Heights[idx];
+	return Accessable[idx];
 }
 
 bool jZMapLoader::Save(string fullname, jRect3D rt, int step, u32 * pixels, int imgWidth)
@@ -55,11 +83,9 @@ bool jZMapLoader::Save(string fullname, jRect3D rt, int step, u32 * pixels, int 
 	int size = sizeof(ZMapHeader) + (sizeof(float) * cnt * cnt);
 	ZMapHeader *outbuf = (ZMapHeader *)malloc(size);
 	memset(outbuf, 0x00, size);
-	outbuf->ext[0] = 'z'; outbuf->ext[1] = 'm'; outbuf->ext[2] = 'a'; outbuf->ext[3] = 'p';
-	outbuf->size = size;
 	outbuf->step = step;
-	outbuf->minX = rt.Min().x; outbuf->minY = rt.Min().y; outbuf->minZ = rt.Min().z;
-	outbuf->maxX = rt.Max().x; outbuf->maxY = rt.Max().y; outbuf->maxZ = rt.Max().z;
+	outbuf->minZ = rt.Min().z;
+	outbuf->maxZ = rt.Max().z;
 
 	struct tmpXYZW { u8 x;	u8 y;	u8 z;	u8 w;	};
 	float minZ = rt.Min().z;

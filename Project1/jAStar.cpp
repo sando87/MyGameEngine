@@ -16,10 +16,9 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 	if (mRunning)
 		return false;
 
+	Reset();
 	if (!Moveable(endWorldPos))
 		return false;
-
-	Reset();
 
 	mStep = step;
 	mStartPos = startWorldPos;
@@ -34,11 +33,14 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 		UpdateWeights(curIdx);
 		curIdx = FindNextKey();
 		if (curIdx == (u64)-1 || depth >= limitDepth)
-			return false;
+			break;
 		else if (curIdx == endKey)
 			break;
 	}
-	SearchRouteResult();
+
+	if(curIdx == endKey)
+		SearchRouteResult();
+
 	mRunning = false;
 	return true;
 }

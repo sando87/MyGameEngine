@@ -71,7 +71,7 @@ void ObjParser::OnStart()
 void jEventParser::OnKeyDown(char ch)
 {
 	ObjParser* obj = (ObjParser*)GetGameObject();
-	if (ch == 'z')
+	if (ch == 'Z')
 	{
 		mAnimIndex++;
 		mAnimIndex %= obj->mParser->mAnims[0].keys.size();
@@ -79,7 +79,7 @@ void jEventParser::OnKeyDown(char ch)
 		for (int i = 0; i < 45; ++i)
 			obj->mShader->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
 	}
-	else if (ch == 'x')
+	else if (ch == 'X')
 	{
 		mAnimIndex--;
 		mAnimIndex = mAnimIndex < 0 ? obj->mParser->mAnims[0].keys.size() - 1 : mAnimIndex;
@@ -92,7 +92,7 @@ void jEventParser::OnKeyDown(char ch)
 void jEventParser::OnKeyPressed(char ch)
 {
 	ObjParser* obj = (ObjParser*)GetGameObject();
-	if (ch == 'c')
+	if (ch == 'C')
 	{
 		mAnimIndex++;
 		mAnimIndex %= obj->mParser->mAnims[0].keys.size();

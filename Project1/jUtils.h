@@ -34,8 +34,8 @@ struct TargaHeader
 	unsigned char data2;
 };
 
-#define KEEPGOING true
-#define STOP false
+#define ForEach_KEEP true
+#define ForEach_STOP false
 
 
 class jUtils
@@ -56,18 +56,27 @@ public:
 	static strings LoadLines(string fullname);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
 	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
-	static string FindFile(string _path, string _filter);
+	static string FindFile(string _fullname);
 	static void MyCopyFile(string _from, string _to);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);
 	static void SaveToFile(string path, string filename, char* data, int size);
 	static void SaveToFile(string fullname, char* data, int size);
+	static string GetFilenameWithoutExt(string _fullname);
+	static string RemoveExtension(string _filename)
+	{
+		return _filename.substr(0, _filename.find_last_of("."));
+	}
 	static string GetFileExtension(string _filename)
 	{
 		return _filename.substr(_filename.find_last_of(".") + 1);
 	}
-	static string GetFilenameOnly(string _fullname)
+	static string GetFilename(string _fullname)
 	{
 		return _fullname.substr(_fullname.find_last_of("/") + 1);
+	}
+	static string GetPathname(string _fullname)
+	{
+		return _fullname.substr(0, _fullname.find_last_of("/") + 1);
 	}
 	static bool ExistFile(string _fullname)
 	{

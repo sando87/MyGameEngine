@@ -225,12 +225,13 @@ void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*
 		_findclose(handle);
 	}
 }
-string jUtils::FindFile(string _path, string _filter)
+string jUtils::FindFile(string _fullname)
 {
+	string pathname = GetPathname(_fullname);
 	string ret = "";
-	jUtils::ForEachFiles2(nullptr, (_path + _filter).c_str(), [&](void* _obj, string _str) {
-		ret = _str;
-		return STOP;
+	jUtils::ForEachFiles2(nullptr, _fullname.c_str(), [&](void* _obj, string _str) {
+		ret = pathname + _str;
+		return ForEach_STOP;
 	});
 	return ret;
 }
@@ -290,6 +291,16 @@ void jUtils::SaveToFile(string fullname, char * data, int size)
 	fwrite(data, 1, size, pFile);
 	fclose(pFile);
 	return;
+}
+
+string jUtils::GetFilenameWithoutExt(string _fullname)
+{
+	strings pieces = Split2(_fullname, "/.");
+	if (pieces->size() >= 2)
+		return pieces[pieces->size() - 2];
+	else if(pieces->size() == 1)
+		return pieces[0];
+	return "";
 }
 
 string jUtils::MatToCSV(Matrix4f * mat)

@@ -159,8 +159,8 @@ bool jBitmap::SaveAlpha(jRect3D rt, int step, int srcWidth, char* srcData, strin
 	int cnt = (rt.Max().x - rt.Min().x) / step;
 	int byteperpixel = 1;
 	int dataSize = cnt * cnt * byteperpixel;
-	//int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + sizeof(ZMapHeader) + dataSize;
-	int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + sizeof(ZMapHeader) + dataSize;
+	//int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + sizeof(ZMapHeader) + dataSize;
+	int totalSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024 + dataSize;
 
 	_BITMAPFILEHEADER    BitmapFileHeader = {
 		0x4d42, //Bmp Mark
@@ -184,13 +184,13 @@ bool jBitmap::SaveAlpha(jRect3D rt, int step, int srcWidth, char* srcData, strin
 		0,        //Number of Important Colors (Indexed Mode)
 	};
 
-	ZMapHeader zmapHead;
-	memset(&zmapHead, 0x00, sizeof(zmapHead));
-	zmapHead.ext[0] = 'z'; zmapHead.ext[1] = 'm'; zmapHead.ext[2] = 'a'; zmapHead.ext[3] = 'p';
-	zmapHead.size = sizeof(ZMapHeader);
-	zmapHead.step = step;
-	zmapHead.minX = rt.Min().x; zmapHead.minY = rt.Min().y; zmapHead.minZ = rt.Min().z;
-	zmapHead.maxX = rt.Max().x; zmapHead.maxY = rt.Max().y; zmapHead.maxZ = rt.Max().z;
+	//ZMapHeader zmapHead;
+	//memset(&zmapHead, 0x00, sizeof(zmapHead));
+	//zmapHead.ext[0] = 'z'; zmapHead.ext[1] = 'm'; zmapHead.ext[2] = 'a'; zmapHead.ext[3] = 'p';
+	//zmapHead.size = sizeof(ZMapHeader);
+	//zmapHead.step = step;
+	//zmapHead.minX = rt.Min().x; zmapHead.minY = rt.Min().y; zmapHead.minZ = rt.Min().z;
+	//zmapHead.maxX = rt.Max().x; zmapHead.maxY = rt.Max().y; zmapHead.maxZ = rt.Max().z;
 
 	struct tmpXYZW { u8 x;	u8 y;	u8 z;	u8 w; };
 	tmpXYZW colorTable[256] = { 0, };
@@ -229,8 +229,8 @@ bool jBitmap::SaveAlpha(jRect3D rt, int step, int srcWidth, char* srcData, strin
 	curPos += sizeof(BitmapInfoHeader);
 	memcpy(curPos, (char *)&colorTable, 1024);
 	curPos += 1024;
-	memcpy(curPos, (char *)&zmapHead, sizeof(zmapHead));
-	curPos += sizeof(zmapHead);
+	//memcpy(curPos, (char *)&zmapHead, sizeof(zmapHead));
+	//curPos += sizeof(zmapHead);
 	memcpy(curPos, (char *)&outData[0], dataSize);
 
 	jUtils::SaveToFile(fullname, (char *)&outBuf[0], totalSize);
