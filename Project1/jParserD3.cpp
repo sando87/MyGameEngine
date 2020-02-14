@@ -680,6 +680,8 @@ void* jParserD3::CreateD3DRescource(void* addr)
 
 		if(imgbuf)
 			pIF = ((MyRes_CreateTexture*)pData)->CreateResource(width, height, &imgbuf[0]);
+		else
+			pIF = ((MyRes_CreateTexture*)pData)->CreateResource(0, 0, nullptr);
 	}
 	break;
 	default:

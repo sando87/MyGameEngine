@@ -2,7 +2,7 @@
 #include "jGameObject.h"
 
 class jParserD3;
-class jShaderParser;
+class jShader;
 
 class ObjParser : public jGameObject
 {
@@ -18,7 +18,7 @@ public:
 	virtual void OnStart();
 
 	jParserD3* mParser;
-	jShaderParser* mShader;
+	jShader* mShader;
 
 };
 
