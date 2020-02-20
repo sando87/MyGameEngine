@@ -634,7 +634,7 @@ void* jParserD3::CreateD3DRescource(void* addr)
 	MyResBase* pData = mMapRes[addr].first;
 	void* pIF = mMapRes[addr].second;
 	if (pIF != nullptr)
-		return pIF;
+		return (pIF == (void*)-1) ? nullptr : pIF;
 
 	switch (pData->type)
 	{
@@ -687,7 +687,7 @@ void* jParserD3::CreateD3DRescource(void* addr)
 	default:
 		break;
 	}
-	mMapRes[addr].second = pIF;
+	mMapRes[addr].second = (pIF == nullptr) ? (void*)-1 : pIF;
 	return pIF;
 }
 ID3D11Buffer* jParserD3::GetResIndexBuffer()
@@ -772,9 +772,6 @@ bool jParserD3::Render()
 
 	for (int i = 0; i < 32; ++i)
 	{
-		if (i == 4)
-			continue;
-
 		TEXInfo& tb = mContext.tex[i];
 		ID3D11ShaderResourceView *pTexBuf = (ID3D11ShaderResourceView *)CreateD3DRescource(tb.addr);
 		if (pTexBuf != nullptr)

@@ -145,11 +145,10 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 
 	if (imgTGA == nullptr)
 	{
-		if (desc.ArraySize * desc.MipLevels > GetCount())
+		if (desc.ArraySize * desc.MipLevels > GetCount() || head.totalSize == sizeof(MyRes_CreateTexture))
 			return nullptr;
 
-		D3D11_SUBRESOURCE_DATA *pSubRes =
-			head.totalSize == sizeof(MyRes_CreateTexture) ? nullptr : subRes;
+		D3D11_SUBRESOURCE_DATA *pSubRes = subRes;
 
 		//desc.SampleDesc.Count = 1;
 		//desc.BindFlags = D3D10_BIND_FLAG::D3D10_BIND_SHADER_RESOURCE;
