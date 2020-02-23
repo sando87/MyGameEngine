@@ -69,16 +69,16 @@ void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, doub
 	mFovDegHori = RadToDeg(fovRadVerti);
 	mFovDegHori *= 2;
 }
-void ObjCamera::setOrthogonalMatrix(int _width, int _height, double _left, double _right, double _bottom, double _top, double _near, double _far)
+void ObjCamera::setOrthogonalMatrix(double _left, double _right, double _bottom, double _top, double _near, double _far)
 {
 	mIsOrthogonal = true;
-	mWidth = _width;
-	mHeight = _height;
+	mWidth = _right - _left;
+	mHeight = _top - _bottom;
 	GetOrthogonalMat(mMatProj, _left, _right, _bottom, _top, _near, _far);
 
 	mNear = _near;
 	mFar = _far;
-	mAspect = (double)_width / _height;
+	mAspect = (double)mWidth / mHeight;
 	mFovDegVerti = 0;
 	mFovDegHori = 0;
 

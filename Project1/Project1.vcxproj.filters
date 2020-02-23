@@ -200,6 +200,15 @@
     <ClCompile Include="jNavigator.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="ObjUI.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjEffect.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderUI.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -381,6 +390,15 @@
     </ClInclude>
     <ClInclude Include="jNavigator.h">
       <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjEffect.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjUI.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderUI.h">
+      <Filter>소스 파일\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

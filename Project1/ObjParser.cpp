@@ -64,7 +64,7 @@ void ObjParser::OnStart()
 	mShader = new jShaderParserOnly();
 	((jShaderParserOnly*)mShader)->mParser = mParser;
 	//mShader->Load(mParser);
-	mShader->SetEnable(false);
+	//mShader->SetEnable(false);
 	AddComponent(mShader);
 
 	Vector3f basePos;

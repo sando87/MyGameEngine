@@ -79,7 +79,7 @@ void ObjCreateHeightmap::SetCamera(int x, int y, int _min, int _max)
 
 	ObjCamera* cam = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
 	double camHeight = cam->GetTransform().getPos().z;
-	cam->setOrthogonalMatrix(CONF_Width, CONF_Height, 0, CONF_Width * CONF_Step, -CONF_Height * CONF_Step, 0, camHeight - _max, camHeight - _min);
+	cam->setOrthogonalMatrix(0, CONF_Width * CONF_Step, -CONF_Height * CONF_Step, 0, camHeight - _max, camHeight - _min);
 	cam->GetTransform().lookat(Vector3(x, y + 240, camHeight), Vector3(x, y + 240, 0), Vector3(0, 1, 0));
 }
 

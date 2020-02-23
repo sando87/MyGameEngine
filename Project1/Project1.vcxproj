@@ -144,11 +144,13 @@
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jNavigator.cpp" />
+    <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
+    <ClCompile Include="ObjEffect.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
     <ClCompile Include="jParserSub.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
@@ -186,6 +188,7 @@
     <ClCompile Include="ObjTerrain.cpp" />
     <ClCompile Include="ObjTerrainMgr.cpp" />
     <ClCompile Include="ObjParser.cpp" />
+    <ClCompile Include="ObjUI.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
@@ -203,12 +206,14 @@
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jNavigator.h" />
+    <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />
     <ClInclude Include="jTypeToString.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
+    <ClInclude Include="ObjEffect.h" />
     <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
     <ClInclude Include="jHeightMap.h" />
@@ -247,6 +252,7 @@
     <ClInclude Include="ObjTerrain.h" />
     <ClInclude Include="ObjTerrainMgr.h" />
     <ClInclude Include="ObjParser.h" />
+    <ClInclude Include="ObjUI.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Vectors.h" />

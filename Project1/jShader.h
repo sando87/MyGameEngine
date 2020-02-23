@@ -23,6 +23,9 @@ public:
 	ShaderBufferBasic&	GetParamBasic() { return mParamBasic; }
 	ShaderBufferSkin&	GetParamSkin() { return mParamSkin; }
 
+	void* LoadTextureRes(unsigned char* buf, int width, int height);
+	void ReleaseTextureRes(void* ptr);
+
 protected:
 	ID3D10Blob *					CompileShader(string filename);
 	ID3D11InputLayout *				CreateInputLayout(D3D11_INPUT_ELEMENT_DESC* layouts, int count, string vsFileName);
@@ -31,7 +34,7 @@ protected:
 	ID3D11ShaderResourceView *		CreateTextureView(ID3D11Texture2D* texture, D3D11_SHADER_RESOURCE_VIEW_DESC* viewDesc);
 	ID3D11Texture2D *				CreateTexture2D(D3D11_TEXTURE2D_DESC* texDesc, 
 														D3D11_SUBRESOURCE_DATA* texSubData, 
-														int width, int height, char* buf);
+														int width, int height, unsigned char* buf);
 
 
 	void CacheCBufferBasic();

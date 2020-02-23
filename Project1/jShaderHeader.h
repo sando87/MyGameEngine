@@ -11,6 +11,12 @@ struct VertexFormatPTN
 	Vector2f t;
 	Vector3f n;
 };
+struct VertexFormatPTC
+{
+	Vector3f p;
+	Vector2f t;
+	Vector4f c;
+};
 struct VertexFormatPT
 {
 	Vector3f p;

@@ -9,6 +9,8 @@
 #include "ObjPlayer.h"
 #include "ObjEnemy.h"
 #include "ObjCreateHeightmap.h"
+#include "ObjUI.h"
+#include "ObjEffect.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -65,16 +67,26 @@ bool jGameObjectMgr::Initialize()
 
 	//AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
+	//AddGameObject(new ObjUI());
+	AddGameObject(new ObjEffect());
 
-
-	jParserD3::LoadResources(1);
+	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 128; i < 129; ++i)
+	for(int i = 0; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
 		obj0->mOff = (i - 0) * 20.0f;
+		AddGameObject(obj0);
+		vecObjs.push_back(obj0);
+	}
+	int objs[] = { 103, 105, 108 };
+	for (int i = 0; i < 0; ++i)
+	{
+		ObjParser* obj0 = new ObjParser();
+		obj0->mFileIndex = objs[i];
+		obj0->mOff = (objs[i] - 0) * 20.0f;
 		AddGameObject(obj0);
 		vecObjs.push_back(obj0);
 	}

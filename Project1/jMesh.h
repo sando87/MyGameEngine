@@ -17,6 +17,7 @@ enum PrimitiveMode
 	None,
 	LineList,
 	TriangleList,
+	TriangleStrip,
 };
 
 class jMesh :	public jComponent

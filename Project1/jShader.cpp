@@ -52,7 +52,7 @@ ID3D11SamplerState * jShader::CreateSamplerState(D3D11_SAMPLER_DESC * desc)
 	}
 	return res;
 }
-ID3D11Texture2D * jShader::CreateTexture2D(D3D11_TEXTURE2D_DESC * texDesc, D3D11_SUBRESOURCE_DATA * texSubData, int width, int height, char * buf)
+ID3D11Texture2D * jShader::CreateTexture2D(D3D11_TEXTURE2D_DESC * texDesc, D3D11_SUBRESOURCE_DATA * texSubData, int width, int height, unsigned char * buf)
 {
 	ID3D11Texture2D* texture = nullptr;
 	if (FAILED(mDev->CreateTexture2D(texDesc, texSubData, &texture)))
@@ -74,6 +74,37 @@ ID3D11ShaderResourceView * jShader::CreateTextureView(ID3D11Texture2D* texture, 
 	}
 	//mDevContext->GenerateMips(texView);
 	return texView;
+}
+void * jShader::LoadTextureRes(unsigned char * buf, int width, int height)
+{
+	ID3D11ShaderResourceView *texView = nullptr;
+	//텍스처의 구조체를 설정합니다.
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Height = height;
+	textureDesc.Width = width;
+	textureDesc.MipLevels = 0;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	ID3D11Texture2D* texture = CreateTexture2D(&textureDesc, nullptr, width, height, (unsigned char *)buf);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1;
+	texView = CreateTextureView(texture, &srvDesc);
+	texture->Release();
+	return texView;
+}
+void jShader::ReleaseTextureRes(void * ptr)
+{
+	((ID3D11ShaderResourceView*)ptr)->Release();
 }
 ID3D10Blob * jShader::CompileShader(string filename)
 {
@@ -385,14 +416,14 @@ void jShader::AddCachedTextureView(void * buf, int width, int height, bool isCom
 			textureDesc.Width = width;
 			textureDesc.MipLevels = 0;
 			textureDesc.ArraySize = 1;
-			textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 			textureDesc.SampleDesc.Count = 1;
 			textureDesc.SampleDesc.Quality = 0;
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
 			textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			textureDesc.CPUAccessFlags = 0;
 			textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-			ID3D11Texture2D* texture = CreateTexture2D(&textureDesc, nullptr, width, height, (char *)buf);
+			ID3D11Texture2D* texture = CreateTexture2D(&textureDesc, nullptr, width, height, (unsigned char *)buf);
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 			srvDesc.Format = textureDesc.Format;

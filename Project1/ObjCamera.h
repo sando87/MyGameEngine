@@ -22,7 +22,7 @@ public:
 	jRect GetGroundRect() { return mGroundRect; }
 
 	void		setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar);
-	void		setOrthogonalMatrix(int _width, int _height, double _left, double _right, double _bottom, double _top, double _near, double _far);
+	void		setOrthogonalMatrix(double _left, double _right, double _bottom, double _top, double _near, double _far);
 
 private:
 	int mWidth;

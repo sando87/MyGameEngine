@@ -129,18 +129,14 @@ bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
 	mVerticies[2].position = Vector3(-size.x * 0.5, 0, size.y * 0.5);
 	mVerticies[3].position = Vector3(size.x * 0.5, 0, size.y * 0.5);
 
-	mVerticies[0].color = Vector4f(0, 1, 0, 1);
-	mVerticies[1].color = Vector4f(0, 1, 0, 1);
-	mVerticies[2].color = Vector4f(0, 1, 0, 1);
-	mVerticies[3].color = Vector4f(0, 1, 0, 1);
+	mVerticies[0].texel = Vector2f(0, 1);
+	mVerticies[1].texel = Vector2f(1, 1);
+	mVerticies[2].texel = Vector2f(0, 0);
+	mVerticies[3].texel = Vector2f(1, 0);
 
-	mIndicies.resize(2 * 3);
-
-	int idx = 0;
-	mIndicies[idx++] = 0;	mIndicies[idx++] = 2;	mIndicies[idx++] = 1;
-	mIndicies[idx++] = 1;	mIndicies[idx++] = 2;	mIndicies[idx++] = 3;
-
-	mPrimitive = PrimitiveMode::TriangleList;
+	mPrimitive = PrimitiveMode::TriangleStrip;
+	SetFullname("Rectangle");
+	SetLoaded(true);
 	return true;
 }
 bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)

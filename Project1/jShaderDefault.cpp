@@ -42,6 +42,8 @@ bool jShaderDefault::OnRender(ObjCamera* cam)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleList)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
+		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
 	u32 stride = sizeof(VertexFormatPTN);
 	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
