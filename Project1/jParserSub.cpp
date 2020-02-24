@@ -172,7 +172,7 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 		D3D11_TEXTURE2D_DESC textureDesc;
 		textureDesc.Height = height;
 		textureDesc.Width = width;
-		textureDesc.MipLevels = 0;
+		textureDesc.MipLevels = 1;
 		textureDesc.ArraySize = 1;
 		textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		textureDesc.SampleDesc.Count = 1;
@@ -180,7 +180,7 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 		textureDesc.Usage = D3D11_USAGE_DEFAULT;
 		textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 		textureDesc.CPUAccessFlags = 0;
-		textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		textureDesc.MiscFlags = 0;
 
 		HRESULT hResult = jRenderer::GetInst().GetDevice()->CreateTexture2D(&textureDesc, NULL, &texture);
 		if (FAILED(hResult))
@@ -193,7 +193,7 @@ void* MyRes_CreateTexture::CreateResource(int width, int height, char *imgTGA)
 		srvDesc.Format = textureDesc.Format;
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = -1;
+		srvDesc.Texture2D.MipLevels = 1;
 
 		hResult = jRenderer::GetInst().GetDevice()->CreateShaderResourceView(texture, &srvDesc, &pTex);
 		if (FAILED(hResult))

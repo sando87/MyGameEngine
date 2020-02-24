@@ -20,13 +20,9 @@ void ObjEffect::OnLoad()
 	mesh->LoadRectangle(Vector2(), Vector2(5, 5));
 	vector<VertexFormat>& verticies = mesh->GetVerticies();
 	verticies[0].texel = Vector2f(0, 1);
-	verticies[1].texel = Vector2f(1, 1);
+	verticies[1].texel = Vector2f(0.125f, 1);
 	verticies[2].texel = Vector2f(0, 0);
-	verticies[3].texel = Vector2f(1, 0);
-	//verticies[0].normal = Vector3f(1, 1, 1);
-	//verticies[1].normal = Vector3f(1, 1, 1);
-	//verticies[2].normal = Vector3f(1, 1, 1);
-	//verticies[3].normal = Vector3f(1, 1, 1);
+	verticies[3].texel = Vector2f(0.125f, 0);
 	AddComponent(mesh);
 
 	jImage* imgae = new jImage("./res/img/sprite.tga");
@@ -34,7 +30,7 @@ void ObjEffect::OnLoad()
 
 	mShader = new jShaderSprite();
 	ShaderBufferBasic& param = mShader->GetParamBasic();
-	param.spriteStep = Vector2f(1.0f, 1.0f);
+	param.spriteStep = Vector2f(0.125f, 1.0f);
 	param.spriteIndex = Vector2f(idx, 0);
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
@@ -50,8 +46,8 @@ void ObjEffect::OnStart()
 
 void ObjEffect::OnUpdate()
 {
-	//idx = (idx+1) % 500;
-	//
-	//ShaderBufferBasic& param = mShader->GetParamBasic();
-	//param.spriteIndex = Vector2f((int)(idx/100), 0);
+	idx = (idx+1) % 500;
+	
+	ShaderBufferBasic& param = mShader->GetParamBasic();
+	param.spriteIndex = Vector2f((int)(idx/100), 0);
 }
