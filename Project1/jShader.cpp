@@ -5,6 +5,8 @@
 #include "jGameObject.h"
 #include "ObjCamera.h"
 #include "jTransform.h"
+#include "jImage.h"
+#include "jMesh.h"
 
 #define ResNameExt_Bolb ".bolb"
 #define VS_FUNCNAME "jVS"
@@ -438,6 +440,31 @@ void jShader::AddCachedTextureView(void * buf, int width, int height, bool isCom
 	
 	if (res != nullptr)
 		mTextureViews.push_back(res);
+}
+
+void jShader::LoadCompentIndicies()
+{
+	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
+	mesh->Load();
+	if (!mesh->GetIndicies().empty())
+	{
+		string key = mesh->GetFullname() + ".indicies";
+		vector<u32>& stream = mesh->GetIndicies();
+		CacheCBIndex(&stream[0], stream.size() * sizeof(u32), key);
+	}
+}
+
+void jShader::LoadCompentTextures()
+{
+	vector<jImage*> images = GetGameObject()->FindComponents<jImage>();
+	for (jImage* img : images)
+	{
+		img->Load();
+		string keyFullname = img->GetFullname();
+		string ext = jUtils::GetFileExtension(keyFullname);
+		bool compressed = ext == "dump" ? true : false;
+		AddCachedTextureView(img->GetBuffer(), img->GetWidth(), img->GetHeight(), compressed, keyFullname);
+	}
 }
 
 void jShader::SetRenderContext(ObjCamera * cam)

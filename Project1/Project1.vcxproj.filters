@@ -209,6 +209,9 @@
     <ClCompile Include="jShaderUI.cpp">
       <Filter>소스 파일\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="jShaderEffectTrace.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -398,6 +401,9 @@
       <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="jShaderUI.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderEffectTrace.h">
       <Filter>소스 파일\Shaders</Filter>
     </ClInclude>
   </ItemGroup>

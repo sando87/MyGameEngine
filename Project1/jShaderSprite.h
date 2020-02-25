@@ -17,7 +17,6 @@ public:
 protected:
 	void LoadLayout();
 	void LoadMesh();
-	void LoadTexture();
 
 	jMesh* mMesh;
 	jImage* mImage;

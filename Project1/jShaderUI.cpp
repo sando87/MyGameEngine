@@ -37,7 +37,8 @@ void jShaderUI::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
-	LoadTexture();
+	LoadCompentIndicies();
+	LoadCompentTextures();
 
 	SetDepthOn(false);
 	SetAlphaOn(true);
@@ -91,13 +92,6 @@ void jShaderUI::LoadMesh()
 	});
 }
 
-void jShaderUI::LoadTexture()
-{
-	jImage img("./res/img/white.tga");
-	img.Load();
-	string keyFullname = img.GetFullname();
-	AddCachedTextureView(img.GetBuffer(), img.GetWidth(), img.GetHeight(), false, keyFullname);
-}
 
 void jShaderUI::DrawRect(VertexFormatPTC verticies[4], void* textureView)
 {

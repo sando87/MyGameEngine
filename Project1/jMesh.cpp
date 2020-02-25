@@ -283,6 +283,19 @@ bool jMesh::LoadAxis(int _len)
 	return true;
 }
 
+bool jMesh::LoadVerticies(vector<VertexFormat>& verticies, vector<u32>& indicies, string name)
+{
+	mStream.clear();
+
+	mIndicies = indicies;
+	mVerticies = verticies;
+
+	mPrimitive = mIndicies.empty() ? PrimitiveMode::TriangleStrip : PrimitiveMode::TriangleList;
+	SetFullname(name);
+	SetLoaded(true);
+	return true;
+}
+
 void jMesh::Reset()
 {
 	SetFullname("");

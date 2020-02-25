@@ -1,28 +1,23 @@
-#include "jShaderSkin.h"
+#include "jShaderEffectTrace.h"
 #include "jMesh.h"
 #include "jImage.h"
-#include "ObjCamera.h"
-#include "jCaches.h"
-#include "jRenderer.h"
-#include "jTime.h"
 
-#define ResName_Layout "jShaderSkin.layout"
-#define ResName_Shader_Vertex "skin.vs"
-#define ResName_Shader_Pixel "skin.ps"
+#define ResName_Layout "jShaderEffectTrace.layout"
+#define ResName_Shader_Vertex "effectTrace.vs"
+#define ResName_Shader_Pixel "effectTrace.ps"
 
-jShaderSkin::jShaderSkin()
+jShaderEffectTrace::jShaderEffectTrace()
 {
 }
 
-
-jShaderSkin::~jShaderSkin()
+jShaderEffectTrace::~jShaderEffectTrace()
 {
 }
 
-void jShaderSkin::OnLoad()
+void jShaderEffectTrace::OnLoad()
 {
 	CacheCBufferBasic();
-	CacheCBufferSkin();
+	CacheCBufferBillboards();
 	CacheSamplerState();
 	CacheBlendState();
 	CacheDepthState();
@@ -35,9 +30,16 @@ void jShaderSkin::OnLoad()
 	LoadCompentTextures();
 }
 
-bool jShaderSkin::OnRender(ObjCamera* cam)
+bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 {
 	SetRenderContext(cam);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	mDevContext->Map(mCBBillboard, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	ShaderBufferBillboards* dataPtr = (ShaderBufferBillboards*)mappedResource.pData;
+	*dataPtr = mParamBillboard;
+	mDevContext->Unmap(mCBBillboard, 0);
+	mDevContext->VSSetConstantBuffers(1, 1, &mCBBillboard);
 
 	D3D_PRIMITIVE_TOPOLOGY prim;
 	if (mMesh->GetPrimitive() == PrimitiveMode::LineList)
@@ -53,7 +55,7 @@ bool jShaderSkin::OnRender(ObjCamera* cam)
 	return true;
 }
 
-void jShaderSkin::LoadLayout()
+void jShaderEffectTrace::LoadLayout()
 {
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];
 	polygonLayout[0].SemanticName = "POSITION";
@@ -99,21 +101,22 @@ void jShaderSkin::LoadLayout()
 	CacheInputLayout(polygonLayout, 5, ResName_Layout, ResName_Shader_Vertex);
 }
 
-void jShaderSkin::LoadMesh()
+void jShaderEffectTrace::LoadMesh()
 {
 	mMesh = GetGameObject()->FindComponent<jMesh>();
-	mMesh->Load();
-	string key = mMesh->GetFullname();
+	jMesh* mesh = mMesh;
+	mesh->Load();
+	string key = mesh->GetFullname();
 
-	if (!mMesh->GetStream().empty())
+	if (!mesh->GetStream().empty())
 	{
-		vector<char>& stream = mMesh->GetStream();
+		vector<char>& stream = mesh->GetStream();
 		CacheCBVertex(&stream[0], stream.size(), key);
 	}
 	else
 	{
 		vector<VertexFormatPTNIW> vertices;
-		vector<VertexFormat>& meshVert = mMesh->GetVerticies();
+		vector<VertexFormat>& meshVert = mesh->GetVerticies();
 		int cnt = meshVert.size();
 		for (int i = 0; i < cnt; ++i)
 		{
@@ -129,4 +132,17 @@ void jShaderSkin::LoadMesh()
 	}
 }
 
-
+void jShaderEffectTrace::CacheCBufferBillboards()
+{
+	string key = "jShader.cbBillboards";
+	mCBBillboard = (ID3D11Buffer *)mGraphicResources->CacheResource(key, [this](string name) {
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.ByteWidth = sizeof(ShaderBufferBillboards);
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+		return CreateConstBuffer(&desc, nullptr);
+	});
+}

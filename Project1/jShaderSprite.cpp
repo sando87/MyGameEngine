@@ -29,7 +29,8 @@ void jShaderSprite::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
-	LoadTexture();
+	LoadCompentIndicies();
+	LoadCompentTextures();
 }
 
 bool jShaderSprite::OnRender(ObjCamera* cam)
@@ -96,17 +97,5 @@ void jShaderSprite::LoadMesh()
 		}
 		CacheCBVertex(&vertices[0], sizeof(VertexFormatPT) * vertices.size(), key);
 	}
-}
-void jShaderSprite::LoadTexture()
-{
-	mImage = GetGameObject()->FindComponent<jImage>();
-	if (mImage == nullptr)
-		return;
-
-	mImage->Load();
-	string keyFullname = mImage->GetFullname();
-	string ext = jUtils::GetFileExtension(keyFullname);
-	bool compressed = ext == "dump" ? true : false;
-	AddCachedTextureView(mImage->GetBuffer(), mImage->GetWidth(), mImage->GetHeight(), compressed, keyFullname);
 }
 

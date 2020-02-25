@@ -1,0 +1,57 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: texture.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+
+cbuffer BasicBuffer : register(b0)
+{
+	matrix worldMatrix;
+	matrix viewMatrix;
+	matrix projectionMatrix;
+    float4 g_ambient;
+    float4 g_diffuse;
+	float4 g_specular;
+	float4 g_shininess;
+    float4 g_position;
+    float4 g_direction;
+	float4 g_color;
+	float4 g_reserve;
+    float4 g_uvInfo;
+	float4 texels[12];
+};
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 jPS(PixelInputType input) : SV_TARGET
+{
+	float4 textureColor;
+	float4 color;
+
+    // 이 텍스처 좌표 위치에서 샘플러를 사용하여 텍스처에서 픽셀 색상을 샘플링합니다.
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+    // 빛의 강도와 결합 된 확산 색을 기준으로 최종 색상의 최종 색상을 결정합니다.
+    color = saturate(g_diffuse * textureColor);
+
+
+    return color;
+}

@@ -144,6 +144,7 @@
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jNavigator.cpp" />
+    <ClCompile Include="jShaderEffectTrace.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jNavigator.h" />
+    <ClInclude Include="jShaderEffectTrace.h" />
     <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />
     <ClInclude Include="jZMapLoader.h" />

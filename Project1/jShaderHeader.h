@@ -35,7 +35,13 @@ struct VertexFormatPC
 	Vector3f p;
 	Vector4f c;
 };
-
+struct Billboard
+{
+	Matrix4f worldMat;
+	Vector2f texelIndex;
+	float  refDiscard;
+	float  reserve;
+};
 struct ShaderBufferBasic
 {
 	Matrix4f worldMat;
@@ -69,6 +75,10 @@ struct ShaderBufferSkin
 		for (int i = 0; i < 45; ++i)
 			bones[i].identity();
 	}
+};
+struct ShaderBufferBillboards
+{
+	Billboard boards[45];
 };
 struct ShaderBufferWVP //should be 16byte aligned
 {

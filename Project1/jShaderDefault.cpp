@@ -29,7 +29,8 @@ void jShaderDefault::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
-	LoadTexture();
+	LoadCompentIndicies();
+	LoadCompentTextures();
 	
 }
 
@@ -107,18 +108,5 @@ void jShaderDefault::LoadMesh()
 		}
 		CacheCBVertex(&vertices[0], sizeof(VertexFormatPTN) * vertices.size(), key);
 	}
-}
-
-void jShaderDefault::LoadTexture()
-{
-	mImage = GetGameObject()->FindComponent<jImage>();
-	if (mImage == nullptr)
-		return;
-
-	mImage->Load();
-	string keyFullname = mImage->GetFullname();
-	string ext = jUtils::GetFileExtension(keyFullname);
-	bool compressed = ext == "dump" ? true : false;
-	AddCachedTextureView(mImage->GetBuffer(), mImage->GetWidth(), mImage->GetHeight(), compressed, keyFullname);
 }
 

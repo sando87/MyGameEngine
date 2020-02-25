@@ -1,6 +1,7 @@
 #include "ObjUI.h"
 #include "jInputEvent.h"
 #include "jShaderUI.h"
+#include "jImage.h"
 
 #pragma comment(lib,"jGUI.lib")
 
@@ -49,6 +50,8 @@ void ObjUI::OnLoad()
 
 	mEvent = new jEventUI();
 	AddComponent(mEvent);
+
+	AddComponent(new jImage("./res/img/white.tga"));
 
 	mUIEngine = jUISystem::GetInst();
 

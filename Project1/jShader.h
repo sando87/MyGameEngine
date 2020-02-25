@@ -49,6 +49,9 @@ protected:
 	void CacheCBIndex(void* buf, int size, string key);
 	void AddCachedTextureView(void* buf, int width, int height, bool isCompressed, string key);
 
+	void LoadCompentIndicies();
+	void LoadCompentTextures();
+
 	void SetRenderContext(ObjCamera * cam);
 	void Draw(u32 stride, D3D_PRIMITIVE_TOPOLOGY primitive, u32 vertCount, u32 indiCount);
 
