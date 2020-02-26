@@ -549,13 +549,12 @@ void jParserD3::InitTextureList()
 	case RES_ID(0xaa, 0x1324): //257-2
 	case RES_ID(0x6f, 0xfa8): //261-2
 	case RES_ID(0xe4, 0x11fc): //269-2
+	case RES_ID(0x53, 0x13cc):
 		_printlog("[ps] default : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
 		mTextures.push_back(0);
 		break;
 	case RES_ID(0x73, 0x1b58):
 	case RES_ID(0x9, 0x1d50):
-		_printlog("[ps] skip too hard... : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
-		break;
 	default:
 		_printlog("[ps] undefine : %d[idx], 0x%x[crc], 0x%x[size]\n", mFileIndex, pData->crc, pData->totalSize);
 		break;

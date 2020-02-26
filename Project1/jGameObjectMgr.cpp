@@ -11,6 +11,7 @@
 #include "ObjCreateHeightmap.h"
 #include "ObjUI.h"
 #include "ObjEffect.h"
+#include "ObjBomb.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -68,7 +69,8 @@ bool jGameObjectMgr::Initialize()
 	//AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
 	//AddGameObject(new ObjUI());
-	AddGameObject(new ObjEffect());
+	//AddGameObject(new ObjEffect());
+	AddGameObject(new ObjBomb());
 
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
@@ -196,12 +198,13 @@ void jGameObjectMgr::RunObjects()
 		mObjects.insert(make_pair(obj->mName, obj));
 	}
 
-	for (auto iter = mNewObjects.begin(); iter != mNewObjects.end(); )
+	list<jGameObject*> newObjs = mNewObjects;
+	mNewObjects.clear();
+	for (auto iter = newObjs.begin(); iter != newObjs.end(); ++iter)
 	{
 		jGameObject* obj = *iter;
 		obj->LoadComponents();
 		obj->OnStart();
-		mNewObjects.erase(iter++);
 	}
 
 	mCoroutine.RunCoroutines();

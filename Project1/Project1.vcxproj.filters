@@ -212,6 +212,12 @@
     <ClCompile Include="jShaderEffectTrace.cpp">
       <Filter>소스 파일\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="ObjBomb.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jParabolic2.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -405,6 +411,12 @@
     </ClInclude>
     <ClInclude Include="jShaderEffectTrace.h">
       <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjBomb.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jParabolic2.h">
+      <Filter>소스 파일\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

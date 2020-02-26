@@ -16,7 +16,10 @@ ObjEffect::~ObjEffect()
 
 void ObjEffect::Burst(Vector3 pos, int idxU, int idxV)
 {
-	mParamsBillboards->boards[mBillboardIndex].worldMat = Matrix4f().identity();
+	if (mParamsBillboards == nullptr)
+		return;
+
+	mParamsBillboards->boards[mBillboardIndex].worldMat = mBillboardMat;
 	mParamsBillboards->boards[mBillboardIndex].worldMat[3] = pos.x;
 	mParamsBillboards->boards[mBillboardIndex].worldMat[7] = pos.y;
 	mParamsBillboards->boards[mBillboardIndex].worldMat[11] = pos.z;
@@ -43,12 +46,16 @@ void ObjEffect::OnLoad()
 
 	mBillboardIndex = 0;
 	mBillboardCount = sizeof(mParamsBillboards->boards) / sizeof(mParamsBillboards->boards[0]);
+
+	ObjCamera* cam = jGameObjectMgr::GetInst().FindGameObject<ObjCamera>();
+	jTransform trans;
+	trans.lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
+	mBillboardMat = trans.getLocalMatrix();
+	mBillboardMat.transpose();
 }
 
 void ObjEffect::OnStart()
 {
-	//ObjCamera* cam = jGameObjectMgr::GetInst().FindGameObject<ObjCamera>();
-	//GetTransform().lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
 }
 
 void ObjEffect::OnUpdate()
@@ -57,7 +64,7 @@ void ObjEffect::OnUpdate()
 	{
 		if (mParamsBillboards->boards[i].refDiscard > 0)
 		{
-			mParamsBillboards->boards[i].refDiscard -= 0.001f;
+			mParamsBillboards->boards[i].refDiscard -= 0.01f;
 			if (mParamsBillboards->boards[i].refDiscard < 0)
 			{
 				mParamsBillboards->boards[i].worldMat = Matrix4f();

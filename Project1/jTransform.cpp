@@ -58,6 +58,17 @@ jTransform& jTransform::goTo(Vector3 dir)
 	//refreshMatrix();
 	return (*this);
 }
+jTransform & jTransform::rotateAxis(Vector3 axis, double degree)
+{
+	axis.normalize();
+	Matrix4 rotMat;
+	rotMat.rotate(degree, axis.x, axis.y, axis.z);
+	mView = mView * rotMat;
+	mCross = mCross * rotMat;
+	mUp = mUp * rotMat;
+
+	return (*this);
+}
 jTransform& jTransform::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree)
 {
 	axisUP.normalize();

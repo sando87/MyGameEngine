@@ -22,6 +22,7 @@ protected:
 	jShaderEffectTrace * mShader;
 	ShaderBufferBillboards* mParamsBillboards;
 	int mBillboardCount;
+	Matrix4f mBillboardMat;
 
 
 	Property_Setter(string, ImgFullname,"")

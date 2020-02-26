@@ -144,12 +144,14 @@
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jNavigator.cpp" />
+    <ClCompile Include="jParabolic2.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
+    <ClCompile Include="ObjBomb.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEffect.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
@@ -207,6 +209,7 @@
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jNavigator.h" />
+    <ClInclude Include="jParabolic2.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
     <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />
@@ -214,6 +217,7 @@
     <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />
     <ClInclude Include="jTypeToString.h" />
+    <ClInclude Include="ObjBomb.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEffect.h" />
     <ClInclude Include="ObjEnemy.h" />
