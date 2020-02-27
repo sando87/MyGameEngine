@@ -4,8 +4,8 @@
 #include "ObjCamera.h"
 
 #define ResName_Layout "jShaderUI.layout"
-#define ResName_Shader_Vertex "ui.vs"
-#define ResName_Shader_Pixel "ui.ps"
+#define ResName_Shader_Vertex "./shaders/ui.vs"
+#define ResName_Shader_Pixel "./shaders/ui.ps"
 
 
 jShaderUI::jShaderUI()

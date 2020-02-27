@@ -42,8 +42,8 @@ protected:
 	void CacheSamplerState();
 	void CacheBlendState();
 	void CacheDepthState();
-	void CacheVS(string keyFilename);
-	void CachePS(string keyFilename);
+	void CacheVS(string keyFullname);
+	void CachePS(string keyFullname);
 	void CacheInputLayout(D3D11_INPUT_ELEMENT_DESC * layouts, int count, string keyLayout, string keyVS);
 	void CacheCBVertex(void* buf, int size, string key);
 	void CacheCBIndex(void* buf, int size, string key);

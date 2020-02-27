@@ -4,8 +4,8 @@
 #include "jRenderer.h"
 
 #define ResName_Layout "jShaderColor.layout"
-#define ResName_Shader_Vertex "color.vs"
-#define ResName_Shader_Pixel "color.ps"
+#define ResName_Shader_Vertex "./shaders/color.vs"
+#define ResName_Shader_Pixel "./shaders/color.ps"
 
 jShaderColor::jShaderColor()
 {

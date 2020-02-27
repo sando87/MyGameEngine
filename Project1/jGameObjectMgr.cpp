@@ -12,6 +12,7 @@
 #include "ObjUI.h"
 #include "ObjEffect.h"
 #include "ObjBomb.h"
+#include "ObjEffectFire.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -70,7 +71,8 @@ bool jGameObjectMgr::Initialize()
 	//AddGameObject(new ObjEnemy());
 	//AddGameObject(new ObjUI());
 	//AddGameObject(new ObjEffect());
-	AddGameObject(new ObjBomb());
+	AddGameObject(new ObjEffectFire());
+	//AddGameObject(new ObjBomb());
 
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;

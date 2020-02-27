@@ -5,8 +5,8 @@
 #include "jRenderer.h"
 
 #define ResName_Layout "jShaderTerrain.layout"
-#define ResName_Shader_Vertex "terrain.vs"
-#define ResName_Shader_Pixel "terrain.ps"
+#define ResName_Shader_Vertex "./shaders/terrain.vs"
+#define ResName_Shader_Pixel "./shaders/terrain.ps"
 
 
 jShaderTerrain::jShaderTerrain()

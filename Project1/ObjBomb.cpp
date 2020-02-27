@@ -23,14 +23,14 @@ void ObjBomb::OnLoad()
 void ObjBomb::OnStart()
 {
 	mEffectFire = new ObjEffect();
-	mEffectFire->SetImgFullname("./res/img/98_0000028E35C11160_tt.tga");
+	mEffectFire->SetImgFullname("./res/img/98_0000028E35C11160_t.tga");
 	mEffectFire->SetStepUV(Vector2f(0.125f, 1.0f));
-	jGameObjectMgr::GetInst().AddGameObject(mEffectFire);
+	GetEngine().AddGameObject(mEffectFire);
 
 	mEffectSmoke = new ObjEffect();
 	mEffectSmoke->SetImgFullname("./res/img/97_0000028E8BECD460_t.tga");
 	mEffectSmoke->SetStepUV(Vector2f(0.25f, 1.0f));
-	jGameObjectMgr::GetInst().AddGameObject(mEffectSmoke);
+	GetEngine().AddGameObject(mEffectSmoke);
 
 	Vector3 myPos = GetTransform().getPos();
 	mDirection = mDest - myPos;

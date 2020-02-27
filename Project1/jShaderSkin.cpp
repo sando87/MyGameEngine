@@ -7,8 +7,8 @@
 #include "jTime.h"
 
 #define ResName_Layout "jShaderSkin.layout"
-#define ResName_Shader_Vertex "skin.vs"
-#define ResName_Shader_Pixel "skin.ps"
+#define ResName_Shader_Vertex "./shaders/skin.vs"
+#define ResName_Shader_Pixel "./shaders/skin.ps"
 
 jShaderSkin::jShaderSkin()
 {

@@ -46,16 +46,15 @@ void ObjEffect::OnLoad()
 
 	mBillboardIndex = 0;
 	mBillboardCount = sizeof(mParamsBillboards->boards) / sizeof(mParamsBillboards->boards[0]);
-
-	ObjCamera* cam = jGameObjectMgr::GetInst().FindGameObject<ObjCamera>();
-	jTransform trans;
-	trans.lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
-	mBillboardMat = trans.getLocalMatrix();
-	mBillboardMat.transpose();
 }
 
 void ObjEffect::OnStart()
 {
+	ObjCamera* cam = GetEngine().FindGameObject<ObjCamera>();
+	jTransform trans;
+	trans.lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
+	mBillboardMat = trans.getLocalMatrix();
+	mBillboardMat.transpose();
 }
 
 void ObjEffect::OnUpdate()

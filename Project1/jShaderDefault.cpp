@@ -6,8 +6,8 @@
 #include "jRenderer.h"
 
 #define ResName_Layout "jShaderDefault.layout"
-#define ResName_Shader_Vertex "default.vs"
-#define ResName_Shader_Pixel "default.ps"
+#define ResName_Shader_Vertex "./shaders/default.vs"
+#define ResName_Shader_Pixel "./shaders/default.ps"
 
 jShaderDefault::jShaderDefault()
 {

@@ -51,7 +51,7 @@ struct PixelInputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
+    uint4  index : INDEX;
 };
 
 
@@ -80,6 +80,7 @@ PixelInputType jVS(VertexInputType input)
 	texTrans.x = (stepU * idxU) + input.tex.x;
 	texTrans.y = (stepV * idxV) + input.tex.y;
     output.tex = texTrans;
+	output.index = input.index;
     
     return output;
 }

@@ -3,12 +3,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+struct Billboard
+{
+    matrix worldMat;
+    float2 texelIndex;
+    float  refDiscard;
+    float  reserve;
+};
 /////////////
 // GLOBALS //
 /////////////
 Texture2D shaderTexture;
 SamplerState SampleType;
-
 
 cbuffer BasicBuffer : register(b0)
 {
@@ -26,6 +32,11 @@ cbuffer BasicBuffer : register(b0)
     float4 g_uvInfo;
 	float4 texels[12];
 };
+cbuffer BillboardBuffer : register(b1)
+{
+	Billboard boards[45];
+};
+
 
 //////////////
 // TYPEDEFS //
@@ -34,7 +45,7 @@ struct PixelInputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
+    uint4  index : INDEX;
 };
 
 
@@ -51,7 +62,9 @@ float4 jPS(PixelInputType input) : SV_TARGET
 
     // 빛의 강도와 결합 된 확산 색을 기준으로 최종 색상의 최종 색상을 결정합니다.
     color = saturate(g_diffuse * textureColor);
-
+	float ref = boards[input.index[0]].reserve / 60.0f;
+	if(color.w <= ref)
+		discard;
 
     return color;
 }

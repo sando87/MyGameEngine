@@ -14,7 +14,8 @@ void jParabolic2::Init(Vector2 center, Vector2 point)
 
 double jParabolic2::CalcY(double x)
 {
-	return coeffA * x * x + coeffB * x + coeffC;
+	double x2 = x * x;
+	return coeffA * x2 * x2 + coeffB * x2 + coeffC;
 }
 
 double jParabolic2::CalcYAcc(double dx)

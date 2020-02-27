@@ -3,8 +3,8 @@
 #include "jImage.h"
 
 #define ResName_Layout "jShaderEffectTrace.layout"
-#define ResName_Shader_Vertex "effectTrace.vs"
-#define ResName_Shader_Pixel "effectTrace.ps"
+#define ResName_Shader_Vertex "./shaders/effectTrace.vs"
+#define ResName_Shader_Pixel "./shaders/effectTrace.ps"
 
 jShaderEffectTrace::jShaderEffectTrace()
 {
@@ -40,6 +40,7 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 	*dataPtr = mParamBillboard;
 	mDevContext->Unmap(mCBBillboard, 0);
 	mDevContext->VSSetConstantBuffers(1, 1, &mCBBillboard);
+	mDevContext->PSSetConstantBuffers(1, 1, &mCBBillboard);
 
 	D3D_PRIMITIVE_TOPOLOGY prim;
 	if (mMesh->GetPrimitive() == PrimitiveMode::LineList)

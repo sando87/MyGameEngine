@@ -143,6 +143,7 @@
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
+    <ClCompile Include="jLinear.cpp" />
     <ClCompile Include="jNavigator.cpp" />
     <ClCompile Include="jParabolic2.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="ObjBomb.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEffect.cpp" />
+    <ClCompile Include="ObjEffectFire.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
     <ClCompile Include="jParserSub.cpp" />
     <ClCompile Include="jHeightMap.cpp" />
@@ -208,6 +210,7 @@
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
+    <ClInclude Include="jLinear.h" />
     <ClInclude Include="jNavigator.h" />
     <ClInclude Include="jParabolic2.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
@@ -220,6 +223,7 @@
     <ClInclude Include="ObjBomb.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
     <ClInclude Include="ObjEffect.h" />
+    <ClInclude Include="ObjEffectFire.h" />
     <ClInclude Include="ObjEnemy.h" />
     <ClInclude Include="jParserSub.h" />
     <ClInclude Include="jHeightMap.h" />

@@ -218,6 +218,12 @@
     <ClCompile Include="jParabolic2.cpp">
       <Filter>소스 파일\Math</Filter>
     </ClCompile>
+    <ClCompile Include="jLinear.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjEffectFire.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -417,6 +423,12 @@
     </ClInclude>
     <ClInclude Include="jParabolic2.h">
       <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jLinear.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjEffectFire.h">
+      <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

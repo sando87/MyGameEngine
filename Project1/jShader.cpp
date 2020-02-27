@@ -291,9 +291,8 @@ void jShader::CacheDepthState()
 		return depthState;
 	});
 }
-void jShader::CacheVS(string keyFilename)
+void jShader::CacheVS(string keyFullname)
 {
-	string keyFullname = "./shaders/" + keyFilename;
 	mVertexShader = (ID3D11VertexShader *)mGraphicResources->CacheResource(keyFullname, [this](string _fullname) {
 		ID3D11VertexShader *vsShader = nullptr;
 		ID3D10Blob* errorMessage = nullptr;
@@ -318,9 +317,8 @@ void jShader::CacheVS(string keyFilename)
 		return vsShader;
 	});
 }
-void jShader::CachePS(string keyFilename)
+void jShader::CachePS(string keyFullname)
 {
-	string keyFullname = "./shaders/" + keyFilename;
 	mPixelShader = (ID3D11PixelShader *)mGraphicResources->CacheResource(keyFullname, [this](string _fullname) {
 		ID3D11PixelShader *psShader = nullptr;
 		ID3D10Blob* errorMessage = nullptr;

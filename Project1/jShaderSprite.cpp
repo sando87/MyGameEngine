@@ -5,8 +5,8 @@
 #include "jImage.h"
 
 #define ResName_Layout "jShaderSprite.layout"
-#define ResName_Shader_Vertex "sprite.vs"
-#define ResName_Shader_Pixel "sprite.ps"
+#define ResName_Shader_Vertex "./shaders/sprite.vs"
+#define ResName_Shader_Pixel "./shaders/sprite.ps"
 
 
 jShaderSprite::jShaderSprite()
