@@ -113,6 +113,7 @@ public:
 	ID3D11BlendState* GetResBlendState();
 	ID3D11DepthStencilState* GetResDepthStencilState();
 	bool SetContantBuffer(MapInfo& cb, int slotIdx);
+	bool SetContantBufferMain();
 	bool Render();
 	GeometryInfo GetGeometryInfo() { return mGeoInfo; }
 	

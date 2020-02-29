@@ -748,6 +748,30 @@ bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
 	return true;
 }
 
+bool jParserD3::SetContantBufferMain()
+{
+	MapInfo & cb = mContext.CBMain;
+	int slotIdx = 0;
+	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
+	ID3D11Buffer *pConstBuf = (ID3D11Buffer *)CreateD3DRescource(cb.addr);
+	if (pConstBuf == nullptr)
+		return false;
+
+	D3D11_MAPPED_SUBRESOURCE mappedRes;
+	if (FAILED(pDevContext->Map(pConstBuf, cb.subRes, (D3D11_MAP)cb.type, cb.flags, &mappedRes)))
+	{
+		_warn();
+		return false;
+	}
+	memcpy(mappedRes.pData, &mCBMain, sizeof(mCBMain));
+	pDevContext->Unmap(pConstBuf, cb.subRes);
+
+	pDevContext->VSSetConstantBuffers(slotIdx, 1, &pConstBuf);
+	pDevContext->PSSetConstantBuffers(slotIdx, 1, &pConstBuf);
+
+	return true;
+}
+
 bool jParserD3::Render()
 {
 	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
@@ -765,7 +789,8 @@ bool jParserD3::Render()
 	
 	pDevContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)mContext.prim_topology);
 
-	SetContantBuffer(mContext.CBMain, 0);
+	SetContantBufferMain();
+	//SetContantBuffer(mContext.CBMain, 0);
 	SetContantBuffer(mContext.CBBones, 1);
 	SetContantBuffer(mContext.CBLights, 2);
 
