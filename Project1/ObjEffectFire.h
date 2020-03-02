@@ -3,6 +3,7 @@
 #include "jParabolic2.h"
 #include "jLinear.h"
 
+class jParticle;
 class jShaderEffectTrace;
 struct ShaderBufferBillboards;
 
@@ -20,6 +21,7 @@ protected:
 
 	void LoadMesh();
 
+	jParticle * mPaticles;
 	jShaderEffectTrace * mShader;
 	ShaderBufferBillboards* mParamsBillboards;
 	int mBillboardIndex;

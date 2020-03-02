@@ -5,6 +5,7 @@
 #include "ObjCamera.h"
 #include "jShaderEffectTrace.h"
 #include "jTime.h"
+#include "jParticle.h"
 
 ObjEffectFire::ObjEffectFire()
 {
@@ -15,13 +16,38 @@ ObjEffectFire::~ObjEffectFire()
 }
 void ObjEffectFire::OnLoad()
 {
+	class MyParticle : public Particle
+	{
+	public:
+		MyParticle()
+		{
+
+		}
+		virtual void OnUpdate()
+		{
+
+		}
+	};
+
+	mPaticles = new jParticle();
+	mPaticles->OnCreateParticle = []() { return new MyParticle(); };
+	mPaticles->SetForce(1000);
+	mPaticles->SetDegree(90);
+	mPaticles->SetCoeffDrag(0.1);
+	mPaticles->SetDuration(2);
+	mPaticles->SetGravity(Vector3(0, 0, 9.8));
+	mPaticles->SetStart(false);
+	mPaticles->SetBurstCount(5);
+	mPaticles->SetBurstIntervalSec(5);
+	AddComponent(mPaticles);
+
 	LoadMesh();
 
-	AddComponent(new jImage("./res/img/103_0000028EB659FE60_t.tga"));
+	AddComponent(new jImage("./res/img/explore.tga"));
 	//AddComponent(new jImage("./res/img/103_0000028EBB2AF120_t.tga"));
 
 	mShader = new jShaderEffectTrace();
-	mShader->GetParamBasic().spriteStep = Vector2f(0.25f,1);
+	mShader->GetParamBasic().spriteStep = Vector2f(1, 1);
 	mParamsBillboards = &mShader->GetParamBillboard();
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
@@ -42,28 +68,41 @@ void ObjEffectFire::OnStart()
 }
 void ObjEffectFire::OnUpdate()
 {
-	static double time = 0;
-	time += jTime::Delta();
-	if (time < 3)
-		return;
-	else if (time > 4)
-		SetRemove(true);
+	static double tt = 0;
+	tt += jTime::Delta();
+	if (tt > 3)
+		mPaticles->SetStart(true);
 
-	double curHeight = mHeights.CalcYAcc(jTime::Delta());
-	double curSize = mSizes.CalcYAcc(jTime::Delta());
-	Matrix4 mat = Matrix4().identity().scale(curSize);
-	mat *= mBillboardMat;
-	mat[14] = curHeight;
-	mParamsBillboards->boards[0].worldMat = mat.transpose();
-	mParamsBillboards->boards[0].texelIndex = Vector2f(0, 0);
-	mParamsBillboards->boards[0].reserve++;
+	int idx = 0;
+	auto particles = mPaticles->GetParticles();
+	Matrix4f mat = mBillboardMat;
+	mat.transpose();
+	for (Particle* particle : particles)
+	{
+		mat[3] = particle->Pos.x;
+		mat[7] = particle->Pos.y;
+		mat[11] = particle->Pos.z;
+		mParamsBillboards->boards[idx].worldMat = mat;
+		idx++;
+		if (idx >= 20)
+			break;
+	}
+
+	//double curHeight = mHeights.CalcYAcc(jTime::Delta());
+	//double curSize = mSizes.CalcYAcc(jTime::Delta());
+	//Matrix4 mat = Matrix4().identity().scale(curSize);
+	//mat *= mBillboardMat;
+	//mat[14] = curHeight;
+	//mParamsBillboards->boards[0].worldMat = mat.transpose();
+	//mParamsBillboards->boards[0].texelIndex = Vector2f(0, 0);
+	//mParamsBillboards->boards[0].reserve++;
 	
 }
 void ObjEffectFire::LoadMesh()
 {
 	jMesh* mesh = new jMesh();
-	Vector2 size(3, 3);
-	Vector2 stepUV(0.25, 1);
+	Vector2 size(1, 1);
+	Vector2 stepUV(1, 1);
 	int RectCount = 20;
 	vector<VertexFormat> verticies;
 	vector<u32> indicies;
