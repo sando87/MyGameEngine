@@ -40,7 +40,6 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 	*dataPtr = mParamBillboard;
 	mDevContext->Unmap(mCBBillboard, 0);
 	mDevContext->VSSetConstantBuffers(1, 1, &mCBBillboard);
-	mDevContext->PSSetConstantBuffers(1, 1, &mCBBillboard);
 
 	D3D_PRIMITIVE_TOPOLOGY prim;
 	if (mMesh->GetPrimitive() == PrimitiveMode::LineList)
@@ -50,7 +49,7 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	u32 stride = sizeof(VertexFormatPTNIW);
+	u32 stride = sizeof(VertexFormatPTI);
 	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
 	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
 	return true;
@@ -58,7 +57,7 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 
 void jShaderEffectTrace::LoadLayout()
 {
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -74,32 +73,16 @@ void jShaderEffectTrace::LoadLayout()
 	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
-
-	polygonLayout[2].SemanticName = "NORMAL";
+	
+	polygonLayout[2].SemanticName = "INDEX";
 	polygonLayout[2].SemanticIndex = 0;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_UINT;
 	polygonLayout[2].InputSlot = 0;
 	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
-
-	polygonLayout[3].SemanticName = "INDEX";
-	polygonLayout[3].SemanticIndex = 0;
-	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_UINT;
-	polygonLayout[3].InputSlot = 0;
-	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[3].InstanceDataStepRate = 0;
-
-	polygonLayout[4].SemanticName = "WEIGHT";
-	polygonLayout[4].SemanticIndex = 0;
-	polygonLayout[4].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	polygonLayout[4].InputSlot = 0;
-	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[4].InstanceDataStepRate = 0;
-
-	CacheInputLayout(polygonLayout, 5, ResName_Layout, ResName_Shader_Vertex);
+	
+	CacheInputLayout(polygonLayout, 3, ResName_Layout, ResName_Shader_Vertex);
 }
 
 void jShaderEffectTrace::LoadMesh()
@@ -116,20 +99,18 @@ void jShaderEffectTrace::LoadMesh()
 	}
 	else
 	{
-		vector<VertexFormatPTNIW> vertices;
+		vector<VertexFormatPTI> vertices;
 		vector<VertexFormat>& meshVert = mesh->GetVerticies();
 		int cnt = meshVert.size();
 		for (int i = 0; i < cnt; ++i)
 		{
-			VertexFormatPTNIW vertex;
+			VertexFormatPTI vertex;
 			vertex.p = meshVert[i].position;
 			vertex.t = meshVert[i].texel;
-			vertex.n = meshVert[i].normal;
 			vertex.i = meshVert[i].boneIndexs;
-			vertex.w = meshVert[i].weights;
 			vertices.push_back(vertex);
 		}
-		CacheCBVertex(&vertices[0], sizeof(VertexFormatPTNIW) * vertices.size(), key);
+		CacheCBVertex(&vertices[0], sizeof(VertexFormatPTI) * vertices.size(), key);
 	}
 }
 

@@ -30,22 +30,19 @@ void jParticle::OnUpdate()
 	if (mStart == false)
 		return;
 
-	mTime += jTime::Delta();
-	if (mBurstCount <= 0) //infinite loop
+	if (mBurstCount != 0) // burst mode 
 	{
-		if (mTime >= mBurstIntervalSec)
+		mTime += jTime::Delta();
+		if (mBurstIntervalSec < mTime)
 		{
-			Burst();
+			if(mBurstCount < 0) 
+				Burst(); //infinite loop
+			else if (mCurrnetBurstIndex < mBurstCount)
+			{
+				Burst();
+				mCurrnetBurstIndex++;
+			}
 			mTime = 0;
-		}
-	}
-	else if (mCurrnetBurstIndex < mBurstCount)
-	{
-		if (mTime >= mBurstIntervalSec)
-		{
-			Burst();
-			mTime = 0;
-			mCurrnetBurstIndex++;
 		}
 	}
 

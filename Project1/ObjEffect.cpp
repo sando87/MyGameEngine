@@ -14,18 +14,17 @@ ObjEffect::~ObjEffect()
 {
 }
 
-void ObjEffect::Burst(Vector3 pos, int idxU, int idxV)
+void ObjEffect::Burst(Vector3 pos, int idx)
 {
 	if (mParamsBillboards == nullptr)
 		return;
 
-	mParamsBillboards->boards[mBillboardIndex].worldMat = mBillboardMat;
-	mParamsBillboards->boards[mBillboardIndex].worldMat[3] = pos.x;
-	mParamsBillboards->boards[mBillboardIndex].worldMat[7] = pos.y;
-	mParamsBillboards->boards[mBillboardIndex].worldMat[11] = pos.z;
-	mParamsBillboards->boards[mBillboardIndex].texelIndex.x = idxU;
-	mParamsBillboards->boards[mBillboardIndex].texelIndex.y = idxV;
-	mParamsBillboards->boards[mBillboardIndex].refDiscard = 1.0f;
+	mParamsBillboards->billboardMat = mBillboardMat;
+	mParamsBillboards->boards[mBillboardIndex].transform.x = pos.x;
+	mParamsBillboards->boards[mBillboardIndex].transform.y = pos.y;
+	mParamsBillboards->boards[mBillboardIndex].transform.z = pos.z;
+	mParamsBillboards->boards[mBillboardIndex].texIndex = idx;
+	mParamsBillboards->boards[mBillboardIndex].refDiscard = 0;
 
 	mBillboardIndex = (mBillboardIndex + 1) % mBillboardCount;
 }
@@ -38,7 +37,7 @@ void ObjEffect::OnLoad()
 	AddComponent(imgae);
 
 	mShader = new jShaderEffectTrace();
-	mShader->GetParamBasic().spriteStep = mStepUV;
+	mShader->GetParamBasic().uvInfo = Vector4f(0, 0, mStepUV.x, mStepUV.y);
 	mParamsBillboards = &mShader->GetParamBillboard();
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
@@ -61,14 +60,11 @@ void ObjEffect::OnUpdate()
 {
 	for (int i = 0; i < mBillboardCount; ++i)
 	{
-		if (mParamsBillboards->boards[i].refDiscard > 0)
+		if (mParamsBillboards->boards[i].refDiscard < 1)
 		{
-			mParamsBillboards->boards[i].refDiscard -= 0.01f;
-			if (mParamsBillboards->boards[i].refDiscard < 0)
-			{
-				mParamsBillboards->boards[i].worldMat = Matrix4f();
-				mParamsBillboards->boards[i].refDiscard = 0;
-			}
+			mParamsBillboards->boards[i].refDiscard += 0.01f;
+			if (mParamsBillboards->boards[i].refDiscard > 1)
+				mParamsBillboards->boards[i].size = 0;
 		}
 	}
 }

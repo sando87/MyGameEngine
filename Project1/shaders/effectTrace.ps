@@ -3,13 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-struct Billboard
-{
-    matrix worldMat;
-    float2 texelIndex;
-    float  refDiscard;
-    float  reserve;
-};
 /////////////
 // GLOBALS //
 /////////////
@@ -32,10 +25,6 @@ cbuffer BasicBuffer : register(b0)
     float4 g_uvInfo;
 	float4 texels[12];
 };
-cbuffer BillboardBuffer : register(b1)
-{
-	Billboard boards[45];
-};
 
 
 //////////////
@@ -44,8 +33,8 @@ cbuffer BillboardBuffer : register(b1)
 struct PixelInputType
 {
     float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-    uint4  index : INDEX;
+    float4 tex : TEXCOORD0;
+    float4 color : COLOR;
 };
 
 
@@ -55,16 +44,21 @@ struct PixelInputType
 float4 jPS(PixelInputType input) : SV_TARGET
 {
 	float4 textureColor;
-	float4 color;
+	float4 outColor;
+	float2 texel;
+	float ref;
 
     // 이 텍스처 좌표 위치에서 샘플러를 사용하여 텍스처에서 픽셀 색상을 샘플링합니다.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+	texel.x = input.tex.x;
+	texel.y = input.tex.y;
+    textureColor = shaderTexture.Sample(SampleType, texel);
 
     // 빛의 강도와 결합 된 확산 색을 기준으로 최종 색상의 최종 색상을 결정합니다.
-    color = saturate(g_diffuse * textureColor);
-	//float ref = boards[input.index[0]].reserve / 60.0f;
-	//if(color.w <= ref)
-	//	discard;
+    outColor = saturate(input.color * textureColor);
+	
+	ref = input.tex.z;
+	if(outColor.w < ref)
+		discard;
 
-    return color;
+    return outColor;
 }

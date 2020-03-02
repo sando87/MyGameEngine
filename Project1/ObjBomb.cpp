@@ -48,8 +48,8 @@ void ObjBomb::OnUpdate()
 	if (mAccTime > 0.3)
 	{
 		mAccTime = 0;
-		mEffectFire->Burst(trans.getPos(), 0, 0);
-		mEffectSmoke->Burst(trans.getPos(), 1, 0);
+		mEffectFire->Burst(trans.getPos(), 0);
+		mEffectSmoke->Burst(trans.getPos(), 1);
 	}
 	
 	double height = mHeights.CalcYAcc(jTime::Delta());

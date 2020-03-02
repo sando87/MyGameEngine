@@ -1,7 +1,5 @@
 #pragma once
 #include "jGameObject.h"
-#include "jParabolic2.h"
-#include "jLinear.h"
 
 class jParticle;
 class jShaderEffectTrace;
@@ -19,16 +17,11 @@ protected:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
-	void LoadMesh();
+	void LoadMesh(int count);
 
 	jParticle * mPaticles;
 	jShaderEffectTrace * mShader;
 	ShaderBufferBillboards* mParamsBillboards;
-	int mBillboardIndex;
-	int mBillboardCount;
-	Matrix4 mBillboardMat;
-	jParabolic2 mSizes;
-	jLinear mHeights;
 	
 };
 

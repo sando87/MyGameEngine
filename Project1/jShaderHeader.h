@@ -22,6 +22,12 @@ struct VertexFormatPT
 	Vector3f p;
 	Vector2f t;
 };
+struct VertexFormatPTI
+{
+	Vector3f p;
+	Vector2f t;
+	Vector4n i;
+};
 struct VertexFormatPTNIW
 {
 	Vector3f p;
@@ -37,10 +43,21 @@ struct VertexFormatPC
 };
 struct Billboard
 {
-	Matrix4f worldMat;
-	Vector2f texelIndex;
-	float  refDiscard;
-	float  reserve;
+	Vector3f transform; //xyz:position
+	float size;
+	float texIndex;
+	float refDiscard;
+	Vector2f reserve;
+	Vector4f color; //xyz:rga, w:alpha
+	Billboard()
+	{
+		transform = Vector3f(0, 0, 0);
+		size = 1;
+		texIndex = 0;
+		refDiscard = 0;
+		reserve = Vector2f(0, 0);
+		color = Vector4f(1, 1, 1, 1);
+	}
 };
 struct ShaderBufferBasic
 {
@@ -55,8 +72,7 @@ struct ShaderBufferBasic
 	Vector4f lightDirection;
 	Vector4f lightColor;
 	Vector4f lightReserve;
-	Vector2f spriteIndex;
-	Vector2f spriteStep;
+	Vector4f uvInfo;
 	Vector4f texels[12];
 	ShaderBufferBasic() { 
 		memset(this, 0x00, sizeof(ShaderBufferBasic));
@@ -78,6 +94,7 @@ struct ShaderBufferSkin
 };
 struct ShaderBufferBillboards
 {
+	Matrix4f billboardMat;
 	Billboard boards[45];
 };
 struct ShaderBufferWVP //should be 16byte aligned

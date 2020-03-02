@@ -4,10 +4,9 @@
 
 struct Billboard
 {
-    matrix worldMat;
-    float2 texelIndex;
-    float  refDiscard;
-    float  reserve;
+    float4 transform; //xyz:position, w:size
+    float4 info; //x:texIdx, y:refDiscard, zw:reserve
+    float4 color; //xyz:rga, w:alpha
 };
 
 /////////////
@@ -26,11 +25,12 @@ cbuffer BasicBuffer : register(b0)
     float4 g_direction;
 	float4 g_color;
 	float4 g_reserve;
-    float4 g_uvInfo;
+    float4 g_uvInfo; //x:CountU, y:CountV, z:stepU, w:stepV
 	float4 texels[12];
 };
 cbuffer BillboardBuffer : register(b1)
 {
+	matrix billboardMat;
 	Billboard boards[45];
 };
 
@@ -42,16 +42,14 @@ struct VertexInputType
 {
     float4 position : POSITION;
     float2 tex : TEXCOORD;
-    float3 normal : NORMAL;
-    uint4   index : INDEX;
-    float4 weight : WEIGHT;
+    uint4  index : INDEX;
 };
 
 struct PixelInputType
 {
     float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-    uint4  index : INDEX;
+    float4 tex : TEXCOORD0;
+    float4 color : COLOR;
 };
 
 
@@ -61,13 +59,14 @@ struct PixelInputType
 PixelInputType jVS(VertexInputType input)
 {
     PixelInputType output;
-	uint idx;
-	float2 texTrans;
     
+	Billboard board = boards[input.index.x];
+	float size = board.transform.w;
+	
     input.position.w = 1.0f;
-	idx = input.index[0];
-
-    output.position = mul(input.position, boards[idx].worldMat);
+	input.position.xyz *= size;
+    output.position = mul(input.position, billboardMat);
+	output.position.xyz += board.transform.xyz;
     output.position = mul(output.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
@@ -75,12 +74,12 @@ PixelInputType jVS(VertexInputType input)
 	// 픽셀 쉐이더의 텍스처 좌표를 저장한다.
 	float stepU = g_uvInfo.z;
 	float stepV = g_uvInfo.w;
-	int idxU = boards[idx].texelIndex.x;
-	int idxV = boards[idx].texelIndex.y;
-	texTrans.x = (stepU * idxU) + input.tex.x;
-	texTrans.y = (stepV * idxV) + input.tex.y;
-    output.tex = texTrans;
-	output.index = input.index;
+	int idxU = board.info.x % g_uvInfo.x;
+	int idxV = board.info.x / g_uvInfo.x;
+	output.tex.x = (stepU * idxU) + input.tex.x;
+	output.tex.y = (stepV * idxV) + input.tex.y;
+	output.tex.z = board.info.y;
+	output.color = board.color;
     
     return output;
 }

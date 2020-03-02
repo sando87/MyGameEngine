@@ -11,7 +11,7 @@ public:
 	ObjEffect();
 	virtual ~ObjEffect();
 
-	void Burst(Vector3 pos, int idxU, int idxV);
+	void Burst(Vector3 pos, int idx);
 
 protected:
 	virtual void OnLoad();

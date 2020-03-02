@@ -6,6 +6,24 @@
 #include "jShaderEffectTrace.h"
 #include "jTime.h"
 #include "jParticle.h"
+#include "jLinear.h"
+
+class MyParticle : public Particle
+{
+public:
+	int imgIndex;
+	jLinear color;
+	jLinear alpha;
+	MyParticle()
+	{
+		imgIndex = jUtils::Random() % 4;
+		color.Init(-1, 1);
+	}
+	virtual void OnUpdate()
+	{
+		Particle::OnUpdate();
+	}
+};
 
 ObjEffectFire::ObjEffectFire()
 {
@@ -16,55 +34,40 @@ ObjEffectFire::~ObjEffectFire()
 }
 void ObjEffectFire::OnLoad()
 {
-	class MyParticle : public Particle
-	{
-	public:
-		MyParticle()
-		{
-
-		}
-		virtual void OnUpdate()
-		{
-
-		}
-	};
 
 	mPaticles = new jParticle();
 	mPaticles->OnCreateParticle = []() { return new MyParticle(); };
 	mPaticles->SetForce(1000);
 	mPaticles->SetDegree(90);
-	mPaticles->SetCoeffDrag(0.1);
-	mPaticles->SetDuration(2);
+	mPaticles->SetCount(40);
+	mPaticles->SetCoeffDrag(0.5);
+	mPaticles->SetDuration(1);
 	mPaticles->SetGravity(Vector3(0, 0, 9.8));
 	mPaticles->SetStart(false);
-	mPaticles->SetBurstCount(5);
-	mPaticles->SetBurstIntervalSec(5);
+	mPaticles->SetBurstCount(1);
+	mPaticles->SetBurstIntervalSec(0.02);
 	AddComponent(mPaticles);
 
-	LoadMesh();
+	LoadMesh(40);
 
 	AddComponent(new jImage("./res/img/explore.tga"));
 	//AddComponent(new jImage("./res/img/103_0000028EBB2AF120_t.tga"));
 
 	mShader = new jShaderEffectTrace();
-	mShader->GetParamBasic().spriteStep = Vector2f(1, 1);
-	mParamsBillboards = &mShader->GetParamBillboard();
+	mShader->GetParamBasic().uvInfo = Vector4f(2.0f, 2.0f, 0.5f, 0.5f);
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
 	AddComponent(mShader);
 
-	mBillboardIndex = 0;
-	mBillboardCount = sizeof(mParamsBillboards->boards) / sizeof(mParamsBillboards->boards[0]);
+	mParamsBillboards = &mShader->GetParamBillboard();
 
-	mSizes.Init(Vector2(1, 10), Vector2(0, 0));
-	mHeights.Init(30, 0);
 }
 void ObjEffectFire::OnStart()
 {
 	ObjCamera* cam = GetEngine().FindGameObject<ObjCamera>();
 	jTransform trans;
 	trans.lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
-	mBillboardMat = trans.getLocalMatrix();
+	mParamsBillboards->billboardMat = trans.getLocalMatrix().transpose();
 }
 void ObjEffectFire::OnUpdate()
 {
@@ -75,38 +78,30 @@ void ObjEffectFire::OnUpdate()
 
 	int idx = 0;
 	auto particles = mPaticles->GetParticles();
-	Matrix4f mat = mBillboardMat;
-	mat.transpose();
-	for (Particle* particle : particles)
+	for (Particle* ptc : particles)
 	{
-		mat[3] = particle->Pos.x;
-		mat[7] = particle->Pos.y;
-		mat[11] = particle->Pos.z;
-		mParamsBillboards->boards[idx].worldMat = mat;
+		MyParticle* particle = (MyParticle*)ptc;
+		mParamsBillboards->boards[idx].transform.x = particle->Pos.x;
+		mParamsBillboards->boards[idx].transform.y = particle->Pos.y;
+		mParamsBillboards->boards[idx].transform.z = particle->Pos.z;
+		mParamsBillboards->boards[idx].size = 3;
+		mParamsBillboards->boards[idx].texIndex = particle->imgIndex;
+		float color = particle->color.CalcY(particle->Time);
+		mParamsBillboards->boards[idx].color = Vector4f(color + 0.3, color + 0.3, color + 0.3, color * 4);
 		idx++;
-		if (idx >= 20)
+		if (idx >= 40)
 			break;
 	}
 
-	//double curHeight = mHeights.CalcYAcc(jTime::Delta());
-	//double curSize = mSizes.CalcYAcc(jTime::Delta());
-	//Matrix4 mat = Matrix4().identity().scale(curSize);
-	//mat *= mBillboardMat;
-	//mat[14] = curHeight;
-	//mParamsBillboards->boards[0].worldMat = mat.transpose();
-	//mParamsBillboards->boards[0].texelIndex = Vector2f(0, 0);
-	//mParamsBillboards->boards[0].reserve++;
-	
 }
-void ObjEffectFire::LoadMesh()
+void ObjEffectFire::LoadMesh(int count)
 {
 	jMesh* mesh = new jMesh();
 	Vector2 size(1, 1);
-	Vector2 stepUV(1, 1);
-	int RectCount = 20;
+	Vector2 stepUV(0.5, 0.5);
 	vector<VertexFormat> verticies;
 	vector<u32> indicies;
-	for (int i = 0; i < RectCount; ++i)
+	for (int i = 0; i < count; ++i)
 	{
 		VertexFormat vert[4];
 		vert[0].position = Vector3(-size.x, 0, -size.y);
