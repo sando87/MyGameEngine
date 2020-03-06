@@ -229,6 +229,15 @@
     </ClCompile>
     <ClCompile Include="jPng.cpp">
       <Filter>소스 파일\Utils</Filter>
+	</ClCompile>
+    <ClCompile Include="jTrigger.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjItem.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jInventory.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -441,6 +450,15 @@
     </ClInclude>
     <ClInclude Include="jPng.h">
       <Filter>소스 파일\Utils</Filter>
+	</ClInclude>
+    <ClInclude Include="jTrigger.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjItem.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jInventory.h">
+      <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

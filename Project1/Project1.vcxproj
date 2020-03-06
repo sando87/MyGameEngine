@@ -143,6 +143,7 @@
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
+    <ClCompile Include="jInventory.cpp" />
     <ClCompile Include="jLinear.cpp" />
     <ClCompile Include="jNavigator.cpp" />
     <ClCompile Include="jParabolic2.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="jShaderEffectTrace.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
+    <ClCompile Include="jTrigger.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
     <ClCompile Include="jStateMachine.cpp" />
@@ -191,6 +193,7 @@
     <ClCompile Include="Matrices.cpp" />
     <ClCompile Include="ObjCamera.cpp" />
     <ClCompile Include="ObjGroundAxis.cpp" />
+    <ClCompile Include="ObjItem.cpp" />
     <ClCompile Include="ObjPlayer.cpp" />
     <ClCompile Include="ObjTerrain.cpp" />
     <ClCompile Include="ObjTerrainMgr.cpp" />
@@ -212,6 +215,7 @@
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
+    <ClInclude Include="jInventory.h" />
     <ClInclude Include="jLinear.h" />
     <ClInclude Include="jNavigator.h" />
     <ClInclude Include="jParabolic2.h" />
@@ -220,6 +224,7 @@
     <ClInclude Include="jShaderEffectTrace.h" />
     <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />
+    <ClInclude Include="jTrigger.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
     <ClInclude Include="jStateMachine.h" />
@@ -262,6 +267,7 @@
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="ObjCamera.h" />
     <ClInclude Include="ObjGroundAxis.h" />
+    <ClInclude Include="ObjItem.h" />
     <ClInclude Include="ObjPlayer.h" />
     <ClInclude Include="ObjTerrain.h" />
     <ClInclude Include="ObjTerrainMgr.h" />

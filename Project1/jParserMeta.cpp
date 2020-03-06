@@ -32,7 +32,3 @@ string jParserMeta::ToString()
 	return ret;
 }
 
-void jParserMeta::SetValue(string field, string value)
-{
-	mData.insert(make_pair(field, value));
-}

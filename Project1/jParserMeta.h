@@ -12,6 +12,7 @@
 #define MF_Texel			"texel"
 #define MF_Img			"img"
 #define MF_Child			"child"
+#define MF_Item				"item"
 
 class jParserMeta
 {
@@ -21,12 +22,30 @@ public:
 
 	bool Load(string fullname);
 	string ToString();
-	void SetValue(string field, string value);
+	template<typename Ty> void SetValue(string field, Ty value);
 	template<typename Ty = string> Ty GetValue(string field);
 	template<typename Ty = string> vector<Ty> GetValues(string field);
 private:
 	unordered_multimap<string, string> mData;
 };
+
+template<>
+inline void jParserMeta::SetValue(string field, string value)
+{
+	mData.insert(make_pair(field, value));
+}
+
+template<>
+inline void jParserMeta::SetValue(string field, double value)
+{
+	string val = jUtils::ToString(value);
+	mData.insert(make_pair(field, val));
+}
+
+template<typename Ty>
+inline void jParserMeta::SetValue(string field, Ty value)
+{
+}
 
 template<>
 inline string jParserMeta::GetValue(string field)
@@ -36,6 +55,16 @@ inline string jParserMeta::GetValue(string field)
 		return "";
 
 	return iter->second;
+}
+
+template<>
+inline int jParserMeta::GetValue(string field)
+{
+	auto iter = mData.find(field);
+	if (iter == mData.end())
+		return 0;
+
+	return (int)jUtils::ToDouble(iter->second);
 }
 
 template<>
@@ -105,3 +134,4 @@ inline vector<Vector3> jParserMeta::GetValues(string field)
 	}
 	return rets;
 }
+

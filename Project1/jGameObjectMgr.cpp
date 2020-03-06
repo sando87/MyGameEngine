@@ -13,6 +13,7 @@
 #include "ObjEffect.h"
 #include "ObjBomb.h"
 #include "ObjEffectFire.h"
+#include "ObjItem.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -73,6 +74,10 @@ bool jGameObjectMgr::Initialize()
 	//AddGameObject(new ObjEffect());
 	//AddGameObject(new ObjEffectFire());
 	//AddGameObject(new ObjBomb());
+	ObjItem* item = new ObjItem();
+	item->LoadProperty("item1.txt");
+	AddGameObject(item);
+	//AddGameObject(new ObjEffectFire());
 
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
@@ -202,12 +207,12 @@ void jGameObjectMgr::RunObjects()
 
 	list<jGameObject*> newObjs = mNewObjects;
 	mNewObjects.clear();
-	for (auto iter = newObjs.begin(); iter != newObjs.end(); ++iter)
-	{
-		jGameObject* obj = *iter;
+	for (jGameObject* obj : newObjs)
 		obj->LoadComponents();
+	for (jGameObject* obj : newObjs)
+		obj->StartComponents();
+	for (jGameObject* obj : newObjs)
 		obj->OnStart();
-	}
 
 	mCoroutine.RunCoroutines();
 

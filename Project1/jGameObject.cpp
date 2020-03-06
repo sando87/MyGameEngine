@@ -143,6 +143,12 @@ void jGameObject::LoadComponents()
 		comp->Load();
 }
 
+void jGameObject::StartComponents()
+{
+	for (jComponent* comp : mComponents)
+		comp->OnStart();
+}
+
 void jGameObject::UpdateComponents()
 {
 	for (jComponent* comp : mComponents)
