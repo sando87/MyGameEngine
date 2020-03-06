@@ -39,6 +39,12 @@ Physics
 - extname  : 확장자명(txt)
 - 확장자가 없는 경우는 취급하지 않음
 
+순서
+OnLoad of jGameObject //다른 Obj, Comp류 참조 불가능
+OnLoad of jComponent //참조는 가능하나 로딩된 데이터 참조는 불가능
+OnStart of jGameObject //참조도 데이터도 접근 가능
+OnUpdate of jGameObject
+
 class멤버함수
 - m변수명
 

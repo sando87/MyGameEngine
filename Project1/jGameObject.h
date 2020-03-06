@@ -30,6 +30,7 @@ protected:
 	
 	void RemoveComponent(jComponent* comp);
 	void LoadComponents();
+	void StartComponents();
 	void UpdateComponents();
 
 	void AddChild(jGameObject* child);

@@ -1,6 +1,8 @@
 #pragma once
 #include "jComponent.h"
 
+struct  ItemProperty;
+
 struct STAT
 {
 	double life;
@@ -42,6 +44,8 @@ public:
 
 	STAT BasicStatus;
 	STAT CurrentStatus;
+
+	void Effect(ItemProperty& item);
 
 	virtual void OnLoad();
 	virtual void OnUpdate();

@@ -16,6 +16,8 @@
 #include "jTerrainCollider.h"
 #include "jNavigator.h"
 #include "jStateMachine.h"
+#include "jInventory.h"
+#include "ObjItem.h"
 
 class jEventPlayer : public jInputEvent
 {
@@ -75,6 +77,20 @@ void ObjPlayer::OnLoad()
 {
 	jParserMeta meta;
 	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_Player.txt");
+
+	jInventory* inven = new jInventory();
+	vector<string> items = meta.GetValues(MF_Item);
+	vector<ObjItem*> objItems;
+	for (string itemFilename : items)
+	{
+		ObjItem* item = new ObjItem();
+		item->LoadProperty(itemFilename);
+		objItems.push_back(item);
+		
+	}
+	inven->initItemList(objItems);
+	objItems.clear();
+	AddComponent(inven);
 
 	mAnim = new jAnimatorGroup();
 	vector<string> childs = meta.GetValues(MF_Child);

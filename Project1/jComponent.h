@@ -11,6 +11,7 @@ public:
 	virtual ~jComponent();
 
 	virtual void OnLoad() {}
+	virtual void OnStart() {}
 	virtual void OnUpdate() {}
 
 	void Load();

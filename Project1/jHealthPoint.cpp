@@ -1,5 +1,5 @@
 #include "jHealthPoint.h"
-
+#include "ObjItem.h"
 
 
 jHealthPoint::jHealthPoint()
@@ -8,6 +8,10 @@ jHealthPoint::jHealthPoint()
 
 
 jHealthPoint::~jHealthPoint()
+{
+}
+
+void jHealthPoint::Effect(ItemProperty & item)
 {
 }
 
