@@ -10,12 +10,13 @@ public:
 	virtual ~jImage();
 
 	virtual void OnLoad();
-
+	bool LoadImgFile();
+	
 protected:
 
-	Property_Getter(char*, Buffer, nullptr)
+
+	Property_Getter(chars, Buffer, chars())
 	Property_Getter(int, Width, 0)
 	Property_Getter(int, Height, 0)
-	Property_Getter(int, BufferSize, 0)
 };
 

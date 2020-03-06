@@ -147,6 +147,7 @@
     <ClCompile Include="jNavigator.cpp" />
     <ClCompile Include="jParabolic2.cpp" />
     <ClCompile Include="jParticle.cpp" />
+    <ClCompile Include="jPng.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="jNavigator.h" />
     <ClInclude Include="jParabolic2.h" />
     <ClInclude Include="jParticle.h" />
+    <ClInclude Include="jPng.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
     <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />

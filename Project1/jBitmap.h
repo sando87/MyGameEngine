@@ -46,6 +46,7 @@ public:
 	jBitmap();
 	~jBitmap();
 	u32& Access(int x, int y);
+	u32* GetBuffer() { return Colors; }
 	bool Load(const char* FileName);
 	bool Save(const char* FileName);
 	void RedScale();

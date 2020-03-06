@@ -69,9 +69,9 @@ bool jGameObjectMgr::Initialize()
 
 	//AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
-	//AddGameObject(new ObjUI());
+	AddGameObject(new ObjUI());
 	//AddGameObject(new ObjEffect());
-	AddGameObject(new ObjEffectFire());
+	//AddGameObject(new ObjEffectFire());
 	//AddGameObject(new ObjBomb());
 
 	//jParserD3::LoadResources(1);

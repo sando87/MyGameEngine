@@ -27,6 +27,7 @@ void jShaderUI::OnLoad()
 	mDevContext->RSGetViewports(&num, &viewPort);
 	mCameraUI->GetTransform().lookat(Vector3(0, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0));
 	mCameraUI->setOrthogonalMatrix(0, viewPort.Width, viewPort.Height, 0, 0, 1);
+	//mCameraUI->setOrthogonalMatrix(0, 1280, 800, 0, 0, 1);
 
 	CacheCBufferBasic();
 	CacheSamplerState();
@@ -37,7 +38,6 @@ void jShaderUI::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
-	LoadCompentIndicies();
 	LoadCompentTextures();
 
 	SetDepthOn(false);

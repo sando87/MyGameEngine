@@ -463,7 +463,8 @@ void jShader::LoadCompentTextures()
 		string keyFullname = img->GetFullname();
 		string ext = jUtils::GetFileExtension(keyFullname);
 		bool compressed = ext == "dump" ? true : false;
-		AddCachedTextureView(img->GetBuffer(), img->GetWidth(), img->GetHeight(), compressed, keyFullname);
+		chars buf = img->GetBuffer();
+		AddCachedTextureView(&buf[0], img->GetWidth(), img->GetHeight(), compressed, keyFullname);
 	}
 }
 

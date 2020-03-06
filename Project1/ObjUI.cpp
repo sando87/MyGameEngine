@@ -51,9 +51,10 @@ void ObjUI::OnLoad()
 	mEvent = new jEventUI();
 	AddComponent(mEvent);
 
-	AddComponent(new jImage("./res/img/white.tga"));
+	AddComponent(new jImage("./res/ui/white.png"));
 
 	mUIEngine = jUISystem::GetInst();
+	mUIEngine->SetResourcePath("./res/ui/");
 
 	mUIEngine->EventDrawFill = [&](DrawingParams params) {
 		VertexFormatPTC vert[4];
@@ -71,16 +72,16 @@ void ObjUI::OnLoad()
 		mShader->DrawRect(vert, params.texture);
 	};
 	mUIEngine->OpLoadTexture = [&](jUIBitmap* bitmap) {
-		void* ptr;
-		if (bitmap->fullname.length() > 0 && bitmap->buf.empty())
+		void* ptr = nullptr;
+		if (bitmap->fullname.length() > 0)
 		{
-			int width = 0;
-			int height = 0;
-			chars buf = jUtils::LoadTarga(bitmap->fullname, height, width);
-			ptr = mShader->LoadTextureRes((unsigned char*)&buf[0], width, height);
+			jImage img(bitmap->fullname);
+			img.LoadImgFile();
+			chars buf = img.GetBuffer();
+			ptr = mShader->LoadTextureRes((unsigned char*)&buf[0], img.GetWidth(), img.GetHeight());
 
 		}
-		else
+		else if(!bitmap->buf.empty())
 		{
 			ptr = mShader->LoadTextureRes((unsigned char*)&bitmap->buf[0], bitmap->width, bitmap->height);
 		}
@@ -91,7 +92,7 @@ void ObjUI::OnLoad()
 		mShader->ReleaseTextureRes(ptr);
 	};
 
-	mUIEngine->ParseJson("test.json");
+	mUIEngine->ParseJson("panel.json");
 	mUIEngine->LoadViews();
 	
 }
