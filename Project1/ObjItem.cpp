@@ -52,27 +52,27 @@ void ItemProperty::LoadMetaFile(string filename)
 	string path = PATH_RESOURCES + string("items/");
 	meta.Load(path + filename);
 
-	itemFilename = meta.GetValue<string>("itemFilename");
-	meshFilename = meta.GetValue<string>("meshFilename");
+	itemFilename	= meta.GetValue<string>("itemFilename");
+	meshFilename	= meta.GetValue<string>("meshFilename");
 	textureFilename = meta.GetValue<string>("textureFilename");
 	UIImageFilename = meta.GetValue<string>("UIImageFilename");
-	state = (ItemState)meta.GetValue<int>("state");
-	category = (ItemCategory)meta.GetValue<int>("category");
-	posIndex = meta.GetValue<int>("posIndex");
-	pa = meta.GetValue<double>("pa");
-	ma = meta.GetValue<double>("ma");
-	pd = meta.GetValue<double>("pd");
-	md = meta.GetValue<double>("md");
-	hp = meta.GetValue<double>("hp");
-	mp = meta.GetValue<double>("mp");
-	shieldMax	= meta.GetValue<double>("shieldMax");
-	shieldTime	= meta.GetValue<double>("shieldTime");
-	spdMove		= meta.GetValue<double>("spdMove");
-	spdSkill	= meta.GetValue<double>("spdSkill");
-	cntSkill	= meta.GetValue<double>("cntSkill");
-	sizeSkill	= meta.GetValue<double>("sizeSkill");
-	cooltime	= meta.GetValue<double>("cooltime");
-	proficiency = meta.GetValue<double>("proficiency");
+	state			= (ItemState)meta.GetValue<int>("state");
+	category		= (ItemCategory)meta.GetValue<int>("category");
+	posIndex		= meta.GetValue<int>("posIndex");
+	pa				= meta.GetValue<double>("pa");
+	ma				= meta.GetValue<double>("ma");
+	pd				= meta.GetValue<double>("pd");
+	md				= meta.GetValue<double>("md");
+	hp				= meta.GetValue<double>("hp");
+	mp				= meta.GetValue<double>("mp");
+	shieldMax		= meta.GetValue<double>("shieldMax");
+	shieldTime		= meta.GetValue<double>("shieldTime");
+	spdMove			= meta.GetValue<double>("spdMove");
+	spdSkill		= meta.GetValue<double>("spdSkill");
+	cntSkill		= meta.GetValue<double>("cntSkill");
+	sizeSkill		= meta.GetValue<double>("sizeSkill");
+	cooltime		= meta.GetValue<double>("cooltime");
+	proficiency		= meta.GetValue<double>("proficiency");
 }
 
 void ItemProperty::SaveMetaFile()

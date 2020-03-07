@@ -76,8 +76,8 @@ PixelInputType jVS(VertexInputType input)
 	float stepV = g_uvInfo.w;
 	int idxU = board.info.x % g_uvInfo.x;
 	int idxV = board.info.x / g_uvInfo.x;
-	output.tex.x = (stepU * idxU) + input.tex.x;
-	output.tex.y = (stepV * idxV) + input.tex.y;
+	output.tex.x = stepU * (idxU + input.tex.x);
+	output.tex.y = stepV * (idxV + input.tex.y);
 	output.tex.z = board.info.y;
 	output.color = board.color;
     

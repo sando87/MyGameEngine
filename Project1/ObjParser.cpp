@@ -45,7 +45,7 @@ void ObjParser::OnStart()
 	if (!mParser->Init(mFileIndex))
 	{
 		_printlog("fail to load [%d]\n", mFileIndex);
-		SetRemove(true);
+		Destroy();
 		return;
 	}
 

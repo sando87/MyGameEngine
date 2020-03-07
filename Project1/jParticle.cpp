@@ -1,5 +1,6 @@
 #include "jParticle.h"
 #include "jTime.h"
+#include "jTransform.h"
 
 jParticle::jParticle()
 {
@@ -9,18 +10,13 @@ jParticle::jParticle()
 
 jParticle::~jParticle()
 {
-	Clear();
+	Reset();
 }
 
 void jParticle::OnLoad()
 {
-	mTime = mBurstIntervalSec;
-	mCurrnetBurstIndex = 0;
-	mDirection.normalize();
-	Vector3 axis = Vector3(0, 0, 1).cross(mDirection);
-	double deg = RadToDeg(asin(axis.length()));
-	mRotateMat.identity();
-	mRotateMat.rotate(deg, axis);
+	Reset();
+
 	if (OnCreateParticle == nullptr)
 		OnCreateParticle = []() { return new Particle(); };
 }
@@ -30,10 +26,13 @@ void jParticle::OnUpdate()
 	if (mStart == false)
 		return;
 
+	mWaitTime += jTime::Delta();
+	if (mWaitTime <= 0)
+		return;
+
 	if (mBurstCount != 0) // burst mode 
 	{
-		mTime += jTime::Delta();
-		if (mBurstIntervalSec < mTime)
+		if (mBurstIntervalSec < mWaitTime)
 		{
 			if(mBurstCount < 0) 
 				Burst(); //infinite loop
@@ -42,15 +41,16 @@ void jParticle::OnUpdate()
 				Burst();
 				mCurrnetBurstIndex++;
 			}
-			mTime = 0;
+			mWaitTime = 0;
 		}
 	}
 
 	for (auto iter = mParticles.begin(); iter != mParticles.end(); )
 	{
 		Particle* parti = *iter;
-		parti->Time += jTime::Delta();
-		UpdateDynamics(parti);
+		parti->AccTime += jTime::Delta();
+		ForceGravity(parti);
+		ForceAirDrag(parti);
 		parti->OnUpdate();
 		if (parti->Death)
 		{
@@ -69,34 +69,48 @@ void jParticle::Burst()
 	for (int i = 0; i < mCount; ++i)
 	{
 		Particle* particle = OnCreateParticle();
-		particle->Pos = mPosition;
+		particle->Pos += mPosition;
 		particle->LifeTime = mDuration * RandomRate();
+		particle->mass = mMass != 0 ? mMass : particle->mass;
 		Vector3 force = RandomForce() * mForce * RandomRate();
 		particle->Force(force);
 		mParticles.push_back(particle);
 	}
 }
 
-void jParticle::Clear()
+bool jParticle::IsFinished()
+{
+	if (mBurstCount < 0)
+		return false;
+
+	if(mCurrnetBurstIndex < mBurstCount)
+		return false;
+
+	if (!mParticles.empty())
+		return false;
+
+	return true;
+}
+
+void jParticle::Reset()
 {
 	for (auto iter : mParticles)
 		delete iter;
 	mParticles.clear();
+
+	mWaitTime -= mStartDelay;
+	mCurrnetBurstIndex = 0;
 }
 
 Vector3 jParticle::RandomForce()
 {
-	int x = jUtils::Random() % 100 - 50;
-	int y = jUtils::Random() % 100 - 50;
-	Vector3 axis(x, y, 0);
-	axis.normalize();
-	int degree = jUtils::Random() % mDegree;
+	int deg = jUtils::Random() % 360;
+	Vector3 axis(cos(DegToRad(deg)), 0, sin(DegToRad(deg)));
+	int degree = mDegree == 0 ? 0 : jUtils::Random() % abs(mDegree);
 	Matrix4 mat;
-	mat.identity();
 	mat.rotate(degree, axis);
-	Vector3 transVec = Vector3(0, 0, 1) * mat;
-	if (mDirection != Vector3(0, 0, 1))
-		transVec = transVec * mRotateMat;
+	Vector3 transVec = Vector3(0, 1, 0) * mat;
+	transVec = transVec * mRotateMat;
 	
 	transVec.normalize();
 	return transVec;
@@ -110,36 +124,58 @@ double jParticle::RandomRate()
 	return 1 - b;
 }
 
-void jParticle::UpdateDynamics(Particle * particle)
+void jParticle::ForceGravity(Particle * particle)
 {
-	Vector3 dragDir = -particle->Vel;
-	double dragMag = particle->Vel.length();
+	particle->Force(mGravity * particle->mass);
+}
+void jParticle::ForceAirDrag(Particle* particle)
+{
+	Vector3 dragDir = particle->Vel * -1.0;
+	double dragMag = dragDir.length();
 	dragDir.normalize();
-	Vector3 force = mGravity * particle->mass + mCoeffDrag * dragMag * dragMag * dragDir;
-	Vector3 acc = force / particle->mass;
-	particle->Vel += acc * jTime::Delta();
-	particle->Pos += particle->Vel * jTime::Delta();
+	Vector3 force = mCoeffDrag * dragMag * dragMag * dragDir;
+	particle->Force(force);
+}
+
+void jParticle::SetDirection(Vector3 dir)
+{
+	mDirection = dir;
+	mDirection.normalize();
+	jTransform trans;
+	trans.lookat(Vector3(), mDirection, Vector3(0, 0, 1));
+	mRotateMat = trans.getLocalMatrix();
 }
 
 Particle::Particle()
 {
 	Pos = Vector3();
 	Vel = Vector3();
-	Time = 0;
+	AccTime = 0;
 	LifeTime = 0;
 	Death = false;
 	mass = 1;
+	size = 1;
+	texIdx = 0;
+	refDiscard = 0;
+	color = Vector4f(1,1,1,1);
 }
 
 void Particle::Force(Vector3 force)
 {
-	Vector3 acc = force / mass;
-	Vel += acc * jTime::Delta();
-	Pos += Vel * jTime::Delta();
+	forces.push_back(force);
 }
 
 void Particle::OnUpdate()
 {
-	if (LifeTime < Time)
+	Vector3 forceTotal;
+	for (Vector3 force : forces)
+		forceTotal += force;
+
+	Vector3 acc = mass == 0 ? Vector3() : forceTotal / mass;
+	Vel += acc * jTime::Delta();
+	Pos += Vel * jTime::Delta();
+	forces.clear();
+
+	if (LifeTime < AccTime)
 		Death = true;
 }

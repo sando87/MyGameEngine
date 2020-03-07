@@ -11,10 +11,10 @@ private:
 	virtual void OnMouseWheel(int delta);
 };
 
-INITIALIZER(camera)
-{
-	jGameObjectMgr::GetInst().AddGameObject(new ObjCamera());
-}
+//INITIALIZER(camera)
+//{
+//	jGameObjectMgr::GetInst().AddGameObject(new ObjCamera());
+//}
 
 ObjCamera::ObjCamera()
 {

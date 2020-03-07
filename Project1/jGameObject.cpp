@@ -25,7 +25,17 @@ jGameObject::jGameObject()
 
 jGameObject::~jGameObject()
 {
-	delete mTransform;
+	for (jGameObject* child : mChilds)
+		child->mParent = nullptr;
+
+	if (mParent != nullptr)
+		mParent->SubChild(this);
+	
+	for (auto iter = mComponents.begin(); iter != mComponents.end(); ++iter)
+	{
+		jComponent* comp = *iter;
+		delete comp;
+	}
 }
 
 jGameObject * jGameObject::GetParent()
@@ -105,6 +115,10 @@ void jGameObject::AddChild(jGameObject* child)
 	mChilds.push_back(child);
 	child->mParent = this;
 }
+void jGameObject::SubChild(jGameObject * child)
+{
+	mChilds.remove(child);
+}
 void jGameObject::AddComponent(jComponent* comp)
 {
 	comp->mGameObject = this;
@@ -112,6 +126,12 @@ void jGameObject::AddComponent(jComponent* comp)
 	if (GetEngine().Added(this))
 		comp->Load();
 	mComponents.push_back(comp);
+}
+void jGameObject::Destroy()
+{
+	mRemove = true;
+	for (jGameObject* child : mChilds)
+		child->Destroy();
 }
 void jGameObject::RemoveComponent(jComponent* comp)
 {

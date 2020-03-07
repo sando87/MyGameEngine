@@ -9,10 +9,6 @@
 #define TERRAIN_SIZE 240
 #define TERRAIN_STEP 5
 
-INITIALIZER(terrain)
-{
-	jGameObjectMgr::GetInst().AddGameObject(new ObjTerrainMgr());
-}
 
 ObjTerrainMgr::ObjTerrainMgr()
 {
@@ -120,7 +116,7 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 			break;
 
 		for(jGameObject* terrain : block.terrains)
-			terrain->SetRemove(true);
+			terrain->Destroy();
 
 		mCachedBlocks.erase(key);
 	}

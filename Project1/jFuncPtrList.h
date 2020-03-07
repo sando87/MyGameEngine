@@ -31,14 +31,7 @@ public:
 	}
 	void operator-=(function<T> _func)
 	{
-		for (auto iter = mList.begin(); iter != mList.end(); ++iter)
-		{
-			if (*iter == _func)
-			{
-				mList.erase(iter);
-				break;
-			}
-		}
+		mList.remove(_func);
 	}
 	void operator=(function<T> _func)
 	{

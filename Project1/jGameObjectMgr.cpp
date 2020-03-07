@@ -10,9 +10,7 @@
 #include "ObjEnemy.h"
 #include "ObjCreateHeightmap.h"
 #include "ObjUI.h"
-#include "ObjEffect.h"
 #include "ObjBomb.h"
-#include "ObjEffectFire.h"
 #include "ObjItem.h"
 
 #include "jTime.h"
@@ -37,47 +35,49 @@ bool jGameObjectMgr::Initialize()
 	ID3D11Device* pDev = jRenderer::GetInst().GetDevice();
 	ID3D11DeviceContext* pDevCont = jRenderer::GetInst().GetDeviceContext();
 
-	//pDev->CreateSamplerState(NULL, NULL);
-	//pDev->CreateTexture2D(NULL, NULL, NULL);
-	//pDev->CreateShaderResourceView(NULL, NULL, NULL);
-	//pDev->CreateBuffer(NULL, NULL, NULL);
-	//pDev->CreateInputLayout(NULL, 0, NULL, 0, NULL);
-	//pDev->CreateVertexShader(NULL, 0, NULL, NULL);
-	//pDev->CreatePixelShader(NULL, 0, NULL, NULL);
-	//
-	//pDevCont->OMSetBlendState(NULL, NULL, 0);
-	//pDevCont->OMSetDepthStencilState(NULL, 0);
-	//pDevCont->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
-	//pDevCont->IASetIndexBuffer(NULL, DXGI_FORMAT::DXGI_FORMAT_A8_UNORM, 0);
-	//pDevCont->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
-	//pDevCont->VSSetConstantBuffers(0, 0, NULL);
-	//pDevCont->PSSetConstantBuffers(0, 0, NULL);
-	//pDevCont->PSSetShaderResources(0, 0, NULL);
-	//pDevCont->IASetInputLayout(NULL);
-	//pDevCont->VSSetShader(NULL, NULL, 0);
-	//pDevCont->PSSetShader(NULL, NULL, 0);
-	//pDevCont->PSSetSamplers(0, 0, NULL);
-	//pDevCont->DrawIndexed(0, 0, 0);
-	//
-	//pDevCont->Map(NULL, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, NULL);
-	//pDevCont->Unmap(NULL, 0);
-	//Present는 jRenderer::EndScene()함수에서 확인 필요
-	//00007FFEA8D34300
-	//00007FFEA8D30000
+	/*
+	pDev->CreateSamplerState(NULL, NULL);
+	pDev->CreateTexture2D(NULL, NULL, NULL);
+	pDev->CreateShaderResourceView(NULL, NULL, NULL);
+	pDev->CreateBuffer(NULL, NULL, NULL);
+	pDev->CreateInputLayout(NULL, 0, NULL, 0, NULL);
+	pDev->CreateVertexShader(NULL, 0, NULL, NULL);
+	pDev->CreatePixelShader(NULL, 0, NULL, NULL);
+	
+	pDevCont->OMSetBlendState(NULL, NULL, 0);
+	pDevCont->OMSetDepthStencilState(NULL, 0);
+	pDevCont->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+	pDevCont->IASetIndexBuffer(NULL, DXGI_FORMAT::DXGI_FORMAT_A8_UNORM, 0);
+	pDevCont->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
+	pDevCont->VSSetConstantBuffers(0, 0, NULL);
+	pDevCont->PSSetConstantBuffers(0, 0, NULL);
+	pDevCont->PSSetShaderResources(0, 0, NULL);
+	pDevCont->IASetInputLayout(NULL);
+	pDevCont->VSSetShader(NULL, NULL, 0);
+	pDevCont->PSSetShader(NULL, NULL, 0);
+	pDevCont->PSSetSamplers(0, 0, NULL);
+	pDevCont->DrawIndexed(0, 0, 0);
+	
+	pDevCont->Map(NULL, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, NULL);
+	pDevCont->Unmap(NULL, 0);
+	Present는 jRenderer::EndScene()함수에서 확인 필요
+	00007FFEA8D34300
+	00007FFEA8D30000
+	*/
 
+
+	AddGameObject(new ObjCamera());
+	AddGameObject(new ObjTerrainMgr());
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
 
 	//AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
-	AddGameObject(new ObjUI());
-	//AddGameObject(new ObjEffect());
-	//AddGameObject(new ObjEffectFire());
-	//AddGameObject(new ObjBomb());
-	ObjItem* item = new ObjItem();
-	item->LoadProperty("item1.txt");
-	AddGameObject(item);
-	//AddGameObject(new ObjEffectFire());
+	//AddGameObject(new ObjUI());
+	AddGameObject(new ObjBomb());
+	//ObjItem* item = new ObjItem();
+	//item->LoadProperty("item1.txt");
+	//AddGameObject(item);
 
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;

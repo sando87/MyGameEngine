@@ -22,6 +22,7 @@ public:
 	void AddComponent(jComponent* comp);
 	template<typename T = jComponent> T* FindComponent();
 	template<typename T = jComponent> vector<T*> FindComponents();
+	void Destroy();
 
 protected:
 	virtual void OnLoad();
@@ -34,15 +35,16 @@ protected:
 	void UpdateComponents();
 
 	void AddChild(jGameObject* child);
+	void SubChild(jGameObject* child);
 
 	list<jComponent*> mComponents;
 	jTransform* mTransform;
 	jGameObjectMgr* mEngine;
 	jGameObject* mParent;
-	vector<jGameObject*> mChilds;
+	list<jGameObject*> mChilds;
 
 
-	Property_GetSetter(bool, Remove, false)
+	Property_Getter(bool, Remove, false)
 	Property_Getter(string, Name, "")
 };
 

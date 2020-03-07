@@ -203,9 +203,6 @@
     <ClCompile Include="ObjUI.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="ObjEffect.cpp">
-      <Filter>소스 파일\GameObjects</Filter>
-    </ClCompile>
     <ClCompile Include="jShaderUI.cpp">
       <Filter>소스 파일\Shaders</Filter>
     </ClCompile>
@@ -221,15 +218,12 @@
     <ClCompile Include="jLinear.cpp">
       <Filter>소스 파일\Math</Filter>
     </ClCompile>
-    <ClCompile Include="ObjEffectFire.cpp">
-      <Filter>소스 파일\GameObjects</Filter>
-    </ClCompile>
     <ClCompile Include="jParticle.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="jPng.cpp">
       <Filter>소스 파일\Utils</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="jTrigger.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
@@ -238,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="jInventory.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjParticle.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -421,9 +418,6 @@
     <ClInclude Include="jNavigator.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
-    <ClInclude Include="ObjEffect.h">
-      <Filter>소스 파일\GameObjects</Filter>
-    </ClInclude>
     <ClInclude Include="ObjUI.h">
       <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
@@ -442,15 +436,12 @@
     <ClInclude Include="jLinear.h">
       <Filter>소스 파일\Math</Filter>
     </ClInclude>
-    <ClInclude Include="ObjEffectFire.h">
-      <Filter>소스 파일\GameObjects</Filter>
-    </ClInclude>
     <ClInclude Include="jParticle.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="jPng.h">
       <Filter>소스 파일\Utils</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="jTrigger.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
@@ -459,6 +450,9 @@
     </ClInclude>
     <ClInclude Include="jInventory.h">
       <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjParticle.h">
+      <Filter>소스 파일\GameObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

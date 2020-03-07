@@ -9,12 +9,18 @@ class Particle
 public:
 	Particle();
 
-	double mass;
-	Vector3 Pos;
+	vector<Vector3> forces;
 	Vector3 Vel;
-	double Time;
+	Vector3 Pos;
+	
+	double mass;
+	double AccTime;
 	double LifeTime;
 	bool Death;
+	float size;
+	int texIdx;
+	float refDiscard;
+	Vector4f color;
 
 	void Force(Vector3 force);
 	virtual void OnUpdate();
@@ -26,34 +32,44 @@ class jParticle :
 public:
 	jParticle();
 	virtual ~jParticle();
-	const list<Particle*>& GetParticles() { return mParticles; }
+
+	list<Particle*>& GetParticles() { return mParticles; }
+	void Start() { mStart = true; }
+	void Stop() { mStart = false; Reset(); }
+	void Burst();
+	bool IsFinished();
 	function<Particle*(void)> OnCreateParticle;
 
 protected:
 	virtual void OnLoad();
 	virtual void OnUpdate();
 	
-	void Burst();
-	void Clear();
+	void Reset();
 	Vector3 RandomForce();
 	double RandomRate();
-	void UpdateDynamics(Particle* particle);
+	void ForceGravity(Particle* particle);
+	void ForceAirDrag(Particle* particle);
 	
 	list<Particle*> mParticles;
-	double mTime;
+	double mWaitTime;
 	int mCurrnetBurstIndex;
 	Matrix4 mRotateMat;
 
+
+	public: void SetDirection(Vector3 dir);
+	Property_Getter(Vector3, Direction, Vector3(0, 0, 1))
 	Property_GetSetter(Vector3, Position, Vector3())
-	Property_GetSetter(Vector3, Direction, Vector3(0, 0, 1))
 	Property_GetSetter(Vector3, Gravity, Vector3(0, 0, -9.8))
 	Property_GetSetter(double, CoeffDrag, 0.01)
+	Property_GetSetter(int, Reserve, 40)
 	Property_GetSetter(int, Count, 10)
 	Property_GetSetter(int, Degree, 45)
+	Property_GetSetter(double, Mass, 0)
+	Property_GetSetter(double, StartDelay, 0)
 	Property_GetSetter(double, Duration, 5)
 	Property_GetSetter(double, RandomRate, 0.1)
 	Property_GetSetter(double, Force, 100)
 	Property_GetSetter(int, BurstCount, 1)
 	Property_GetSetter(double, BurstIntervalSec, 1)
-	Property_GetSetter(bool, Start, true)
+	Property_Getter(bool, Start, true)
 };

@@ -2,7 +2,7 @@
 #include "jGameObject.h"
 #include "jParabolic2.h"
 
-class ObjEffect;
+class jParticle;
 
 class ObjBomb :
 	public jGameObject
@@ -13,18 +13,15 @@ public:
 
 protected:
 	virtual void OnLoad();
-	virtual void OnStart();
 	virtual void OnUpdate();
 
-	ObjEffect* mEffectFire;
-	ObjEffect* mEffectSmoke;
+	void CreateFlameParticle();
+	void CreateExploreParticle();
+	void CreateSmokeParticle();
 
-	jParabolic2 mHeights;
-	Vector2 mDirection;
-	double mDistance;
-	double mAccTime;
-
-	Property_Setter(Vector3, Dest, Vector3())
-	Property_Setter(double, Second, 0)
+	jParticle *mParticleBomb;
+	jParticle *mParticleFlame;
+	jParticle *mParticleExplore;
+	jParticle *mParticleSmoke;
 };
 
