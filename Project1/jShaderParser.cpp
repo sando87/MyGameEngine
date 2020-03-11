@@ -5,7 +5,7 @@
 #include "jCaches.h"
 #include "jRenderer.h"
 
-#define SHADER_PARSER_FILENAME "./parser"
+#define SHADER_PARSER_FILENAME "./shaders/parser"
 
 jShaderParser::jShaderParser()
 {

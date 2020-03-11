@@ -29,7 +29,6 @@ ObjParser::ObjParser()
 ObjParser::~ObjParser()
 {
 	delete mParser;
-	delete mShader;
 }
 
 void PrintMat(Matrix4f* mat)
@@ -54,6 +53,7 @@ void ObjParser::OnStart()
 	{
 	public:
 		jParserD3 * mParser;
+		jShaderParserOnly(jParserD3 * parser) { mParser = parser; }
 		virtual bool OnRender(ObjCamera* cam)
 		{
 			mParser->Render();
@@ -61,24 +61,18 @@ void ObjParser::OnStart()
 		}
 	};
 
-	mShader = new jShaderParserOnly();
-	((jShaderParserOnly*)mShader)->mParser = mParser;
-	//mShader->Load(mParser);
+	mShader = new jShaderParserOnly(mParser);
+	//mShader = new jShaderParser();
+	//((jShaderParser*)mShader)->Load(mParser);
 	//mShader->SetEnable(false);
 	AddComponent(mShader);
 
-	Vector3f basePos;
-	//basePos.x = mParser->mCBMain.matWorld[3];
-	//basePos.y = mParser->mCBMain.matWorld[7];
-	//basePos.z = mParser->mCBMain.matWorld[11];
-	//_printlog("%f %f %f \n", basePos.x, basePos.y, basePos.z);
 	Vector3 pos = GetTransform().getPos();
 	pos.x = mOff;
-	//pos = basePos;
-	GetTransform().moveTo(pos);
+	//GetTransform().moveTo(pos);
 
-	//if (mParser->mAnims.size() > 0)
-	//	AddComponent(new jEventParser());
+	if (mParser->mAnimKeys.size() > 0)
+		AddComponent(new jEventParser());
 }
 
 void jEventParser::OnKeyDown(char ch)
@@ -87,18 +81,16 @@ void jEventParser::OnKeyDown(char ch)
 	if (ch == 'Z')
 	{
 		mAnimIndex++;
-		mAnimIndex %= obj->mParser->mAnims[0].keys.size();
+		mAnimIndex %= obj->mParser->mAnimKeys.size();
+		obj->mParser->mCurrentAnimIndex = mAnimIndex;
 		_echoN(mAnimIndex);
-		for (int i = 0; i < 45; ++i)
-			((jShaderParser *)obj->mShader)->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
 	}
 	else if (ch == 'X')
 	{
 		mAnimIndex--;
-		mAnimIndex = mAnimIndex < 0 ? obj->mParser->mAnims[0].keys.size() - 1 : mAnimIndex;
+		mAnimIndex = mAnimIndex < 0 ? obj->mParser->mAnimKeys.size() - 1 : mAnimIndex;
+		obj->mParser->mCurrentAnimIndex = mAnimIndex;
 		_echoN(mAnimIndex);
-		for (int i = 0; i < 45; ++i)
-			((jShaderParser *)obj->mShader)->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
 	}
 }
 
@@ -108,8 +100,7 @@ void jEventParser::OnKeyPressed(char ch)
 	if (ch == 'C')
 	{
 		mAnimIndex++;
-		mAnimIndex %= obj->mParser->mAnims[0].keys.size();
-		for (int i = 0; i < 45; ++i)
-			((jShaderParser *)obj->mShader)->mBones[i] = obj->mParser->mAnims[0].keys[mAnimIndex][i];
+		mAnimIndex %= obj->mParser->mAnimKeys.size();
+		obj->mParser->mCurrentAnimIndex = mAnimIndex;
 	}
 }

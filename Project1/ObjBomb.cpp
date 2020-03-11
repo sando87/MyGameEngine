@@ -52,14 +52,14 @@ void ObjBomb::OnUpdate()
 		Particle* part = *iter;
 		GetTransform().moveTo(part->Pos);
 		mParticleFlame->SetDirection(part->Vel * -1);
-
+	
 		jTransform& trans = GetTransform();
 		Vector3 dir = mParticleBomb->GetDirection();
 		dir.z = (jUtils::Random() % 8) * 0.1;
 		dir.normalize();
 		trans.rotateAxis(dir, 180 * jTime::Delta());
 	}
-
+	
 	if(mParticleBomb->IsFinished())
 	{
 		CreateExploreParticle();

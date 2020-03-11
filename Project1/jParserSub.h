@@ -34,6 +34,11 @@ struct Matrix3x4f
 	}
 };
 
+struct Parser3DAnimKey
+{
+	Matrix3x4f bones[45];
+};
+
 struct Matrix3x4n
 {
 	Vector4n a;

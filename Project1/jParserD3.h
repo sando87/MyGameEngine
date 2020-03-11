@@ -91,10 +91,12 @@ public:
 	vector<AnimInfo> mAnims;
 	GeometryInfo mGeoInfo;
 	int mFileIndex;
+	int mCurrentAnimIndex = 0;
 	function< Vector2f(int _idx, unsigned char *_p) > mFuncConvertTex;
 	RenderContext mContext;
 	vector<int> mTextures;
 	CBMain mCBMain;
+	vector<Parser3DAnimKey> mAnimKeys;
 	MyRes_CreateBuffer* mpVerticies;
 	int mLayoutFileID;
 
@@ -114,6 +116,7 @@ public:
 	ID3D11DepthStencilState* GetResDepthStencilState();
 	bool SetContantBuffer(MapInfo& cb, int slotIdx);
 	bool SetContantBufferMain();
+	bool SetContantBufferBones();
 	bool Render();
 	GeometryInfo GetGeometryInfo() { return mGeoInfo; }
 	

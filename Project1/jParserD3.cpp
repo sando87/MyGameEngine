@@ -464,6 +464,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x28, 0x32c):
 	case RES_ID(0x42, 0xf3c):
 	case RES_ID(0xb3, 0x358):
+	case RES_ID(0xe5, 0x1310): //41
 		mTextures.push_back(0);
 		break;
 	case RES_ID(0xe3, 0x10e8): //126
@@ -472,7 +473,6 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x39, 0x2198): //21
 	case RES_ID(0x32, 0x1468): //34
 	case RES_ID(0x75, 0x1418): //38
-	case RES_ID(0xe5, 0x1310): //41
 	case RES_ID(0x4a, 0x20cc): //82
 	case RES_ID(0x3d, 0x1468):	//79
 	case RES_ID(0x87, 0x261c): //13-1
@@ -615,6 +615,10 @@ void jParserD3::InitAnims()
 					key.push_back(pMat[k + j * 45].ToMat());
 
 				info.keys.push_back(key);
+
+				Parser3DAnimKey animKey;
+				memcpy(&animKey, &pMat[j * 45], sizeof(Parser3DAnimKey));
+				mAnimKeys.push_back(animKey);
 			}
 			
 			i++;
@@ -751,7 +755,6 @@ bool jParserD3::SetContantBuffer(MapInfo & cb, int slotIdx)
 bool jParserD3::SetContantBufferMain()
 {
 	MapInfo & cb = mContext.CBMain;
-	int slotIdx = 0;
 	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
 	ID3D11Buffer *pConstBuf = (ID3D11Buffer *)CreateD3DRescource(cb.addr);
 	if (pConstBuf == nullptr)
@@ -766,8 +769,34 @@ bool jParserD3::SetContantBufferMain()
 	memcpy(mappedRes.pData, &mCBMain, sizeof(mCBMain));
 	pDevContext->Unmap(pConstBuf, cb.subRes);
 
-	pDevContext->VSSetConstantBuffers(slotIdx, 1, &pConstBuf);
-	pDevContext->PSSetConstantBuffers(slotIdx, 1, &pConstBuf);
+	pDevContext->VSSetConstantBuffers(0, 1, &pConstBuf);
+	pDevContext->PSSetConstantBuffers(0, 1, &pConstBuf);
+
+	return true;
+}
+
+bool jParserD3::SetContantBufferBones()
+{
+	if (mAnimKeys.empty())
+		return false;
+
+	MapInfo & cb = mContext.CBBones;
+	auto pDevContext = jRenderer::GetInst().GetDeviceContext();
+	ID3D11Buffer *pConstBuf = (ID3D11Buffer *)CreateD3DRescource(cb.addr);
+	if (pConstBuf == nullptr)
+		return false;
+
+	D3D11_MAPPED_SUBRESOURCE mappedRes;
+	if (FAILED(pDevContext->Map(pConstBuf, cb.subRes, (D3D11_MAP)cb.type, cb.flags, &mappedRes)))
+	{
+		_warn();
+		return false;
+	}
+	memcpy(mappedRes.pData, &mAnimKeys[mCurrentAnimIndex], sizeof(Parser3DAnimKey));
+	pDevContext->Unmap(pConstBuf, cb.subRes);
+
+	pDevContext->VSSetConstantBuffers(1, 1, &pConstBuf);
+	pDevContext->PSSetConstantBuffers(1, 1, &pConstBuf);
 
 	return true;
 }
@@ -789,9 +818,12 @@ bool jParserD3::Render()
 	
 	pDevContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)mContext.prim_topology);
 
-	SetContantBufferMain();
-	//SetContantBuffer(mContext.CBMain, 0);
+	//SetContantBufferMain();
+	SetContantBuffer(mContext.CBMain, 0);
+	
 	SetContantBuffer(mContext.CBBones, 1);
+	SetContantBufferBones();
+	
 	SetContantBuffer(mContext.CBLights, 2);
 
 	for (int i = 0; i < 32; ++i)
