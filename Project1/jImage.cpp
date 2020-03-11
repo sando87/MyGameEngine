@@ -52,8 +52,7 @@ bool jImage::LoadImgFile()
 		std::vector<unsigned char> image;
 		unsigned width, height;
 		unsigned error = lodepng::decode(image, width, height, fullname.c_str());
-		if (error)
-			_warn();
+		_errorif(image.empty());
 
 		mBuffer->resize(image.size());
 		memcpy(&mBuffer[0], &image[0], image.size());

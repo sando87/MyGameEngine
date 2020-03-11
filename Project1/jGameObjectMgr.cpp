@@ -12,6 +12,7 @@
 #include "ObjUI.h"
 #include "ObjBomb.h"
 #include "ObjItem.h"
+#include "ObjHealthBars.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -75,6 +76,8 @@ bool jGameObjectMgr::Initialize()
 	//AddGameObject(new ObjEnemy());
 	//AddGameObject(new ObjUI());
 	//AddGameObject(new ObjBomb());
+	//AddGameObject(new ObjHealthBars());
+
 	//ObjItem* item = new ObjItem();
 	//item->LoadProperty("item1.txt");
 	//AddGameObject(item);

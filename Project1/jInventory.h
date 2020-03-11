@@ -10,6 +10,7 @@ public:
 	void initItemList(vector<ObjItem*>& items);
 	bool PickItem(ObjItem* item);
 	bool DropItem(ObjItem* item);
+	list<ObjItem*>& GetItems() { return mItems; }
 
 protected:
 	virtual void OnStart();

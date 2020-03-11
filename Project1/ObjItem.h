@@ -42,11 +42,11 @@ public:
 	~ObjItem();
 
 	void LoadProperty(string filename);
+	const ItemProperty& GetProperty() const { return mProperty; }
 
 protected:
 	virtual void OnLoad();
 
-	void SetProperty(ItemProperty& prop) { mProperty = prop; mProperty.SaveMetaFile(); }
-	Property_Getter(ItemProperty, Property, ItemProperty())
+	ItemProperty mProperty;
 };
 

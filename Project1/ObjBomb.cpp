@@ -34,7 +34,7 @@ void ObjBomb::OnLoad()
 	mParticleBomb->SetDirection(Vector3(-1, 1, 3));
 	mParticleBomb->SetDegree(0);
 	mParticleBomb->SetCount(1);
-	mParticleBomb->SetMass(3);
+	mParticleBomb->SetMassRate(3);
 	mParticleBomb->SetStartDelay(3);
 	mParticleBomb->SetDuration(3);
 	mParticleBomb->SetBurstCount(1);

@@ -18,6 +18,7 @@ public:
 protected:
 	void LoadLayout();
 	void LoadMesh();
+	void LoadTextureWhite();
 	
 	void ConfigRender();
 
