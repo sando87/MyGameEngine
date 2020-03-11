@@ -70,12 +70,21 @@ void jParticle::Burst()
 	{
 		Particle* particle = OnCreateParticle();
 		particle->Pos += mPosition;
-		particle->LifeTime = mDuration * RandomRate();
-		particle->mass = mMass != 0 ? mMass : particle->mass;
+		particle->LifeTime += mDuration * RandomRate();
+		particle->mass *= mMassRate;
 		Vector3 force = RandomForce() * mForce * RandomRate();
 		particle->Force(force);
 		mParticles.push_back(particle);
 	}
+}
+void jParticle::Burst(Particle* particle)
+{
+	particle->Pos += mPosition;
+	particle->LifeTime += mDuration * RandomRate();
+	particle->mass *= mMassRate;
+	Vector3 force = RandomForce() * mForce * RandomRate();
+	particle->Force(force);
+	mParticles.push_back(particle);
 }
 
 bool jParticle::IsFinished()
@@ -142,7 +151,10 @@ void jParticle::SetDirection(Vector3 dir)
 	mDirection = dir;
 	mDirection.normalize();
 	jTransform trans;
-	trans.lookat(Vector3(), mDirection, Vector3(0, 0, 1));
+	if (mDirection == Vector3(0, 0, 1))
+		trans.lookat(Vector3(), mDirection, Vector3(0, -1, 0));
+	else
+		trans.lookat(Vector3(), mDirection, Vector3(0, 0, 1));
 	mRotateMat = trans.getLocalMatrix();
 }
 

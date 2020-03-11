@@ -2,6 +2,12 @@
 #include "jInputEvent.h"
 #include "jShaderUI.h"
 #include "jImage.h"
+#include "jInventory.h"
+#include "ObjItem.h"
+
+#include <jViewGrid.h>
+#include <jViewImage.h>
+
 
 #pragma comment(lib,"jGUI.lib")
 
@@ -43,6 +49,7 @@ ObjUI::~ObjUI()
 {
 }
 
+
 void ObjUI::OnLoad()
 {
 	mShader = new jShaderUIEngine;
@@ -50,8 +57,6 @@ void ObjUI::OnLoad()
 
 	mEvent = new jEventUI();
 	AddComponent(mEvent);
-
-	AddComponent(new jImage("./res/ui/white.png"));
 
 	mUIEngine = jUISystem::GetInst();
 	mUIEngine->SetResourcePath("./res/ui/");
@@ -92,9 +97,12 @@ void ObjUI::OnLoad()
 		mShader->ReleaseTextureRes(ptr);
 	};
 
-	mUIEngine->ParseJson("panel.json");
+	mUIEngine->ParseJson("panelInven.json");
 	mUIEngine->LoadViews();
 	
+	mViewGrid = (jViewGrid*)mUIEngine->FindView("InvenGrid");
+	mViewSlots[0] = mUIEngine->FindView("SlotA");
+	mViewSlots[1] = mUIEngine->FindView("SlotB");
 }
 
 void ObjUI::OnUpdate()
@@ -119,4 +127,32 @@ void ObjUI::ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4])
 	vert[1].c = color;
 	vert[2].c = color;
 	vert[3].c = color;
+}
+
+void ObjUI::Reset()
+{
+	mViewGrid->ClearChild();
+	mViewGrid = nullptr;
+	memset(mViewSlots, 0x00, sizeof(mViewSlots));
+}
+
+void ObjUI::UpdateItemViews()
+{
+	if (mInventory == nullptr)
+		return;
+
+	Reset();
+
+	int cellW = mViewGrid->Width / mViewGrid->ColumnCount;
+	int cellH = mViewGrid->Height / mViewGrid->RowCount;
+	list<ObjItem*>& items = mInventory->GetItems();
+	for (ObjItem* item : items)
+	{
+		jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+		viewbg->Width = cellW;
+		viewbg->Height = cellH;
+		viewbg->Object = item;
+		const ItemProperty& prop = item->GetProperty();
+		
+	}
 }

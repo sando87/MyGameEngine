@@ -38,7 +38,7 @@ void jShaderUI::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
-	LoadCompentTextures();
+	LoadTextureWhite();
 
 	SetDepthOn(false);
 	SetAlphaOn(true);
@@ -90,6 +90,17 @@ void jShaderUI::LoadMesh()
 		vertBuf = CreateConstBuffer(&desc, nullptr);
 		return vertBuf;
 	});
+}
+
+void jShaderUI::LoadTextureWhite()
+{
+	string key = "jShaderUI.whiteTexture";
+	int width = 32;
+	int height = 32;
+	vector<char> buf;
+	buf.resize(width * height * 4);
+	memset(&buf[0], 0xff, buf.size());
+	AddCachedTextureView(&buf[0], width, height, false, key);
 }
 
 

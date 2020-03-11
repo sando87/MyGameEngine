@@ -22,7 +22,7 @@ public:
 
 	bool Load(string fullname);
 	string ToString();
-	template<typename Ty> void SetValue(string field, Ty value);
+	template<typename Ty> void AddValue(string field, Ty value);
 	template<typename Ty = string> Ty GetValue(string field);
 	template<typename Ty = string> vector<Ty> GetValues(string field);
 private:
@@ -30,21 +30,30 @@ private:
 };
 
 template<>
-inline void jParserMeta::SetValue(string field, string value)
+inline void jParserMeta::AddValue(string field, string value)
 {
 	mData.insert(make_pair(field, value));
 }
 
 template<>
-inline void jParserMeta::SetValue(string field, double value)
+inline void jParserMeta::AddValue(string field, double value)
+{
+	string val = jUtils::ToString(value);
+	mData.insert(make_pair(field, val));
+}
+
+template<>
+inline void jParserMeta::AddValue(string field, int value)
 {
 	string val = jUtils::ToString(value);
 	mData.insert(make_pair(field, val));
 }
 
 template<typename Ty>
-inline void jParserMeta::SetValue(string field, Ty value)
+inline void jParserMeta::AddValue(string field, Ty value)
 {
+	string val = value;
+	mData.insert(make_pair(field, val));
 }
 
 template<>

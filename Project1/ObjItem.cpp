@@ -78,27 +78,27 @@ void ItemProperty::LoadMetaFile(string filename)
 void ItemProperty::SaveMetaFile()
 {
 	jParserMeta meta;
-	meta.SetValue("itemFilename", itemFilename);
-	meta.SetValue("meshFilename", meshFilename);
-	meta.SetValue("textureFilename", textureFilename);
-	meta.SetValue("UIImageFilename", UIImageFilename);
-	meta.SetValue("state", (double)state);
-	meta.SetValue("category", (double)category);
-	meta.SetValue("posIndex", (double)posIndex);
-	meta.SetValue("pa", pa);
-	meta.SetValue("ma", ma);
-	meta.SetValue("pd", pd);
-	meta.SetValue("md", md);
-	meta.SetValue("hp", hp);
-	meta.SetValue("mp", mp);
-	meta.SetValue("shieldMax", shieldMax);
-	meta.SetValue("shieldTime", shieldTime);
-	meta.SetValue("spdMove", spdMove);
-	meta.SetValue("spdSkill", spdSkill);
-	meta.SetValue("cntSkill", cntSkill);
-	meta.SetValue("sizeSkill", sizeSkill);
-	meta.SetValue("cooltime", cooltime);
-	meta.SetValue("proficiency", proficiency);
+	meta.AddValue("itemFilename", itemFilename);
+	meta.AddValue("meshFilename", meshFilename);
+	meta.AddValue("textureFilename", textureFilename);
+	meta.AddValue("UIImageFilename", UIImageFilename);
+	meta.AddValue("state", (double)state);
+	meta.AddValue("category", (double)category);
+	meta.AddValue("posIndex", (double)posIndex);
+	meta.AddValue("pa", pa);
+	meta.AddValue("ma", ma);
+	meta.AddValue("pd", pd);
+	meta.AddValue("md", md);
+	meta.AddValue("hp", hp);
+	meta.AddValue("mp", mp);
+	meta.AddValue("shieldMax", shieldMax);
+	meta.AddValue("shieldTime", shieldTime);
+	meta.AddValue("spdMove", spdMove);
+	meta.AddValue("spdSkill", spdSkill);
+	meta.AddValue("cntSkill", cntSkill);
+	meta.AddValue("sizeSkill", sizeSkill);
+	meta.AddValue("cooltime", cooltime);
+	meta.AddValue("proficiency", proficiency);
 
 	string data = meta.ToString();
 	string path = PATH_RESOURCES + string("items/");

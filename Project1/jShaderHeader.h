@@ -41,6 +41,22 @@ struct VertexFormatPC
 	Vector3f p;
 	Vector4f c;
 };
+struct HPInfo
+{
+	Vector4f transform;
+	Vector2f size;
+	float reserve;
+	float hpRate;
+	Vector4f color;
+	HPInfo()
+	{
+		transform = Vector4f(0, 0, 0, 1);
+		size = Vector2f(1, 1);
+		reserve = 0;
+		hpRate = 0;
+		color = Vector4f(1, 1, 1, 1);
+	}
+};
 struct Billboard
 {
 	Vector3f transform; //xyz:position
@@ -91,6 +107,10 @@ struct ShaderBufferSkin
 		for (int i = 0; i < 45; ++i)
 			bones[i].identity();
 	}
+};
+struct ShaderBufferHPBars
+{
+	HPInfo bars[45];
 };
 struct ShaderBufferBillboards
 {

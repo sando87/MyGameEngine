@@ -150,8 +150,10 @@
     <ClCompile Include="jParticle.cpp" />
     <ClCompile Include="jPng.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
+    <ClCompile Include="jShaderHPBar.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
+    <ClCompile Include="jTinyDB.cpp" />
     <ClCompile Include="jTrigger.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
@@ -191,6 +193,7 @@
     <ClCompile Include="Matrices.cpp" />
     <ClCompile Include="ObjCamera.cpp" />
     <ClCompile Include="ObjGroundAxis.cpp" />
+    <ClCompile Include="ObjHealthBars.cpp" />
     <ClCompile Include="ObjItem.cpp" />
     <ClCompile Include="ObjParticle.cpp" />
     <ClCompile Include="ObjPlayer.cpp" />
@@ -221,8 +224,10 @@
     <ClInclude Include="jParticle.h" />
     <ClInclude Include="jPng.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
+    <ClInclude Include="jShaderHPBar.h" />
     <ClInclude Include="jShaderUI.h" />
     <ClInclude Include="jTerrainCollider.h" />
+    <ClInclude Include="jTinyDB.h" />
     <ClInclude Include="jTrigger.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
@@ -264,6 +269,7 @@
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="ObjCamera.h" />
     <ClInclude Include="ObjGroundAxis.h" />
+    <ClInclude Include="ObjHealthBars.h" />
     <ClInclude Include="ObjItem.h" />
     <ClInclude Include="ObjParticle.h" />
     <ClInclude Include="ObjPlayer.h" />

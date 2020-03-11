@@ -20,6 +20,7 @@ public:
 	float size;
 	int texIdx;
 	float refDiscard;
+	Vector2f reserve;
 	Vector4f color;
 
 	void Force(Vector3 force);
@@ -37,6 +38,7 @@ public:
 	void Start() { mStart = true; }
 	void Stop() { mStart = false; Reset(); }
 	void Burst();
+	void Burst(Particle* particle);
 	bool IsFinished();
 	function<Particle*(void)> OnCreateParticle;
 
@@ -64,7 +66,7 @@ protected:
 	Property_GetSetter(int, Reserve, 40)
 	Property_GetSetter(int, Count, 10)
 	Property_GetSetter(int, Degree, 45)
-	Property_GetSetter(double, Mass, 0)
+	Property_GetSetter(double, MassRate, 1)
 	Property_GetSetter(double, StartDelay, 0)
 	Property_GetSetter(double, Duration, 5)
 	Property_GetSetter(double, RandomRate, 0.1)

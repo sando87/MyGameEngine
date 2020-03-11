@@ -16,8 +16,8 @@ public:
 #define _trace()			jLog::Log("trace() [%s][%d]\n",__FUNCTION__,__LINE__)
 #define _warn()			jLog::Log("warn() [%s][%d]\n",__FUNCTION__,__LINE__)
 #define _error()			jLog::Log("error() [%s][%d]\n",__FUNCTION__,__LINE__)
-#define _warnif(p)		if(p){jLog::Log("warn() [%d]\n",__LINE__);}
-#define _errorif(p)		if(p){jLog::Log("error() [%d]\n",__LINE__);}
+#define _warnif(p)		if(p){jLog::Log("warn() [%s][%d]\n",__FUNCTION__,__LINE__);}
+#define _errorif(p)		if(p){jLog::Log("error() [%s][%d]\n",__FUNCTION__,__LINE__);}
 #else
 #define printlog(...)	
 #define echoD(v)		

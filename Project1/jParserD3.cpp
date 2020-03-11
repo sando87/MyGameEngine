@@ -1363,20 +1363,20 @@ bool ExpMesh::ExportMetaInfo(string path)
 	
 	float renderOrder = GetRenderOrder();
 	jParserMeta meta;
-	meta.SetValue(MF_Mesh, objname);
-	meta.SetValue(MF_Shader, type);
-	meta.SetValue(MF_Alpha, alpha ? "TRUE" : "FALSE");
-	meta.SetValue(MF_Depth, depth ? "TRUE" : "FALSE");
-	meta.SetValue(MF_WorldPos, jUtils::ToString(metaInfo.worldPosition.x) + " " + jUtils::ToString(metaInfo.worldPosition.y) + " " + jUtils::ToString(metaInfo.worldPosition.z));
-	meta.SetValue(MF_Anim, animName);
-	meta.SetValue(MF_Order, jUtils::ToString(renderOrder));
+	meta.AddValue(MF_Mesh, objname);
+	meta.AddValue(MF_Shader, type);
+	meta.AddValue(MF_Alpha, alpha ? "TRUE" : "FALSE");
+	meta.AddValue(MF_Depth, depth ? "TRUE" : "FALSE");
+	meta.AddValue(MF_WorldPos, jUtils::ToString(metaInfo.worldPosition.x) + " " + jUtils::ToString(metaInfo.worldPosition.y) + " " + jUtils::ToString(metaInfo.worldPosition.z));
+	meta.AddValue(MF_Anim, animName);
+	meta.AddValue(MF_Order, jUtils::ToString(renderOrder));
 	int cnt = metaInfo.vectors.size();
 	for (int i = 0; i < cnt; ++i)
-		meta.SetValue(MF_Texel, jUtils::ToString(metaInfo.vectors[i].x) + " " + jUtils::ToString(metaInfo.vectors[i].y) + " " + jUtils::ToString(metaInfo.vectors[i].z));
+		meta.AddValue(MF_Texel, jUtils::ToString(metaInfo.vectors[i].x) + " " + jUtils::ToString(metaInfo.vectors[i].y) + " " + jUtils::ToString(metaInfo.vectors[i].z));
 
 	cnt = metaInfo.images.size();
 	for (int i = 0; i < cnt; ++i)
-		meta.SetValue(MF_Img, metaInfo.images[i]);
+		meta.AddValue(MF_Img, metaInfo.images[i]);
 
 	jUtils::SaveToFile(folderPath, name + ".txt", meta.ToString());
 	

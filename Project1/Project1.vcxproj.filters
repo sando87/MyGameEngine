@@ -236,6 +236,15 @@
     <ClCompile Include="ObjParticle.cpp">
       <Filter>소스 파일\GameObjects</Filter>
     </ClCompile>
+    <ClCompile Include="ObjHealthBars.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jShaderHPBar.cpp">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="jTinyDB.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -453,6 +462,15 @@
     </ClInclude>
     <ClInclude Include="ObjParticle.h">
       <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjHealthBars.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jShaderHPBar.h">
+      <Filter>소스 파일\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="jTinyDB.h">
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -29,6 +29,13 @@ network
 database
 Physics
 ==========
+고려해볼만한 사항...
+- 기본적으로 엔진 클래스는 사용자가 new delete 하지 않도록..
+- 싱글톤은 uniqu_ptr -> GetInst반환은 weak_ptr
+- Cache와 같은 리소스 관리자는 shared_ptr -> Cache반환도 shared_ptr
+- ObjMgr의 객체들은 shared_ptr -> FindObj반환은 weak_ptr
+- GameObject 빌더 디자인 패턴 사용 반환값은 weak
+- ObjectComponent 빌더 디자인 패턴 사용 반환값은 weak
 
 
 ====namiong convention====
