@@ -141,6 +141,7 @@
     <ClCompile Include="jCoroutine.cpp" />
     <ClCompile Include="jCrash.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
+    <ClCompile Include="jGenericValue.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
     <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jInventory.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="jBoneNode.h" />
     <ClInclude Include="jComponent.h" />
     <ClInclude Include="jFuncPtrList.h" />
+    <ClInclude Include="jGenericValue.h" />
     <ClInclude Include="jHealthPoint.h" />
     <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jInventory.h" />

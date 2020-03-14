@@ -2,6 +2,7 @@
 #include "jComponent.h"
 
 class ObjItem;
+class ObjUI;
 
 class jInventory :
 	public jComponent
@@ -14,6 +15,8 @@ public:
 
 protected:
 	virtual void OnStart();
+
+	ObjUI* mFormInventory;
 
 	void Equip(ObjItem* item);
 	void UnEquip(ObjItem* item);

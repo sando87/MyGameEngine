@@ -13,9 +13,14 @@ struct ItemProperty
 	string meshFilename;
 	string textureFilename;
 	string UIImageFilename;
+	double UVleft;
+	double UVright;
+	double UVtop;
+	double UVbottom;
 	ItemState state;
 	ItemCategory category;
 	int posIndex;
+	int grade;
 	double pa;
 	double ma;
 	double pd;
@@ -42,7 +47,8 @@ public:
 	~ObjItem();
 
 	void LoadProperty(string filename);
-	const ItemProperty& GetProperty() const { return mProperty; }
+	const ItemProperty& GetProperty() { return mProperty; }
+	void SetPropPosIdx(int idx) { mProperty.posIndex = idx; }
 
 protected:
 	virtual void OnLoad();

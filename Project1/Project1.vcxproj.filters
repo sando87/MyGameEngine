@@ -245,6 +245,9 @@
     <ClCompile Include="jTinyDB.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="jGenericValue.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jAStar.h">
@@ -470,6 +473,9 @@
       <Filter>소스 파일\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="jTinyDB.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jGenericValue.h">
       <Filter>소스 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>

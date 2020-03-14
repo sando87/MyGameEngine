@@ -1,6 +1,8 @@
 #include "jInventory.h"
 #include "ObjItem.h"
 #include "jHealthPoint.h"
+#include "jGameObjectMgr.h"
+#include "ObjUI.h"
 
 void jInventory::initItemList(vector<ObjItem*>& items)
 {
@@ -20,6 +22,16 @@ bool jInventory::DropItem(ObjItem * item)
 
 void jInventory::OnStart()
 {
+	mFormInventory = GetEngine().FindGameObject<ObjUI>();
+
+	ObjItem* item = new ObjItem();
+	item->LoadProperty("item.txt");
+	mFormInventory->AddItem(item);
+
+	ObjItem* item2 = new ObjItem();
+	item2->LoadProperty("item2.txt");
+	mFormInventory->AddItem(item2);
+
 	for (ObjItem* item : mItems)
 	{
 		if (item->GetProperty().state == ItemState::Equipped)

@@ -79,17 +79,17 @@ void ObjPlayer::OnLoad()
 	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_Player.txt");
 
 	jInventory* inven = new jInventory();
-	vector<string> items = meta.GetValues(MF_Item);
-	vector<ObjItem*> objItems;
-	for (string itemFilename : items)
-	{
-		ObjItem* item = new ObjItem();
-		item->LoadProperty(itemFilename);
-		objItems.push_back(item);
-		
-	}
-	inven->initItemList(objItems);
-	objItems.clear();
+	//vector<string> items = meta.GetValues(MF_Item);
+	//vector<ObjItem*> objItems;
+	//for (string itemFilename : items)
+	//{
+	//	ObjItem* item = new ObjItem();
+	//	item->LoadProperty(itemFilename);
+	//	objItems.push_back(item);
+	//	
+	//}
+	//inven->initItemList(objItems);
+	//objItems.clear();
 	AddComponent(inven);
 
 	mAnim = new jAnimatorGroup();

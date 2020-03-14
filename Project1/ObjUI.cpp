@@ -11,12 +11,16 @@
 
 #pragma comment(lib,"jGUI.lib")
 
+#define FN_Category		"Category"
+#define FN_GameObject	"GameObject"
+
 class jShaderUIEngine : public jShaderUI
 {
 private:
 	jUISystem * mUIEngine;
 	virtual void OnLoad() 
 	{ 
+		SetRenderOrder(6);
 		mUIEngine = jUISystem::GetInst(); 
 		jShaderUI::OnLoad();
 	}
@@ -60,7 +64,6 @@ void ObjUI::OnLoad()
 
 	mUIEngine = jUISystem::GetInst();
 	mUIEngine->SetResourcePath("./res/ui/");
-
 	mUIEngine->EventDrawFill = [&](DrawingParams params) {
 		VertexFormatPTC vert[4];
 		ConvertDrawParam(params, vert);
@@ -96,13 +99,51 @@ void ObjUI::OnLoad()
 	mUIEngine->OpReleaseTexture = [&](void* ptr) {
 		mShader->ReleaseTextureRes(ptr);
 	};
-
 	mUIEngine->ParseJson("panelInven.json");
 	mUIEngine->LoadViews();
 	
+
 	mViewGrid = (jViewGrid*)mUIEngine->FindView("InvenGrid");
+	mViewGrid->UserData[FN_Category] = 0;
 	mViewSlots[0] = mUIEngine->FindView("SlotA");
+	mViewSlots[0]->UserData[FN_Category] = 1;
 	mViewSlots[1] = mUIEngine->FindView("SlotB");
+	mViewSlots[1]->UserData[FN_Category] = 2;
+	mCellWidth = mViewGrid->GetWidth() / mViewGrid->ColumnCount;
+	mCellHeight = mViewGrid->GetHeight() / mViewGrid->RowCount;
+
+
+	mViewGrid->EventGridEnter = [&](jView* view, Point2 pt){ DoHightlight(view);};
+	mViewGrid->EventGridLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
+	mViewGrid->EventGridClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
+	mViewSlots[0]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mViewSlots[0]->EventMouseLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
+	mViewSlots[0]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
+	mViewSlots[1]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mViewSlots[1]->EventMouseLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
+	mViewSlots[1]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
+
+
+	mViewActive = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mViewActive->Width = "1.0";
+	mViewActive->Height = "1.0";
+	mViewActive->Image.filename = "itemgrade.png";
+	mViewActive->Image.top = 0;
+	mViewActive->Image.bottom = 1.0f;
+	mViewActive->Image.left = 0.9f;
+	mViewActive->Image.right = 1.0f;
+	mViewActive->Enable = false;
+
+	mViewLight = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mViewLight->Width = "1.0";
+	mViewLight->Height = "1.0";
+	mViewLight->Image.filename = "itemgrade.png";
+	mViewLight->Image.top = 0;
+	mViewLight->Image.bottom = 1.0f;
+	mViewLight->Image.left = 0.9f;
+	mViewLight->Image.right = 1.0f;
+	mViewLight->Enable = false;
+
 }
 
 void ObjUI::OnUpdate()
@@ -129,30 +170,145 @@ void ObjUI::ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4])
 	vert[3].c = color;
 }
 
-void ObjUI::Reset()
+void ObjUI::DoClickEvent(jView* clickedView)
 {
-	mViewGrid->ClearChild();
-	mViewGrid = nullptr;
-	memset(mViewSlots, 0x00, sizeof(mViewSlots));
-}
-
-void ObjUI::UpdateItemViews()
-{
-	if (mInventory == nullptr)
+	bool clickedGrid = (clickedView->GetParent() == mViewGrid);
+	jView* itemView = clickedView->Childs.empty() ? nullptr : clickedView->Childs.front();
+	if (itemView == nullptr && mSelectedView == nullptr)
 		return;
 
-	Reset();
-
-	int cellW = mViewGrid->Width / mViewGrid->ColumnCount;
-	int cellH = mViewGrid->Height / mViewGrid->RowCount;
-	list<ObjItem*>& items = mInventory->GetItems();
-	for (ObjItem* item : items)
+	if (clickedGrid)
 	{
-		jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
-		viewbg->Width = cellW;
-		viewbg->Height = cellH;
-		viewbg->Object = item;
-		const ItemProperty& prop = item->GetProperty();
-		
+		if (mSelectedView != nullptr && itemView != nullptr && mSelectedView->GetParent()->GetParent() != mViewGrid)
+		{
+			int cateA = mSelectedView->UserData[FN_Category].val<int>();
+			int cateB = itemView->UserData[FN_Category].val<int>();
+			if (cateA != cateB)
+				return;
+		}
 	}
+	else
+	{
+		if (mSelectedView != nullptr)
+		{
+			int cateA = mSelectedView->UserData[FN_Category].val<int>();
+			int cateB = clickedView->UserData[FN_Category].val<int>();
+			if (cateA != cateB)
+				return;
+		}
+	}
+
+	if (itemView == nullptr)
+	{
+		//MoveView
+		mSelectedView->Detach();
+		clickedView->AddChild(mSelectedView);
+		mSelectedView->LoadAll();
+
+		mViewActive->Detach();
+		mSelectedView = nullptr;
+
+	}
+	else if (mSelectedView == nullptr)
+	{
+		//SelectView
+		mSelectedView = itemView;
+		mSelectedView->AddChild(mViewActive);
+		mViewActive->LoadAll();
+	}
+	else if (mSelectedView == itemView)
+	{
+		//UnSelectView
+		mViewActive->Detach();
+		mSelectedView = nullptr;
+	}
+	else
+	{
+		//SwapView
+		jView* backView = mSelectedView->GetParent();
+		mSelectedView->Detach();
+		itemView->Detach();
+		backView->AddChild(itemView);
+		clickedView->AddChild(mSelectedView);
+		mSelectedView->LoadAll();
+		itemView->LoadAll();
+
+		mViewActive->Detach();
+		mSelectedView = nullptr;
+	}
+}
+
+void ObjUI::DoHightlight(jView * hoveredView)
+{
+	jView* parentView = hoveredView->GetParent();
+	Point2 pos = hoveredView->GetLocalPos();
+	mViewLight->LocalX = to_string((int)pos.x);
+	mViewLight->LocalY = to_string((int)pos.y);
+	mViewLight->Width = to_string((int)hoveredView->GetWidth());
+	mViewLight->Height = to_string((int)hoveredView->GetHeight());
+	parentView->AddChild(mViewLight);
+	mViewLight->LoadAll();
+}
+
+void ObjUI::Reset()
+{
+	mViewActive->Detach();
+	mViewLight->Detach();
+
+	int gridCount = mViewGrid->ColumnCount * mViewGrid->RowCount;
+	for (int i = 0; i < gridCount; ++i)
+		mViewGrid->GetChild(i)->ClearChilds();
+
+	int cnt = sizeof(mViewSlots) / sizeof(mViewSlots[0]);
+	for (int i = 0; i < cnt; ++i)
+	{
+		if (mViewSlots[i] != nullptr)
+			mViewSlots[i]->ClearChilds();
+	}
+}
+
+bool ObjUI::AddItem(ObjItem * item)
+{
+	const ItemProperty& prop = item->GetProperty();
+	int posIdx = prop.posIndex;
+	jView* emptyView = mViewGrid->GetChild(posIdx);
+	if (!emptyView->Childs.empty())
+	{
+		emptyView = mViewGrid->FindEmptyChild();
+		if (emptyView == nullptr) //inventory full
+			return false;
+
+		posIdx = emptyView->UserData["Idx"].val<int>();
+		if (EventItemMoved != nullptr)
+			EventItemMoved(item, posIdx);
+	}
+
+	jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	viewbg->Width = "1.0";
+	viewbg->Height = "1.0";
+	viewbg->Image.filename = "itemgrade.png";
+	viewbg->Image.top = 0;
+	viewbg->Image.bottom = 1;
+	viewbg->Image.left = 0.1 * prop.grade;
+	viewbg->Image.right = 0.1 * (prop.grade + 1);
+	viewbg->Enable = false;
+	viewbg->UserData[FN_GameObject] = item;
+	viewbg->UserData[FN_Category] = (int)prop.category;
+
+	jViewImage* viewfg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	viewfg->Width = "1.0";
+	viewfg->Height = "1.0";
+	viewfg->Image.filename = prop.UIImageFilename;
+	viewfg->Image.top = prop.UVtop;
+	viewfg->Image.bottom = prop.UVbottom;
+	viewfg->Image.left = prop.UVleft;
+	viewfg->Image.right = prop.UVright;
+	viewfg->Enable = false;
+	viewfg->UserData[FN_GameObject] = item;
+	viewfg->UserData[FN_Category] = (int)prop.category;
+
+	viewbg->AddChild(viewfg);
+	emptyView->AddChild(viewbg);
+	viewbg->LoadAll();
+	return true;
 }

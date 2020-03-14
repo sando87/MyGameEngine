@@ -72,9 +72,9 @@ bool jGameObjectMgr::Initialize()
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
 
-	//AddGameObject(new ObjPlayer());
+	AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
-	//AddGameObject(new ObjUI());
+	AddGameObject(new ObjUI());
 	//AddGameObject(new ObjBomb());
 	//AddGameObject(new ObjHealthBars());
 
