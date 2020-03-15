@@ -22,82 +22,30 @@ jAnimator::jAnimator(string name)
 jAnimator::~jAnimator()
 {
 }
-void jAnimator::OnLoad2()
-{
-	string keyFullname = GetFullname();
-	vector<AnimationClip> * rets = (vector<AnimationClip> *)jCaches::CacheClass(keyFullname, [](string _fullname) {
-		vector<AnimationClip> * clips = nullptr;
-
-		strings lines = jUtils::LoadLines(_fullname);
-		if (lines)
-		{
-			clips = new vector<AnimationClip>();
-			int num = lines->size();
-			int idx = 0;
-			while (idx < num)
-			{
-				strings pieces = jUtils::Split2(lines[idx], ",");
-				string clipName = pieces[0];
-				clips->push_back(AnimationClip());
-				AnimationClip& clip = clips->back();
-				clip.name = clipName;
-				clip.frameRate = 1 / 30.0f;
-
-				idx++;
-				while (idx < num)
-				{
-					mat4s key;
-					if (jUtils::CsvToMat(lines[idx], *key) == false)
-						break;
-
-					clip.keyMats.push_back(key);
-					idx++;
-				}
-
-				clip.endTime = clip.frameRate * clip.keyMats.size();
-			}
-		}
-
-		return clips;
-	});
-
-	if (rets != nullptr)
-	{
-		for (int i = 0; i < rets->size(); ++i)
-		{
-			AnimationClip& clip = (*rets)[i];
-			mAnims[clip.name] = clip;
-		}
-	}
-
-	
-	SetAnimation("idle");
-	mShader = GetGameObject()->FindComponent<jShaderSkin>();
-}
 void jAnimator::OnLoad()
 {
 	SplitCSVtoClips();
 
 	string baseFullname = jUtils::RemoveExtension(GetFullname());
-	for (auto iter = mAnims.begin(); iter != mAnims.end(); ++iter)
-	{
-		string clipname = iter->first;
-		string clipfullname = baseFullname + "_" + clipname + ".dump";
-
-		AnimationClip * retClip = (AnimationClip *)jCaches::CacheClass(clipfullname, [](string _fullname) {
+	string filter = baseFullname + "_*.dump";
+	jUtils::ForEachFiles2(nullptr, filter.c_str(), [&](void* obj, string filename) {
+		string fullname = string(PATH_RESOURCES) + "anim/" + filename;
+		AnimationClip * retClip = (AnimationClip *)jCaches::CacheClass(fullname, [](string _fullname) {
 			AnimationClip * clip = new AnimationClip();
 			clip->LoadFromFile(_fullname);
 			return clip;
 		});
 
-		AnimationClip& dest = iter->second;
-		dest = *retClip;
-	}
+		if (retClip != nullptr)
+			mAnims[retClip->name] = *retClip;
+		return true;
+	});
 
 	if (!mAnims.empty())
+	{
 		SetAnimation(mAnims.begin()->first);
-
-	mShader = GetGameObject()->FindComponent<jShaderSkin>();
+		mShader = GetGameObject()->FindComponent<jShaderSkin>();
+	}
 }
 void jAnimator::OnUpdate()
 {
@@ -122,16 +70,6 @@ void jAnimator::AddEvent(string animName, float rate, function<void(void)> event
 	_warnif(mAnims.find(animName) == mAnims.end());
 	if (mAnims.find(animName) != mAnims.end())
 		mAnims[animName].AddEvent(rate, event);
-}
-
-void jAnimator::AddAnimationClip(string name)
-{
-	if (mAnims.find(name) == mAnims.end())
-	{
-		mAnims[name] = AnimationClip();
-		mAnims[name].name = name;
-	}
-		
 }
 
 void jAnimator::SplitCSVtoClips()

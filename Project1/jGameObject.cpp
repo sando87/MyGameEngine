@@ -13,8 +13,9 @@
 #include "jParserMeta.h"
 
 
-jGameObject::jGameObject()
+jGameObject::jGameObject(string name)
 {
+	mName = name;
 	mEngine = &jGameObjectMgr::GetInst();
 
 	mTransform = new jTransform();
@@ -26,7 +27,7 @@ jGameObject::jGameObject()
 jGameObject::~jGameObject()
 {
 	for (jGameObject* child : mChilds)
-		child->mParent = nullptr;
+		delete child;
 
 	if (mParent != nullptr)
 		mParent->SubChild(this);
@@ -127,46 +128,84 @@ void jGameObject::AddComponent(jComponent* comp)
 		comp->Load();
 	mComponents.push_back(comp);
 }
+jComponent * jGameObject::FindComponent(string componentName)
+{
+	for (jComponent* comp : mComponents)
+	{
+		if (comp->GetCompName() == componentName)
+			return comp;
+	}
+	return nullptr;
+}
+vector<jComponent*> jGameObject::FindComponents(string componentName)
+{
+	vector<jComponent*> comps;
+	for (jComponent* comp : mComponents)
+	{
+		if (comp->GetCompName() == componentName)
+			comps.push_back(comp);
+	}
+	return comps;
+}
 void jGameObject::Destroy()
 {
 	mRemove = true;
-	for (jGameObject* child : mChilds)
-		child->Destroy();
 }
 void jGameObject::RemoveComponent(jComponent* comp)
 {
-	for (jComponent* ele : mComponents)
-	{
-		if (ele == comp)
-		{
-			mComponents.remove(ele);
-			break;
-		}
-	}
+	auto iter = find(mComponents.begin(), mComponents.end(), comp);
+	if (iter != mComponents.end())
+		mComponents.erase(iter);
 }
 
-void jGameObject::OnLoad()
+void jGameObject::LoadAll()
 {
+	OnLoad();
+	for (jGameObject* child : mChilds)
+		child->LoadAll();
 }
 
-void jGameObject::OnStart()
+void jGameObject::StartAll()
 {
+	OnStart();
+	for (jGameObject* child : mChilds)
+		child->StartAll();
 }
 
-void jGameObject::OnUpdate()
+void jGameObject::UpdateAll()
 {
+	OnUpdate();
+	for (jGameObject* child : mChilds)
+		child->UpdateAll();
+}
+
+void jGameObject::GetShaderAll(vector<jShader*>& outs)
+{
+	vector<jShader*> shaders = FindComponents<jShader>();
+	for(jShader* sh : shaders)
+		if(sh->GetEnable())
+			outs.push_back(sh);
+
+	for (jGameObject* child : mChilds)
+		child->GetShaderAll(outs);
 }
 
 void jGameObject::LoadComponents()
 {
 	for (jComponent* comp : mComponents)
 		comp->Load();
+
+	for (jGameObject* child : mChilds)
+		child->LoadComponents();
 }
 
 void jGameObject::StartComponents()
 {
 	for (jComponent* comp : mComponents)
 		comp->OnStart();
+
+	for (jGameObject* child : mChilds)
+		child->StartComponents();
 }
 
 void jGameObject::UpdateComponents()
@@ -174,4 +213,7 @@ void jGameObject::UpdateComponents()
 	for (jComponent* comp : mComponents)
 		if (comp->GetEnable())
 			comp->OnUpdate();
+
+	for (jGameObject* child : mChilds)
+		child->UpdateComponents();
 }

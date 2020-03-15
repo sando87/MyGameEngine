@@ -1,7 +1,7 @@
 #pragma once
 #include "jComponent.h"
 
-struct  ItemProperty;
+struct DBItem;
 
 struct STAT
 {
@@ -45,7 +45,7 @@ public:
 	STAT BasicStatus;
 	STAT CurrentStatus;
 
-	void Effect(ItemProperty& item);
+	void Effect(const DBItem& item);
 
 	virtual void OnLoad();
 	virtual void OnUpdate();

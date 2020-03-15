@@ -24,6 +24,7 @@ protected:
 	Property_Getter(jGameObject*, GameObject, nullptr)
 	Property_GetSetter(bool, Enable, true)
 	Property_GetSetter(bool, Loaded, false)
+	Property_GetSetter(string, CompName, "")
 	Property_GetSetter(string, Fullname, "")
 };
 

@@ -55,7 +55,7 @@ public:
 	static chars LoadFile2(string fullname);
 	static strings LoadLines(string fullname);
 	static void ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename));
-	static void ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func);
+	static void ForEachFiles2(void* _object, const char* _filter, function<bool(void*, string)> _func);
 	static string FindFile(string _fullname);
 	static void MyCopyFile(string _from, string _to);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);

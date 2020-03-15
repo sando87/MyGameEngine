@@ -25,6 +25,9 @@ void jTerrainCollider::OnLoad()
 
 void jTerrainCollider::OnUpdate()
 {
+	if (mTerrain == nullptr)
+		return;
+
 	Vector3 newPos = GetGameObject()->GetTransform().getPos();
 	Vector2 pos = newPos;
 

@@ -204,12 +204,12 @@ strings jUtils::LoadLines(string fullname)
 	return lines;
 }
 
-//example path is like "D:\\temp\\*.*";
-void jUtils::ForEachFiles2(void* _object, const char* _path, function<bool(void*, string)> _func)
+//example _filter is like "D:\\temp\\*.*";
+void jUtils::ForEachFiles2(void* _object, const char* _filter, function<bool(void*, string)> _func)
 {
 	struct _finddata_t fd;
 	intptr_t handle = 1;
-	if ((handle = _findfirst(_path, &fd)) >= 0)
+	if ((handle = _findfirst(_filter, &fd)) >= 0)
 	{
 		do
 		{
@@ -340,7 +340,7 @@ int jUtils::Random()
 	if (isFirstCall)
 	{
 		isFirstCall = false;
-		int seed = (int)jTime::Now();
+		int seed = (int)(jTime::Now() * 10000.0);
 		srand(seed);
 	}
 	return rand();

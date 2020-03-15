@@ -6,28 +6,37 @@
 class jGameObjectMgr;
 class jComponent;
 class jTransform;
+class jShader;
 
 class jGameObject
 {
 	friend class jGameObjectMgr;
 
 public:
-	jGameObject();
+	jGameObject(string name = "");
 	virtual ~jGameObject();
 
 	jGameObject * GetParent();
+	list<jGameObject*>& GetChilds() { return mChilds; }
 	jTransform& GetTransform();
 	jGameObjectMgr& GetEngine();
 	bool LoadTxt(string filename);
 	void AddComponent(jComponent* comp);
 	template<typename T = jComponent> T* FindComponent();
 	template<typename T = jComponent> vector<T*> FindComponents();
+	jComponent* FindComponent(string componentName);
+	vector<jComponent*> FindComponents(string componentName);
 	void Destroy();
 
 protected:
-	virtual void OnLoad();
-	virtual void OnStart();
-	virtual void OnUpdate();
+	virtual void OnLoad() {}
+	virtual void OnStart() {}
+	virtual void OnUpdate() {}
+
+	void LoadAll();
+	void StartAll();
+	void UpdateAll();
+	void GetShaderAll(vector<jShader*>& outs);
 	
 	void RemoveComponent(jComponent* comp);
 	void LoadComponents();

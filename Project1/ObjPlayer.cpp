@@ -11,13 +11,13 @@
 #include "jCrash.h"
 #include "jAnimator.h"
 #include "jLine3D.h"
-#include "jParserMeta.h"
 #include "jInputEvent.h"
 #include "jTerrainCollider.h"
 #include "jNavigator.h"
 #include "jStateMachine.h"
 #include "jInventory.h"
 #include "ObjItem.h"
+#include "jTinyDB.h"
 
 class jEventPlayer : public jInputEvent
 {
@@ -28,16 +28,16 @@ private:
 	virtual void OnLoad();
 	virtual void OnMouseDown(Vector2n pt, int type);
 };
-class jAnimatorGroup
+class jAnimatorGroup : public jComponent
 {
 public:
-	void AddChild(jAnimator* anim);
 	string GetAnimation();
 	void SetAnimation(string name);
 	void AddEvent(string name, float rate, function<void(void)> event);
-	void AddAnimationClip(string name);
 protected:
-	vector<jAnimator*> mChildAnimators;
+	virtual void OnLoad();
+
+	vector<jAnimator*> mAnimators;
 };
 class MyCrash : public jCrash 
 {
@@ -75,43 +75,30 @@ ObjPlayer::~ObjPlayer()
 
 void ObjPlayer::OnLoad()
 {
-	jParserMeta meta;
-	meta.Load(PATH_RESOURCES + string("meta/") + "MyObject_Player.txt");
+	DBPlayer dbPlayer;
+	dbPlayer.Load(1);
+	//GetTransform().moveTo(dbPlayer.startPos);
 
 	jInventory* inven = new jInventory();
-	//vector<string> items = meta.GetValues(MF_Item);
-	//vector<ObjItem*> objItems;
-	//for (string itemFilename : items)
-	//{
-	//	ObjItem* item = new ObjItem();
-	//	item->LoadProperty(itemFilename);
-	//	objItems.push_back(item);
-	//	
-	//}
-	//inven->initItemList(objItems);
-	//objItems.clear();
+	inven->LoadItems(dbPlayer.itemIDs);
 	AddComponent(inven);
+	
+	//GetEngine().StartCoRoutine("createNewItem", 3000, [&](CorMember& mem, bool meg) {
+	//	ObjItem* obj = new ObjItem();
+	//	obj->GetTransform().moveTo(Vector3(10, 10, 0));
+	//	GetEngine().AddGameObject(obj);
+	//	return CorCmd::Stop;
+	//});
+
+	DBClasses dbClasses;
+	dbClasses.Load(dbPlayer.classes);
+	CreateChild("body", dbClasses.bodyMesh, dbClasses.bodyImg, dbClasses.bodyAnim);
+	CreateChild("leg",  dbClasses.legMesh, dbClasses.legImg, dbClasses.legAnim);
+	CreateChild("arm",  dbClasses.armMesh, dbClasses.armImg, dbClasses.armAnim);
+	CreateChild("foot", dbClasses.footMesh, dbClasses.footImg, dbClasses.footAnim);
 
 	mAnim = new jAnimatorGroup();
-	vector<string> childs = meta.GetValues(MF_Child);
-	for (string fullnameChild : childs)
-	{
-		jGameObject* child = new jGameObject();
-		child->LoadTxt(fullnameChild);
-		AddChild(child);
-		GetEngine().AddGameObject(child);
-		mAnim->AddChild(child->FindComponent<jAnimator>());
-	}
-
-	mAnim->AddAnimationClip("idle");
-	mAnim->AddAnimationClip("walk");
-	mAnim->AddAnimationClip("attack1");
-	mAnim->AddAnimationClip("attack2");
-	mAnim->AddAnimationClip("attack3");
-	mAnim->AddEvent("attack1", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
-	mAnim->SetAnimation("idle");
-
-	GetTransform().moveTo(meta.GetValue<Vector3>(MF_WorldPos));
+	AddComponent(mAnim);
 
 	AddComponent(new jEventPlayer());
 
@@ -130,46 +117,63 @@ void ObjPlayer::OnLoad()
 
 void ObjPlayer::OnStart()
 {
+	mAnim->AddEvent("attack1", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 }
 void ObjPlayer::OnUpdate()
 {
 }
 
-
-void jAnimatorGroup::AddChild(jAnimator * anim)
+jGameObject* ObjPlayer::CreateChild(string name, string meshFullname, string imgFullname, string animFullname)
 {
-	mChildAnimators.push_back(anim);
+	jGameObject* child = new jGameObject(name);
+	child->AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + meshFullname));
+	child->AddComponent(new jImage(PATH_RESOURCES + string("img/") + imgFullname));
+	child->AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + animFullname));
+	jShaderSkin* shader = new jShaderSkin();
+	shader->SetRenderOrder(RenderOrder_Skin);
+	child->AddComponent(shader);
+	AddChild(child);
+	return child;
 }
+
 
 string jAnimatorGroup::GetAnimation()
 {
-	jAnimator* firstAnimator = mChildAnimators.front();
+	jAnimator* firstAnimator = mAnimators.front();
 	return firstAnimator->GetAnimation();
 }
 
 void jAnimatorGroup::SetAnimation(string name)
 {
-	for (jAnimator* animator : mChildAnimators)
+	for (jAnimator* animator : mAnimators)
 		animator->SetAnimation(name);
 }
 
 void jAnimatorGroup::AddEvent(string name, float rate, function<void(void)> event)
 {
-	jAnimator* firstAnimator = mChildAnimators.front();
+	jAnimator* firstAnimator = mAnimators.front();
 	firstAnimator->AddEvent(name, rate, event);
 }
 
-void jAnimatorGroup::AddAnimationClip(string name)
+void jAnimatorGroup::OnLoad()
 {
-	for (jAnimator* animator : mChildAnimators)
-		animator->AddAnimationClip(name);
+	list<jGameObject*> childs = GetGameObject()->GetChilds();
+	for (jGameObject* child : childs)
+	{
+		jAnimator* anim = child->FindComponent<jAnimator>();
+		if(anim != nullptr)
+			mAnimators.push_back(anim);
+	}
 }
+
 
 void jEventPlayer::OnLoad()
 {
 	mPlayer = GetEngine().FindGameObject<ObjPlayer>();
 	mCamera = GetEngine().FindGameObject<ObjCamera>();
 	mTerrain = GetEngine().FindGameObject<ObjTerrainMgr>();
+	if (mTerrain == nullptr)
+		SetEnable(false);
 }
 
 void jEventPlayer::OnMouseDown(Vector2n pt, int type)

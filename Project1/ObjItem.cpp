@@ -6,6 +6,8 @@
 #include "jMesh.h"
 #include "jImage.h"
 #include "jShaderDefault.h"
+#include "jTime.h"
+#include "jTransform.h"
 
 class jTriggeredByObject : public jTrigger
 {
@@ -20,21 +22,56 @@ ObjItem::~ObjItem()
 {
 }
 
-void ObjItem::LoadProperty(string filename)
+void ObjItem::LoadDB(u32 id)
 {
-	mProperty.LoadMetaFile(filename);
+	mDBItem.Load(id);
+	mDBItemResorce.Load(mDBItem.rsrcID);
 }
 
 void ObjItem::OnLoad()
 {
-	if (mProperty.itemFilename.length() <= 0)
-		return;
+	if (mDBItem.GetID() == 0)
+		NewRandomItem();
 
-	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + mProperty.meshFilename));
-	AddComponent(new jImage(PATH_RESOURCES + string("img/") + mProperty.textureFilename));
+	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + mDBItemResorce.mesh));
+	AddComponent(new jImage(PATH_RESOURCES + string("img/") + mDBItemResorce.img));
 	AddComponent(new jShaderDefault());
 
 	AddComponent(new jTriggeredByObject());
+	mHeights.Init(Vector2(0.15, 10), Vector2());
+}
+
+void ObjItem::OnUpdate()
+{
+	if (mHeights.AccX < 0.3)
+	{
+		double height = mHeights.CalcYAcc(jTime::Delta());
+		Vector3 pos = GetTransform().getPos();
+		pos.z = height;
+		GetTransform().rotateAxis(Vector3(0, 1, 0), 5);
+		GetTransform().moveTo(pos);
+	}
+
+	Vector3 pos = GetTransform().getPos();
+	if(pos.z < 0)
+	{
+		pos.z = 0;
+		GetTransform().lookat(Vector3(), Vector3(0, 1, 0), Vector3(0, 0, 1));
+		GetTransform().moveTo(pos);
+	}
+}
+
+void ObjItem::NewRandomItem()
+{
+	mDBItem.state = ItemState::Dropped;
+	mDBItem.posIndex = 0;
+	mDBItem.grade = jUtils::Random() % 5;
+	mDBItem.hp = jUtils::Random() % 30;
+	mDBItem.mp = jUtils::Random() % 30;
+	mDBItem.cntSkill = jUtils::Random() % 3;
+	mDBItem.rsrcID = (jUtils::Random() % 11) + 1;
+
+	mDBItemResorce.Load(mDBItem.rsrcID);
 }
 
 void jTriggeredByObject::OnTriggered(jGameObject * object)
@@ -46,71 +83,3 @@ void jTriggeredByObject::OnTriggered(jGameObject * object)
 	inven->PickItem((ObjItem*)GetGameObject());
 }
 
-void ItemProperty::LoadMetaFile(string filename)
-{
-	jParserMeta meta;
-	string path = PATH_RESOURCES + string("items/");
-	meta.Load(path + filename);
-
-	itemFilename	= meta.GetValue<string>("itemFilename");
-	meshFilename	= meta.GetValue<string>("meshFilename");
-	textureFilename = meta.GetValue<string>("textureFilename");
-	UIImageFilename = meta.GetValue<string>("UIImageFilename");
-	UVleft			= meta.GetValue<double>("UVleft");
-	UVright			= meta.GetValue<double>("UVright");
-	UVtop			= meta.GetValue<double>("UVtop");
-	UVbottom		= meta.GetValue<double>("UVbottom");
-	state			= (ItemState)meta.GetValue<int>("state");
-	category		= (ItemCategory)meta.GetValue<int>("category");
-	posIndex		= meta.GetValue<int>("posIndex");
-	grade			= meta.GetValue<int>("grade");
-	pa				= meta.GetValue<double>("pa");
-	ma				= meta.GetValue<double>("ma");
-	pd				= meta.GetValue<double>("pd");
-	md				= meta.GetValue<double>("md");
-	hp				= meta.GetValue<double>("hp");
-	mp				= meta.GetValue<double>("mp");
-	shieldMax		= meta.GetValue<double>("shieldMax");
-	shieldTime		= meta.GetValue<double>("shieldTime");
-	spdMove			= meta.GetValue<double>("spdMove");
-	spdSkill		= meta.GetValue<double>("spdSkill");
-	cntSkill		= meta.GetValue<double>("cntSkill");
-	sizeSkill		= meta.GetValue<double>("sizeSkill");
-	cooltime		= meta.GetValue<double>("cooltime");
-	proficiency		= meta.GetValue<double>("proficiency");
-}
-
-void ItemProperty::SaveMetaFile()
-{
-	jParserMeta meta;
-	meta.AddValue("itemFilename", itemFilename);
-	meta.AddValue("meshFilename", meshFilename);
-	meta.AddValue("textureFilename", textureFilename);
-	meta.AddValue("UIImageFilename", UIImageFilename);
-	meta.AddValue("UVleft", UVleft);
-	meta.AddValue("UVright", UVright);
-	meta.AddValue("UVtop", UVtop);
-	meta.AddValue("UVbottom", UVbottom);
-	meta.AddValue("state", (double)state);
-	meta.AddValue("category", (double)category);
-	meta.AddValue("posIndex", (double)posIndex);
-	meta.AddValue("grade", (double)grade);
-	meta.AddValue("pa", pa);
-	meta.AddValue("ma", ma);
-	meta.AddValue("pd", pd);
-	meta.AddValue("md", md);
-	meta.AddValue("hp", hp);
-	meta.AddValue("mp", mp);
-	meta.AddValue("shieldMax", shieldMax);
-	meta.AddValue("shieldTime", shieldTime);
-	meta.AddValue("spdMove", spdMove);
-	meta.AddValue("spdSkill", spdSkill);
-	meta.AddValue("cntSkill", cntSkill);
-	meta.AddValue("sizeSkill", sizeSkill);
-	meta.AddValue("cooltime", cooltime);
-	meta.AddValue("proficiency", proficiency);
-
-	string data = meta.ToString();
-	string path = PATH_RESOURCES + string("items/");
-	jUtils::SaveToFile(path, itemFilename, data);
-}

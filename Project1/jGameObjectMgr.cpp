@@ -72,6 +72,18 @@ bool jGameObjectMgr::Initialize()
 	AddGameObject(new ObjGroundAxis());
 	//AddGameObject(new ObjCreateHeightmap());
 
+	//int idxs[] = { 44,45,46,48,49,50,51,52,53,54,55,64 };
+	//int cnt = sizeof(idxs) / sizeof(idxs[0]);
+	//for(int i = 0; i < cnt; ++i)
+	//{
+	//	string id = to_string(idxs[i]);
+	//	jGameObject* obj = new jGameObject();
+	//	obj->LoadTxt("MyObject_"+id+".txt");
+	//	obj->GetTransform().moveTo(Vector3(i * 10, 0, 0));
+	//	AddGameObject(obj);
+	//}
+
+
 	AddGameObject(new ObjPlayer());
 	//AddGameObject(new ObjEnemy());
 	AddGameObject(new ObjUI());
@@ -85,12 +97,10 @@ bool jGameObjectMgr::Initialize()
 	//44~46
 	//48~55(48x, 49x)
 	//64
-	//
-	//56~63, 65
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 44; i < 0; ++i)
+	for(int i = 0; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -108,20 +118,29 @@ bool jGameObjectMgr::Initialize()
 		vecObjs.push_back(obj0);
 	}
 
-	for (int i = 44; i < 0; ++i)
+	for (int i = 1; i < 0; ++i)
 	{
-		jParserD3 parser; 
+		jParserD3 parser;
 		if (!parser.Init(i))
 			continue;
 
 		MyRes_CreateShader* pDataVS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.vs_addr].first;
 		MyRes_CreateShader* pDataPS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.ps_addr].first;
 		_printlog("%d vs[%d] ps[%d]\n", i, pDataVS->head.crc, pDataPS->head.crc);
+		_printlog("%d vs[%p] ps[%p]\n", i, parser.mContext.vs_addr, parser.mContext.ps_addr);
+		_printlog("%d tex0[%p]\n", i, parser.mContext.tex[0].addr);
+		_printlog("%d tex1[%p]\n", i, parser.mContext.tex[1].addr);
+		_printlog("%d tex2[%p]\n", i, parser.mContext.tex[2].addr);
+		_printlog("%d tex3[%p]\n", i, parser.mContext.tex[3].addr);
+		_printlog("\n");
+
+#define SKIN
+#ifdef TERRAIN
 		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237 || pDataVS->head.crc == 194)
 		{
 			parser.ExportToObjectFormat("terrain", false, true);
 		}
-		if (pDataVS->head.crc == 99 || pDataVS->head.crc == 210 || pDataVS->head.crc == 173)
+		if (pDataVS->head.crc == 99 || pDataVS->head.crc == 210 || pDataVS->head.crc == 173 || pDataVS->head.crc == 128)
 		{
 			parser.ExportToObjectFormat("default", false, true);
 		}
@@ -129,13 +148,22 @@ bool jGameObjectMgr::Initialize()
 		{
 			parser.ExportToObjectFormat("default", true, false);
 		}
-		else if (pDataVS->head.crc == 83 || pDataVS->head.crc == 65)
+#endif
+#ifdef SKIN
+		if (pDataVS->head.crc == 83 || pDataVS->head.crc == 65)
 		{
 			parser.ExportToObjectFormat("skin", false, true);
 		}
+#endif
+#ifdef ITEM
+		if (pDataVS->head.crc == 22 || pDataVS->head.crc == 128)
+		{
+			parser.ExportToObjectFormat("default", false, true);
+		}
+#endif
 		//252 - 주캐릭터부위별스킨
 		//157,134 - 천 애니메이션
-		//128 - 주캐릭아이템(방패)
+		//128 - 주캐릭아이템
 		//65 - skinned 지형지물
 		//215 - UI종류같음
 		//213,22 - 불타는장작,커튼
@@ -210,7 +238,7 @@ void jGameObjectMgr::RunObjects()
 		if (obj->mName.length() == 0)
 			obj->mName = TypeToString(obj);
 
-		obj->OnLoad();
+		obj->LoadAll();
 		mObjects.insert(make_pair(obj->mName, obj));
 	}
 
@@ -221,7 +249,7 @@ void jGameObjectMgr::RunObjects()
 	for (jGameObject* obj : newObjs)
 		obj->StartComponents();
 	for (jGameObject* obj : newObjs)
-		obj->OnStart();
+		obj->StartAll();
 
 	mCoroutine.RunCoroutines();
 
@@ -231,19 +259,14 @@ void jGameObjectMgr::RunObjects()
 	{
 		jGameObject* obj = it->second;
 		obj->UpdateComponents();
-		obj->OnUpdate();
+		obj->UpdateAll();
 	}
 
 	vector<jShader*> shaders;
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
-		jShader* shader = obj->FindComponent<jShader>();
-		if (shader == nullptr)
-			continue;
-
-		if (shader->GetEnable())
-			shaders.push_back(shader);
+		obj->GetShaderAll(shaders);
 	}
 
 	//Sorting Rendering Order

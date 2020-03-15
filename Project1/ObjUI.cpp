@@ -104,11 +104,11 @@ void ObjUI::OnLoad()
 	
 
 	mViewGrid = (jViewGrid*)mUIEngine->FindView("InvenGrid");
-	mViewGrid->UserData[FN_Category] = 0;
+	mViewGrid->UserData[FN_Category] = "null";
 	mViewSlots[0] = mUIEngine->FindView("SlotA");
-	mViewSlots[0]->UserData[FN_Category] = 1;
+	mViewSlots[0]->UserData[FN_Category] = "armor";
 	mViewSlots[1] = mUIEngine->FindView("SlotB");
-	mViewSlots[1]->UserData[FN_Category] = 2;
+	mViewSlots[1]->UserData[FN_Category] = "gloves";
 	mCellWidth = mViewGrid->GetWidth() / mViewGrid->ColumnCount;
 	mCellHeight = mViewGrid->GetHeight() / mViewGrid->RowCount;
 
@@ -127,21 +127,21 @@ void ObjUI::OnLoad()
 	mViewActive = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
 	mViewActive->Width = "1.0";
 	mViewActive->Height = "1.0";
-	mViewActive->Image.filename = "itemgrade.png";
+	mViewActive->Image.filename = "itemgrade2.png";
 	mViewActive->Image.top = 0;
 	mViewActive->Image.bottom = 1.0f;
-	mViewActive->Image.left = 0.9f;
-	mViewActive->Image.right = 1.0f;
+	mViewActive->Image.left = 0.125f * 5;
+	mViewActive->Image.right = 0.125f * 6;
 	mViewActive->Enable = false;
 
 	mViewLight = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
 	mViewLight->Width = "1.0";
 	mViewLight->Height = "1.0";
-	mViewLight->Image.filename = "itemgrade.png";
+	mViewLight->Image.filename = "itemgrade2.png";
 	mViewLight->Image.top = 0;
 	mViewLight->Image.bottom = 1.0f;
-	mViewLight->Image.left = 0.9f;
-	mViewLight->Image.right = 1.0f;
+	mViewLight->Image.left = 0.125f * 5;
+	mViewLight->Image.right = 0.125f * 6;
 	mViewLight->Enable = false;
 
 }
@@ -181,8 +181,8 @@ void ObjUI::DoClickEvent(jView* clickedView)
 	{
 		if (mSelectedView != nullptr && itemView != nullptr && mSelectedView->GetParent()->GetParent() != mViewGrid)
 		{
-			int cateA = mSelectedView->UserData[FN_Category].val<int>();
-			int cateB = itemView->UserData[FN_Category].val<int>();
+			string cateA = mSelectedView->UserData[FN_Category].val<string>();
+			string cateB = itemView->UserData[FN_Category].val<string>();
 			if (cateA != cateB)
 				return;
 		}
@@ -191,8 +191,8 @@ void ObjUI::DoClickEvent(jView* clickedView)
 	{
 		if (mSelectedView != nullptr)
 		{
-			int cateA = mSelectedView->UserData[FN_Category].val<int>();
-			int cateB = clickedView->UserData[FN_Category].val<int>();
+			string cateA = mSelectedView->UserData[FN_Category].val<string>();
+			string cateB = clickedView->UserData[FN_Category].val<string>();
 			if (cateA != cateB)
 				return;
 		}
@@ -269,8 +269,9 @@ void ObjUI::Reset()
 
 bool ObjUI::AddItem(ObjItem * item)
 {
-	const ItemProperty& prop = item->GetProperty();
-	int posIdx = prop.posIndex;
+	const DBItem& itemInfo = item->GetDBItem();
+	const DBItemResource& itemResInfo = item->GetDBItemResource();
+	int posIdx = itemInfo.posIndex;
 	jView* emptyView = mViewGrid->GetChild(posIdx);
 	if (!emptyView->Childs.empty())
 	{
@@ -279,33 +280,33 @@ bool ObjUI::AddItem(ObjItem * item)
 			return false;
 
 		posIdx = emptyView->UserData["Idx"].val<int>();
-		if (EventItemMoved != nullptr)
-			EventItemMoved(item, posIdx);
+		if (EventMoveItem != nullptr)
+			EventMoveItem(item, posIdx);
 	}
 
 	jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
 	viewbg->Width = "1.0";
 	viewbg->Height = "1.0";
-	viewbg->Image.filename = "itemgrade.png";
+	viewbg->Image.filename = "itemgrade2.png";
 	viewbg->Image.top = 0;
 	viewbg->Image.bottom = 1;
-	viewbg->Image.left = 0.1 * prop.grade;
-	viewbg->Image.right = 0.1 * (prop.grade + 1);
+	viewbg->Image.left = 0.125 * itemInfo.grade;
+	viewbg->Image.right = 0.125 * (itemInfo.grade + 1);
 	viewbg->Enable = false;
 	viewbg->UserData[FN_GameObject] = item;
-	viewbg->UserData[FN_Category] = (int)prop.category;
+	viewbg->UserData[FN_Category] = itemResInfo.category;
 
 	jViewImage* viewfg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
 	viewfg->Width = "1.0";
 	viewfg->Height = "1.0";
-	viewfg->Image.filename = prop.UIImageFilename;
-	viewfg->Image.top = prop.UVtop;
-	viewfg->Image.bottom = prop.UVbottom;
-	viewfg->Image.left = prop.UVleft;
-	viewfg->Image.right = prop.UVright;
+	viewfg->Image.filename = itemResInfo.uiImg;
+	viewfg->Image.top = itemResInfo.Top();
+	viewfg->Image.bottom = itemResInfo.Bottom();
+	viewfg->Image.left = itemResInfo.Left();
+	viewfg->Image.right = itemResInfo.Right();
 	viewfg->Enable = false;
 	viewfg->UserData[FN_GameObject] = item;
-	viewfg->UserData[FN_Category] = (int)prop.category;
+	viewfg->UserData[FN_Category] = itemResInfo.category;
 
 	viewbg->AddChild(viewfg);
 	emptyView->AddChild(viewbg);

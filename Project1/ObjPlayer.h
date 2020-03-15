@@ -20,6 +20,8 @@ private:
 	virtual void OnStart();
 	virtual void OnUpdate();
 
+	jGameObject* CreateChild(string name, string meshFullname, string imgFullname, string animFullname);
+
 	Vector2 mDestPos;
 	jGameObject* mTarget = nullptr;
 

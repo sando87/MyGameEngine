@@ -7,8 +7,21 @@
 #include "jGameObjectMgr.h"
 #include "jGraphicResources.h"
 
+//Sorting Rendering Order
+//layer1 : terrain
+//layer2 : terrain 바닥(바닥문양, 그림자, 스킬효과 순서) => 알파o, 깊이비교x, 깊이쓰기x  =>일단 보류...구분할 방법 없음... => layer5로 이동
+//layer3 : terrain 주변(높이가 있는 주변 지형) => 알파x, 깊이비교o, 깊이쓰기o
+//layer4 : 유닛(움직이는 유닛) => 알파x, 깊이비교o, 깊이쓰기o
+//layer5 : 높이가 있는 알파(지형, 지형 효과, 스킬효과 카메라로부터 먼순서로) => 알파o, 깊이비교o, 깊이쓰기x
+#define RenderOrder_Terrain 1
+#define RenderOrder_Terrain_Pattern 2
+#define RenderOrder_Terrain_Env 3
+#define RenderOrder_Skin 4
+#define RenderOrder_Terrain_Env_Alpha 5
 
 class ObjCamera;
+class jMesh;
+class jImage;
 
 class jShader : public jComponent
 {

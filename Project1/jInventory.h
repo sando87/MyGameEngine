@@ -8,7 +8,7 @@ class jInventory :
 	public jComponent
 {
 public:
-	void initItemList(vector<ObjItem*>& items);
+	void LoadItems(vector<u32>& items);
 	bool PickItem(ObjItem* item);
 	bool DropItem(ObjItem* item);
 	list<ObjItem*>& GetItems() { return mItems; }

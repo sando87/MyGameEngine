@@ -4,10 +4,14 @@
 #include "jGameObjectMgr.h"
 #include "ObjUI.h"
 
-void jInventory::initItemList(vector<ObjItem*>& items)
+void jInventory::LoadItems(vector<u32>& items)
 {
-	for (ObjItem* item : items)
-		mItems.push_back(item);
+	for (u32 id : items)
+	{
+		ObjItem* obj = new ObjItem();
+		obj->LoadDB(id);
+		mItems.push_back(obj);
+	}
 }
 
 bool jInventory::PickItem(ObjItem * item)
@@ -24,25 +28,18 @@ void jInventory::OnStart()
 {
 	mFormInventory = GetEngine().FindGameObject<ObjUI>();
 
-	ObjItem* item = new ObjItem();
-	item->LoadProperty("item.txt");
-	mFormInventory->AddItem(item);
-
-	ObjItem* item2 = new ObjItem();
-	item2->LoadProperty("item2.txt");
-	mFormInventory->AddItem(item2);
-
 	for (ObjItem* item : mItems)
 	{
-		if (item->GetProperty().state == ItemState::Equipped)
+		mFormInventory->AddItem(item);
+		if (item->GetDBItem().state == ItemState::Equipped)
 			Equip(item);
 	}
 }
 
 void jInventory::Equip(ObjItem * item)
 {
-	ItemProperty prop = item->GetProperty();
-	if (prop.meshFilename.length() >= 0)
+	const DBItemResource& resInfo = item->GetDBItemResource();
+	if (resInfo.equipMesh.length() >= 0)
 	{
 		//update subobject mesh
 		//update subobject texture
@@ -53,7 +50,7 @@ void jInventory::Equip(ObjItem * item)
 	jGameObject* obj = GetGameObject();
 	jHealthPoint* stats = obj->FindComponent<jHealthPoint>();
 	if (stats != nullptr)
-		stats->Effect(prop);
+		stats->Effect(item->GetDBItem());
 }
 
 void jInventory::UnEquip(ObjItem * item)
