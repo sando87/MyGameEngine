@@ -11,7 +11,11 @@ jHealthPoint::~jHealthPoint()
 {
 }
 
-void jHealthPoint::Effect(const DBItem & item)
+void jHealthPoint::AddEffect(const DBItem & item)
+{
+}
+
+void jHealthPoint::SubEffect(const DBItem & item)
 {
 }
 

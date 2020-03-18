@@ -53,6 +53,15 @@ bool jShaderSkin::OnRender(ObjCamera* cam)
 	return true;
 }
 
+void jShaderSkin::UpdateInputResource()
+{
+	LoadMesh();
+	LoadCompentIndicies();
+	
+	mTextureViews.clear();
+	LoadCompentTextures();
+}
+
 void jShaderSkin::LoadLayout()
 {
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];

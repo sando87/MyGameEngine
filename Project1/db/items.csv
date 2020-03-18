@@ -1,4 +1,5 @@
-id,state,posIndex,grade,pa,ma,pd,md,hp,mp,shieldMax,shieldTime,spdMove,spdSkill,cntSkill,sizeSkill,cooltime,proficiency,rsrcID
-1,1,0,1,30,10,5,5,12,6,22,1,1,1,1,1,1,1,1
-2,1,0,2,20,10,5,5,13,7,21,1,1,1,2,1,1,1,2
-3,1,0,3,10,10,5,5,14,8,23,1,1,1,3,1,1,1,3
+cntSkill,cooltime,grade,hp,id,ma,md,mp,owner,pa,pd,posIndex,proficiency,rsrcID,shieldMax,shieldTime,sizeSkill,spdMove,spdSkill,state,
+1,2,1,3,1,4,5,6,1,7,8,13,9,1,10,11,12,13,14,1,
+1.000000,2.000000,2,3.000000,2,4.000000,5.000000,6.000000,1,7.000000,8.000000,2,9.000000,2,10.000000,11.000000,12.000000,13.000000,14.000000,1,
+1,2,3,3,3,4,5,6,2,7,8,2,9,3,10,11,12,13,14,1,
+2,0,3,29,4,0,0,22,1,0,0,6,0,9,0,0,0,0,0,1,

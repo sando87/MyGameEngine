@@ -14,6 +14,8 @@ public:
 	virtual void OnLoad();
 	virtual bool OnRender(ObjCamera* cam);
 
+	void UpdateInputResource();
+
 protected:
 	void LoadLayout();
 	void LoadMesh();

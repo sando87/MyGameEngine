@@ -8,13 +8,10 @@
 #include "jShaderDefault.h"
 #include "jTime.h"
 #include "jTransform.h"
+#include "ObjTerrainMgr.h"
+#include "jCrash.h"
 
-class jTriggeredByObject : public jTrigger
-{
-	virtual void OnTriggered(jGameObject* object);
-};
-
-ObjItem::ObjItem()
+ObjItem::ObjItem(u32 dbID) : mDBID(dbID), jGameObject("item")
 {
 }
 
@@ -22,42 +19,49 @@ ObjItem::~ObjItem()
 {
 }
 
-void ObjItem::LoadDB(u32 id)
-{
-	mDBItem.Load(id);
-	mDBItemResorce.Load(mDBItem.rsrcID);
-}
-
 void ObjItem::OnLoad()
 {
 	if (mDBItem.GetID() == 0)
 		NewRandomItem();
+	else
+	{
+		mDBItem.Load(mDBID);
+		mDBItemResorce.Load(mDBItem.rsrcID);
+	}
 
 	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + mDBItemResorce.mesh));
 	AddComponent(new jImage(PATH_RESOURCES + string("img/") + mDBItemResorce.img));
 	AddComponent(new jShaderDefault());
 
-	AddComponent(new jTriggeredByObject());
+	jCrash * crash = new jCrash();
+	crash->SetShape(4, 2);
+	AddComponent(crash);
+
 	mHeights.Init(Vector2(0.15, 10), Vector2());
+}
+
+void ObjItem::OnStart()
+{
+	ObjTerrainMgr* terrain = GetEngine().FindGameObject<ObjTerrainMgr>();
+	Vector3 pos = GetTransform().getPos();
+	terrain->GetHeight(pos.x, pos.y, mHeightTerrain);
+	mHeightTerrain += 4;
+	pos.z = mHeightTerrain;
+	GetTransform().moveTo(pos);
 }
 
 void ObjItem::OnUpdate()
 {
 	if (mHeights.AccX < 0.3)
 	{
-		double height = mHeights.CalcYAcc(jTime::Delta());
+		double deltaPos = mHeights.CalcVelAcc(jTime::Delta()) * jTime::Delta();
 		Vector3 pos = GetTransform().getPos();
-		pos.z = height;
+		pos.z += deltaPos;
+		_echoF(deltaPos);
 		GetTransform().rotateAxis(Vector3(0, 1, 0), 5);
 		GetTransform().moveTo(pos);
-	}
-
-	Vector3 pos = GetTransform().getPos();
-	if(pos.z < 0)
-	{
-		pos.z = 0;
-		GetTransform().lookat(Vector3(), Vector3(0, 1, 0), Vector3(0, 0, 1));
-		GetTransform().moveTo(pos);
+		if (mHeights.AccX >= 0.3)
+			GetTransform().lookat(pos, pos + Vector3(0, 1, 0), Vector3(0, 0, 1));
 	}
 }
 
@@ -72,14 +76,5 @@ void ObjItem::NewRandomItem()
 	mDBItem.rsrcID = (jUtils::Random() % 11) + 1;
 
 	mDBItemResorce.Load(mDBItem.rsrcID);
-}
-
-void jTriggeredByObject::OnTriggered(jGameObject * object)
-{
-	jInventory* inven = object->FindComponent<jInventory>();
-	if (inven == nullptr)
-		return;
-
-	inven->PickItem((ObjItem*)GetGameObject());
 }
 

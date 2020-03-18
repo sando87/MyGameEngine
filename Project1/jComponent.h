@@ -16,6 +16,7 @@ public:
 
 	void Load();
 	jGameObjectMgr& GetEngine();
+	void SetFullname(string val) { mFullname = val; mLoaded = false; }
 
 protected:
 	friend void jGameObject::AddComponent(jComponent* comp);
@@ -25,7 +26,7 @@ protected:
 	Property_GetSetter(bool, Enable, true)
 	Property_GetSetter(bool, Loaded, false)
 	Property_GetSetter(string, CompName, "")
-	Property_GetSetter(string, Fullname, "")
+	Property_Getter(string, Fullname, "")
 };
 
 

@@ -3,16 +3,10 @@
 #include "jHealthPoint.h"
 #include "jGameObjectMgr.h"
 #include "ObjUI.h"
-
-void jInventory::LoadItems(vector<u32>& items)
-{
-	for (u32 id : items)
-	{
-		ObjItem* obj = new ObjItem();
-		obj->LoadDB(id);
-		mItems.push_back(obj);
-	}
-}
+#include "jMesh.h"
+#include "jImage.h"
+#include "jShaderSkin.h"
+#include "jTinyDB.h"
 
 bool jInventory::PickItem(ObjItem * item)
 {
@@ -21,38 +15,92 @@ bool jInventory::PickItem(ObjItem * item)
 
 bool jInventory::DropItem(ObjItem * item)
 {
+	DBItem DBItem = item->GetDBItem();
+	DBItem.owner = 0;
+	DBItem.Save();
+
 	return true;
+}
+
+void jInventory::OnLoad()
+{
+	mObjBody = GetGameObject()->FindGameObject("body");
+	mObjLeg = GetGameObject()->FindGameObject("leg");
+	mObjArm = GetGameObject()->FindGameObject("arm");
+	mObjFoot = GetGameObject()->FindGameObject("foot");
+
+	DBPlayer dbPlayer;
+	dbPlayer.Load(mObjectDBID);
+	mDBClasses.Load(dbPlayer.classes);
+
+	vector<DBItem> items;
+	jTinyDB::GetInst().ReadRecords(items, [this](TinyRecord* rec) {
+		return rec->GetValue<u32>("owner") == mObjectDBID;
+	});
+
+	for (DBItem& item : items)
+	{
+		ObjItem* obj = new ObjItem(item.GetID());
+		mItems.push_back(obj);
+	}
 }
 
 void jInventory::OnStart()
 {
-	mFormInventory = GetEngine().FindGameObject<ObjUI>();
-
-	for (ObjItem* item : mItems)
-	{
-		mFormInventory->AddItem(item);
-		if (item->GetDBItem().state == ItemState::Equipped)
-			Equip(item);
-	}
 }
 
 void jInventory::Equip(ObjItem * item)
 {
 	const DBItemResource& resInfo = item->GetDBItemResource();
-	if (resInfo.equipMesh.length() >= 0)
+	if (resInfo.category == "armor")
 	{
-		//update subobject mesh
-		//update subobject texture
-		//update subobject anim
-		//add item to gameobject list
+		jMesh* compMesh = mObjBody->FindComponent<jMesh>();
+		jImage* compImg = mObjBody->FindComponent<jImage>();
+		jShaderSkin* compshader = mObjBody->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+		compshader->UpdateInputResource();
+	}
+	else if (resInfo.category == "pants")
+	{
+	}
+	else if (resInfo.category == "gloves")
+	{
+	}
+	else if (resInfo.category == "shoes")
+	{
 	}
 
 	jGameObject* obj = GetGameObject();
 	jHealthPoint* stats = obj->FindComponent<jHealthPoint>();
 	if (stats != nullptr)
-		stats->Effect(item->GetDBItem());
+		stats->AddEffect(item->GetDBItem());
 }
 
 void jInventory::UnEquip(ObjItem * item)
 {
+	const DBItemResource& resInfo = item->GetDBItemResource();
+	if (resInfo.category == "armor")
+	{
+		jMesh* compMesh = mObjBody->FindComponent<jMesh>();
+		jImage* compImg = mObjBody->FindComponent<jImage>();
+		jShaderSkin* compshader = mObjBody->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + mDBClasses.bodyMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + mDBClasses.bodyImg);
+		compshader->UpdateInputResource();
+	}
+	else if (resInfo.category == "pants")
+	{
+	}
+	else if (resInfo.category == "gloves")
+	{
+	}
+	else if (resInfo.category == "shoes")
+	{
+	}
+
+	jGameObject* obj = GetGameObject();
+	jHealthPoint* stats = obj->FindComponent<jHealthPoint>();
+	if (stats != nullptr)
+		stats->SubEffect(item->GetDBItem());
 }

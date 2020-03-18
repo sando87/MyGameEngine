@@ -26,6 +26,7 @@ public:
 	template<typename T = jComponent> vector<T*> FindComponents();
 	jComponent* FindComponent(string componentName);
 	vector<jComponent*> FindComponents(string componentName);
+	jGameObject* FindGameObject(string objectName);
 	void Destroy();
 
 protected:

@@ -18,6 +18,8 @@
 #include "jInventory.h"
 #include "ObjItem.h"
 #include "jTinyDB.h"
+#include "jTrigger.h"
+#include "ObjUI.h"
 
 class jEventPlayer : public jInputEvent
 {
@@ -75,20 +77,21 @@ ObjPlayer::~ObjPlayer()
 
 void ObjPlayer::OnLoad()
 {
+	mDBid = 1;
 	DBPlayer dbPlayer;
-	dbPlayer.Load(1);
-	//GetTransform().moveTo(dbPlayer.startPos);
+	dbPlayer.Load(mDBid);
+	GetTransform().moveTo(dbPlayer.startPos);
 
-	jInventory* inven = new jInventory();
-	inven->LoadItems(dbPlayer.itemIDs);
-	AddComponent(inven);
+	//AddComponent(new jInventory(mDBid));
 	
-	//GetEngine().StartCoRoutine("createNewItem", 3000, [&](CorMember& mem, bool meg) {
-	//	ObjItem* obj = new ObjItem();
-	//	obj->GetTransform().moveTo(Vector3(10, 10, 0));
-	//	GetEngine().AddGameObject(obj);
-	//	return CorCmd::Stop;
-	//});
+	double xx = dbPlayer.startPos.x;
+	double yy = dbPlayer.startPos.y;
+	GetEngine().StartCoRoutine("createNewItem", 3000, [this, xx, yy](CorMember& mem, bool meg) {
+		ObjItem* obj = new ObjItem();
+		obj->GetTransform().moveTo(Vector3(xx + 10, yy + 10, 0));
+		GetEngine().AddGameObject(obj);
+		return CorCmd::Stop;
+	});
 
 	DBClasses dbClasses;
 	dbClasses.Load(dbPlayer.classes);
@@ -205,9 +208,10 @@ void jEventPlayer::OnMouseDown(Vector2n pt, int type)
 		}
 		mPlayer->mState->SetState(StateType::MOVE);
 		mPlayer->mAnim->SetAnimation("walk");
+		mPlayer->mTarget = GetEngine().RayCast(camPos, view);
 	}
 
-	//player->mTarget = GetEngine().RayCast(camPos, view);
+	
 }
 
 void StateMachPlayer::OnLoad()
@@ -228,8 +232,26 @@ void StateMachPlayer::OnMove()
 			GetGameObject()->GetTransform().moveSmoothlyToward2D(mPlayer->mTarget->GetTransform().getPos(), 20, jTime::Delta());
 			if (CloseEnoughToTarget())
 			{
-				SetState(StateType::ATTACK);
-				mPlayer->mAnim->SetAnimation("attack1");
+				if (mPlayer->mTarget->GetName() == "item")
+				{
+					ObjItem* objItem = (ObjItem*)mPlayer->mTarget;
+					ObjUI* formInven = GetEngine().FindGameObject<ObjUI>();
+					if (formInven->IsFull())
+						objItem->ResetAnimate();
+					else
+					{
+						formInven->PickItem(objItem->GetDBItem());
+						objItem->Destroy();
+					}
+
+					SetState(StateType::IDLE);
+					mPlayer->mAnim->SetAnimation("idle");
+				}
+				else
+				{
+					SetState(StateType::ATTACK);
+					mPlayer->mAnim->SetAnimation("attack1");
+				}
 			}
 		}
 		else

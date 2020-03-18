@@ -8,7 +8,13 @@ jTinyDB::jTinyDB()
 
 jTinyDB::~jTinyDB()
 {
-	SaveTableAll();
+}
+
+void jTinyDB::DeleteRecord(string tableName, u32 id)
+{
+	if (mTables.find(tableName) != mTables.end())
+		if (mTables[tableName]->records.find(id) != mTables[tableName]->records.end())
+			mTables[tableName]->records.erase(id);
 }
 
 bool jTinyDB::LoadTable(string tableName)
@@ -34,7 +40,7 @@ bool jTinyDB::LoadTable(string tableName)
 			string value = values[j];
 			record->data[field] = value;
 		}
-		u32 id = jUtils::ToDouble(values[0]);
+		u32 id = record->GetValue<u32>("id");
 		table->records[id] = record;
 	}
 	mTables[tableName] = table;
@@ -42,13 +48,11 @@ bool jTinyDB::LoadTable(string tableName)
 	return true;
 }
 
-bool jTinyDB::SaveTableAll()
+bool jTinyDB::SaveTable(string tableName)
 {
-	
-	for (auto iterT : mTables)
+	if(mTables.find(tableName) != mTables.end())
 	{
-		string tableName = iterT.first;
-		TinyTable* table = iterT.second;
+		TinyTable* table = mTables[tableName];
 		string ret = table->records.begin()->second->FieldToString() + "\r\n";
 		for (auto iterR : table->records)
 		{
@@ -61,12 +65,14 @@ bool jTinyDB::SaveTableAll()
 	return true;
 }
 
-void jTinyDB::WriteRecord(string tableName, u32 recordID, TinyRecord * record)
+u32 jTinyDB::WriteRecord(string tableName, u32 recordID, TinyRecord * record)
 {
 	if (mTables.find(tableName) == mTables.end())
 		LoadTable(tableName);
 
-	mTables[tableName]->SetRecord(recordID, record);
+	u32 recID = mTables[tableName]->SetRecord(recordID, record);
+	SaveTable(tableName);
+	return recID;
 }
 
 TinyRecord * jTinyDB::ReadRecord(string tableName, u32 recordID)
@@ -78,25 +84,21 @@ TinyRecord * jTinyDB::ReadRecord(string tableName, u32 recordID)
 	return table->records.find(recordID) == table->records.end() ? nullptr : table->records[recordID];
 }
 
-void TinyTable::SetRecord(u32 id, TinyRecord * record)
+u32 TinyTable::SetRecord(u32 id, TinyRecord * record)
 {
+	u32 recordID = id;
 	if (records.find(id) == records.end())
 	{
-		records[id] = record;
+		auto iter = std::max_element(records.begin(), records.end());
+		recordID = iter->first + 1;
+		record->SetValue("id", recordID);
+		records[recordID] = record;
 	}
 	else
 	{
-		if (records[id] == record)
-		{
-			records[id] = record;
-		}
-		else
-		{
-			TinyRecord* preRecord = records[id];
-			records[id] = record;
-			delete preRecord;
-		}
+		records[id] = record;
 	}
+	return recordID;
 }
 
 string TinyRecord::FieldToString()
@@ -120,7 +122,7 @@ string TinyRecord::ValueToString()
 bool DBPlayer::Load(u32 _id)
 {
 	id = _id;
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("player", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	_warnif(record == nullptr);
 	if (record == nullptr)
 		return false;
@@ -139,16 +141,12 @@ bool DBPlayer::Load(u32 _id)
 	startPos.x = record->GetValue<double>("startPosX");
 	startPos.y = record->GetValue<double>("startPosY");
 	startPos.z = record->GetValue<double>("startPosZ");
-	string itemInfo = record->GetValue<string>("itemIDs");
-	strings items = jUtils::Split2(itemInfo, "/");
-	for (string item : *items)
-		itemIDs.push_back((u32)jUtils::ToDouble(item));
 	return true;
 }
 
 bool DBPlayer::Save()
 {
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("player", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	if (record == nullptr)
 		record = new TinyRecord();
 
@@ -167,24 +165,15 @@ bool DBPlayer::Save()
 	record->SetValue("startPosX",	startPos.x);
 	record->SetValue("startPosY",	startPos.y);
 	record->SetValue("startPosZ",	startPos.z);
-	string itemStr = "";
-	if (!itemIDs.empty())
-	{
-		itemStr = jUtils::ToString(itemIDs[0]);
-		for(int i = 1; i < itemIDs.size(); ++i)
-			itemStr += "/" + jUtils::ToString(itemIDs[i]);
-	}
-	record->SetValue("itemIDs", itemStr);
 
-
-	jTinyDB::GetInst().WriteRecord("player", id, record);
+	id = jTinyDB::GetInst().WriteRecord(tableName, id, record);
 	return true;
 }
 
 bool DBItemResource::Load(u32 _id)
 {
 	id = _id;
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("itemResources", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	_warnif(record == nullptr);
 	if (record == nullptr)
 		return false;
@@ -204,7 +193,7 @@ bool DBItemResource::Load(u32 _id)
 
 bool DBItemResource::Save()
 {
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("itemResources", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	if (record == nullptr)
 		record = new TinyRecord();
 	
@@ -219,18 +208,19 @@ bool DBItemResource::Save()
 	record->SetValue("rowNum"	,rowNum		);
 	record->SetValue("uiImgIdx"	,uiImgIdx	);
 
-	jTinyDB::GetInst().WriteRecord("itemResources", id, record);
+	id = jTinyDB::GetInst().WriteRecord(tableName, id, record);
 	return true;
 }
 
 bool DBItem::Load(u32 _id)
 {
 	id = _id;
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("items", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	_warnif(record == nullptr);
 	if (record == nullptr)
 		return false;
 
+	owner			= record->GetValue<u32>("owner");
 	state			= (ItemState)record->GetValue<u32>("state");
 	posIndex		= record->GetValue<u32>("posIndex");
 	grade			= record->GetValue<u32>("grade");
@@ -254,10 +244,11 @@ bool DBItem::Load(u32 _id)
 
 bool DBItem::Save()
 {
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("items", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	if (record == nullptr)
 		record = new TinyRecord();
 	
+	record->SetValue("owner", owner);
 	record->SetValue("state", (u32)state);
 	record->SetValue("posIndex", posIndex);
 	record->SetValue("grade", grade);
@@ -277,14 +268,14 @@ bool DBItem::Save()
 	record->SetValue("proficiency", proficiency);
 	record->SetValue("rsrcID", rsrcID);
 
-	jTinyDB::GetInst().WriteRecord("items", id, record);
+	id = jTinyDB::GetInst().WriteRecord(tableName, id, record);
 	return true;
 }
 
 bool DBClasses::Load(u32 _id)
 {
 	id = _id;
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("classes", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	_warnif(record == nullptr);
 	if (record == nullptr)
 		return false;
@@ -308,7 +299,7 @@ bool DBClasses::Load(u32 _id)
 
 bool DBClasses::Save()
 {
-	TinyRecord *record = jTinyDB::GetInst().ReadRecord("classes", id);
+	TinyRecord *record = jTinyDB::GetInst().ReadRecord(tableName, id);
 	if (record == nullptr)
 		record = new TinyRecord();
 	
@@ -327,6 +318,11 @@ bool DBClasses::Save()
 	record->SetValue("footImg", footImg);
 	record->SetValue("footAnim",footAnim);
 
-	jTinyDB::GetInst().WriteRecord("classes", id, record);
+	id = jTinyDB::GetInst().WriteRecord(tableName, id, record);
 	return true;
+}
+
+void DBInterface::DeleteRecord()
+{
+	jTinyDB::GetInst().DeleteRecord(tableName, id);
 }

@@ -15,6 +15,8 @@ public:
 	ObjPlayer();
 	virtual ~ObjPlayer();
 
+	u32 GetID() { return mDBid; }
+
 private:
 	virtual void OnLoad();
 	virtual void OnStart();
@@ -22,6 +24,7 @@ private:
 
 	jGameObject* CreateChild(string name, string meshFullname, string imgFullname, string animFullname);
 
+	u32 mDBid;
 	Vector2 mDestPos;
 	jGameObject* mTarget = nullptr;
 

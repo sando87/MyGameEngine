@@ -22,3 +22,9 @@ double jParabolic2::CalcYAcc(double dx)
 	AccX += dx;
 	return CalcY(AccX);
 }
+
+double jParabolic2::CalcVelAcc(double dx)
+{
+	AccX += dx;
+	return 2 * coeffA * AccX + coeffB;
+}

@@ -12,38 +12,49 @@ class jViewGrid;
 class jView;
 class jViewImage;
 class ObjItem;
+class jEventUI;
+class ObjPlayer;
+struct DBItem;
 
 class ObjUI :
 	public jGameObject
 {
+	friend class jEventUI;
 public:
 	ObjUI();
 	virtual ~ObjUI();
 
-	function<void(ObjItem*, int)> EventMoveItem;
-	function<void(ObjItem*)> EventEquipItem;
-	function<void(ObjItem*)> EventUnEquipItem;
-
-	bool AddItem(ObjItem* item);
+	bool IsFull();
+	bool PickItem(const DBItem& itemDB);
+	jView* GetSelectedView() { return mSelectedItem; }
 
 protected:
 	virtual void OnLoad();
+	virtual void OnStart();
 	virtual void OnUpdate();
 
 	jUISystem * mUIEngine;
 	jShaderUIEngine * mShader;
 	jInputEvent * mEvent;
+	ObjPlayer * mPlayer;
 
-	jViewGrid* mViewGrid;
-	jView* mViewSlots[10];
-	jViewImage* mViewLight;
-	jViewImage* mViewActive;
-	jView* mSelectedView;
+	jViewGrid* mGridView;
+	unordered_map<string, jView*> mSlotViews;
+	jViewImage* mHoverOnForm;
+	jViewImage* mActiveOnItem;
+	jView* mSelectedItem;
 	double mCellWidth;
 	double mCellHeight;
 
+	void MoveItem(u32 itemID, u32 pos);
+	void Equip(u32 itemID);
+	void UnEquip(u32 itemID, u32 pos);
+	void DropItem(u32 itemID);
+
+	jView* CreateItemView(u32 itemID);
 	void ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4]);
-	void DoClickEvent(jView* clickedView);
+	void DoClickGrid(jView* cell);
+	void DoClickSlot(jView* slot);
 	void DoHightlight(jView* hoveredView);
 	void Reset();
 };

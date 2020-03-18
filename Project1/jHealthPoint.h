@@ -45,7 +45,8 @@ public:
 	STAT BasicStatus;
 	STAT CurrentStatus;
 
-	void Effect(const DBItem& item);
+	void AddEffect(const DBItem& item);
+	void SubEffect(const DBItem& item);
 
 	virtual void OnLoad();
 	virtual void OnUpdate();

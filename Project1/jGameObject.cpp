@@ -147,6 +147,22 @@ vector<jComponent*> jGameObject::FindComponents(string componentName)
 	}
 	return comps;
 }
+jGameObject * jGameObject::FindGameObject(string objectName)
+{
+	auto findIter = find_if(mChilds.begin(), mChilds.end(), [&](jGameObject* obj) {
+		return obj->GetName() == objectName;
+	});
+	if (findIter != mChilds.end())
+		return *findIter;
+
+	for (auto child : mChilds)
+	{
+		jGameObject* findObj = child->FindGameObject(objectName);
+		if (findObj != nullptr)
+			return findObj;
+	}
+	return nullptr;
+}
 void jGameObject::Destroy()
 {
 	mRemove = true;

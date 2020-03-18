@@ -14,15 +14,19 @@ enum class ItemCategory {
 struct DBInterface
 {
 public:
-	DBInterface() : id(0) {}
+	DBInterface(string _tableName) : id(0), tableName(_tableName) {}
 	u32 GetID() { return id; }
+	string GetTableName() { return tableName; }
+	void DeleteRecord();
 protected:
 	u32 id;
+	string tableName;
 	virtual bool Load(u32 id) = 0;
 	virtual bool Save() = 0;
 };
 struct DBPlayer : DBInterface
 {
+	DBPlayer() : DBInterface("player") {}
 	string name;
 	u32 classes;
 	u32 level;
@@ -35,12 +39,12 @@ struct DBPlayer : DBInterface
 	u32 statsMP;
 	u32 statsRemain;
 	Vector3 startPos;
-	vector<u32> itemIDs;
 	virtual bool Load(u32 _id);
 	virtual bool Save();
 };
 struct DBItemResource : DBInterface
 {
+	DBItemResource() : DBInterface("itemResources") {}
 	string mesh;
 	string img;
 	u32 equipPos;
@@ -60,6 +64,8 @@ struct DBItemResource : DBInterface
 };
 struct DBItem : DBInterface
 {
+	DBItem() : DBInterface("items") {}
+	u32 owner;
 	ItemState state;
 	u32 posIndex;
 	u32 grade;
@@ -83,6 +89,7 @@ struct DBItem : DBInterface
 };
 struct DBClasses : DBInterface
 {
+	DBClasses() : DBInterface("classes") {}
 	string name;
 	u32 type;
 	string bodyMesh;
@@ -110,7 +117,7 @@ public:
 	template<typename Ty> Ty GetValue(string field);
 	template<typename Ty> void SetValue(string field, Ty value);
 private:
-	unordered_map<string, string> data;
+	map<string, string> data;
 	string FieldToString();
 	string ValueToString();
 };
@@ -118,20 +125,22 @@ class TinyTable
 {
 	friend class jTinyDB;
 public:
-	void SetRecord(u32 id, TinyRecord* record);
+	u32 SetRecord(u32 id, TinyRecord* record);
 private:
-	unordered_map<u32, TinyRecord*> records;
+	map<u32, TinyRecord*> records;
 };
 class jTinyDB
 {
 public:
 	static jTinyDB& GetInst() { static jTinyDB inst; return inst; }
 
+	void DeleteRecord(string tableName, u32 id);
 	bool LoadTable(string tableName);
-	bool SaveTableAll();
+	bool SaveTable(string tableName);
 
-	void WriteRecord(string tableName, u32 recordID, TinyRecord* record);
+	u32 WriteRecord(string tableName, u32 recordID, TinyRecord* record);
 	TinyRecord* ReadRecord(string tableName, u32 recordID);
+	template<typename Ty> void ReadRecords(vector<Ty>& records, function<bool(TinyRecord* rec)> comp);
 
 protected:
 	jTinyDB();
@@ -165,4 +174,24 @@ template<>
 inline void TinyRecord::SetValue(string field, string value)
 {
 	data[field] = value;
+}
+
+template<typename Ty>
+inline void jTinyDB::ReadRecords(vector<Ty>& records, function<bool(TinyRecord* rec)> comp)
+{
+	Ty db;
+	string tableName = db.GetTableName();
+	if (mTables.find(tableName) == mTables.end())
+		LoadTable(tableName);
+	
+	TinyTable* table = mTables[tableName];
+	for (auto elem : table->records)
+	{
+		if (comp(elem.second))
+		{
+			u32 id = elem.second->GetValue<u32>("id");
+			db.Load(id);
+			records.push_back(db);
+		}
+	}
 }

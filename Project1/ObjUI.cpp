@@ -4,6 +4,12 @@
 #include "jImage.h"
 #include "jInventory.h"
 #include "ObjItem.h"
+#include "ObjPlayer.h"
+#include "jMesh.h"
+#include "jImage.h"
+#include "jShaderSkin.h"
+#include "jHealthPoint.h"
+#include "jTransform.h"
 
 #include <jViewGrid.h>
 #include <jViewImage.h>
@@ -11,6 +17,7 @@
 
 #pragma comment(lib,"jGUI.lib")
 
+#define FN_CellIndex	"Idx"
 #define FN_Category		"Category"
 #define FN_GameObject	"GameObject"
 
@@ -41,6 +48,7 @@ private:
 	virtual void OnMouseDown(Vector2n pt, int type) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), true, true); }
 	virtual void OnMouseUp(Vector2n pt, int type) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), false, true); }
 	virtual void OnMouseMove(Vector2n pt, Vector2n delta) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), false, false); }
+	virtual void OnMouseClick(Vector2n pt, int type);
 };
 
 
@@ -103,52 +111,214 @@ void ObjUI::OnLoad()
 	mUIEngine->LoadViews();
 	
 
-	mViewGrid = (jViewGrid*)mUIEngine->FindView("InvenGrid");
-	mViewGrid->UserData[FN_Category] = "null";
-	mViewSlots[0] = mUIEngine->FindView("SlotA");
-	mViewSlots[0]->UserData[FN_Category] = "armor";
-	mViewSlots[1] = mUIEngine->FindView("SlotB");
-	mViewSlots[1]->UserData[FN_Category] = "gloves";
-	mCellWidth = mViewGrid->GetWidth() / mViewGrid->ColumnCount;
-	mCellHeight = mViewGrid->GetHeight() / mViewGrid->RowCount;
+	mGridView = (jViewGrid*)mUIEngine->FindView("InvenGrid");
+	mGridView->UserData[FN_Category] = "null";
+	mSlotViews["armor"] = mUIEngine->FindView("armor");
+	mSlotViews["armor"]->UserData[FN_Category] = "armor";
+	mSlotViews["gloves"] = mUIEngine->FindView("gloves");
+	mSlotViews["gloves"]->UserData[FN_Category] = "gloves";
+	mCellWidth = mGridView->GetWidth() / mGridView->ColumnCount;
+	mCellHeight = mGridView->GetHeight() / mGridView->RowCount;
 
 
-	mViewGrid->EventGridEnter = [&](jView* view, Point2 pt){ DoHightlight(view);};
-	mViewGrid->EventGridLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
-	mViewGrid->EventGridClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
-	mViewSlots[0]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
-	mViewSlots[0]->EventMouseLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
-	mViewSlots[0]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
-	mViewSlots[1]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
-	mViewSlots[1]->EventMouseLeave = [&](jView* view, Point2 pt) { mViewLight->Detach(); };
-	mViewSlots[1]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickEvent(view); };
+	mGridView->EventGridEnter = [&](jView* view, Point2 pt){ DoHightlight(view);};
+	mGridView->EventGridLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
+	mGridView->EventGridClick = [&](jView* view, Point2 pt) { DoClickGrid(view); };
+	mSlotViews["armor"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mSlotViews["armor"]->EventMouseLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
+	mSlotViews["armor"]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickSlot(view); };
+	mSlotViews["gloves"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mSlotViews["gloves"]->EventMouseLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
+	mSlotViews["gloves"]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickSlot(view); };
 
 
-	mViewActive = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
-	mViewActive->Width = "1.0";
-	mViewActive->Height = "1.0";
-	mViewActive->Image.filename = "itemgrade2.png";
-	mViewActive->Image.top = 0;
-	mViewActive->Image.bottom = 1.0f;
-	mViewActive->Image.left = 0.125f * 5;
-	mViewActive->Image.right = 0.125f * 6;
-	mViewActive->Enable = false;
+	mActiveOnItem = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mActiveOnItem->Width = "1.0";
+	mActiveOnItem->Height = "1.0";
+	mActiveOnItem->Image.filename = "itemgrade2.png";
+	mActiveOnItem->Image.top = 0;
+	mActiveOnItem->Image.bottom = 1.0f;
+	mActiveOnItem->Image.left = 0.125f * 5;
+	mActiveOnItem->Image.right = 0.125f * 6;
+	mActiveOnItem->Enable = false;
 
-	mViewLight = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
-	mViewLight->Width = "1.0";
-	mViewLight->Height = "1.0";
-	mViewLight->Image.filename = "itemgrade2.png";
-	mViewLight->Image.top = 0;
-	mViewLight->Image.bottom = 1.0f;
-	mViewLight->Image.left = 0.125f * 5;
-	mViewLight->Image.right = 0.125f * 6;
-	mViewLight->Enable = false;
+	mHoverOnForm = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mHoverOnForm->Width = "1.0";
+	mHoverOnForm->Height = "1.0";
+	mHoverOnForm->Image.filename = "itemgrade2.png";
+	mHoverOnForm->Image.top = 0;
+	mHoverOnForm->Image.bottom = 1.0f;
+	mHoverOnForm->Image.left = 0.125f * 5;
+	mHoverOnForm->Image.right = 0.125f * 6;
+	mHoverOnForm->Enable = false;
+}
 
+void ObjUI::OnStart()
+{
+	mPlayer = GetEngine().FindGameObject<ObjPlayer>();
+	u32 playID = mPlayer->GetID();
+	vector<DBItem> items;
+	jTinyDB::GetInst().ReadRecords(items, [playID](TinyRecord* rec) {
+		return rec->GetValue<u32>("owner") == playID;
+	});
+
+	for (DBItem& item : items)
+	{
+		jView* newItemView = CreateItemView(item.GetID());
+		if (item.state != ItemState::Equipped)
+		{
+			jView* child = mGridView->GetChild(item.posIndex);
+			child->AddChild(newItemView);
+			newItemView->LoadAll();
+		}
+		else
+		{
+			DBItemResource itemRes;
+			itemRes.Load(item.rsrcID);
+			mSlotViews[itemRes.category]->AddChild(newItemView);
+			newItemView->LoadAll();
+			Equip(item.GetID());
+		}
+	}
 }
 
 void ObjUI::OnUpdate()
 {
 	mUIEngine->MouseEventCall();
+}
+
+void ObjUI::MoveItem(u32 itemID, u32 pos)
+{
+	DBItem DBItem;
+	DBItem.Load(itemID);
+	DBItem.posIndex = pos;
+	DBItem.Save();
+}
+
+void ObjUI::Equip(u32 itemID)
+{
+	DBItem item;
+	item.Load(itemID);
+	if (item.state != ItemState::Equipped)
+	{
+		item.state = ItemState::Equipped;
+		item.Save();
+	}
+
+	DBItemResource resInfo;
+	resInfo.Load(item.rsrcID);
+	if (resInfo.category == "armor")
+	{
+		jGameObject* body = mPlayer->FindGameObject("body");
+		jMesh* compMesh = body->FindComponent<jMesh>();
+		jImage* compImg = body->FindComponent<jImage>();
+		jShaderSkin* compshader = body->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+		compshader->UpdateInputResource();
+	}
+	else if (resInfo.category == "pants")
+	{
+	}
+	else if (resInfo.category == "gloves")
+	{
+	}
+	else if (resInfo.category == "shoes")
+	{
+	}
+
+	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
+	if (stats != nullptr)
+		stats->AddEffect(item);
+}
+
+void ObjUI::UnEquip(u32 itemID, u32 pos)
+{
+	DBItem item;
+	item.Load(itemID);
+	item.state = ItemState::Carraied;
+	item.posIndex = pos;
+	item.Save();
+
+	DBItemResource resInfo;
+	resInfo.Load(item.rsrcID);
+	DBPlayer player;
+	player.Load(mPlayer->GetID());
+	DBClasses playerClass;
+	playerClass.Load(player.classes);
+	if (resInfo.category == "armor")
+	{
+		jGameObject* body = mPlayer->FindGameObject("body");
+		jMesh* compMesh = body->FindComponent<jMesh>();
+		jImage* compImg = body->FindComponent<jImage>();
+		jShaderSkin* compshader = body->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.bodyMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.bodyImg);
+		compshader->UpdateInputResource();
+	}
+	else if (resInfo.category == "pants")
+	{
+	}
+	else if (resInfo.category == "gloves")
+	{
+	}
+	else if (resInfo.category == "shoes")
+	{
+	}
+
+	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
+	if (stats != nullptr)
+		stats->SubEffect(item);
+}
+
+void ObjUI::DropItem(u32 itemID)
+{
+	DBItem DBItem;
+	DBItem.Load(itemID);
+	DBItem.owner = 0;
+	DBItem.posIndex = 0;
+	DBItem.state = ItemState::Dropped;
+	DBItem.Save();
+
+	ObjItem* objitem = new ObjItem(itemID);
+	Vector3 dropPos = mPlayer->GetTransform().getPos();
+	objitem->GetTransform().moveTo(dropPos);
+	GetEngine().AddGameObject(objitem);
+}
+
+jView * ObjUI::CreateItemView(u32 itemID)
+{
+	DBItem itemInfo;
+	itemInfo.Load(itemID);
+	DBItemResource itemResInfo;
+	itemResInfo.Load(itemInfo.rsrcID);
+
+	jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	viewbg->Width = "1.0";
+	viewbg->Height = "1.0";
+	viewbg->Image.filename = "itemgrade2.png";
+	viewbg->Image.top = 0;
+	viewbg->Image.bottom = 1;
+	viewbg->Image.left = 0.125 * itemInfo.grade;
+	viewbg->Image.right = 0.125 * (itemInfo.grade + 1);
+	viewbg->Enable = false;
+	viewbg->UserData[FN_GameObject] = itemID;
+	viewbg->UserData[FN_Category] = itemResInfo.category;
+
+	jViewImage* viewfg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	viewfg->Width = "1.0";
+	viewfg->Height = "1.0";
+	viewfg->Image.filename = itemResInfo.uiImg;
+	viewfg->Image.top = itemResInfo.Top();
+	viewfg->Image.bottom = itemResInfo.Bottom();
+	viewfg->Image.left = itemResInfo.Left();
+	viewfg->Image.right = itemResInfo.Right();
+	viewfg->Enable = false;
+	viewfg->UserData[FN_GameObject] = itemID;
+	viewfg->UserData[FN_Category] = itemResInfo.category;
+
+	viewbg->AddChild(viewfg);
+	return viewbg;
 }
 
 void ObjUI::ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4])
@@ -170,71 +340,154 @@ void ObjUI::ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4])
 	vert[3].c = color;
 }
 
-void ObjUI::DoClickEvent(jView* clickedView)
+void ObjUI::DoClickGrid(jView* cell)
 {
-	bool clickedGrid = (clickedView->GetParent() == mViewGrid);
-	jView* itemView = clickedView->Childs.empty() ? nullptr : clickedView->Childs.front();
-	if (itemView == nullptr && mSelectedView == nullptr)
+	jView* itemOnCell = cell->Childs.empty() ? nullptr : cell->Childs.front();
+	if (itemOnCell == nullptr && mSelectedItem == nullptr)
 		return;
 
-	if (clickedGrid)
+	if (mSelectedItem != nullptr && itemOnCell != nullptr && mSelectedItem->GetParent()->GetParent() != mGridView)
 	{
-		if (mSelectedView != nullptr && itemView != nullptr && mSelectedView->GetParent()->GetParent() != mViewGrid)
-		{
-			string cateA = mSelectedView->UserData[FN_Category].val<string>();
-			string cateB = itemView->UserData[FN_Category].val<string>();
-			if (cateA != cateB)
-				return;
-		}
-	}
-	else
-	{
-		if (mSelectedView != nullptr)
-		{
-			string cateA = mSelectedView->UserData[FN_Category].val<string>();
-			string cateB = clickedView->UserData[FN_Category].val<string>();
-			if (cateA != cateB)
-				return;
-		}
+		string cateA = mSelectedItem->UserData[FN_Category].val<string>();
+		string cateB = itemOnCell->UserData[FN_Category].val<string>();
+		if (cateA != cateB)
+			return;
 	}
 
-	if (itemView == nullptr)
+	if (itemOnCell == nullptr)
 	{
 		//MoveView
-		mSelectedView->Detach();
-		clickedView->AddChild(mSelectedView);
-		mSelectedView->LoadAll();
+		bool isEquippedItem = mSelectedItem->GetParent()->GetParent() != mGridView;
+		if (isEquippedItem)
+		{
+			u32 selItemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+			int gridPosIdx = cell->UserData[FN_CellIndex].val<int>();
+			UnEquip(selItemID, gridPosIdx);
+		}
+		else
+		{
+			u32 selItemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+			int gridPosIdx = cell->UserData[FN_CellIndex].val<int>();
+			MoveItem(selItemID, gridPosIdx);
+		}
 
-		mViewActive->Detach();
-		mSelectedView = nullptr;
+		mSelectedItem->Detach();
+		cell->AddChild(mSelectedItem);
+		mSelectedItem->LoadAll();
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
 
 	}
-	else if (mSelectedView == nullptr)
+	else if (mSelectedItem == nullptr)
 	{
 		//SelectView
-		mSelectedView = itemView;
-		mSelectedView->AddChild(mViewActive);
-		mViewActive->LoadAll();
+		mSelectedItem = itemOnCell;
+		mSelectedItem->AddChild(mActiveOnItem);
+		mActiveOnItem->LoadAll();
 	}
-	else if (mSelectedView == itemView)
+	else if (mSelectedItem == itemOnCell)
 	{
 		//UnSelectView
-		mViewActive->Detach();
-		mSelectedView = nullptr;
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
 	}
 	else
 	{
 		//SwapView
-		jView* backView = mSelectedView->GetParent();
-		mSelectedView->Detach();
-		itemView->Detach();
-		backView->AddChild(itemView);
-		clickedView->AddChild(mSelectedView);
-		mSelectedView->LoadAll();
-		itemView->LoadAll();
+		jView* backView = mSelectedItem->GetParent();
+		bool isEquippedItem = mSelectedItem->GetParent()->GetParent() != mGridView;
+		if (isEquippedItem)
+		{
+			u32 unequipItemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+			int gridPosIdx = cell->UserData[FN_CellIndex].val<int>();
+			UnEquip(unequipItemID, gridPosIdx);
 
-		mViewActive->Detach();
-		mSelectedView = nullptr;
+			u32 equipItemID = itemOnCell->UserData[FN_GameObject].val<u32>();
+			Equip(equipItemID);
+		}
+		else
+		{
+			u32 itemA = mSelectedItem->UserData[FN_GameObject].val<u32>();
+			int gridPosIdx = cell->UserData[FN_CellIndex].val<int>();
+			MoveItem(itemA, gridPosIdx);
+
+			u32 itemB = itemOnCell->UserData[FN_GameObject].val<u32>();
+			gridPosIdx = backView->UserData[FN_CellIndex].val<int>();
+			MoveItem(itemB, gridPosIdx);
+		}
+
+		mSelectedItem->Detach();
+		itemOnCell->Detach();
+		backView->AddChild(itemOnCell);
+		cell->AddChild(mSelectedItem);
+		mSelectedItem->LoadAll();
+		itemOnCell->LoadAll();
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
+	}
+}
+
+void ObjUI::DoClickSlot(jView* slot)
+{
+	jView* itemOnSlot = slot->Childs.empty() ? nullptr : slot->Childs.front();
+	if (itemOnSlot == nullptr && mSelectedItem == nullptr)
+		return;
+
+	if (mSelectedItem != nullptr)
+	{
+		string cateA = mSelectedItem->UserData[FN_Category].val<string>();
+		string cateB = slot->UserData[FN_Category].val<string>();
+		if (cateA != cateB)
+			return;
+	}
+
+	if (itemOnSlot == nullptr)
+	{
+		//MoveView
+		mSelectedItem->Detach();
+		slot->AddChild(mSelectedItem);
+		mSelectedItem->LoadAll();
+
+		u32 selectedItemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+		Equip(selectedItemID);
+
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
+
+	}
+	else if (mSelectedItem == nullptr)
+	{
+		//SelectView
+		mSelectedItem = itemOnSlot;
+		mSelectedItem->AddChild(mActiveOnItem);
+		mActiveOnItem->LoadAll();
+	}
+	else if (mSelectedItem == itemOnSlot)
+	{
+		//UnSelectView
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
+	}
+	else
+	{
+		//SwapView
+		jView* cell = mSelectedItem->GetParent();
+		mSelectedItem->Detach();
+		itemOnSlot->Detach();
+		cell->AddChild(itemOnSlot);
+		slot->AddChild(mSelectedItem);
+		mSelectedItem->LoadAll();
+		itemOnSlot->LoadAll();
+
+		u32 slotItemID = itemOnSlot->UserData[FN_GameObject].val<u32>();
+		int gridPosIdx = cell->UserData[FN_CellIndex].val<int>();
+		UnEquip(slotItemID, gridPosIdx);
+
+		u32 selectedItemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+		Equip(selectedItemID);
+
+		mActiveOnItem->Detach();
+		mSelectedItem = nullptr;
 	}
 }
 
@@ -242,74 +495,65 @@ void ObjUI::DoHightlight(jView * hoveredView)
 {
 	jView* parentView = hoveredView->GetParent();
 	Point2 pos = hoveredView->GetLocalPos();
-	mViewLight->LocalX = to_string((int)pos.x);
-	mViewLight->LocalY = to_string((int)pos.y);
-	mViewLight->Width = to_string((int)hoveredView->GetWidth());
-	mViewLight->Height = to_string((int)hoveredView->GetHeight());
-	parentView->AddChild(mViewLight);
-	mViewLight->LoadAll();
+	mHoverOnForm->LocalX = to_string((int)pos.x);
+	mHoverOnForm->LocalY = to_string((int)pos.y);
+	mHoverOnForm->Width = to_string((int)hoveredView->GetWidth());
+	mHoverOnForm->Height = to_string((int)hoveredView->GetHeight());
+	parentView->AddChild(mHoverOnForm);
+	mHoverOnForm->LoadAll();
 }
 
 void ObjUI::Reset()
 {
-	mViewActive->Detach();
-	mViewLight->Detach();
+	mActiveOnItem->Detach();
+	mHoverOnForm->Detach();
 
-	int gridCount = mViewGrid->ColumnCount * mViewGrid->RowCount;
+	int gridCount = mGridView->ColumnCount * mGridView->RowCount;
 	for (int i = 0; i < gridCount; ++i)
-		mViewGrid->GetChild(i)->ClearChilds();
+		mGridView->GetChild(i)->ClearChilds();
 
-	int cnt = sizeof(mViewSlots) / sizeof(mViewSlots[0]);
-	for (int i = 0; i < cnt; ++i)
-	{
-		if (mViewSlots[i] != nullptr)
-			mViewSlots[i]->ClearChilds();
-	}
+	for (auto slot : mSlotViews)
+		slot.second->ClearChilds();
 }
 
-bool ObjUI::AddItem(ObjItem * item)
+bool ObjUI::IsFull()
 {
-	const DBItem& itemInfo = item->GetDBItem();
-	const DBItemResource& itemResInfo = item->GetDBItemResource();
-	int posIdx = itemInfo.posIndex;
-	jView* emptyView = mViewGrid->GetChild(posIdx);
-	if (!emptyView->Childs.empty())
-	{
-		emptyView = mViewGrid->FindEmptyChild();
-		if (emptyView == nullptr) //inventory full
-			return false;
+	return mGridView->FindEmptyChild() == nullptr;
+}
 
-		posIdx = emptyView->UserData["Idx"].val<int>();
-		if (EventMoveItem != nullptr)
-			EventMoveItem(item, posIdx);
-	}
+bool ObjUI::PickItem(const DBItem& itemDB)
+{
+	if (IsFull())
+		return false;
 
-	jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
-	viewbg->Width = "1.0";
-	viewbg->Height = "1.0";
-	viewbg->Image.filename = "itemgrade2.png";
-	viewbg->Image.top = 0;
-	viewbg->Image.bottom = 1;
-	viewbg->Image.left = 0.125 * itemInfo.grade;
-	viewbg->Image.right = 0.125 * (itemInfo.grade + 1);
-	viewbg->Enable = false;
-	viewbg->UserData[FN_GameObject] = item;
-	viewbg->UserData[FN_Category] = itemResInfo.category;
+	jView* emptyView = mGridView->FindEmptyChild();
+	DBItem newItem = itemDB;
+	newItem.owner = mPlayer->GetID();
+	newItem.state = ItemState::Carraied;
+	newItem.posIndex = emptyView->UserData[FN_CellIndex].val<int>();
+	newItem.Save();
 
-	jViewImage* viewfg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
-	viewfg->Width = "1.0";
-	viewfg->Height = "1.0";
-	viewfg->Image.filename = itemResInfo.uiImg;
-	viewfg->Image.top = itemResInfo.Top();
-	viewfg->Image.bottom = itemResInfo.Bottom();
-	viewfg->Image.left = itemResInfo.Left();
-	viewfg->Image.right = itemResInfo.Right();
-	viewfg->Enable = false;
-	viewfg->UserData[FN_GameObject] = item;
-	viewfg->UserData[FN_Category] = itemResInfo.category;
-
-	viewbg->AddChild(viewfg);
-	emptyView->AddChild(viewbg);
-	viewbg->LoadAll();
+	jView* newItemView = CreateItemView(newItem.GetID());
+	emptyView->AddChild(newItemView);
+	newItemView->LoadAll();
 	return true;
+}
+
+void jEventUI::OnMouseClick(Vector2n pt, int type)
+{
+	ObjUI* obj = (ObjUI*)GetGameObject();
+	jView* view = mUIEngine->FindTopView(pt.x, pt.y);
+	if (view == nullptr && obj->mSelectedItem != nullptr)
+	{
+		u32 itemID = obj->mSelectedItem->UserData[FN_GameObject].val<u32>();
+		if (obj->mSelectedItem->GetParent()->GetParent() != obj->mGridView)
+			obj->UnEquip(itemID, 0);
+		
+		obj->DropItem(itemID);
+
+		obj->mActiveOnItem->Detach();
+		obj->mSelectedItem->Detach();
+		delete obj->mSelectedItem;
+		obj->mSelectedItem = nullptr;
+	}
 }
