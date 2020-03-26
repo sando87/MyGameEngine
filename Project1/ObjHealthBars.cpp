@@ -12,21 +12,33 @@ class HPParticle : public Particle
 public:
 	jTransform* partTransform;
 	jHealthPoint* partHP;
+	jGameObject* partObject;
 	HPParticle(jGameObject* obj)
 	{
+		partObject = obj;
 		partTransform = obj->FindComponent<jTransform>();
 		partHP = obj->FindComponent<jHealthPoint>();
 	}
 	virtual void OnUpdate()
 	{
 		Pos = partTransform->getPos();
-		refDiscard = partHP->CurrentStatus.life / partHP->BasicStatus.life; //hp Rate
+		Pos.z += 7.0;
+		refDiscard = partHP->CurSpec.hp / partHP->MaxSpec.hp; //hp Rate
 		Death = (LifeTime < AccTime) ? true : false;
 	}
 };
 
 void ObjHealthBars::ShowHPBar(jGameObject * obj)
 {
+	list<Particle*>& parties = mParticle->GetParticles();
+	for (Particle* part : parties)
+		if (((HPParticle*)part)->partObject == obj)
+		{
+			part->AccTime = 0;
+			return;
+		}
+			
+
 	HPParticle* particle = new HPParticle(obj);
 	mParticle->Burst(particle);
 }
@@ -48,6 +60,7 @@ void ObjHealthBars::OnLoad()
 	mShader = new jShaderHPBar();
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
+	mShader->SetRenderOrder(RenderOrder_Terrain_Env_Alpha);
 	AddComponent(mShader);
 
 	mParamsBars = &mShader->GetParamBars();

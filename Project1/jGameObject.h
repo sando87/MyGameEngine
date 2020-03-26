@@ -54,6 +54,7 @@ protected:
 	list<jGameObject*> mChilds;
 
 
+	Property_GetSetter(bool, Enable, true)
 	Property_Getter(bool, Remove, false)
 	Property_Getter(string, Name, "")
 };

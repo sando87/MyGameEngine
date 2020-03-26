@@ -159,7 +159,7 @@ bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
 	bool ret = block.zMap->GetHeight(worldX, worldY, height);
 	return ret;
 }
-bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector2& outPoint)
+bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector3& outPoint)
 {
 	dir.normalize();
 	Vector3 currentPos = pos;

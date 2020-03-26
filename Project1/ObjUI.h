@@ -5,21 +5,19 @@
 
 
 class jUISystem;
-class jShaderUIEngine;
-class jInputEvent;
 class jInventory;
 class jViewGrid;
 class jView;
 class jViewImage;
 class ObjItem;
-class jEventUI;
+class jEventFormInven;
 class ObjPlayer;
 struct DBItem;
 
 class ObjUI :
 	public jGameObject
 {
-	friend class jEventUI;
+	friend class jEventFormInven;
 public:
 	ObjUI();
 	virtual ~ObjUI();
@@ -31,11 +29,8 @@ public:
 protected:
 	virtual void OnLoad();
 	virtual void OnStart();
-	virtual void OnUpdate();
 
-	jUISystem * mUIEngine;
-	jShaderUIEngine * mShader;
-	jInputEvent * mEvent;
+	jUISystem * mUIForm;
 	ObjPlayer * mPlayer;
 
 	jViewGrid* mGridView;
@@ -52,7 +47,6 @@ protected:
 	void DropItem(u32 itemID);
 
 	jView* CreateItemView(u32 itemID);
-	void ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4]);
 	void DoClickGrid(jView* cell);
 	void DoClickSlot(jView* slot);
 	void DoHightlight(jView* hoveredView);

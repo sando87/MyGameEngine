@@ -4,6 +4,13 @@
 #include "jGameObjectMgr.h"
 #include "ObjParticle.h"
 #include "jParticle.h"
+#include "jMesh.h"
+#include "jImage.h"
+#include "jShaderDefault.h"
+#include "jTinyDB.h"
+#include "jHealthPoint.h"
+#include "ObjTerrainMgr.h"
+#include "ObjEnemy.h"
 
 ObjBomb::ObjBomb()
 {
@@ -15,7 +22,23 @@ ObjBomb::~ObjBomb()
 
 void ObjBomb::OnLoad()
 {
-	LoadTxt("MyObject_51.txt");
+	DBSkill skillDB;
+	skillDB.Load(1);
+	strings imgs = jUtils::Split2(skillDB.resImg, "&");
+	_warnif(imgs->size() != 4);
+
+	mResImgBomb = imgs[0];
+	mResImgFlame = imgs[1];
+	mResImgExplore = imgs[2];
+	mResImgSmoke = imgs[3];
+
+	AddComponent(new jHealthPoint(skillDB.spec));
+
+	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + skillDB.resMesh));
+	AddComponent(new jImage(PATH_RESOURCES + string("img/") + mResImgBomb));
+	jShaderDefault* shader = new jShaderDefault();
+	shader->SetRenderOrder(RenderOrder_Terrain_Env_Alpha);
+	AddComponent(shader);
 
 	class BombParticle : public Particle
 	{
@@ -24,24 +47,33 @@ void ObjBomb::OnLoad()
 		{
 			Force(Vector3(0, 0, -150));
 			Particle::OnUpdate();
-			Death = (Pos.z <= 0) ? true : false;
+			Death = false;
 		}
 	};
 
+	Vector2 dir = mDestPos - GetTransform().getPos();
+	dir.normalize();
+
 	mParticleBomb = new jParticle();
 	mParticleBomb->OnCreateParticle = []() { return new BombParticle(); };
+	mParticleBomb->SetPosition(GetTransform().getPos());
 	mParticleBomb->SetForce(10000);
-	mParticleBomb->SetDirection(Vector3(-1, 1, 3));
+	mParticleBomb->SetDirection(Vector3(dir.x, dir.y, 3));
 	mParticleBomb->SetDegree(0);
 	mParticleBomb->SetCount(1);
 	mParticleBomb->SetMassRate(3);
-	mParticleBomb->SetStartDelay(3);
-	mParticleBomb->SetDuration(3);
+	mParticleBomb->SetDuration(1);
 	mParticleBomb->SetBurstCount(1);
+	mParticleBomb->SetBurstIntervalSec(0);
 	AddComponent(mParticleBomb);
 
 	CreateFlameParticle();
 	//CreateSmokeParticle();
+}
+
+void ObjBomb::OnStart()
+{
+	mTerrain = GetEngine().FindGameObject<ObjTerrainMgr>();;
 }
 
 void ObjBomb::OnUpdate()
@@ -53,17 +85,20 @@ void ObjBomb::OnUpdate()
 		GetTransform().moveTo(part->Pos);
 		mParticleFlame->SetDirection(part->Vel * -1);
 	
-		jTransform& trans = GetTransform();
 		Vector3 dir = mParticleBomb->GetDirection();
 		dir.z = (jUtils::Random() % 8) * 0.1;
 		dir.normalize();
-		trans.rotateAxis(dir, 180 * jTime::Delta());
+		GetTransform().rotateAxis(dir, 180 * jTime::Delta());
 	}
 	
-	if(mParticleBomb->IsFinished())
+	Vector3 pos = GetTransform().getPos();
+	float height = 0;
+	mTerrain->GetHeight(pos.x, pos.y, height);
+	if(pos.z < height)
 	{
 		CreateExploreParticle();
 		mParticleFlame->SetBurstCount(0);
+		AttackEnemies();
 		Destroy();
 	}
 	
@@ -97,13 +132,12 @@ void ObjBomb::CreateFlameParticle()
 	mParticleFlame->SetDegree(20);
 	mParticleFlame->SetRandomRate(0.5);
 	mParticleFlame->SetCount(1);
-	mParticleFlame->SetStartDelay(4);
 	mParticleFlame->SetBurstCount(50);
 	mParticleFlame->SetBurstIntervalSec(0.07);
 
 	ObjParticle* objParticle = new ObjParticle();
 	objParticle->SetParticle(mParticleFlame);
-	objParticle->SetImageFullname("./res/img/flame.tga");
+	objParticle->SetImageFullname("./res/img/" + mResImgFlame);
 	objParticle->SetImageGridCount(Vector2n(8, 1));
 	objParticle->SetImageStepUV(Vector2f(0.125f, 1.0f));
 	GetEngine().AddGameObject(objParticle);
@@ -143,7 +177,7 @@ void ObjBomb::CreateExploreParticle()
 
 	ObjParticle* objParticle = new ObjParticle();
 	objParticle->SetParticle(mParticleExplore);
-	objParticle->SetImageFullname("./res/img/explore.tga");
+	objParticle->SetImageFullname("./res/img/" + mResImgExplore);
 	objParticle->SetImageGridCount(Vector2n(2, 2));
 	objParticle->SetImageStepUV(Vector2f(0.5f, 0.5f));
 	GetEngine().AddGameObject(objParticle);
@@ -190,8 +224,22 @@ void ObjBomb::CreateSmokeParticle()
 
 	ObjParticle* objParticle = new ObjParticle();
 	objParticle->SetParticle(mParticleSmoke);
-	objParticle->SetImageFullname("./res/img/smoke.tga");
+	objParticle->SetImageFullname("./res/img/" + mResImgSmoke);
 	objParticle->SetImageGridCount(Vector2n(4, 1));
 	objParticle->SetImageStepUV(Vector2f(0.25f, 1.0f));
 	GetEngine().AddGameObject(objParticle);
+}
+
+void ObjBomb::AttackEnemies()
+{
+	Vector3 pos = GetTransform().getPos();
+	jHealthPoint* owner = mOwner->FindComponent<jHealthPoint>();
+	jHealthPoint* hp = FindComponent<jHealthPoint>();
+	auto enemies = GetEngine().FindGameObjects<ObjEnemy>();
+	for (ObjEnemy* enemy : *enemies)
+	{
+		Vector3 targetPos = enemy->GetTransform().getPos();
+		if (targetPos.distance(pos) < 5)
+			owner->Attack(enemy->FindComponent<jHealthPoint>(), hp);
+	}
 }

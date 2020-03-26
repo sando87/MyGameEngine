@@ -1,57 +1,31 @@
 #pragma once
 #include "jComponent.h"
+#include "jTinyDB.h"
 
-struct DBItem;
-
-struct STAT
-{
-	double life;
-	double mana;
-	double shield;
-	double exp;
-	u32 level;
-
-	double attackPower;
-	double magicPower;
-	double attackDefense;
-	double magicDefense;
-
-	double spdAttack;
-	double spdMove;
-	double spdLifeRecovery;
-	double spdManaRecovery;
-	double spdShieldRecovery;
-	double spdSternRecovery;
-
-	double ShieldResetTime;
-
-	double criticalChance;
-	double criticalPowerRate;
-	double coolTimeReduction;
-
-	double itemChance;
-	STAT() {
-		memset(this, 0x00, sizeof(STAT));
-	}
-};
+class ObjHealthBars;
 
 class jHealthPoint :
 	public jComponent
 {
 public:
-	jHealthPoint();
+	jHealthPoint(u32 specID);
 	virtual ~jHealthPoint();
 
-	STAT BasicStatus;
-	STAT CurrentStatus;
+	DBSpecification MaxSpec;
+	DBSpecification CurSpec;
 
-	void AddEffect(const DBItem& item);
-	void SubEffect(const DBItem& item);
+	function<void(jHealthPoint*)> EventDeath;
+	function<void(jHealthPoint*)> EventKill;
 
+	void AddEffect(const DBSpecification& spec);
+	void SubEffect(const DBSpecification& spec);
+	void Attack(jHealthPoint* target, jHealthPoint* with = nullptr);
+
+protected:
 	virtual void OnLoad();
-	virtual void OnUpdate();
-	virtual void OnAttack(jGameObject* target);
-	virtual void OnDamaged(const STAT& attacker);
 
+	ObjHealthBars* mObjHPBar;
+
+	u32 mSpecDBID;
 };
 

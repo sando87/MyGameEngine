@@ -1,0 +1,2 @@
+className,id,name,resAnim,resImg,resMesh,resShader,spec
+ObjBomb,1,Bomb,null,bombTex.dump&flame.tga&explore.tga&smoke.tga,bombMesh.dump,null,10

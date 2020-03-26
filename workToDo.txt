@@ -1,35 +1,48 @@
-BaseEngine
-Render
-Input
-Math
+=======구현한 모듈들=======
+Engine Architecture
+Render(shaders)
+Input(keyboard,mouse)
+Math(vector,matrix)
 Cache
 Astar
-Animation
+Animation(skinned)
 Collision
 Resource
-=========
-- 중복된 Vertex제거를 위한 index드로잉 방식으로 개선이 필요
-//- jMesh, jImage, jAnim OnLoad시 자체 캐쉬 필요
-- GameObject 생성 및 소멸 매커니즘 정리 필요(추가로 다른 객체들도...)
-- parser -> obj dump에 해더 추가필요
-//- transport 컴포넌트화 필요...
-//- shader rendering, params 정리필요
-//- GameObject, Component Loading시스템 개선 필요
-//- GameObject Naiming 시스템 정리 필요
-- 경로 정리
-//- input시스템도 컴포넌트화 필요
 Terrain
 Combat Game Logic
 (enemy AI, regen, attack, health, death...)
-Effect
-Sound
+Effect(skill)
 UI system
-==========
-network
+======해야할일=======
+
+=====구현해야할 모듈들=====
+Sound
 database
+resourcing
+network
 Physics
-==========
-고려해볼만한 사항...
+=======리소스 추출========
+Skill Effect 또는 UI 추출
+- 1단계 Raw데이터 추출(hookiat.sln에서 EXPORT_TERRAIN 해제할것)
+- 필요시 Dia3Parser.sln로 이미지나 vs,ps 변환
+- Project1.sln에서 분석
+- 입맛에 맞게 재가공
+캐릭터 및 애니메이션 추출
+- 1단계 Raw데이터 추출
+- A키 추출
+- B키 Animation데이터 저장 시작(캐릭터별로 하나씩 남겨두고 할 것)
+- 2단계 Project.sln에서 분석 후 원하는 Object들만 export(메쉬,이미지,Anim,메타정보를 분류)
+- 3단계 Animation데이터 클립별로 분류작업 필요(직접 확인하여 clip작업 필요)
+Terrain 추출
+- 1단계 Raw데이터 추출
+- EXPORT_TERRAIN 활성화 하여 연속으로 A키를 누르면서 추출
+- 2단계 Project.sln에서 Terrain객체 번호 확인 후 export(grid별로 폴더링 분류됨)
+- 3단계 ....
+
+
+=====고려해볼만한 사항=====
+- 중복된 Vertex제거를 위한 index드로잉 방식으로 개선이 필요
+- GameObject 생성 및 소멸 매커니즘 정리 필요(추가로 다른 객체들도...)
 - 기본적으로 엔진 클래스는 사용자가 new delete 하지 않도록..
 - 싱글톤은 uniqu_ptr -> GetInst반환은 weak_ptr
 - Cache와 같은 리소스 관리자는 shared_ptr -> Cache반환도 shared_ptr
@@ -38,7 +51,7 @@ Physics
 - ObjectComponent 빌더 디자인 패턴 사용 반환값은 weak
 
 
-====namiong convention====
+====naming convention====
 파일명이 담기는 변수 관련
 - fullname : 경로명 + 파일명 (D:/temp/example.txt)
 - filename : 파일명 (example.txt)

@@ -20,5 +20,7 @@ public:
 private:
 	jHealthPoint* mHP;
 	StateMachEnemy* mStateMach;
+
+	void Death();
 };
 

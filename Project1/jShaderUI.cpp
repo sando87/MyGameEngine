@@ -2,14 +2,16 @@
 #include "jMesh.h"
 #include "jImage.h"
 #include "ObjCamera.h"
+#include <jUISystem.h>
 
 #define ResName_Layout "jShaderUI.layout"
 #define ResName_Shader_Vertex "./shaders/ui.vs"
 #define ResName_Shader_Pixel "./shaders/ui.ps"
 
 
-jShaderUI::jShaderUI()
+jShaderUI::jShaderUI(jUISystem* form)
 {
+	mForm = form;
 	mCameraUI = new ObjCamera();
 }
 
@@ -22,6 +24,8 @@ jShaderUI::~jShaderUI()
 
 void jShaderUI::OnLoad()
 {
+	SetRenderOrder(6);
+
 	u32 num = 1;
 	D3D11_VIEWPORT viewPort;
 	mDevContext->RSGetViewports(&num, &viewPort);
@@ -42,6 +46,15 @@ void jShaderUI::OnLoad()
 
 	SetDepthOn(false);
 	SetAlphaOn(true);
+}
+
+bool jShaderUI::OnRender(ObjCamera * cam)
+{
+	jShaderUI::ConfigRender();
+
+	mForm->Draw();
+
+	return true;
 }
 
 

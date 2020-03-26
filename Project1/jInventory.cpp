@@ -71,10 +71,6 @@ void jInventory::Equip(ObjItem * item)
 	{
 	}
 
-	jGameObject* obj = GetGameObject();
-	jHealthPoint* stats = obj->FindComponent<jHealthPoint>();
-	if (stats != nullptr)
-		stats->AddEffect(item->GetDBItem());
 }
 
 void jInventory::UnEquip(ObjItem * item)
@@ -99,8 +95,4 @@ void jInventory::UnEquip(ObjItem * item)
 	{
 	}
 
-	jGameObject* obj = GetGameObject();
-	jHealthPoint* stats = obj->FindComponent<jHealthPoint>();
-	if (stats != nullptr)
-		stats->SubEffect(item->GetDBItem());
 }

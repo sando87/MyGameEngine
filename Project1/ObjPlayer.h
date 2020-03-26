@@ -6,6 +6,7 @@
 class jNavigator;
 class jAnimatorGroup;
 class StateMachPlayer;
+class jHealthPoint;
 
 class ObjPlayer : public jGameObject
 {
@@ -28,6 +29,7 @@ private:
 	Vector2 mDestPos;
 	jGameObject* mTarget = nullptr;
 
+	jHealthPoint* mHP;
 	jAnimatorGroup * mAnim;
 	jNavigator * mNavi;
 	StateMachPlayer * mState;

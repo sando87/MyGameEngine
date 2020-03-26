@@ -27,5 +27,6 @@ protected:
 	jParabolic2 mHeights;
 	DBItem mDBItem;
 	DBItemResource mDBItemResorce;
+	DBSpecification mDBItemSpec;
 };
 

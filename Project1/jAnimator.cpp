@@ -43,7 +43,8 @@ void jAnimator::OnLoad()
 
 	if (!mAnims.empty())
 	{
-		SetAnimation(mAnims.begin()->first);
+		_errorif(mAnims.find("idle") == mAnims.end());
+		SetAnimation("idle");
 		mShader = GetGameObject()->FindComponent<jShaderSkin>();
 	}
 }
@@ -118,8 +119,9 @@ void jAnimator::SetAnimation(string name)
 	_warnif(mAnims.find(name) == mAnims.end());
 	if (mAnims.find(name) != mAnims.end())
 	{
-		mCurrentTime = 0;
 		mCurrentAnim = &mAnims[name];
+		mCurrentAnim->prevPosRate = 0;
+		mCurrentTime = 0;
 	}
 }
 

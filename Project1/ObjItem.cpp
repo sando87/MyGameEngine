@@ -21,12 +21,13 @@ ObjItem::~ObjItem()
 
 void ObjItem::OnLoad()
 {
-	if (mDBItem.GetID() == 0)
+	if (mDBID == 0)
 		NewRandomItem();
 	else
 	{
 		mDBItem.Load(mDBID);
 		mDBItemResorce.Load(mDBItem.rsrcID);
+		mDBItemSpec.Load(mDBItem.spec);
 	}
 
 	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + mDBItemResorce.mesh));
@@ -57,7 +58,6 @@ void ObjItem::OnUpdate()
 		double deltaPos = mHeights.CalcVelAcc(jTime::Delta()) * jTime::Delta();
 		Vector3 pos = GetTransform().getPos();
 		pos.z += deltaPos;
-		_echoF(deltaPos);
 		GetTransform().rotateAxis(Vector3(0, 1, 0), 5);
 		GetTransform().moveTo(pos);
 		if (mHeights.AccX >= 0.3)
@@ -67,14 +67,22 @@ void ObjItem::OnUpdate()
 
 void ObjItem::NewRandomItem()
 {
+	DBSpecification newSpec;
+	newSpec.pa = jUtils::Random() % 5;
+	newSpec.hp = jUtils::Random() % 10;
+	newSpec.Save();
+
 	mDBItem.state = ItemState::Dropped;
 	mDBItem.posIndex = 0;
 	mDBItem.grade = jUtils::Random() % 5;
-	mDBItem.hp = jUtils::Random() % 30;
-	mDBItem.mp = jUtils::Random() % 30;
-	mDBItem.cntSkill = jUtils::Random() % 3;
 	mDBItem.rsrcID = (jUtils::Random() % 11) + 1;
+	mDBItem.spec = newSpec.GetID();
 
+	mDBItemSpec.hp = jUtils::Random() % 30;
+	mDBItemSpec.mp = jUtils::Random() % 30;
+	mDBItemSpec.count = jUtils::Random() % 3;
+	
+	
 	mDBItemResorce.Load(mDBItem.rsrcID);
 }
 

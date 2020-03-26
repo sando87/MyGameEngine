@@ -1,9 +1,11 @@
 #include "jHealthPoint.h"
 #include "ObjItem.h"
+#include "jGameObjectMgr.h"
+#include "ObjHealthBars.h"
 
-
-jHealthPoint::jHealthPoint()
+jHealthPoint::jHealthPoint(u32 specID)
 {
+	mSpecDBID = specID;
 }
 
 
@@ -11,32 +13,42 @@ jHealthPoint::~jHealthPoint()
 {
 }
 
-void jHealthPoint::AddEffect(const DBItem & item)
+void jHealthPoint::AddEffect(const DBSpecification& spec)
 {
+	DBSpecification rate = CurSpec / MaxSpec;
+	MaxSpec += spec;
+	CurSpec = MaxSpec * rate;
 }
 
-void jHealthPoint::SubEffect(const DBItem & item)
+void jHealthPoint::SubEffect(const DBSpecification& spec)
 {
+	DBSpecification rate = CurSpec / MaxSpec;
+	MaxSpec -= spec;
+	CurSpec = MaxSpec * rate;
+}
+
+void jHealthPoint::Attack(jHealthPoint* target, jHealthPoint* with)
+{
+	if (!target->GetEnable())
+		return;
+
+	double alpha = with != nullptr ? with->CurSpec.pa : 0;
+	target->CurSpec.hp -= (CurSpec.pa + alpha);
+	mObjHPBar->ShowHPBar(target->GetGameObject());
+	if (target->CurSpec.hp <= 0)
+	{
+		target->CurSpec.hp = 0;
+		if (target->EventDeath != nullptr)
+			target->EventDeath(this);
+		if (EventKill != nullptr)
+			EventKill(target);
+	}
 }
 
 void jHealthPoint::OnLoad()
 {
-}
-
-void jHealthPoint::OnUpdate()
-{
-}
-
-void jHealthPoint::OnAttack(jGameObject* target)
-{
-	jHealthPoint* targetStat = target->FindComponent<jHealthPoint>();
-	if (targetStat == nullptr)
-		return;
-
-	targetStat->OnDamaged(CurrentStatus);
-}
-
-void jHealthPoint::OnDamaged(const STAT & attacker)
-{
-	CurrentStatus.life -= attacker.attackPower;
+	_warnif(mSpecDBID == 0);
+	MaxSpec.Load(mSpecDBID);
+	CurSpec = MaxSpec;
+	mObjHPBar = GetEngine().FindGameObject<ObjHealthBars>();
 }

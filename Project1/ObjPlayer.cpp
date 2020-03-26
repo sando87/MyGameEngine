@@ -20,6 +20,10 @@
 #include "jTinyDB.h"
 #include "jTrigger.h"
 #include "ObjUI.h"
+#include "oFormMain.h"
+#include "oFormStats.h"
+#include "ObjBomb.h"
+#include "jHealthPoint.h"
 
 class jEventPlayer : public jInputEvent
 {
@@ -29,6 +33,7 @@ private:
 	ObjTerrainMgr * mTerrain;
 	virtual void OnLoad();
 	virtual void OnMouseDown(Vector2n pt, int type);
+	virtual void OnKeyDown(char ch);
 };
 class jAnimatorGroup : public jComponent
 {
@@ -83,15 +88,6 @@ void ObjPlayer::OnLoad()
 	GetTransform().moveTo(dbPlayer.startPos);
 
 	//AddComponent(new jInventory(mDBid));
-	
-	double xx = dbPlayer.startPos.x;
-	double yy = dbPlayer.startPos.y;
-	GetEngine().StartCoRoutine("createNewItem", 3000, [this, xx, yy](CorMember& mem, bool meg) {
-		ObjItem* obj = new ObjItem();
-		obj->GetTransform().moveTo(Vector3(xx + 10, yy + 10, 0));
-		GetEngine().AddGameObject(obj);
-		return CorCmd::Stop;
-	});
 
 	DBClasses dbClasses;
 	dbClasses.Load(dbPlayer.classes);
@@ -99,6 +95,8 @@ void ObjPlayer::OnLoad()
 	CreateChild("leg",  dbClasses.legMesh, dbClasses.legImg, dbClasses.legAnim);
 	CreateChild("arm",  dbClasses.armMesh, dbClasses.armImg, dbClasses.armAnim);
 	CreateChild("foot", dbClasses.footMesh, dbClasses.footImg, dbClasses.footAnim);
+
+	AddComponent(new jHealthPoint(dbClasses.spec));
 
 	mAnim = new jAnimatorGroup();
 	AddComponent(mAnim);
@@ -120,6 +118,38 @@ void ObjPlayer::OnLoad()
 
 void ObjPlayer::OnStart()
 {
+	DBPlayer dbPlayer;
+	dbPlayer.Load(mDBid);
+	DBSpecification spec;
+	spec.pa = 0.5 * (dbPlayer.statsPA + dbPlayer.level);
+	spec.ma = 0.5 * (dbPlayer.statsMA + dbPlayer.level);
+	spec.pd = 0.2 * (dbPlayer.statsPD + dbPlayer.level);
+	spec.md = 0.1 * (dbPlayer.statsMD + dbPlayer.level);
+	spec.hp = 1.0 * (dbPlayer.statsHP + dbPlayer.level);
+	spec.mp = 0.3 * (dbPlayer.statsMP + dbPlayer.level);
+	mHP = FindComponent<jHealthPoint>();
+	mHP->AddEffect(spec);
+	mHP->EventKill = [&](jHealthPoint* target) {
+		DBPlayer dbPlayer;
+		dbPlayer.Load(mDBid);
+		dbPlayer.exp += 10;
+		if (dbPlayer.exp >= dbPlayer.level * 100)
+		{
+			dbPlayer.level += 1;
+			dbPlayer.statsRemain += 5;
+		}
+		dbPlayer.Save();
+		FindComponent<jStateMachine>()->SetState(StateType::IDLE);
+		mTarget = nullptr;
+		mWayPoints.clear();
+	};
+
+	mAnim->AddEvent("attack1", 0.6f, [this]() { 
+		_warnif(mTarget == nullptr);
+		jHealthPoint* hp = mTarget->FindComponent<jHealthPoint>();
+		if (hp != nullptr)
+			mHP->Attack(hp);
+	});
 	mAnim->AddEvent("attack1", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
 }
 void ObjPlayer::OnUpdate()
@@ -187,7 +217,7 @@ void jEventPlayer::OnMouseDown(Vector2n pt, int type)
 
 	if (type == 1)
 	{
-		Vector2 pointOnTerrain;
+		Vector3 pointOnTerrain;
 		Vector2 obstaclePos;
 		mTerrain->RayCastTerrain(camPos, view, pointOnTerrain);
 		bool obstacled = mTerrain->FindObstacle(playerPos, pointOnTerrain, obstaclePos, 1);
@@ -208,10 +238,64 @@ void jEventPlayer::OnMouseDown(Vector2n pt, int type)
 		}
 		mPlayer->mState->SetState(StateType::MOVE);
 		mPlayer->mAnim->SetAnimation("walk");
-		mPlayer->mTarget = GetEngine().RayCast(camPos, view);
+		mPlayer->mTarget = GetEngine().RayCast(camPos, view, GetGameObject());
 	}
 
 	
+}
+
+void jEventPlayer::OnKeyDown(char ch)
+{
+	switch (ch)
+	{
+	case 'A':
+	{
+		jGameObject* obj = GetEngine().FindGameObject<oFormStats>();
+		bool isEnabled = obj->GetEnable();
+		obj->SetEnable(!isEnabled);
+	}
+		break;
+	case 'S':
+	{
+		jGameObject* obj = GetEngine().FindGameObject<oFormMain>();
+		bool isEnabled = obj->GetEnable();
+		obj->SetEnable(!isEnabled);
+	}
+		break;
+	case 'D':
+	{
+		jGameObject* obj = GetEngine().FindGameObject<ObjUI>();
+		bool isEnabled = obj->GetEnable();
+		obj->SetEnable(!isEnabled);
+	}
+		break;
+	case 'Q':
+	{
+		Vector2 mousePt = jOS_APIs::GetCursorScreenPos();
+		Vector3 view = mCamera->ScreenToWorldView(mousePt.x, mousePt.y);
+		Vector3 camPos = mCamera->GetTransform().getPos();
+		Vector3 playerPos = mPlayer->GetTransform().getPos();
+
+		Vector3 pointOnTerrain;
+		mTerrain->RayCastTerrain(camPos, view, pointOnTerrain);
+
+		ObjBomb* objBomb = new ObjBomb();
+		objBomb->GetTransform().moveTo(playerPos);
+		objBomb->SetDestPos(pointOnTerrain);
+		objBomb->SetOwner(GetGameObject());
+
+		GetEngine().AddGameObject(objBomb);
+	}
+		break;
+	case 'W':
+		break;
+	case 'E':
+		break;
+	case 'R':
+		break;
+	default:
+		break;
+	}
 }
 
 void StateMachPlayer::OnLoad()
@@ -298,6 +382,8 @@ void StateMachPlayer::OnAttack()
 {
 	if (mPlayer->mTarget == nullptr)
 		return;
+	if (mPlayer->mAnim->GetAnimation() != "idle")
+		return;
 
 	if (CloseEnoughToTarget())
 	{
@@ -315,7 +401,7 @@ bool StateMachPlayer::CloseEnoughToTarget()
 {
 	Vector2 targetPos = mPlayer->mTarget->GetTransform().getPos();
 	Vector2 myPos = mPlayer->GetTransform().getPos();
-	return targetPos.distance(myPos) < 3;
+	return targetPos.distance(myPos) < 7;
 }
 
 bool StateMachPlayer::CloseEnoughToDest(Vector2 dest)

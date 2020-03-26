@@ -2,16 +2,17 @@
 #include "jShader.h"
 
 class ObjCamera;
+class jUISystem;
 
 class jShaderUI :
 	public jShader
 {
 public:
-	jShaderUI();
+	jShaderUI(jUISystem* form);
 	virtual ~jShaderUI();
 
 	virtual void OnLoad();
-	virtual bool OnRender(ObjCamera* cam) = 0;
+	virtual bool OnRender(ObjCamera* cam);
 
 	void DrawRect(VertexFormatPTC verticies[4], void* textureView);
 
@@ -23,5 +24,6 @@ protected:
 	void ConfigRender();
 
 	ObjCamera* mCameraUI;
+	jUISystem* mForm;
 };
 

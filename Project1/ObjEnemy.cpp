@@ -10,7 +10,7 @@
 #include "jHealthPoint.h"
 #include "jTerrainCollider.h"
 #include "jStateMachine.h"
-
+#include "ObjItem.h"
 
 class StateMachEnemy : public jStateMachine 
 {
@@ -44,31 +44,69 @@ ObjEnemy::~ObjEnemy()
 
 void ObjEnemy::OnLoad()
 {
-	LoadTxt("MyObject_232.txt");
+	DBEnemies dbEnemy;
+	dbEnemy.Load(1);
+	GetTransform().moveTo(Vector3(2347 + 40, 4866 - 20, 0));
 
-	mHP = new jHealthPoint();
+	AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + dbEnemy.resMesh));
+	AddComponent(new jImage(PATH_RESOURCES + string("img/") + dbEnemy.resImg));
+	AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + dbEnemy.resAnim));
+	jShaderSkin* shader = new jShaderSkin();
+	shader->SetRenderOrder(RenderOrder_Skin);
+	AddComponent(shader);
+
+	mHP = new jHealthPoint(dbEnemy.spec);
+	mHP->EventDeath = [&](jHealthPoint* from) {
+		Death();
+	};
 	AddComponent(mHP);
 
 	mStateMach = new StateMachEnemy();
 	AddComponent(mStateMach);
 
 	NoCrash * crash = new NoCrash();
-	crash->SetShape(2, 5);
+	crash->SetShape(5, 10);
 	AddComponent(crash);
 
 	AddComponent(new jTerrainCollider(crash->GetRound()));
 
-	jAnimator* anim = FindComponent<jAnimator>();
-	anim->AddEvent("attack", 0.6f, []() {_trace(); });
-	anim->AddEvent("attack", 1.0f, [anim]() { anim->SetAnimation("idle"); });
 }
 
 void ObjEnemy::OnStart()
 {
+	jGameObject* objPlayer = GetEngine().FindGameObject("ObjPlayer");
+	jAnimator* anim = FindComponent<jAnimator>();
+	anim->AddEvent("attack", 0.6f, [this, objPlayer]() {
+		jHealthPoint* hp = objPlayer->FindComponent<jHealthPoint>();
+		if (hp != nullptr)
+			mHP->Attack(hp);
+	});
+	
+	anim->AddEvent("attack", 1.0f, [anim]() { anim->SetAnimation("idle"); });
+	anim->AddEvent("death", 0.9f, [this, objPlayer]() {
+		Destroy();
+	});
 }
 
 void ObjEnemy::OnUpdate()
 {
+}
+
+void ObjEnemy::Death()
+{
+	FindComponent<jAnimator>()->SetAnimation("death");
+	FindComponent<StateMachEnemy>()->SetState(StateType::DYING);
+	FindComponent<NoCrash>()->SetEnable(false);
+	FindComponent<jHealthPoint>()->SetEnable(false);
+
+	ObjItem* obj = new ObjItem();
+	obj->GetTransform().moveTo(GetTransform().getPos());
+	GetEngine().AddGameObject(obj);
+	
+	GetEngine().StartCoRoutine("createNextMonster", 10000, [](CorMember& mem, bool meg) {
+		jGameObjectMgr::GetInst().AddGameObject(new ObjEnemy());
+		return CorCmd::Stop;
+	});
 }
 
 
@@ -97,7 +135,7 @@ void StateMachEnemy::OnIdle()
 	if (mAccTime > 5)
 	{
 		mAccTime = 0;
-		Vector2 basePos(1390, 820);
+		Vector2 basePos = GetGameObject()->GetTransform().getPos();
 		int offX = jUtils::Random() % 20 - 10;
 		int offY = jUtils::Random() % 20 - 10;
 		Vector2 randomPos = basePos + Vector2(offX, offY);
@@ -114,7 +152,7 @@ void StateMachEnemy::OnIdle()
 void StateMachEnemy::OnMove()
 {
 	mAccTime += jTime::Delta();
-	if (DetectPlayerAround(3))
+	if (DetectPlayerAround(7))
 	{
 		mAccTime = 0;
 		mDestPos = GetGameObject()->GetTransform().getPos();

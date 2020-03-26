@@ -61,11 +61,10 @@ void ObjParser::OnStart()
 		}
 	};
 
-	mShader = new jShaderParserOnly(mParser);
 	//mShader = new jShaderParser();
 	//((jShaderParser*)mShader)->Load(mParser);
 	//mShader->SetEnable(false);
-	AddComponent(mShader);
+	AddComponent(new jShaderParserOnly(mParser));
 
 	Vector3 pos = GetTransform().getPos();
 	pos.x = mOff;

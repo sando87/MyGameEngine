@@ -1,2 +1,2 @@
-id,name,classes,level,exp,statsPA,statsMA,statsPD,statsMD,statsHP,statsMP,statsRemain,startPosX,startPosY,startPosZ
-1,sjlee,1,1,10,10,5,10,5,100,50,0,2347,4866,0
+classes,exp,id,level,name,startPos.x,startPos.y,startPos.z,statsHP,statsMA,statsMD,statsMP,statsPA,statsPD,statsRemain,
+1,120,1,2,sjlee,2347.000000,4866.000000,0.000000,5,6,7,5,5,7,0,

@@ -13,6 +13,8 @@
 #include "ObjBomb.h"
 #include "ObjItem.h"
 #include "ObjHealthBars.h"
+#include "oFormMain.h"
+#include "oFormStats.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -82,25 +84,24 @@ bool jGameObjectMgr::Initialize()
 	//	obj->GetTransform().moveTo(Vector3(i * 10, 0, 0));
 	//	AddGameObject(obj);
 	//}
-
-
+	AddGameObject(new ObjHealthBars());
 	AddGameObject(new ObjPlayer());
-	//AddGameObject(new ObjEnemy());
-	AddGameObject(new ObjUI());
+
+	AddGameObject(new ObjEnemy());
+	AddGameObject(new ObjUI())->SetEnable(false);
+	AddGameObject(new oFormStats())->SetEnable(false);
+	AddGameObject(new oFormMain())->SetEnable(false);
 	//AddGameObject(new ObjBomb());
-	//AddGameObject(new ObjHealthBars());
+	
 
 	//ObjItem* item = new ObjItem();
 	//item->LoadProperty("item1.txt");
 	//AddGameObject(item);
 
-	//44~46
-	//48~55(48x, 49x)
-	//64
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 0; i < 0; ++i)
+	for(int i = 2; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -118,7 +119,7 @@ bool jGameObjectMgr::Initialize()
 		vecObjs.push_back(obj0);
 	}
 
-	for (int i = 1; i < 0; ++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		jParserD3 parser;
 		if (!parser.Init(i))
@@ -258,6 +259,9 @@ void jGameObjectMgr::RunObjects()
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
+		if (!obj->GetEnable())
+			continue;
+
 		obj->UpdateComponents();
 		obj->UpdateAll();
 	}
@@ -266,6 +270,9 @@ void jGameObjectMgr::RunObjects()
 	for (auto it = mObjects.begin(); it != mObjects.end(); ++it)
 	{
 		jGameObject* obj = it->second;
+		if (!obj->GetEnable())
+			continue;
+
 		obj->GetShaderAll(shaders);
 	}
 
@@ -343,7 +350,7 @@ void jGameObjectMgr::StartCoRoutine(string name, std::function<void(void)> task,
 	mCoroutine.StartCoroutine(info);
 }
 
-jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
+jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir, jGameObject* skipObject)
 {
 	jLine3D line(pos, dir);
 	
@@ -353,10 +360,13 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 	{
 		jGameObject* obj = it->second;
 		jCrash* crash = obj->FindComponent<jCrash>();
-		if (crash == nullptr)
+		if (crash == nullptr || !crash->GetEnable())
 			continue;
 
 		if (!crash->IsCrash(line))
+			continue;
+
+		if (skipObject == obj)
 			continue;
 
 		double distFar = obj->GetTransform().getPos().distance(pos);
@@ -369,9 +379,10 @@ jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir)
 	return ret;
 }
 
-void jGameObjectMgr::AddGameObject(jGameObject* _obj)
+jGameObject* jGameObjectMgr::AddGameObject(jGameObject* _obj)
 {
 	mNewObjects.push_back(_obj);
+	return _obj;
 }
 bool jGameObjectMgr::Added(jGameObject * obj)
 {

@@ -36,9 +36,9 @@ public:
 	void StartCoRoutine(string name, std::function<void(void)> task, std::function<CorCmd(CorMember&, bool)> coroutine);
 	void StopCoRoutine(string name);
 
-	jGameObject* RayCast(Vector3 pos, Vector3 dir);
+	jGameObject* RayCast(Vector3 pos, Vector3 dir, jGameObject* skipObject);
 
-	void AddGameObject(jGameObject* _obj);
+	jGameObject* AddGameObject(jGameObject* _obj);
 	bool Added(jGameObject* obj);
 	template<typename Ty = jGameObject> Ty* FindGameObject();
 	template<typename Ty = jGameObject> shared_ptr_array<Ty*> FindGameObjects();

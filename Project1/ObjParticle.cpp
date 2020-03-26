@@ -31,6 +31,7 @@ void ObjParticle::OnLoad()
 	mShader->GetParamBasic().uvInfo = Vector4f(mImageGridCount.x, mImageGridCount.y, mImageStepUV.x, mImageStepUV.y);
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
+	mShader->SetRenderOrder(RenderOrder_Terrain_Env_Alpha);
 	AddComponent(mShader);
 
 	mParamsBillboards = &mShader->GetParamBillboard();

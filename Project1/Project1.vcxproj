@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(WindowsSDK_IncludePath);$(ProjectDir)\..\..\MyUIEngine\jGUI;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)\..\..\MyUIEngine\jGUI;$(IncludePath)</IncludePath>
@@ -140,6 +140,8 @@
     <ClCompile Include="jComponent.cpp" />
     <ClCompile Include="jCoroutine.cpp" />
     <ClCompile Include="jCrash.cpp" />
+    <ClCompile Include="jEventForm.cpp" />
+    <ClCompile Include="jForm.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGenericValue.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
@@ -202,6 +204,8 @@
     <ClCompile Include="ObjTerrainMgr.cpp" />
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="ObjUI.cpp" />
+    <ClCompile Include="oFormMain.cpp" />
+    <ClCompile Include="oFormStats.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
@@ -215,6 +219,8 @@
     <ClInclude Include="jAStar.h" />
     <ClInclude Include="jBoneNode.h" />
     <ClInclude Include="jComponent.h" />
+    <ClInclude Include="jEventForm.h" />
+    <ClInclude Include="jForm.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGenericValue.h" />
     <ClInclude Include="jHealthPoint.h" />
@@ -279,6 +285,8 @@
     <ClInclude Include="ObjTerrainMgr.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="ObjUI.h" />
+    <ClInclude Include="oFormMain.h" />
+    <ClInclude Include="oFormStats.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Vectors.h" />

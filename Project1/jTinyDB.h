@@ -24,6 +24,44 @@ protected:
 	virtual bool Load(u32 id) = 0;
 	virtual bool Save() = 0;
 };
+struct DBSpecification : DBInterface
+{
+	DBSpecification() : DBInterface("specifications") {
+		u32 size = sizeof(DBSpecification) - sizeof(DBInterface);
+		memset(&pa, 0x00, size);
+	}
+	double pa;
+	double ma;
+	double pd;
+	double md;
+	double hp;
+	double mp;
+	double shield;
+	double MoveSpeed;
+	double attackSpeed;
+	double castingSpeed;
+	double StunRecoverySpeed;
+	double HPperSec;
+	double MPperSec;
+	double shieldResetTime;
+	double count;
+	double range;
+	double keepTime;
+	double coolTime;
+	double skillMoveSpeed;
+	double skillEffectFreq;
+	double proficiency;
+	double chance;
+	double criticalAttack;
+	double magicChance;
+	virtual bool Load(u32 _id);
+	virtual bool Save();
+	void operator+=(const DBSpecification& spec);
+	void operator-=(const DBSpecification& spec);
+	void operator*=(double rate);
+	const DBSpecification operator*(const DBSpecification& spec) const;
+	const DBSpecification operator/(const DBSpecification& spec) const;
+};
 struct DBPlayer : DBInterface
 {
 	DBPlayer() : DBInterface("player") {}
@@ -65,45 +103,62 @@ struct DBItemResource : DBInterface
 struct DBItem : DBInterface
 {
 	DBItem() : DBInterface("items") {}
-	u32 owner;
+	u32	owner;
 	ItemState state;
-	u32 posIndex;
-	u32 grade;
-	double pa;
-	double ma;
-	double pd;
-	double md;
-	double hp;
-	double mp;
-	double shieldMax;
-	double shieldTime;
-	double spdMove;
-	double spdSkill;
-	double cntSkill;
-	double sizeSkill;
-	double cooltime;
-	double proficiency;
-	u32 rsrcID;
+	u32	posIndex;
+	u32	grade;
+	u32	rsrcID;
+	u32	spec;
 	virtual bool Load(u32 _id);
 	virtual bool Save();
 };
 struct DBClasses : DBInterface
 {
 	DBClasses() : DBInterface("classes") {}
+	string	name;
+	u32		type;
+	string	bodyMesh;
+	string	bodyImg;
+	string	bodyAnim;
+	string	legMesh;
+	string	legImg;
+	string	legAnim;
+	string	armMesh;
+	string	armImg;
+	string	armAnim;
+	string	footMesh;
+	string	footImg;
+	string	footAnim;
+	u32		spec;
+	string	skills;
+	virtual bool Load(u32 _id);
+	virtual bool Save();
+};
+struct DBSkill : DBInterface
+{
+	DBSkill() : DBInterface("skills") {}
+	string name			;
+	string className	;
+	string resMesh		;
+	string resImg		;
+	string resAnim		;
+	string resShader	;
+	u32 spec;
+	virtual bool Load(u32 _id);
+	virtual bool Save();
+};
+struct DBEnemies : DBInterface
+{
+	DBEnemies() : DBInterface("enemies") {}
 	string name;
+	u32 level;
 	u32 type;
-	string bodyMesh;
-	string bodyImg;
-	string bodyAnim;
-	string legMesh;
-	string legImg;
-	string legAnim;
-	string armMesh;
-	string armImg;
-	string armAnim;
-	string footMesh;
-	string footImg;
-	string footAnim;
+	string resMesh;
+	string resImg;
+	string resAnim;
+	u32 spec;
+	u32 skill;
+	u32 item;
 	virtual bool Load(u32 _id);
 	virtual bool Save();
 };
@@ -114,6 +169,7 @@ class TinyRecord
 	friend class TinyTable;
 	friend class jTinyDB;
 public:
+	void Clear() { data.clear(); }
 	template<typename Ty> Ty GetValue(string field);
 	template<typename Ty> void SetValue(string field, Ty value);
 private:
@@ -154,22 +210,31 @@ template<typename Ty>
 inline Ty TinyRecord::GetValue(string field)
 {
 	_warnif(data.find(field) == data.end());
-	Ty val = (Ty)jUtils::ToDouble(data[field]);
-	return val;
+	return data.find(field) == data.end() ? (Ty)0 : (Ty)((u32)jUtils::ToDouble(data[field]));
+}
+template<>
+inline double TinyRecord::GetValue(string field)
+{
+	_warnif(data.find(field) == data.end());
+	return data.find(field) == data.end() ? 0 : jUtils::ToDouble(data[field]);
 }
 template<>
 inline string TinyRecord::GetValue(string field)
 {
 	_warnif(data.find(field) == data.end());
-	return data.find(field) == data.end() ? "" : data[field];
+	return data.find(field) == data.end() ? "null" : data[field];
 }
 
 template<typename Ty>
 inline void TinyRecord::SetValue(string field, Ty value)
 {
-	data[field] = jUtils::ToString(value);
+	data[field] = jUtils::ToString((u32)value);
 }
-
+template<>
+inline void TinyRecord::SetValue(string field, double value)
+{
+	data[field] = jUtils::ToString(value);;
+}
 template<>
 inline void TinyRecord::SetValue(string field, string value)
 {

@@ -1,7 +1,8 @@
 #include "ObjUI.h"
-#include "jInputEvent.h"
+#include "jEventForm.h"
 #include "jShaderUI.h"
 #include "jImage.h"
+#include "jForm.h"
 #include "jInventory.h"
 #include "ObjItem.h"
 #include "ObjPlayer.h"
@@ -21,33 +22,11 @@
 #define FN_Category		"Category"
 #define FN_GameObject	"GameObject"
 
-class jShaderUIEngine : public jShaderUI
+class jEventFormInven : public jEventForm
 {
+public:
+	jEventFormInven(jUISystem *form) : jEventForm(form) {}
 private:
-	jUISystem * mUIEngine;
-	virtual void OnLoad() 
-	{ 
-		SetRenderOrder(6);
-		mUIEngine = jUISystem::GetInst(); 
-		jShaderUI::OnLoad();
-	}
-	virtual bool OnRender(ObjCamera* cam)
-	{
-		jShaderUI::ConfigRender();
-
-		mUIEngine->Draw();
-		
-		return true;
-	}
-};
-class jEventUI : public jInputEvent
-{
-private:
-	jUISystem * mUIEngine;
-	virtual void OnLoad() { mUIEngine = jUISystem::GetInst(); }
-	virtual void OnMouseDown(Vector2n pt, int type) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), true, true); }
-	virtual void OnMouseUp(Vector2n pt, int type) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), false, true); }
-	virtual void OnMouseMove(Vector2n pt, Vector2n delta) { mUIEngine->SetMouseEvent(Point2(pt.x, pt.y), false, false); }
 	virtual void OnMouseClick(Vector2n pt, int type);
 };
 
@@ -64,64 +43,34 @@ ObjUI::~ObjUI()
 
 void ObjUI::OnLoad()
 {
-	mShader = new jShaderUIEngine;
-	AddComponent(mShader);
+	mUIForm = new jUISystem();
 
-	mEvent = new jEventUI();
-	AddComponent(mEvent);
+	jForm* compForm = new jForm(mUIForm);
+	compForm->SetJsonFilename("panelInven.json");
+	AddComponent(compForm);
 
-	mUIEngine = jUISystem::GetInst();
-	mUIEngine->SetResourcePath("./res/ui/");
-	mUIEngine->EventDrawFill = [&](DrawingParams params) {
-		VertexFormatPTC vert[4];
-		ConvertDrawParam(params, vert);
-		mShader->DrawRect(vert, nullptr);
-	};
-	mUIEngine->EventDrawOutline = [&](DrawingParams params) {
-		VertexFormatPTC vert[4];
-		ConvertDrawParam(params, vert);
-		mShader->DrawRect(vert, nullptr);
-	};
-	mUIEngine->EventDrawTexture = [&](DrawingParams params) {
-		VertexFormatPTC vert[4];
-		ConvertDrawParam(params, vert);
-		mShader->DrawRect(vert, params.texture);
-	};
-	mUIEngine->OpLoadTexture = [&](jUIBitmap* bitmap) {
-		void* ptr = nullptr;
-		if (bitmap->fullname.length() > 0)
-		{
-			jImage img(bitmap->fullname);
-			img.LoadImgFile();
-			chars buf = img.GetBuffer();
-			ptr = mShader->LoadTextureRes((unsigned char*)&buf[0], img.GetWidth(), img.GetHeight());
+	AddComponent(new jShaderUI(mUIForm));
 
-		}
-		else if(!bitmap->buf.empty())
-		{
-			ptr = mShader->LoadTextureRes((unsigned char*)&bitmap->buf[0], bitmap->width, bitmap->height);
-		}
-		
-		return ptr;
-	};
-	mUIEngine->OpReleaseTexture = [&](void* ptr) {
-		mShader->ReleaseTextureRes(ptr);
-	};
-	mUIEngine->ParseJson("panelInven.json");
-	mUIEngine->LoadViews();
-	
+	AddComponent(new jEventFormInven(mUIForm));
+}
 
-	mGridView = (jViewGrid*)mUIEngine->FindView("InvenGrid");
+void ObjUI::OnStart()
+{
+	mGridView = (jViewGrid*)mUIForm->FindView("InvenGrid");
 	mGridView->UserData[FN_Category] = "null";
-	mSlotViews["armor"] = mUIEngine->FindView("armor");
+	mSlotViews["armor"] = mUIForm->FindView("armor");
 	mSlotViews["armor"]->UserData[FN_Category] = "armor";
-	mSlotViews["gloves"] = mUIEngine->FindView("gloves");
+	mSlotViews["gloves"] = mUIForm->FindView("gloves");
 	mSlotViews["gloves"]->UserData[FN_Category] = "gloves";
+	mSlotViews["pants"] = mUIForm->FindView("pants");
+	mSlotViews["pants"]->UserData[FN_Category] = "pants";
+	mSlotViews["shoes"] = mUIForm->FindView("shoes");
+	mSlotViews["shoes"]->UserData[FN_Category] = "shoes";
 	mCellWidth = mGridView->GetWidth() / mGridView->ColumnCount;
 	mCellHeight = mGridView->GetHeight() / mGridView->RowCount;
 
 
-	mGridView->EventGridEnter = [&](jView* view, Point2 pt){ DoHightlight(view);};
+	mGridView->EventGridEnter = [&](jView* view, Point2 pt) { DoHightlight(view);};
 	mGridView->EventGridLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
 	mGridView->EventGridClick = [&](jView* view, Point2 pt) { DoClickGrid(view); };
 	mSlotViews["armor"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
@@ -130,9 +79,15 @@ void ObjUI::OnLoad()
 	mSlotViews["gloves"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
 	mSlotViews["gloves"]->EventMouseLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
 	mSlotViews["gloves"]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickSlot(view); };
+	mSlotViews["pants"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mSlotViews["pants"]->EventMouseLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
+	mSlotViews["pants"]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickSlot(view); };
+	mSlotViews["shoes"]->EventMouseEnter = [&](jView* view, Point2 pt) { DoHightlight(view); };
+	mSlotViews["shoes"]->EventMouseLeave = [&](jView* view, Point2 pt) { mHoverOnForm->Detach(); };
+	mSlotViews["shoes"]->EventMouseClick = [&](jView* view, Point2 pt) { DoClickSlot(view); };
 
 
-	mActiveOnItem = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mActiveOnItem = (jViewImage*)mUIForm->CreateView(jViewType::Image);
 	mActiveOnItem->Width = "1.0";
 	mActiveOnItem->Height = "1.0";
 	mActiveOnItem->Image.filename = "itemgrade2.png";
@@ -142,7 +97,7 @@ void ObjUI::OnLoad()
 	mActiveOnItem->Image.right = 0.125f * 6;
 	mActiveOnItem->Enable = false;
 
-	mHoverOnForm = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	mHoverOnForm = (jViewImage*)mUIForm->CreateView(jViewType::Image);
 	mHoverOnForm->Width = "1.0";
 	mHoverOnForm->Height = "1.0";
 	mHoverOnForm->Image.filename = "itemgrade2.png";
@@ -151,10 +106,8 @@ void ObjUI::OnLoad()
 	mHoverOnForm->Image.left = 0.125f * 5;
 	mHoverOnForm->Image.right = 0.125f * 6;
 	mHoverOnForm->Enable = false;
-}
 
-void ObjUI::OnStart()
-{
+
 	mPlayer = GetEngine().FindGameObject<ObjPlayer>();
 	u32 playID = mPlayer->GetID();
 	vector<DBItem> items;
@@ -182,11 +135,6 @@ void ObjUI::OnStart()
 	}
 }
 
-void ObjUI::OnUpdate()
-{
-	mUIEngine->MouseEventCall();
-}
-
 void ObjUI::MoveItem(u32 itemID, u32 pos)
 {
 	DBItem DBItem;
@@ -209,27 +157,50 @@ void ObjUI::Equip(u32 itemID)
 	resInfo.Load(item.rsrcID);
 	if (resInfo.category == "armor")
 	{
-		jGameObject* body = mPlayer->FindGameObject("body");
-		jMesh* compMesh = body->FindComponent<jMesh>();
-		jImage* compImg = body->FindComponent<jImage>();
-		jShaderSkin* compshader = body->FindComponent<jShaderSkin>();
+		jGameObject* obj = mPlayer->FindGameObject("body");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
 		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
 		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
 		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "pants")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("leg");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "gloves")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("arm");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "shoes")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("foot");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+		compshader->UpdateInputResource();
 	}
 
 	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
+	DBSpecification spec;
+	spec.Load(item.spec);
 	if (stats != nullptr)
-		stats->AddEffect(item);
+		stats->AddEffect(spec);
 }
 
 void ObjUI::UnEquip(u32 itemID, u32 pos)
@@ -248,27 +219,50 @@ void ObjUI::UnEquip(u32 itemID, u32 pos)
 	playerClass.Load(player.classes);
 	if (resInfo.category == "armor")
 	{
-		jGameObject* body = mPlayer->FindGameObject("body");
-		jMesh* compMesh = body->FindComponent<jMesh>();
-		jImage* compImg = body->FindComponent<jImage>();
-		jShaderSkin* compshader = body->FindComponent<jShaderSkin>();
+		jGameObject* obj = mPlayer->FindGameObject("body");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
 		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.bodyMesh);
 		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.bodyImg);
 		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "pants")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("leg");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.legMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.legImg);
+		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "gloves")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("arm");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.armMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.armImg);
+		compshader->UpdateInputResource();
 	}
 	else if (resInfo.category == "shoes")
 	{
+		jGameObject* obj = mPlayer->FindGameObject("foot");
+		jMesh* compMesh = obj->FindComponent<jMesh>();
+		jImage* compImg = obj->FindComponent<jImage>();
+		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.footMesh);
+		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.footImg);
+		compshader->UpdateInputResource();
 	}
 
 	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
+	DBSpecification spec;
+	spec.Load(item.spec);
 	if (stats != nullptr)
-		stats->SubEffect(item);
+		stats->SubEffect(spec);
 }
 
 void ObjUI::DropItem(u32 itemID)
@@ -293,7 +287,7 @@ jView * ObjUI::CreateItemView(u32 itemID)
 	DBItemResource itemResInfo;
 	itemResInfo.Load(itemInfo.rsrcID);
 
-	jViewImage* viewbg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	jViewImage* viewbg = (jViewImage*)mUIForm->CreateView(jViewType::Image);
 	viewbg->Width = "1.0";
 	viewbg->Height = "1.0";
 	viewbg->Image.filename = "itemgrade2.png";
@@ -305,7 +299,7 @@ jView * ObjUI::CreateItemView(u32 itemID)
 	viewbg->UserData[FN_GameObject] = itemID;
 	viewbg->UserData[FN_Category] = itemResInfo.category;
 
-	jViewImage* viewfg = (jViewImage*)mUIEngine->CreateView(jViewType::Image);
+	jViewImage* viewfg = (jViewImage*)mUIForm->CreateView(jViewType::Image);
 	viewfg->Width = "1.0";
 	viewfg->Height = "1.0";
 	viewfg->Image.filename = itemResInfo.uiImg;
@@ -319,25 +313,6 @@ jView * ObjUI::CreateItemView(u32 itemID)
 
 	viewbg->AddChild(viewfg);
 	return viewbg;
-}
-
-void ObjUI::ConvertDrawParam(DrawingParams& params, VertexFormatPTC vert[4])
-{
-	vert[0].p = Vector3f(params.rect.Left(), params.rect.Top(), 0);
-	vert[1].p = Vector3f(params.rect.Left(), params.rect.Bottom(), 0);
-	vert[2].p = Vector3f(params.rect.Right(), params.rect.Top(), 0);
-	vert[3].p = Vector3f(params.rect.Right(), params.rect.Bottom(), 0);
-
-	vert[0].t = Vector2f(params.uv.Left(), params.uv.Top());
-	vert[1].t = Vector2f(params.uv.Left(), params.uv.Bottom());
-	vert[2].t = Vector2f(params.uv.Right(), params.uv.Top());
-	vert[3].t = Vector2f(params.uv.Right(), params.uv.Bottom());
-
-	Vector4f color = Vector4f(params.color.r, params.color.g, params.color.b, params.color.a) / 255.0f;
-	vert[0].c = color;
-	vert[1].c = color;
-	vert[2].c = color;
-	vert[3].c = color;
 }
 
 void ObjUI::DoClickGrid(jView* cell)
@@ -539,10 +514,10 @@ bool ObjUI::PickItem(const DBItem& itemDB)
 	return true;
 }
 
-void jEventUI::OnMouseClick(Vector2n pt, int type)
+void jEventFormInven::OnMouseClick(Vector2n pt, int type)
 {
 	ObjUI* obj = (ObjUI*)GetGameObject();
-	jView* view = mUIEngine->FindTopView(pt.x, pt.y);
+	jView* view = mForm->FindTopView(pt.x, pt.y);
 	if (view == nullptr && obj->mSelectedItem != nullptr)
 	{
 		u32 itemID = obj->mSelectedItem->UserData[FN_GameObject].val<u32>();
