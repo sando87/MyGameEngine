@@ -72,36 +72,22 @@ bool jGameObjectMgr::Initialize()
 	AddGameObject(new ObjCamera());
 	AddGameObject(new ObjTerrainMgr());
 	AddGameObject(new ObjGroundAxis());
-	//AddGameObject(new ObjCreateHeightmap());
-
-	//int idxs[] = { 44,45,46,48,49,50,51,52,53,54,55,64 };
-	//int cnt = sizeof(idxs) / sizeof(idxs[0]);
-	//for(int i = 0; i < cnt; ++i)
-	//{
-	//	string id = to_string(idxs[i]);
-	//	jGameObject* obj = new jGameObject();
-	//	obj->LoadTxt("MyObject_"+id+".txt");
-	//	obj->GetTransform().moveTo(Vector3(i * 10, 0, 0));
-	//	AddGameObject(obj);
-	//}
 	AddGameObject(new ObjHealthBars());
-	AddGameObject(new ObjPlayer());
 
+#ifdef HeightmapCaptureMode
+	AddGameObject(new ObjCreateHeightmap());
+#endif
+	
+	AddGameObject(new ObjPlayer());
 	AddGameObject(new ObjEnemy());
 	AddGameObject(new ObjUI())->SetEnable(false);
 	AddGameObject(new oFormStats())->SetEnable(false);
 	AddGameObject(new oFormMain())->SetEnable(false);
-	//AddGameObject(new ObjBomb());
 	
-
-	//ObjItem* item = new ObjItem();
-	//item->LoadProperty("item1.txt");
-	//AddGameObject(item);
-
 	//jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 2; i < 0; ++i)
+	for(int i = 0; i < 0; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
@@ -135,7 +121,7 @@ bool jGameObjectMgr::Initialize()
 		_printlog("%d tex3[%p]\n", i, parser.mContext.tex[3].addr);
 		_printlog("\n");
 
-#define SKIN
+#define TERRAIN
 #ifdef TERRAIN
 		if (pDataVS->head.crc == 132 || pDataVS->head.crc == 237 || pDataVS->head.crc == 194)
 		{

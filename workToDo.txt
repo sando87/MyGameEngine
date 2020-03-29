@@ -31,14 +31,19 @@ Skill Effect 또는 UI 추출
 - 1단계 Raw데이터 추출
 - A키 추출
 - B키 Animation데이터 저장 시작(캐릭터별로 하나씩 남겨두고 할 것)
-- 2단계 Project.sln에서 분석 후 원하는 Object들만 export(메쉬,이미지,Anim,메타정보를 분류)
+- 2단계 Project.sln에서 SKIN define 활성화 후 원하는 Object들만 export(메쉬,이미지,Anim,메타정보를 분류)
 - 3단계 Animation데이터 클립별로 분류작업 필요(직접 확인하여 clip작업 필요)
 Terrain 추출
 - 1단계 Raw데이터 추출
 - EXPORT_TERRAIN 활성화 하여 연속으로 A키를 누르면서 추출
-- 2단계 Project.sln에서 Terrain객체 번호 확인 후 export(grid별로 폴더링 분류됨)
-- 3단계 ....
-
+- 2단계 Project.sln에서 TERRAIN define 활성화하여 export(grid별로 폴더링 분류됨)
+- 3단계 junks.h HeightmapCaptureMode define 활성화, default와 terrain Pixel shader 주석 해제 필요
+- M키로 Capture하고싶은 Grid 이동, C키로 Heightmap export
+- 4단계 heightmap을 기반으로 Accessables맵 생성
+- 높이맵 파일확장자 변경(.heights), Accessables맵(.aces)
+ITEM 추출
+- 1단계 Raw데이터 추출(EXPORT_TERRAIN 해제)
+- 2단계 define ITEM 활성화 후 추출
 
 =====고려해볼만한 사항=====
 - 중복된 Vertex제거를 위한 index드로잉 방식으로 개선이 필요

@@ -8,8 +8,12 @@ bool jZMapLoader::LoadHeights(string name)
 	string filter = name + "_*.heights";
 	string fullname = jUtils::FindFile(filter);
 	chars file = jUtils::LoadFile2(fullname);
+	_warnif(!file);
 	if (!file)
+	{
+		Heights.resize(GRID_SIZE * GRID_SIZE);
 		return false;
+	}
 
 	string filename = jUtils::GetFilename(fullname);
 	strings pieces = jUtils::Split2(filename, "_");
@@ -43,10 +47,15 @@ bool jZMapLoader::LoadHeights(string name)
 
 bool jZMapLoader::LoadAccessables(string name)
 {
-	string fullname = name + ".aces";
+	string filter = name + "_*.aces";
+	string fullname = jUtils::FindFile(filter);
 	chars file = jUtils::LoadFile2(fullname);
+	_warnif(!file);
 	if (!file)
+	{
+		Accessable.resize(GRID_SIZE * GRID_SIZE);
 		return false;
+	}
 
 	int dataOff = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) + 1024;
 	int dataSize = file->size() - dataOff;

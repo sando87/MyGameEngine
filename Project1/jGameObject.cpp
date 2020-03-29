@@ -11,6 +11,7 @@
 #include "jShaderTerrain.h"
 #include "jShaderDefault.h"
 #include "jParserMeta.h"
+#include "jTypeToString.h"
 
 
 jGameObject::jGameObject(string name)
@@ -94,10 +95,13 @@ bool jGameObject::LoadTxt(string filename)
 	else if (shaderType == "default")
 	{
 		jShaderDefault* shader = new jShaderDefault();
+#ifndef HeightmapCaptureMode
 		shader->SetAlphaOn(parse.GetValue<bool>(MF_Alpha)); 
 		shader->SetDepthOn(parse.GetValue<bool>(MF_Depth)); 
-		//shader->SetAlphaOn(false); //ObjCreateHeightMap 积己矫 false
-		//shader->SetDepthOn(true); //ObjCreateHeightMap 积己矫 true
+#else
+		shader->SetAlphaOn(false);
+		shader->SetDepthOn(true);
+#endif
 		shader->SetRenderOrder(parse.GetValue<double>(MF_Order));
 		AddComponent(shader);
 	}
@@ -122,6 +126,9 @@ void jGameObject::SubChild(jGameObject * child)
 }
 void jGameObject::AddComponent(jComponent* comp)
 {
+	if (comp->GetCompName().length() <= 0)
+		comp->SetCompName(TypeToString(comp));
+
 	comp->mGameObject = this;
 	comp->mEngine = mEngine;
 	if (GetEngine().Added(this))
@@ -183,6 +190,7 @@ void jGameObject::LoadAll()
 
 void jGameObject::StartAll()
 {
+	//_echoS(GetName().c_str());
 	OnStart();
 	for (jGameObject* child : mChilds)
 		child->StartAll();
@@ -209,7 +217,11 @@ void jGameObject::GetShaderAll(vector<jShader*>& outs)
 void jGameObject::LoadComponents()
 {
 	for (jComponent* comp : mComponents)
+	{
+		//_echoS(comp->GetCompName().c_str());
 		comp->Load();
+	}
+		
 
 	for (jGameObject* child : mChilds)
 		child->LoadComponents();
@@ -218,7 +230,11 @@ void jGameObject::LoadComponents()
 void jGameObject::StartComponents()
 {
 	for (jComponent* comp : mComponents)
+	{
+		//_echoS(comp->GetCompName().c_str());
 		comp->OnStart();
+	}
+		
 
 	for (jGameObject* child : mChilds)
 		child->StartComponents();

@@ -22,10 +22,6 @@ private:
 #define CONF_Step (1)
 #define CONF_Size (240)
 
-//HeightMap 생성시 해줘야 할 작업....
-//terrain, default  pixel shader 변경 필요
-//alpha false depth true => ObjTerrain.cpp Load()함수
-
 
 ObjCreateHeightmap::ObjCreateHeightmap()
 {
@@ -94,17 +90,17 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 		string minZ = jUtils::ToString(cur.z);
 		string maxZ = jUtils::ToString(cur.w);
 		string step = jUtils::ToString(CONF_Step);
-		string filename = posX + "_" + posY + "_" + step + "_" + minZ + "_" + maxZ + ".bmp";
+		string filename = posX + "_" + posY + "_" + step + "_" + minZ + "_" + maxZ;
 		jUtils::MakeFolder(PATH_RESOURCES + string("zmap/"));
-		string fullName = PATH_RESOURCES + string("zmap/") + filename;
 		
 		Vector3 pos = Vector3(cur.x, cur.y, cur.z);
 		Vector3 size = Vector3(CONF_Size, CONF_Size, cur.w - cur.z);
 		jRect3D rt(pos, size);
 
 		//jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], 640);
-		jBitmap::Save(240, 240, 640 * 4, 4, &img[0], fullName.c_str());
-		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], fullName + ".alpha");
+		jBitmap::Save(240, 240, 640 * 4, 4, &img[0], PATH_RESOURCES + string("zmap/") + filename + string("_ref.bmp"));
+		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".heights"));
+		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".aces"));
 	}
 }
 

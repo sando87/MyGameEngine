@@ -69,6 +69,8 @@ typedef unsigned long long u64;
 #define ToU32x(key) (u32)(key)
 #define ToU32y(key) (u32)(((u64)(key) >> 32))
 
+//#define HeightmapCaptureMode
+
 
 #ifdef __cplusplus
 #define INITIALIZER(f) \

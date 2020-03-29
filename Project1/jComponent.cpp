@@ -1,6 +1,6 @@
 #include "jComponent.h"
 #include "jGameObjectMgr.h"
-
+#include "jTypeToString.h"
 
 jComponent::jComponent()
 {

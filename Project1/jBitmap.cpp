@@ -109,7 +109,7 @@ bool jBitmap::Save(const char* FileName)
 	delete[] ColorsData;
 	return false;
 }
-bool jBitmap::Save(int width, int height, int rowpitch, int byteperpixel, char* data, const char* outfilename)
+bool jBitmap::Save(int width, int height, int rowpitch, int byteperpixel, char* data, string fullname)
 {
 	_BITMAPFILEHEADER    BitmapFileHeader = {
 		0x4d42, //Bmp Mark
@@ -145,7 +145,7 @@ bool jBitmap::Save(int width, int height, int rowpitch, int byteperpixel, char* 
 		memcpy(offDesc, offSrc, rowSize);
 	}
 
-	ofstream outfile(outfilename, ios::binary);
+	ofstream outfile(fullname, ios::binary);
 	outfile.write((char*)&BitmapFileHeader, sizeof(BitmapFileHeader));
 	outfile.write((char*)&BitmapInfoHeader, sizeof(BitmapInfoHeader));
 	outfile.write((char*)ColorsData, byteperpixel * width * height);
