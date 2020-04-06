@@ -13,6 +13,7 @@
 
 ObjItem::ObjItem(u32 dbID) : mDBID(dbID), jGameObject("item")
 {
+	mHeightTerrain = 0;
 }
 
 ObjItem::~ObjItem()
@@ -44,9 +45,10 @@ void ObjItem::OnLoad()
 void ObjItem::OnStart()
 {
 	ObjTerrainMgr* terrain = GetEngine().FindGameObject<ObjTerrainMgr>();
+	_exceptif(terrain == nullptr, return);
+
 	Vector3 pos = GetTransform().getPos();
 	terrain->GetHeight(pos.x, pos.y, mHeightTerrain);
-	mHeightTerrain += 4;
 	pos.z = mHeightTerrain;
 	GetTransform().moveTo(pos);
 }
@@ -56,12 +58,20 @@ void ObjItem::OnUpdate()
 	if (mHeights.AccX < 0.3)
 	{
 		double deltaPos = mHeights.CalcVelAcc(jTime::Delta()) * jTime::Delta();
-		Vector3 pos = GetTransform().getPos();
-		pos.z += deltaPos;
-		GetTransform().rotateAxis(Vector3(0, 1, 0), 5);
-		GetTransform().moveTo(pos);
 		if (mHeights.AccX >= 0.3)
+		{
+			Vector3 pos = GetTransform().getPos();
+			pos.z = mHeightTerrain;
 			GetTransform().lookat(pos, pos + Vector3(0, 1, 0), Vector3(0, 0, 1));
+		}
+		else
+		{
+			Vector3 pos = GetTransform().getPos();
+			pos.z += deltaPos;
+			GetTransform().rotateAxis(Vector3(0, 1, 0), 20);
+			GetTransform().moveTo(pos);
+		}
+		
 	}
 }
 

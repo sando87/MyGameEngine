@@ -18,6 +18,7 @@ public:
 #define _error()			jLog::Log("error() [%s][%d]\n",__FUNCTION__,__LINE__)
 #define _warnif(p)		if(p){jLog::Log("warn() [%s][%d]\n",__FUNCTION__,__LINE__);}
 #define _errorif(p)		if(p){jLog::Log("error() [%s][%d]\n",__FUNCTION__,__LINE__);}
+#define _exceptif(p, ex)	if(p){jLog::Log("except() [%s][%d]\n",__FUNCTION__,__LINE__); ex;}
 #else
 #define printlog(...)	
 #define echoD(v)		

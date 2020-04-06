@@ -188,9 +188,6 @@
     <ClCompile Include="jParserMeta.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="jTransform.cpp">
-      <Filter>소스 파일\Math</Filter>
-    </ClCompile>
     <ClCompile Include="jInputEvent.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
@@ -259,6 +256,9 @@
     </ClCompile>
     <ClCompile Include="oFormMain.cpp">
       <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="jTransform.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -430,9 +430,6 @@
     <ClInclude Include="jParserMeta.h">
       <Filter>소스 파일\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="jTransform.h">
-      <Filter>소스 파일\Math</Filter>
-    </ClInclude>
     <ClInclude Include="jInputEvent.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
@@ -501,6 +498,9 @@
     </ClInclude>
     <ClInclude Include="oFormMain.h">
       <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="jTransform.h">
+      <Filter>소스 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -14,6 +14,11 @@ Combat Game Logic
 Effect(skill)
 UI system
 ======해야할일=======
+- terrain 추출 후 연동 시 경계부분 짤리거나 문제되는 이슈
+- 좌표계 m단위로 맞출필요
+- terrain, 캐릭터 등 사이즈 맞출필요
+- 캐릭터의 이동 공격 Navigate등 fine튜닝 필요
+- 캐릭터 및 구조물들 그림자 및 광원 효과 적용 필요
 
 =====구현해야할 모듈들=====
 Sound

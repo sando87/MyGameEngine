@@ -25,6 +25,8 @@ public:
 	void EndScene();
 	chars CaptureBuffer();
 
+	int GetScreenWidth() { return m_width; }
+	int GetScreenHeight() { return m_height; }
 	ID3D11Device* GetDevice() { return m_device; }
 	ID3D11DeviceContext* GetDeviceContext() { return m_deviceContext; }
 

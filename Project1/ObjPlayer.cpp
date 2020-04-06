@@ -85,6 +85,7 @@ void ObjPlayer::OnLoad()
 	mDBid = 1;
 	DBPlayer dbPlayer;
 	dbPlayer.Load(mDBid);
+	GetTransform().Zoom(Vector3(1.3, 1.3, 1.3));
 	GetTransform().moveTo(dbPlayer.startPos);
 
 	//AddComponent(new jInventory(mDBid));

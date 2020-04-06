@@ -3,6 +3,7 @@
 #include "jLine3D.h"
 #include "jGameObjectMgr.h"
 #include "jInputEvent.h"
+#include "jRenderer.h"
 
 class jEventCamera : public jInputEvent
 {
@@ -33,16 +34,18 @@ void ObjCamera::OnLoad()
 
 void ObjCamera::OnStart()
 {
+	int screenWidth = jRenderer::GetInst().GetScreenWidth();
+	int screenHeight = jRenderer::GetInst().GetScreenHeight();
 	mPlayer = GetEngine().FindGameObject("ObjPlayer");
-	setProjectionMatrix(640, 480, 45, 1.0, 1000.0);
-	GetTransform().lookat(Vector3(25, 25, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
+	setProjectionMatrix(screenWidth, screenHeight, 45, 1.0, 1000.0);
+	GetTransform().lookat(Vector3(35, 35, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
 }
 void ObjCamera::OnUpdate()
 {
 	if (mPlayer != nullptr)
 	{
 		Vector3 pos = mPlayer->GetTransform().getPos();
-		GetTransform().moveTo(pos + Vector3(25, 25, 50));
+		GetTransform().moveTo(pos + Vector3(35, 35, 50));
 	}
 
 	mGroundRect = UpdateGroundRect();

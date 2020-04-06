@@ -3,6 +3,7 @@
 jTransform::jTransform()
 {
 	lookat(Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
+	mSize = Vector3(1, 1, 1);
 }
 
 jTransform::~jTransform()
@@ -106,13 +107,17 @@ jTransform & jTransform::moveSmoothlyToward2D(Vector2 pos, double moveSpeed, dou
 	mPos = (pos - nextPos).dot(targetView) < 0 ? pos : nextPos; //목표 지점보다 더 이동했을 경우 예외처리
 	return (*this);
 }
+jTransform & jTransform::Zoom(Vector3 size)
+{
+	mSize = size;
+	return *this;
+}
 Matrix4 jTransform::refreshMatrix()
 {
 	Matrix4 mat;
-	mat.identity();
-	mat.setRow(0, mCross);
-	mat.setRow(1, mView);
-	mat.setRow(2, mUp);
+	mat.setRow(0, mCross * mSize.x);
+	mat.setRow(1, mView * mSize.y);
+	mat.setRow(2, mUp * mSize.z);
 	mat.setRow(3, mPos);
 	return mat;
 }

@@ -17,8 +17,6 @@ private:
 	virtual void OnKeyDown(char ch);
 };
 
-#define CONF_Width (640)
-#define CONF_Height (480)
 #define CONF_Step (1)
 #define CONF_Size (240)
 
@@ -75,7 +73,9 @@ void ObjCreateHeightmap::SetCamera(int x, int y, int _min, int _max)
 
 	ObjCamera* cam = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
 	double camHeight = cam->GetTransform().getPos().z;
-	cam->setOrthogonalMatrix(0, CONF_Width * CONF_Step, -CONF_Height * CONF_Step, 0, camHeight - _max, camHeight - _min);
+	int screenWidth = jRenderer::GetInst().GetScreenWidth();
+	int screenHeight = jRenderer::GetInst().GetScreenHeight();
+	cam->setOrthogonalMatrix(0, screenWidth * CONF_Step, -screenHeight * CONF_Step, 0, camHeight - _max, camHeight - _min);
 	cam->GetTransform().lookat(Vector3(x, y + 240, camHeight), Vector3(x, y + 240, 0), Vector3(0, 1, 0));
 }
 
@@ -97,10 +97,11 @@ void ObjCreateHeightmap::CaptureAndSaveHeightMap(int idx)
 		Vector3 size = Vector3(CONF_Size, CONF_Size, cur.w - cur.z);
 		jRect3D rt(pos, size);
 
-		//jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], 640);
-		jBitmap::Save(240, 240, 640 * 4, 4, &img[0], PATH_RESOURCES + string("zmap/") + filename + string("_ref.bmp"));
-		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".heights"));
-		jBitmap::SaveAlpha(rt, CONF_Step, 640, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".aces"));
+		int screenWidth = jRenderer::GetInst().GetScreenWidth();
+		//jZMapLoader::Save(fullName, rt, CONF_Step, (u32*)&img[0], screenWidth);
+		jBitmap::Save(240, 240, screenWidth * 4, 4, &img[0], PATH_RESOURCES + string("zmap/") + filename + string("_ref.bmp"));
+		jBitmap::SaveAlpha(rt, CONF_Step, screenWidth, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".heights"));
+		jBitmap::SaveAlpha(rt, CONF_Step, screenWidth, &img[0], PATH_RESOURCES + string("zmap/") + filename + string(".aces"));
 	}
 }
 

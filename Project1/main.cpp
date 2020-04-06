@@ -5,8 +5,8 @@
 #include "jSound.h"
 #include "jOS_APIs.h"
 
-int gScreenWidth = 640;
-int gScreenHeight = 480;
+int gScreenWidth = 1280;
+int gScreenHeight = 720;
 HINSTANCE g_hInst = NULL;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
