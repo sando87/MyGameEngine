@@ -85,7 +85,6 @@ struct DBItemResource : DBInterface
 	DBItemResource() : DBInterface("itemResources") {}
 	string mesh;
 	string img;
-	u32 equipPos;
 	string category;
 	string equipMesh;
 	string equipImg;

@@ -196,7 +196,6 @@ bool DBItemResource::Load(u32 _id)
 
 	GetDBValue(string	,mesh);
 	GetDBValue(string	,img);
-	GetDBValue(u32		,equipPos);
 	GetDBValue(string	,category);
 	GetDBValue(string	,equipMesh);
 	GetDBValue(string	,equipImg);
@@ -215,7 +214,6 @@ bool DBItemResource::Save()
 
 	SetDBValue(mesh);
 	SetDBValue(img);
-	SetDBValue(equipPos);
 	SetDBValue(category);
 	SetDBValue(equipMesh);
 	SetDBValue(equipImg);

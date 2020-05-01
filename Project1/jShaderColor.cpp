@@ -25,6 +25,7 @@ void jShaderColor::OnLoad()
 
 	LoadLayout();
 	LoadMesh();
+	LoadCompentIndicies();
 }
 
 bool jShaderColor::OnRender(ObjCamera* cam)
@@ -39,9 +40,8 @@ bool jShaderColor::OnRender(ObjCamera* cam)
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	u32 stride = sizeof(VertexFormatPC);
-	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
-	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
+	u32 vertCount = mMesh->GetVerticies().size();
+	Draw(sizeof(VertexFormatPC), prim, vertCount, mMesh->GetIndicies().size());
 	return true;
 }
 
@@ -72,23 +72,15 @@ void jShaderColor::LoadMesh()
 	mMesh->Load();
 	string key = mMesh->GetFullname();
 
-	if (!mMesh->GetStream().empty())
+	vector<VertexFormatPC> vertices;
+	vector<VertexFormat>& meshVert = mMesh->GetVerticies();
+	int cnt = meshVert.size();
+	for (int i = 0; i < cnt; ++i)
 	{
-		vector<char>& stream = mMesh->GetStream();
-		CacheCBVertex(&stream[0], stream.size(), key);
+		VertexFormatPC vertex;
+		vertex.p = meshVert[i].position;
+		vertex.c = meshVert[i].color;
+		vertices.push_back(vertex);
 	}
-	else
-	{
-		vector<VertexFormatPC> vertices;
-		vector<VertexFormat>& meshVert = mMesh->GetVerticies();
-		int cnt = meshVert.size();
-		for (int i = 0; i < cnt; ++i)
-		{
-			VertexFormatPC vertex;
-			vertex.p = meshVert[i].position;
-			vertex.c = meshVert[i].color;
-			vertices.push_back(vertex);
-		}
-		CacheCBVertex(&vertices[0], sizeof(VertexFormatPC) * vertices.size(), key);
-	}
+	CacheCBVertex(&vertices[0], sizeof(VertexFormatPC) * vertices.size(), key);
 }

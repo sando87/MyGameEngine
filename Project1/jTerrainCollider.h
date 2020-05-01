@@ -7,15 +7,18 @@ class jTerrainCollider :
 	public jComponent
 {
 public:
-	jTerrainCollider(double round);
+	jTerrainCollider();
 	virtual ~jTerrainCollider();
+
+	function<void(double height)> EventUnderTerrain;
+	double GetHeight();
+
 
 protected:
 	virtual void OnLoad();
+	virtual void OnStart();
 	virtual void OnUpdate();
 
-	double mRound;
 	ObjTerrainMgr * mTerrain;
-	Vector2 mDetectPoints[8];
 };
 

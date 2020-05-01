@@ -22,14 +22,6 @@
 #define FN_Category		"Category"
 #define FN_GameObject	"GameObject"
 
-class jEventFormInven : public jEventForm
-{
-public:
-	jEventFormInven(jUISystem *form) : jEventForm(form) {}
-private:
-	virtual void OnMouseClick(Vector2n pt, int type);
-};
-
 
 ObjUI::ObjUI()
 {
@@ -51,7 +43,24 @@ void ObjUI::OnLoad()
 
 	AddComponent(new jShaderUI(mUIForm));
 
-	AddComponent(new jEventFormInven(mUIForm));
+	jEventForm* eventForm = new jEventForm(mUIForm, 'D');
+	eventForm->EventMouseDown = [&](InputEventArgs args) {
+		if (false == GetEnable())
+			return EventResult::TransferEvent;
+
+		jView* rootView = mUIForm->GetRootView();
+		if (false == rootView->GetRectAbsolute().Contains(Point2(args.pt.x, args.pt.y)))
+		{
+			if (TryDropItem(args.pt))
+				return EventResult::StopEvent;
+			else
+				return EventResult::TransferEvent;
+		}
+
+		mUIForm->SetMouseEvent(Point2(args.pt.x, args.pt.y), true, true);
+		return EventResult::StopEvent;
+	};
+	AddComponent(eventForm);
 }
 
 void ObjUI::OnStart()
@@ -153,48 +162,48 @@ void ObjUI::Equip(u32 itemID)
 		item.Save();
 	}
 
-	DBItemResource resInfo;
-	resInfo.Load(item.rsrcID);
-	if (resInfo.category == "armor")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("body");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "pants")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("leg");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "gloves")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("arm");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "shoes")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("foot");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
-		compshader->UpdateInputResource();
-	}
+	//DBItemResource resInfo;
+	//resInfo.Load(item.rsrcID);
+	//if (resInfo.category == "armor")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("body");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "pants")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("leg");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "gloves")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("arm");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "shoes")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("foot");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + resInfo.equipMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + resInfo.equipImg);
+	//	compshader->UpdateInputResource();
+	//}
 
 	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
 	DBSpecification spec;
@@ -211,52 +220,52 @@ void ObjUI::UnEquip(u32 itemID, u32 pos)
 	item.posIndex = pos;
 	item.Save();
 
-	DBItemResource resInfo;
-	resInfo.Load(item.rsrcID);
-	DBPlayer player;
-	player.Load(mPlayer->GetID());
-	DBClasses playerClass;
-	playerClass.Load(player.classes);
-	if (resInfo.category == "armor")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("body");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.bodyMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.bodyImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "pants")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("leg");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.legMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.legImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "gloves")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("arm");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.armMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.armImg);
-		compshader->UpdateInputResource();
-	}
-	else if (resInfo.category == "shoes")
-	{
-		jGameObject* obj = mPlayer->FindGameObject("foot");
-		jMesh* compMesh = obj->FindComponent<jMesh>();
-		jImage* compImg = obj->FindComponent<jImage>();
-		jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
-		compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.footMesh);
-		compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.footImg);
-		compshader->UpdateInputResource();
-	}
+	//DBItemResource resInfo;
+	//resInfo.Load(item.rsrcID);
+	//DBPlayer player;
+	//player.Load(mPlayer->GetID());
+	//DBClasses playerClass;
+	//playerClass.Load(player.classes);
+	//if (resInfo.category == "armor")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("body");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.bodyMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.bodyImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "pants")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("leg");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.legMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.legImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "gloves")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("arm");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.armMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.armImg);
+	//	compshader->UpdateInputResource();
+	//}
+	//else if (resInfo.category == "shoes")
+	//{
+	//	jGameObject* obj = mPlayer->FindGameObject("foot");
+	//	jMesh* compMesh = obj->FindComponent<jMesh>();
+	//	jImage* compImg = obj->FindComponent<jImage>();
+	//	jShaderSkin* compshader = obj->FindComponent<jShaderSkin>();
+	//	compMesh->SetFullname(PATH_RESOURCES + string("mesh/") + playerClass.footMesh);
+	//	compImg->SetFullname(PATH_RESOURCES + string("img/") + playerClass.footImg);
+	//	compshader->UpdateInputResource();
+	//}
 
 	jHealthPoint* stats = mPlayer->FindComponent<jHealthPoint>();
 	DBSpecification spec;
@@ -514,21 +523,22 @@ bool ObjUI::PickItem(const DBItem& itemDB)
 	return true;
 }
 
-void jEventFormInven::OnMouseClick(Vector2n pt, int type)
+bool ObjUI::TryDropItem(Vector2n pt)
 {
-	ObjUI* obj = (ObjUI*)GetGameObject();
-	jView* view = mForm->FindTopView(pt.x, pt.y);
-	if (view == nullptr && obj->mSelectedItem != nullptr)
+	jView* view = mUIForm->FindTopView(pt.x, pt.y);
+	if (view == nullptr && mSelectedItem != nullptr)
 	{
-		u32 itemID = obj->mSelectedItem->UserData[FN_GameObject].val<u32>();
-		if (obj->mSelectedItem->GetParent()->GetParent() != obj->mGridView)
-			obj->UnEquip(itemID, 0);
+		u32 itemID = mSelectedItem->UserData[FN_GameObject].val<u32>();
+		if (mSelectedItem->GetParent()->GetParent() != mGridView)
+			UnEquip(itemID, 0);
 		
-		obj->DropItem(itemID);
+		DropItem(itemID);
 
-		obj->mActiveOnItem->Detach();
-		obj->mSelectedItem->Detach();
-		delete obj->mSelectedItem;
-		obj->mSelectedItem = nullptr;
+		mActiveOnItem->Detach();
+		mSelectedItem->Detach();
+		delete mSelectedItem;
+		mSelectedItem = nullptr;
+		return true;
 	}
+	return false;
 }

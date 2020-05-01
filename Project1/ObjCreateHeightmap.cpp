@@ -8,14 +8,8 @@
 #include "jZMapLoader.h"
 #include "jParserMeta.h"
 #include "jShaderHeader.h"
-#include "jInputEvent.h"
+#include "cUserInputDriven.h"
 
-class jEventHeightMap : public jInputEvent
-{
-private:
-	int mIndex = 0;
-	virtual void OnKeyDown(char ch);
-};
 
 #define CONF_Step (1)
 #define CONF_Size (240)
@@ -32,7 +26,13 @@ ObjCreateHeightmap::~ObjCreateHeightmap()
 
 void ObjCreateHeightmap::OnStart()
 {
-	AddComponent(new jEventHeightMap());
+	mCurrentGridIndex = 0;
+	cUserInputDriven* inputEvent = new cUserInputDriven();
+	inputEvent->EventKeyDown = [&](InputEventArgs args) { 
+		OnKeyDown(args.key);
+		return EventResult::TransferEvent;
+	};
+	AddComponent(inputEvent);
 	LoadBlocksInfo();
 }
 
@@ -123,54 +123,22 @@ bool ObjCreateHeightmap::FindMinMaxHeight(string fullname, Vector2& result)
 		result.x = worldPos.z + val.first->position.z;
 		result.y = worldPos.z + val.second->position.z;
 	}
-	else if(!mesh.GetStream().empty())
-	{
-		string shaderType = parse.GetValue(MF_Shader);
-		vector<char>& stream = mesh.GetStream();
-		if (shaderType == "terrain")
-		{
-			VertexFormatPT* pVert = (VertexFormatPT*)&stream[0];
-			int vertCnt = stream.size() / sizeof(VertexFormatPT);
-			vector<VertexFormatPT*> vecs;
-			for (int i = 0; i < vertCnt; ++i)
-				vecs.push_back(&pVert[i]);
-			auto val = minmax_element(vecs.begin(), vecs.end(), [](const VertexFormatPT* lhs, const VertexFormatPT* rhs) {
-				return lhs->p.z < rhs->p.z;
-			});
-			result.x = worldPos.z + (*val.first)->p.z;
-			result.y = worldPos.z + (*val.second)->p.z;
-		}
-		else if (shaderType == "default")
-		{
-			VertexFormatPTN* pVert = (VertexFormatPTN*)&stream[0];
-			int vertCnt = stream.size() / sizeof(VertexFormatPTN);
-			vector<VertexFormatPTN*> vecs;
-			for (int i = 0; i < vertCnt; ++i)
-				vecs.push_back(&pVert[i]);
-			auto val = minmax_element(vecs.begin(), vecs.end(), [](const VertexFormatPTN* lhs, const VertexFormatPTN* rhs) {
-				return lhs->p.z < rhs->p.z;
-			});
-			result.x = worldPos.z + (*val.first)->p.z;
-			result.y = worldPos.z + (*val.second)->p.z;
-		}
-	}
 
 	return true;
 }
 
-void jEventHeightMap::OnKeyDown(char ch)
+void ObjCreateHeightmap::OnKeyDown(char ch)
 {
-	ObjCreateHeightmap* obj = (ObjCreateHeightmap*)GetGameObject();
 	if (ch == 'M')
 	{
-		mIndex = (mIndex + 1) % obj->mBlocks.size();
-		Vector4n cur = obj->mBlocks[mIndex];
+		mCurrentGridIndex = (mCurrentGridIndex + 1) % mBlocks.size();
+		Vector4n cur = mBlocks[mCurrentGridIndex];
 		double min = cur.z;
 		double max = cur.w;
-		obj->SetCamera(cur.x, cur.y, min, max);
+		SetCamera(cur.x, cur.y, min, max);
 	}
 	else if (ch == 'C')
 	{
-		obj->CaptureAndSaveHeightMap(mIndex);
+		CaptureAndSaveHeightMap(mCurrentGridIndex);
 	}
 }

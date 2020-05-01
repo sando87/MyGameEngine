@@ -1,6 +1,7 @@
 #pragma once
 #include "jComponent.h"
 #include "junks.h"
+#include "jRect3D.h"
 
 struct VertexFormat
 {
@@ -10,6 +11,15 @@ struct VertexFormat
 	Vector4f color;
 	Vector4n boneIndexs;
 	Vector4f weights;
+	VertexFormat()
+	{
+		position = Vector3f();
+		texel = Vector2f();
+		normal = Vector3f(1, 1, 1);
+		color = Vector4f(1, 1, 1, 1);
+		boneIndexs = Vector4n(0, 0, 0, 0);
+		weights = Vector4f(1, 0, 0, 0);
+	}
 };
 
 enum PrimitiveMode
@@ -26,11 +36,10 @@ public:
 	jMesh(string _fullname = "");
 	virtual ~jMesh();
 
-	virtual void OnLoad();
-
 	bool LoadFile();
 	bool LoadCube(int size);
-	bool LoadRectangle(Vector2 center, Vector2 size);
+	bool LoadCubeOutline(int size);
+	bool LoadRectangle(Vector2 size);
 	bool LoadGrid(int _x, int _y, int _w, int _h, int _step);
 	bool LoadAxis(int _len);
 	bool LoadVerticies(vector<VertexFormat>& verticies, vector<u32>& indicies, string name);
@@ -38,13 +47,16 @@ public:
 
 	vector<VertexFormat>& GetVerticies() { return mVerticies; }
 	vector<u32>& GetIndicies() { return mIndicies; }
-	vector<char>& GetStream() { return mStream; }
+	jRect3D GetBox() { return mBox; }
 
 protected:
+	virtual void OnLoad();
 
 	vector<VertexFormat> mVerticies;
 	vector<u32> mIndicies;
-	vector<char> mStream;
+	jRect3D mBox;
+
+	void UpdateBox();
 
 	Property_Getter(PrimitiveMode, Primitive, PrimitiveMode::None)
 };

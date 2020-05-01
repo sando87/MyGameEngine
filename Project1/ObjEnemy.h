@@ -4,7 +4,8 @@
 class jAnimator;
 class jHealthPoint;
 class ObjTerrainMgr;
-class StateMachEnemy;
+class cMovement;
+class cColliderCylinder;
 
 class ObjEnemy :
 	public jGameObject
@@ -19,8 +20,16 @@ public:
 
 private:
 	jHealthPoint* mHP;
-	StateMachEnemy* mStateMach;
+	jAnimator* mAnim;
+	cMovement* mMovement;
+	cColliderCylinder* mCollider;
 
+	double mAccTime = 0;
+	double mNextActionTime = 0;
+
+	void DoAction();
+	void AttackObject(jGameObject* obj);
+	jGameObject* IsAroundTarget(double round);
 	void Death();
 };
 

@@ -20,7 +20,7 @@ public:
 	list<jGameObject*>& GetChilds() { return mChilds; }
 	jTransform& GetTransform();
 	jGameObjectMgr& GetEngine();
-	bool LoadTxt(string filename);
+	bool LoadTxt(string fullname);
 	void AddComponent(jComponent* comp);
 	template<typename T = jComponent> T* FindComponent();
 	template<typename T = jComponent> vector<T*> FindComponents();
@@ -69,6 +69,8 @@ inline T * jGameObject::FindComponent()
 		if (pp)
 			return pp;
 	}
+	if (nullptr != mParent)
+		return mParent->FindComponent<T>();
 	return nullptr;
 }
 

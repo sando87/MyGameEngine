@@ -239,22 +239,19 @@ void jUtils::MyCopyFile(string _from, string _to)
 {
 	jOS_APIs::MyCopyFile(_from, _to);
 }
-void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
+void jUtils::SaveToFile(string fullname, string data, bool isAttach)
 {
-	char name[260] = { 0, };
-	sprintf_s(name, "%s\\%s", path.c_str(), filename.c_str());
-
 	FILE *pFile = NULL;
 
 	if (!isAttach)
 	{
-		fopen_s(&pFile, name, "wb");
+		fopen_s(&pFile, fullname.c_str(), "wb");
 		if (pFile == NULL)
 			return;
 	}
 	else
 	{
-		fopen_s(&pFile, name, "ab");
+		fopen_s(&pFile, fullname.c_str(), "ab");
 		if (pFile == NULL)
 			return;
 	}
@@ -263,6 +260,13 @@ void jUtils::SaveToFile(string path, string filename, string data, bool isAttach
 	fwrite(data.c_str(), 1, size, pFile);
 
 	fclose(pFile);
+	return;
+}
+void jUtils::SaveToFile(string path, string filename, string data, bool isAttach)
+{
+	char name[260] = { 0, };
+	sprintf_s(name, "%s\\%s", path.c_str(), filename.c_str());
+	SaveToFile(path + "\\" + filename, data, isAttach);
 	return;
 }
 

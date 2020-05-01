@@ -10,11 +10,20 @@ class ObjTerrain :
 public:
 	ObjTerrain();
 	~ObjTerrain();
-private:
-	//void OnStart();
+
+	void Load(string filename);
+protected:
+	void OnStart();
 	//void OnUpdate();
+
+	string mMetaFullname = "";
+	jGameObject* mChild = nullptr;
+
+	bool SetTypeTxt(string value);
+	string GetTypeTxt();
+	void CreateChildCollisionBox();
+	void Show(bool isShow);
+	void OnKeyDown(char key);
 	
-public:
-	void Load(string name);
 };
 

@@ -84,6 +84,7 @@ struct Vector3
 	void        set(double x, double y, double z);
 	double       length() const;                         //
 	double       distance(const Vector3& vec) const;     // distance between two vectors
+	double       distance2D(const Vector3& vec) const;     // distance between two vectors
 	Vector3&    normalize();                            //
 	double       dot(const Vector3& vec) const;          // dot product
 	Vector3     cross(const Vector3& vec) const;        // cross product
@@ -648,6 +649,10 @@ inline double Vector3::length() const {
 
 inline double Vector3::distance(const Vector3& vec) const {
 	return sqrt((vec.x - x)*(vec.x - x) + (vec.y - y)*(vec.y - y) + (vec.z - z)*(vec.z - z));
+}
+
+inline double Vector3::distance2D(const Vector3& vec) const {
+	return sqrt((vec.x - x)*(vec.x - x) + (vec.y - y)*(vec.y - y));
 }
 
 inline Vector3& Vector3::normalize() {

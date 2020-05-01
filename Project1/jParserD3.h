@@ -59,7 +59,7 @@ struct ExpMesh
 	bool ExportMetaInfo(string path);
 	bool ExportImage(string path);
 	bool ExportMesh(string _path, bool _isRoot, int _baseIdx);
-	bool ExportMeshDump(string _path);
+	bool ExportMeshDump(string _path, float rotateDegree = 0);
 	bool Merge(ExpMesh *_mesh);
 	float GetRenderOrder();
 	void Reset()
@@ -88,7 +88,6 @@ public:
 	virtual ~jParserD3();
 
 	string mAnimFileName;
-	vector<AnimInfo> mAnims;
 	GeometryInfo mGeoInfo;
 	int mFileIndex;
 	int mCurrentAnimIndex = 0;
@@ -139,6 +138,7 @@ public:
 	bool IsTerrain();
 	unsigned long long CalcKey(float _x, float _y);
 	ExpMesh mExportInfo;
+	bool ReadyToExportInfo(string type, bool alpha, bool depth);
 	bool ExportToObjectFormat(string type, bool alpha, bool depth);
 	bool AddVertInfo(int index, int offset);
 };

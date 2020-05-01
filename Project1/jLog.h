@@ -2,17 +2,19 @@
 #define __EZ_MAP_LOG_H__
 
 #define LOG_ON
+#include <string>
 
 class jLog {
 public:
 	static void Log(const char* format, ...);
+	static void LogString(const char* format, const char* func, int lineNum, std::string log);
 };
 
 #ifdef LOG_ON
 #define _printlog(...)	jLog::Log(__VA_ARGS__)
-#define _echoN(v)		jLog::Log("echo() [%d][%d]\n",__LINE__,v)
-#define _echoF(v)		jLog::Log("echo() [%d][%f]\n",__LINE__,v)
-#define _echoS(v)		jLog::Log("echo() [%d][%s]\n",__LINE__,v)
+#define _echoN(v)		jLog::Log("echo() [%s][%d][%d]\n",__FUNCTION__,__LINE__,v)
+#define _echoF(v)		jLog::Log("echo() [%s][%d][%f]\n",__FUNCTION__,__LINE__,v)
+#define _echoS(v)		jLog::LogString("echo() [%s][%d][%s]\n",__FUNCTION__,__LINE__,v)
 #define _trace()			jLog::Log("trace() [%s][%d]\n",__FUNCTION__,__LINE__)
 #define _warn()			jLog::Log("warn() [%s][%d]\n",__FUNCTION__,__LINE__)
 #define _error()			jLog::Log("error() [%s][%d]\n",__FUNCTION__,__LINE__)

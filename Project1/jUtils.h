@@ -47,6 +47,7 @@ public:
 	static void Split(string _str, const char* _del, vector<string>& _vec);
 	static strings Split2(string _str, const char* _del);
 	static double ToDouble(string _str) { return stod(_str); }
+	static int ToInt(string _str) { return stoi(_str); }
 	template<typename Ty>
 	static string ToString(Ty _val) { return to_string(_val); }
 	static chars LoadTarga(string fullname, int& height, int& width, bool _isInvert = false);
@@ -58,6 +59,7 @@ public:
 	static void ForEachFiles2(void* _object, const char* _filter, function<bool(void*, string)> _func);
 	static string FindFile(string _fullname);
 	static void MyCopyFile(string _from, string _to);
+	static void SaveToFile(string fullname, string data, bool isAttach = false);
 	static void SaveToFile(string path, string filename, string data, bool isAttach = false);
 	static void SaveToFile(string path, string filename, char* data, int size);
 	static void SaveToFile(string fullname, char* data, int size);
@@ -81,6 +83,10 @@ public:
 	static bool ExistFile(string _fullname)
 	{
 		return _access(_fullname.c_str(), 0) == 0 ? true : false;
+	}
+	static bool DeleteFullname(string _fullname)
+	{
+		return remove(_fullname.c_str()) == 0 ? true : false;
 	}
 	static void MakeFolder(string _folderfullname)
 	{

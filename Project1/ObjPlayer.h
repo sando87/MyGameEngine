@@ -1,18 +1,15 @@
 #pragma once
 #include "jGameObject.h"
 #include "junks.h"
-#include "jAnimator.h"
+#include "cUserInputDriven.h"
 
-class jNavigator;
-class jAnimatorGroup;
-class StateMachPlayer;
 class jHealthPoint;
+class cMovement;
+class cColliderCylinder;
 
 class ObjPlayer : public jGameObject
 {
 public:
-	friend class jEventPlayer;
-	friend class StateMachPlayer;
 	ObjPlayer();
 	virtual ~ObjPlayer();
 
@@ -26,13 +23,18 @@ private:
 	jGameObject* CreateChild(string name, string meshFullname, string imgFullname, string animFullname);
 
 	u32 mDBid;
-	Vector2 mDestPos;
-	jGameObject* mTarget = nullptr;
-
 	jHealthPoint* mHP;
-	jAnimatorGroup * mAnim;
-	jNavigator * mNavi;
-	StateMachPlayer * mState;
-	list<Vector2> mWayPoints;
+	cMovement * mMovement;
+	cColliderCylinder* mCollider;
+
+	void OnMouseDown(InputEventArgs args);
+	void OnKeyDown(InputEventArgs args);
+	void CreateBombSkill(Vector3 destPos);
+
+	string GetCurrentAnimName();
+	void SetAnimation(string name);
+	void SetAnimEvent(string name, float rate, function<void(void)> handler);
+
+	void DoAction(jGameObject* target);
 };
 

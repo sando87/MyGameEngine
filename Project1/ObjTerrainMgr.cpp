@@ -33,24 +33,25 @@ void ObjTerrainMgr::OnStart()
 
 	mBlockSize = TERRAIN_SIZE;
 	mCamera = (ObjCamera *)GetEngine().FindGameObject("ObjCamera");
+	mHeights.SetStep(TERRAIN_STEP);
 	LoadTerrainGridMetaInfo();
 }
 void ObjTerrainMgr::OnUpdate()
 {
-	LoadingBlocks();
+	jRectangle2D rect = mCamera->GetGroundRect();
+	LoadingBlocks(rect);
 	
 	if (mCachedBlocks.size() > 100)
 		ClearFarBlocks(50);
 }
 
 
-void ObjTerrainMgr::LoadingBlocks()
+void ObjTerrainMgr::LoadingBlocks(jRectangle2D rect)
 {
-	jRect rect = mCamera->GetGroundRect();
-	int idxStartX = (int)(rect.Left() / mBlockSize);
-	int idxEndX =  (int)(rect.Right() / mBlockSize);
-	int idxStartY = (int)(rect.Bottom() / mBlockSize);
-	int idxEndY =  (int)(rect.Top() / mBlockSize);
+	int idxStartX = (int)(rect.GetMin().x / mBlockSize);
+	int idxEndX =  (int)(rect.GetMax().x / mBlockSize);
+	int idxStartY = (int)(rect.GetMin().y / mBlockSize);
+	int idxEndY =  (int)(rect.GetMax().y / mBlockSize);
 	for (int idxY = idxStartY; idxY <= idxEndY; ++idxY)
 	{
 		for (int idxX = idxStartX; idxX <= idxEndX; ++idxX)
@@ -64,11 +65,12 @@ void ObjTerrainMgr::LoadingBlocks()
 				string name = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE);
 
 				TerrainBlock block;
-				block.zMap = new jZMapLoader();
-				block.zMap->LoadHeights(PATH_RESOURCES + string("zmap/") + name);
-				block.zMap->LoadAccessables(PATH_RESOURCES + string("zmap/") + name);
+				block.rect.SetPosSize(Vector2(idxX * TERRAIN_SIZE, idxY * TERRAIN_SIZE), Vector2(TERRAIN_SIZE, TERRAIN_SIZE));
+				//block.zMap = new jZMapHeights();
+				//block.zMap->LoadHeights(PATH_RESOURCES + string("zmap/") + name);
+				//block.zMap->LoadAccessables(PATH_RESOURCES + string("zmap/") + name);
 
-				LoadBlock(idxX, idxY, block);
+				LoadTerrainsInBlock(idxX, idxY, block);
 
 				mCachedBlocks[key] = block;
 			}
@@ -76,7 +78,7 @@ void ObjTerrainMgr::LoadingBlocks()
 	}
 }
 
-void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
+void ObjTerrainMgr::LoadTerrainsInBlock(int idxX, int idxY, TerrainBlock& block)
 {
 	string foldername = to_string(idxX * TERRAIN_SIZE) + "_" + to_string(idxY * TERRAIN_SIZE);
 	u64 key = ToU64(idxX, idxY);
@@ -90,16 +92,52 @@ void ObjTerrainMgr::LoadBlock(int idxX, int idxY, TerrainBlock& block)
 	}
 	return;
 }
+void ObjTerrainMgr::LoadHeights(vector<Vector3>& worldPositions)
+{
+	unordered_map<u64, pair<int, double>> tmp;
+	for (Vector3 pos : worldPositions)
+	{
+		u64 key = mHeights.ToKey(pos);
+		if (tmp.find(key) == tmp.end())
+		{
+			tmp[key] = make_pair(1, pos.z);
+		}
+		else
+		{
+			tmp[key].first++;
+			tmp[key].second += pos.z;
+		}
+	}
+
+	for (auto elem : tmp)
+	{
+		u64 key = elem.first;
+		int n = elem.second.first;
+		double heightSum = elem.second.second;
+		double heightAvg = heightSum / n;
+		Vector2 gridPos = mHeights.ToPosition(key);
+		if (mHeights.IsContains(key))
+		{
+			double preHeight = mHeights[key].z;
+			mHeights[key] = Vector3(gridPos.x, gridPos.y, (heightAvg + preHeight) / 2);
+		}
+		else
+		{
+			mHeights[key] = Vector3(gridPos.x, gridPos.y, heightAvg);
+		}
+	}
+}
 void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 {
-	jRect camRect = mCamera->GetGroundRect();
+	jRectangle2D camRect = mCamera->GetGroundRect();
 	vector<pair<double,u64>> distances;
 	for (auto item : mCachedBlocks)
 	{
-		jRect rect = item.second.zMap->Rect3D.TopBottom();
-		Vector2 pt = rect.Center();
-		u64 key = ToU64(rect.Left(), rect.Bottom());
-		double dist = camRect.Center().distance(pt);
+		jRectangle2D rect = item.second.rect;
+		Vector2 pt = rect.GetCenter();
+		Vector2 min = rect.GetMin();
+		u64 key = ToU64(min.x, min.y);
+		double dist = camRect.GetCenter().distance(pt);
 		distances.push_back(pair<double, u64>(dist, key));
 	}
 	
@@ -111,8 +149,8 @@ void ObjTerrainMgr::ClearFarBlocks(int clearCount)
 	{
 		u64 key = distances[i].second;
 		TerrainBlock& block = mCachedBlocks[key];
-		jRect rect = block.zMap->Rect3D.TopBottom();
-		if (camRect.Overlapped(rect))
+		jRectangle2D rect = block.rect;
+		if (camRect.IsOverlapped(rect))
 			break;
 
 		for(jGameObject* terrain : block.terrains)
@@ -149,34 +187,53 @@ void ObjTerrainMgr::LoadTerrainGridMetaInfo()
 	});
 
 }
-bool ObjTerrainMgr::GetHeight(float worldX, float worldY, float& height)
-{
-	u64 key = CoordinateToKey(worldX, worldY);
-	if (mCachedBlocks.find(key) == mCachedBlocks.end())
-		return false;
-
-	TerrainBlock& block = mCachedBlocks[key];
-	bool ret = block.zMap->GetHeight(worldX, worldY, height);
-	return ret;
-}
 bool ObjTerrainMgr::RayCastTerrain(Vector3 pos, Vector3 dir, Vector3& outPoint)
 {
-	dir.normalize();
-	Vector3 currentPos = pos;
-	while (true)
+	double gridStep = mHeights.GetStep();
+	Vector3 startPos = pos;
+	Vector3 retPos = pos;
+	double curStep = 25.0;
+	int n = 1;
+	while (curStep > 0.1)
 	{
-		currentPos += (dir * TERRAIN_STEP);
-
+		Vector3 curPos = startPos + dir * curStep * n;
 		float height = 0;
-		GetHeight(currentPos.x, currentPos.y, height);
-		if (currentPos.z < height)
+		bool isValid = curStep >= gridStep ? GetHeightSimple(curPos, height) : GetHeight(curPos, height);
+		if (!isValid)
+			return false;
+	
+		if (curPos.z < height)
 		{
-			//클릭지점의 terrain값이 정상적일 경우 유효한 지점 출력(정상적인 루틴)
-			outPoint = currentPos;
-			return true;
+			startPos = curPos - dir * curStep;
+			retPos = (startPos + curPos) / 2;
+			curStep /= 5.0;
+			n = 1;
 		}
+		else
+			n++;
 	}
-	return false;
+	outPoint = retPos;
+	return true;
+
+	//double step = mHeights.GetStep();
+	//dir.normalize();
+	//Vector3 currentPos = pos;
+	//while (true)
+	//{
+	//	currentPos += (dir);
+	//
+	//	float height = -1000;
+	//	if (!GetHeight(currentPos, height))
+	//		break;
+	//
+	//	if (currentPos.z < height)
+	//	{
+	//		outPoint = currentPos;
+	//		outPoint.z = height;
+	//		return true;
+	//	}
+	//}
+	//return false;
 }
 
 bool ObjTerrainMgr::FindObstacle(Vector2 start, Vector2 end, Vector2 & obstaclePos, double step)
@@ -188,7 +245,7 @@ bool ObjTerrainMgr::FindObstacle(Vector2 start, Vector2 end, Vector2 & obstacleP
 	float height = 0;
 	while (curPos.distance(end) > step)
 	{
-		bool ret = GetHeight(curPos.x, curPos.y, height);
+		bool ret = GetHeight(curPos, height);
 		if (!ret)
 		{
 			obstaclePos = curPos;
@@ -198,5 +255,36 @@ bool ObjTerrainMgr::FindObstacle(Vector2 start, Vector2 end, Vector2 & obstacleP
 	}
 	obstaclePos = end;
 	return false;
+}
+
+bool ObjTerrainMgr::GetHeight(Vector2 worldPos, float & outHeight)
+{
+	u64 key = CoordinateToKey(worldPos.x, worldPos.y);
+	//_exceptif(mCachedBlocks.find(key) == mCachedBlocks.end(), return false);
+	//_exceptif(!mHeights.IsContains(worldPos), return false);
+
+	//Interpolate 4 edge heights of rectangle.
+	double step = mHeights.GetStep();
+	Vector3 lb = mHeights[Vector2(worldPos.x - step / 2, worldPos.y - step / 2)];
+	Vector3 lt = mHeights[Vector2(lb.x, lb.y + step)];
+	Vector3 rb = mHeights[Vector2(lb.x + step, lb.y)];
+	Vector3 rt = mHeights[Vector2(lb.x + step, lb.y + step)];
+	double areaTotal = step * step;
+	double rateLB = (rt.x - worldPos.x) * (rt.y - worldPos.y) / areaTotal;
+	double rateLT = (rb.x - worldPos.x) * (worldPos.y - rb.y) / areaTotal;
+	double rateRB = (worldPos.x - lt.x) * (lt.y - worldPos.y) / areaTotal;
+	double rateRT = (worldPos.x - lb.x) * (worldPos.y - lb.y) / areaTotal;
+	outHeight = lb.z * rateLB + lt.z * rateLT + rb.z * rateRB + rt.z * rateRT;
+	return true;
+}
+
+bool ObjTerrainMgr::GetHeightSimple(Vector2 worldPos, float & outHeight)
+{
+	u64 key = CoordinateToKey(worldPos.x, worldPos.y);
+	//_exceptif(mCachedBlocks.find(key) == mCachedBlocks.end(), return false);
+	//_exceptif(!mHeights.IsContains(worldPos), return false);
+	Vector3 pos = mHeights[worldPos];
+	outHeight = pos.z;
+	return true;
 }
 

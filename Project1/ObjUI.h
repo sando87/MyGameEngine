@@ -10,14 +10,12 @@ class jViewGrid;
 class jView;
 class jViewImage;
 class ObjItem;
-class jEventFormInven;
 class ObjPlayer;
 struct DBItem;
 
 class ObjUI :
 	public jGameObject
 {
-	friend class jEventFormInven;
 public:
 	ObjUI();
 	virtual ~ObjUI();
@@ -51,5 +49,7 @@ protected:
 	void DoClickSlot(jView* slot);
 	void DoHightlight(jView* hoveredView);
 	void Reset();
+
+	bool TryDropItem(Vector2n pt);
 };
 

@@ -21,9 +21,9 @@ void jCrash::OnLoad()
 void jCrash::OnUpdate()
 {
 	jRect3D rect = GetRect();
-	jRect rect2D = rect.TopBottom().ClipMinus();
+	//jRect rect2D = rect.TopBottom().ClipMinus();
 	vector<pair<u64,jCrashes>> grids;
-	GetGrids(rect2D, grids);
+	//GetGrids(rect2D, grids);
 	for (auto grid : grids)
 	{
 		u64 key = grid.first;
@@ -84,21 +84,21 @@ CrashInfo jCrash::CheckCrashed(jCrash * left, jCrash * right)
 	return ret;
 }
 
-void jCrash::GetGrids(jRect rect, vector<pair<u64, jCrashes>>& grids)
-{
-	int leftIdx = rect.Left() / CrashGridStep;
-	int rightIdx = rect.Right() / CrashGridStep;
-	int btnIdx = rect.Bottom() / CrashGridStep;
-	int topIdx = rect.Top() / CrashGridStep;
-	for(int y = btnIdx; y <= topIdx; ++y)
-		for (int x = leftIdx; x <= rightIdx; ++x)
-		{
-			jCrashes crashes;
-			u64 key = ToU64(x, y);
-			auto range = mCrashGrid.equal_range(key);
-			for (auto iter = range.first; iter != range.second; ++iter)
-				crashes->push_back(iter->second);
-
-			grids.push_back(make_pair(key, crashes));
-		}
-}
+//void jCrash::GetGrids(jRect rect, vector<pair<u64, jCrashes>>& grids)
+//{
+//	int leftIdx = rect.Left() / CrashGridStep;
+//	int rightIdx = rect.Right() / CrashGridStep;
+//	int btnIdx = rect.Bottom() / CrashGridStep;
+//	int topIdx = rect.Top() / CrashGridStep;
+//	for(int y = btnIdx; y <= topIdx; ++y)
+//		for (int x = leftIdx; x <= rightIdx; ++x)
+//		{
+//			jCrashes crashes;
+//			u64 key = ToU64(x, y);
+//			auto range = mCrashGrid.equal_range(key);
+//			for (auto iter = range.first; iter != range.second; ++iter)
+//				crashes->push_back(iter->second);
+//
+//			grids.push_back(make_pair(key, crashes));
+//		}
+//}

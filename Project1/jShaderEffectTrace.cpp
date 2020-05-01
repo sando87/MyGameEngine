@@ -49,9 +49,8 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	u32 stride = sizeof(VertexFormatPTI);
-	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
-	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
+	u32 vertCount = mMesh->GetVerticies().size();
+	Draw(sizeof(VertexFormatPTI), prim, vertCount, mMesh->GetIndicies().size());
 	return true;
 }
 
@@ -92,26 +91,18 @@ void jShaderEffectTrace::LoadMesh()
 	mesh->Load();
 	string key = mesh->GetFullname();
 
-	if (!mesh->GetStream().empty())
+	vector<VertexFormatPTI> vertices;
+	vector<VertexFormat>& meshVert = mesh->GetVerticies();
+	int cnt = meshVert.size();
+	for (int i = 0; i < cnt; ++i)
 	{
-		vector<char>& stream = mesh->GetStream();
-		CacheCBVertex(&stream[0], stream.size(), key);
+		VertexFormatPTI vertex;
+		vertex.p = meshVert[i].position;
+		vertex.t = meshVert[i].texel;
+		vertex.i = meshVert[i].boneIndexs;
+		vertices.push_back(vertex);
 	}
-	else
-	{
-		vector<VertexFormatPTI> vertices;
-		vector<VertexFormat>& meshVert = mesh->GetVerticies();
-		int cnt = meshVert.size();
-		for (int i = 0; i < cnt; ++i)
-		{
-			VertexFormatPTI vertex;
-			vertex.p = meshVert[i].position;
-			vertex.t = meshVert[i].texel;
-			vertex.i = meshVert[i].boneIndexs;
-			vertices.push_back(vertex);
-		}
-		CacheCBVertex(&vertices[0], sizeof(VertexFormatPTI) * vertices.size(), key);
-	}
+	CacheCBVertex(&vertices[0], sizeof(VertexFormatPTI) * vertices.size(), key);
 }
 
 void jShaderEffectTrace::CacheCBufferBillboards()

@@ -53,6 +53,11 @@ jTransform& jTransform::moveTo(Vector3 pos)
 	//refreshMatrix();
 	return (*this);
 }
+jTransform & jTransform::setHeight(double height)
+{
+	mPos.z = height;
+	return (*this);
+}
 jTransform& jTransform::goTo(Vector3 dir)
 {
 	mPos = mPos + dir;
@@ -86,25 +91,32 @@ jTransform& jTransform::rotateAxis(Vector3 groundPt, Vector3 axisUP, double degr
 }
 jTransform & jTransform::moveSmoothlyToward2D(Vector2 pos, double moveSpeed, double dt)
 {
-	double rotateAngleSpeed = DegToRad(20); // 10 degree per frame speed
-	Vector2 targetView = pos - mPos;
-	targetView.normalize();
-	Vector2 curView = mView;
-	curView.normalize();
-	bool sameLook = curView.dot(targetView) > 0 ? true : false;
-	double cross = curView.cross(targetView);
-	if (sameLook && abs(cross) < sin(rotateAngleSpeed)) // 목표 방향보다 더 회전했을 경우 예외처리
-		curView = targetView;
+	double distPerFrame = moveSpeed * dt;
+	Vector2 viewToDest = pos - mPos;
+	double distFromDest = viewToDest.length();
+	viewToDest.normalize();
+	if (distFromDest < distPerFrame)
+		mPos = pos;
 	else
-		curView.rotate(cross > 0 ? rotateAngleSpeed : -rotateAngleSpeed);
-	
-	mView = Vector3(curView);
-	mUp = Vector3(0, 0, 1);
-	mCross = mView.cross(mUp);
-	mCross.normalize();
-	Vector2 curPos = mPos;
-	Vector2 nextPos = curPos + (targetView * moveSpeed * dt);
-	mPos = (pos - nextPos).dot(targetView) < 0 ? pos : nextPos; //목표 지점보다 더 이동했을 경우 예외처리
+	{
+		mPos = Vector2(mPos) + (viewToDest * distPerFrame);
+
+		double rotateAngleSpeed = DegToRad(20); // 10 degree per frame speed
+		Vector2 curView = mView;
+		curView.normalize();
+		bool sameLook = curView.dot(viewToDest) > 0 ? true : false;
+		double cross = curView.cross(viewToDest);
+		if (sameLook && abs(cross) < sin(rotateAngleSpeed)) // 목표 방향보다 더 회전했을 경우 예외처리
+			curView = viewToDest;
+		else
+			curView.rotate(cross > 0 ? rotateAngleSpeed : -rotateAngleSpeed);
+
+		curView.normalize();
+		mView = Vector3(curView);
+		mUp = Vector3(0, 0, 1);
+		mCross = mView.cross(mUp);
+	}
+
 	return (*this);
 }
 jTransform & jTransform::Zoom(Vector3 size)

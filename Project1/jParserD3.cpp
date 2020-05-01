@@ -2,6 +2,7 @@
 #include "jRenderer.h"
 #include "jShaderHeader.h"
 #include "jParserMeta.h"
+#include "jMesh.h"
 
 #define REV_V(v) ((v))
 #define RES_ID(crc, size) (((size)<<8) | (crc))
@@ -243,6 +244,7 @@ void jParserD3::InitFuncConvTex()
 	case RES_ID(0xc1, 0x1518):
 	case RES_ID(0x85, 0x150c):
 	case RES_ID(0xe3, 0x11dc):
+	case RES_ID(0x44, 0x2254):
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Matrix4 matTex = mCBMain.matTex[_idx];
 			Vector2f tmp = CalcTexCoord(_p);
@@ -465,6 +467,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x42, 0xf3c):
 	case RES_ID(0xb3, 0x358):
 	case RES_ID(0xe5, 0x1310): //41
+	case RES_ID(0x84, 0x1308):
 		mTextures.push_back(0);
 		break;
 	case RES_ID(0xe3, 0x10e8): //126
@@ -589,40 +592,24 @@ bool jParserD3::IsValid()
 
 void jParserD3::InitAnims()
 {
-	stringstream ss;
-	ss << mFileIndex << "_" << mContext.tex[0].addr << "_c";
+	string filter = PATH_PARSER_DATA + jUtils::ToString(mFileIndex) + "_*_c.dump";
+	string animFilename = jUtils::FindFile(filter);
+
+	if (animFilename.length() == 0)
+		return;
 
 	int fileSize = 0;
+	string fullname = PATH_PARSER_DATA + animFilename;
 	MyRes_CreateAnimations* pData = nullptr;
-	jUtils::LoadFile(PATH_PARSER_DATA + ss.str() + ".dump", &fileSize, (char**)&pData);
+	jUtils::LoadFile(fullname.c_str(), &fileSize, (char**)&pData);
 	
 	if (pData)
 	{
-		mAnimFileName = ss.str();
-		int i = 0;
-		while (pData->offset[i] != 0)
-		{
-			int off = pData->offset[i];
-			int count = pData->counts[i];
-			Matrix3x4f* pMat = (Matrix3x4f*)((char*)pData + off);
-			mAnims.push_back(AnimInfo());
-			for (int j = 0; j < count; ++j)
-			{
-				AnimInfo& info = mAnims.back();
-				
-				vector<Matrix4f> key;
-				for (int k = 0; k < 45; ++k)
-					key.push_back(pMat[k + j * 45].ToMat());
-
-				info.keys.push_back(key);
-
-				Parser3DAnimKey animKey;
-				memcpy(&animKey, &pMat[j * 45], sizeof(Parser3DAnimKey));
-				mAnimKeys.push_back(animKey);
-			}
-			
-			i++;
-		}
+		mAnimFileName = animFilename;
+		int keyCount = pData->counts[0];
+		Parser3DAnimKey* keys = (Parser3DAnimKey*)(pData->data);
+		for (int i = 0; i < keyCount; ++i)
+			mAnimKeys.push_back(keys[i]);
 	}
 	
 	free(pData);
@@ -792,7 +779,7 @@ bool jParserD3::SetContantBufferBones()
 		_warn();
 		return false;
 	}
-	memcpy(mappedRes.pData, &mAnimKeys[mCurrentAnimIndex], sizeof(Parser3DAnimKey));
+	memcpy(mappedRes.pData, mAnimKeys[mCurrentAnimIndex].bones, sizeof(Matrix3x4f) * 45);
 	pDevContext->Unmap(pConstBuf, cb.subRes);
 
 	pDevContext->VSSetConstantBuffers(1, 1, &pConstBuf);
@@ -1129,7 +1116,7 @@ unsigned long long jParserD3::CalcKey(float _x, float _y)
 	memcpy((char*)&key + 4, &_y, 4);
 	return key;
 }
-bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
+bool jParserD3::ReadyToExportInfo(string type, bool alpha, bool depth)
 {
 	mExportInfo.Reset();
 	char* pIndiciesData = GetIndiciesData();
@@ -1171,7 +1158,6 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 	int cntTextures = mTextures.size();
 	for (int i = 0; i < cntTextures; ++i)
 	{
-		int idx = mTextures[i];
 		stringstream ss;
 		void* pTexAddr = GetTexResAddr(i);
 		//ss << "*_" << pTexAddr << "_*.tga";
@@ -1184,16 +1170,16 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 		mExportInfo.metaInfo.vectors.push_back(Vector3f(mat[4], mat[5], mat[7]));
 	}
 
-	if (mAnims.size() > 0)
+	if (mAnimKeys.size() > 0)
 	{
-		mExportInfo.animName = mAnimFileName + ".csv";
-		for (int i = 0; i < mAnims[0].keys.size(); ++i)
+		mExportInfo.animName = mAnimFileName;
+		for (int i = 0; i < mAnimKeys.size(); ++i)
 		{
 			string line = "";
-			int cnt = mAnims[0].keys[i].size();
+			int cnt = sizeof(mAnimKeys[i].bones) / sizeof(mAnimKeys[i].bones[0]); //45 fixed
 			for (int j = 0; j < cnt; ++j)
 			{
-				Matrix4f& mat = mAnims[0].keys[i][j];
+				Matrix4f mat = mAnimKeys[i].bones[j].ToMat();
 				line += jUtils::MatToCSV(&mat) + ",";
 			}
 			mExportInfo.animationInfo.push_back(line);
@@ -1201,6 +1187,12 @@ bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
 	}
 	else
 		mExportInfo.animName = "NoAnim";
+
+	return true;
+}
+bool jParserD3::ExportToObjectFormat(string type, bool alpha, bool depth)
+{
+	ReadyToExportInfo(type, alpha, depth);
 
 	mExportInfo.ExportAnimInfo(PATH_RESOURCES + string("anim/"));
 	mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
@@ -1311,52 +1303,24 @@ bool ExpMesh::ExportMesh(string _path, bool _isRoot, int _baseIdx)
 
 	return true;
 }
-bool ExpMesh::ExportMeshDump(string _path)
+bool ExpMesh::ExportMeshDump(string _path, float rotateDegree)
 {
-	int size = 0;
-	char* data = nullptr;
-	if (type == "terrain")
+	float rad = DegToRad(rotateDegree);
+	int cnt = vert.size();
+	int size = sizeof(VertexFormat) * cnt;
+	char* data = (char*)malloc(size);
+	memset(data, 0x00, size);
+	VertexFormat* pVert = (VertexFormat*)data;
+	for (int i = 0; i < cnt; ++i)
 	{
-		int cnt = vert.size();
-		size = sizeof(VertexFormatPT) * cnt;
-		data = (char*)malloc(size);
-		memset(data, 0x00, size);
-		VertexFormatPT* pVert = (VertexFormatPT*)data;
-		for (int i = 0; i < cnt; ++i)
-		{
-			pVert[i].p = vert[i].p;
-			pVert[i].t = vert[i].t;
-		}
-	}
-	else if (type == "skin")
-	{
-		int cnt = vert.size();
-		size = sizeof(VertexFormatPTNIW) * cnt;
-		data = (char*)malloc(size);
-		memset(data, 0x00, size);
-		VertexFormatPTNIW* pVert = (VertexFormatPTNIW*)data;
-		for (int i = 0; i < cnt; ++i)
-		{
-			pVert[i].p = vert[i].p;
-			pVert[i].t = vert[i].t;
-			pVert[i].n = vert[i].n;
-			pVert[i].i = vert[i].i;
-			pVert[i].w = vert[i].w;
-		}
-	}
-	else if (type == "default")
-	{
-		int cnt = vert.size();
-		size = sizeof(VertexFormatPTN) * cnt;
-		data = (char*)malloc(size);
-		memset(data, 0x00, size);
-		VertexFormatPTN* pVert = (VertexFormatPTN*)data;
-		for (int i = 0; i < cnt; ++i)
-		{
-			pVert[i].p = vert[i].p;
-			pVert[i].t = vert[i].t;
-			pVert[i].n = vert[i].n;
-		}
+		double rotX = vert[i].p.x * cos(rad) + vert[i].p.y * sin(rad);
+		double rotY = -vert[i].p.x * sin(rad) + vert[i].p.y * cos(rad);
+		pVert[i].position = Vector3f(rotX, rotY, vert[i].p.z);
+		pVert[i].texel = vert[i].t;
+		pVert[i].normal = vert[i].n;
+		pVert[i].color = Vector4f(1,1,1,1);
+		pVert[i].boneIndexs = vert[i].i;
+		pVert[i].weights = vert[i].w;
 	}
 
 	jUtils::SaveToFile(_path, objname, data, size);
@@ -1397,6 +1361,7 @@ bool ExpMesh::ExportMetaInfo(string path)
 	jParserMeta meta;
 	meta.AddValue(MF_Mesh, objname);
 	meta.AddValue(MF_Shader, type);
+	meta.AddValue(MF_Type, type == "terrain" ? "heightmap" : "collider");
 	meta.AddValue(MF_Alpha, alpha ? "TRUE" : "FALSE");
 	meta.AddValue(MF_Depth, depth ? "TRUE" : "FALSE");
 	meta.AddValue(MF_WorldPos, jUtils::ToString(metaInfo.worldPosition.x) + " " + jUtils::ToString(metaInfo.worldPosition.y) + " " + jUtils::ToString(metaInfo.worldPosition.z));

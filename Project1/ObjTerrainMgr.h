@@ -1,20 +1,22 @@
 #pragma once
 #include "jGameObject.h"
-#include "jRect3D.h"
+#include "jRectangle2D.h"
+#include "jGridContainer.h"
 
-class jZMapLoader;
 class ObjCamera;
 
 struct TerrainBlock
 {
 	vector<jGameObject*> terrains;
-	jZMapLoader* zMap;
+	jRectangle2D rect;
+	//jZMapLoader* zMap;
 };
 
 class ObjTerrainMgr :
 	public jGameObject
 {
 public:
+	friend class cHeightMap;
 	ObjTerrainMgr();
 	virtual ~ObjTerrainMgr();
 
@@ -25,13 +27,15 @@ private:
 	
 	unordered_map<uint64_t, vector<string>*> mBlockResourcesAll;
 	unordered_map<uint64_t, TerrainBlock> mCachedBlocks;
+	jGridContainer<Vector3> mHeights;
 	ObjCamera* mCamera;
 	int mBlockSize;
 
 	void LoadTerrainGridMetaInfo();
-	void LoadingBlocks();
+	void LoadingBlocks(jRectangle2D rect);
 	void ClearFarBlocks(int clearCount);
-	void LoadBlock(int idxX, int idxY, TerrainBlock& block);
+	void LoadTerrainsInBlock(int idxX, int idxY, TerrainBlock& block);
+	void LoadHeights(vector<Vector3>& worldPositions);
 	u64 CoordinateToKey(float x, float y)
 	{
 		int nx = (int)(x / mBlockSize);
@@ -43,6 +47,7 @@ private:
 public:
 	bool RayCastTerrain(Vector3 pos, Vector3 dir, Vector3& outPoint);
 	bool FindObstacle(Vector2 start, Vector2 end, Vector2& obstaclePos, double step);
-	bool GetHeight(float worldX, float worldY, float& height);
+	bool GetHeight(Vector2 worldPos, float& outHeight);
+	bool GetHeightSimple(Vector2 worldPos, float& outHeight);
 };
 

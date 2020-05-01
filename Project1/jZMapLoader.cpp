@@ -70,7 +70,7 @@ bool jZMapLoader::LoadAccessables(string name)
 
 bool jZMapLoader::GetHeight(float worldX, float worldY, float& outHeight)
 {
-	if (!Rect3D.TopBottom().Contains(Vector2(worldX, worldY)))
+	if (!Rect3D.Top().Contains(Vector2(worldX, worldY)))
 		return false;
 
 	float localX = worldX - Rect3D.Min().x;
@@ -118,3 +118,4 @@ bool jZMapLoader::Save(string fullname, jRect3D rt, int step, u32 * pixels, int 
 	free(outbuf);
 	return true;
 }
+

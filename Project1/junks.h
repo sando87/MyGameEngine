@@ -25,6 +25,7 @@
 #include <io.h>
 #include <time.h>
 #include <direct.h>
+#include <float.h>
 
 using namespace std;
 
@@ -54,6 +55,9 @@ public:	 void Set##Name(type val) { m##Name = val; }
 #define DegToRad(deg) ((deg)*jPI/180.0)
 #define RadToDeg(rad) ((rad)*180.0/jPI)
 #define IsOutofOne(x) ((0.9999<(x) && (x)<1.0001) ? false : true)
+
+#define MeterToWorldUnit(a) ((a)*5)
+#define WorldToMeterUnit(a) ((a)*5)
 
 #define PATH_RESOURCES "./res/"
 

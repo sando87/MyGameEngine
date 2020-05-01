@@ -1,3 +1,4 @@
+Player 이동 Navi 테스트
 =======구현한 모듈들=======
 Engine Architecture
 Render(shaders)
@@ -75,6 +76,9 @@ OnLoad of jComponent //참조는 가능하나 로딩된 데이터 참조는 불가능
 OnStart of jGameObject //참조도 데이터도 접근 가능
 OnUpdate of jGameObject
 
+oDriver - cDriven
+if(false == val) // if(val = false)의 실수 방지를 위함
+
 class멤버함수
 - m변수명
 
@@ -87,3 +91,4 @@ class멤버함수
 - 추상적인 개념으로 봐서 선형성일 경우 binarySearch를 적용할 수 있는 역량
 - 람다 , 함수포인터 차이??
 - EventHandling방식 구현 경험??
+- 아스키코드, 유니코드, utf-8 차이 왜??

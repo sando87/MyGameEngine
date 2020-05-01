@@ -27,7 +27,7 @@ void oFormMain::OnLoad()
 
 	AddComponent(new jShaderUI(mForm));
 
-	AddComponent(new jEventForm(mForm));
+	AddComponent(new jEventForm(mForm, 'S'));
 }
 
 void oFormMain::OnStart()

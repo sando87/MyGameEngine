@@ -29,15 +29,32 @@ void jMesh::OnLoad()
 
 	if (ret != nullptr)
 	{
-		mStream = ret->mStream;
 		mPrimitive = ret->mPrimitive;
 		mVerticies = ret->mVerticies;
 		mIndicies = ret->mIndicies;
+		mBox = ret->mBox;
 	}
+}
+void jMesh::UpdateBox()
+{
+	Vector3 minPos(1000, 1000, 1000);
+	Vector3 maxPos(-1000, -1000, -1000);
+	for (VertexFormat& vert : mVerticies)
+	{
+		minPos.x = min((double)vert.position.x, minPos.x);
+		minPos.y = min((double)vert.position.y, minPos.y);
+		minPos.z = min((double)vert.position.z, minPos.z);
+		maxPos.x = max((double)vert.position.x, maxPos.x);
+		maxPos.y = max((double)vert.position.y, maxPos.y);
+		maxPos.z = max((double)vert.position.z, maxPos.z);
+	}
+	mBox = jRect3D(minPos, maxPos - minPos);
 }
 bool jMesh::LoadFile()
 {
 	string fullname = GetFullname();
+	_exceptif(false == jUtils::ExistFile(fullname), _echoS(fullname); return false;);
+
 	jLoader data;
 	if (jUtils::GetFileExtension(fullname) == "obj")
 	{
@@ -50,8 +67,12 @@ bool jMesh::LoadFile()
 	else if (jUtils::GetFileExtension(fullname) == "dump")
 	{
 		chars buf = jUtils::LoadFile2(fullname);
-		mStream = *buf;
+		_warnif(buf->size() % sizeof(VertexFormat) != 0);
+		int cnt = buf->size() / sizeof(VertexFormat);
+		mVerticies.resize(cnt);
+		memcpy(&mVerticies[0], &buf[0], buf->size());
 		mPrimitive = PrimitiveMode::TriangleList;
+		UpdateBox();
 		return true;
 	}
 
@@ -79,19 +100,21 @@ bool jMesh::LoadFile()
 	}
 
 	mPrimitive = PrimitiveMode::TriangleList;
+	UpdateBox();
 	return true;
 }
 bool jMesh::LoadCube(int size)
 {
+	double halfSize = size * 0.5;
 	mVerticies.resize(8);
-	mVerticies[0].position = Vector3(0, size, 0);
-	mVerticies[1].position = Vector3(size, size, 0);
-	mVerticies[2].position = Vector3(0, size, size);
-	mVerticies[3].position = Vector3(size, size, size);
-	mVerticies[4].position = Vector3(0, 0, 0);
-	mVerticies[5].position = Vector3(size, 0, 0);
-	mVerticies[6].position = Vector3(0, 0, size);
-	mVerticies[7].position = Vector3(size, 0, size);
+	mVerticies[0].position = Vector3(-halfSize,	halfSize,	-halfSize);
+	mVerticies[1].position = Vector3(halfSize,	halfSize,	-halfSize);
+	mVerticies[2].position = Vector3(-halfSize,	halfSize,	halfSize);
+	mVerticies[3].position = Vector3(halfSize,	halfSize,	halfSize);
+	mVerticies[4].position = Vector3(-halfSize,	-halfSize,	-halfSize);
+	mVerticies[5].position = Vector3(halfSize,	-halfSize,	-halfSize);
+	mVerticies[6].position = Vector3(-halfSize,	-halfSize,	halfSize);
+	mVerticies[7].position = Vector3(halfSize,	-halfSize,	halfSize);
 
 	mVerticies[0].color = Vector4f(1, 0, 0, 1);
 	mVerticies[1].color = Vector4f(0, 1, 0, 1);
@@ -119,9 +142,61 @@ bool jMesh::LoadCube(int size)
 	mIndicies[idx++] = 5;	mIndicies[idx++] = 0;	mIndicies[idx++] = 1;
 
 	mPrimitive = PrimitiveMode::TriangleList;
+	SetFullname("Cube" + jUtils::ToString(size));
+	UpdateBox();
+	SetLoaded(true);
 	return true;
 }
-bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
+bool jMesh::LoadCubeOutline(int size)
+{
+	double halfSize = size * 0.5;
+	mVerticies.resize(8);
+	mVerticies[0].position = Vector3(-halfSize,	halfSize,	-halfSize);
+	mVerticies[1].position = Vector3(halfSize,	halfSize,	-halfSize);
+	mVerticies[2].position = Vector3(-halfSize,	halfSize,	halfSize);
+	mVerticies[3].position = Vector3(halfSize,	halfSize,	halfSize);
+	mVerticies[4].position = Vector3(-halfSize,	-halfSize,	-halfSize);
+	mVerticies[5].position = Vector3(halfSize,	-halfSize,	-halfSize);
+	mVerticies[6].position = Vector3(-halfSize,	-halfSize,	halfSize);
+	mVerticies[7].position = Vector3(halfSize,	-halfSize,	halfSize);
+
+	mVerticies[0].color = Vector4f(0, 1, 0, 1);
+	mVerticies[1].color = Vector4f(0, 1, 0, 1);
+	mVerticies[2].color = Vector4f(0, 1, 0, 1);
+	mVerticies[3].color = Vector4f(0, 1, 0, 1);
+	mVerticies[4].color = Vector4f(0, 1, 0, 1);
+	mVerticies[5].color = Vector4f(0, 1, 0, 1);
+	mVerticies[6].color = Vector4f(0, 1, 0, 1);
+	mVerticies[7].color = Vector4f(0, 1, 0, 1);
+
+	mIndicies.resize(24);
+
+	int idx = 0;
+	//back
+	mIndicies[idx++] = 0; mIndicies[idx++] = 1;
+	mIndicies[idx++] = 1; mIndicies[idx++] = 3;
+	mIndicies[idx++] = 3; mIndicies[idx++] = 2;
+	mIndicies[idx++] = 2; mIndicies[idx++] = 0;
+
+	//front
+	mIndicies[idx++] = 4; mIndicies[idx++] = 5;
+	mIndicies[idx++] = 5; mIndicies[idx++] = 7;
+	mIndicies[idx++] = 7; mIndicies[idx++] = 6;
+	mIndicies[idx++] = 6; mIndicies[idx++] = 4;
+
+	//side
+	mIndicies[idx++] = 0; mIndicies[idx++] = 4;
+	mIndicies[idx++] = 1; mIndicies[idx++] = 5;
+	mIndicies[idx++] = 2; mIndicies[idx++] = 6;
+	mIndicies[idx++] = 3; mIndicies[idx++] = 7;
+
+	mPrimitive = PrimitiveMode::LineList;
+	SetFullname("CubeOutline" + jUtils::ToString(size));
+	UpdateBox();
+	SetLoaded(true);
+	return true;
+}
+bool jMesh::LoadRectangle(Vector2 size)
 {
 	mVerticies.resize(4);
 	mVerticies[0].position = Vector3(-size.x * 0.5, 0, -size.y * 0.5);
@@ -135,7 +210,7 @@ bool jMesh::LoadRectangle(Vector2 center, Vector2 size)
 	mVerticies[3].texel = Vector2f(1, 0);
 
 	mPrimitive = PrimitiveMode::TriangleStrip;
-	SetFullname("Rectangle");
+	SetFullname("Rectangle" + jUtils::ToString(size.length()));
 	SetLoaded(true);
 	return true;
 }
@@ -182,6 +257,9 @@ bool jMesh::LoadGrid(int _x, int _y, int _w, int _h, int _step)
 	}
 
 	mPrimitive = PrimitiveMode::LineList;
+	SetFullname("Grid");
+	UpdateBox();
+	SetLoaded(true);
 	return true;
 }
 bool jMesh::LoadAxis(int _len)
@@ -279,19 +357,21 @@ bool jMesh::LoadAxis(int _len)
 	}
 
 	mPrimitive = PrimitiveMode::LineList;
+	SetFullname("Grid");
+	UpdateBox();
+	SetLoaded(true);
 
 	return true;
 }
 
 bool jMesh::LoadVerticies(vector<VertexFormat>& verticies, vector<u32>& indicies, string name)
 {
-	mStream.clear();
-
 	mIndicies = indicies;
 	mVerticies = verticies;
 
 	mPrimitive = mIndicies.empty() ? PrimitiveMode::TriangleStrip : PrimitiveMode::TriangleList;
 	SetFullname(name);
+	UpdateBox();
 	SetLoaded(true);
 	return true;
 }
@@ -299,8 +379,8 @@ bool jMesh::LoadVerticies(vector<VertexFormat>& verticies, vector<u32>& indicies
 void jMesh::Reset()
 {
 	SetFullname("");
+	mBox = jRect3D();
 	mVerticies.clear();
 	mIndicies.clear();
-	mStream.clear();
 	mPrimitive = PrimitiveMode::None;
 }

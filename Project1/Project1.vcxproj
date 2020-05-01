@@ -132,6 +132,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cActionReceiver.cpp" />
+    <ClCompile Include="cCollider.cpp" />
+    <ClCompile Include="cCuiDriven.cpp" />
+    <ClCompile Include="cHeightMap.cpp" />
+    <ClCompile Include="cMovement.cpp" />
+    <ClCompile Include="cUserInputDriven.cpp" />
     <ClCompile Include="jAnimator.cpp" />
     <ClCompile Include="jBitmap.cpp" />
     <ClCompile Include="jBoneTree.cpp" />
@@ -144,23 +150,24 @@
     <ClCompile Include="jForm.cpp" />
     <ClCompile Include="jFuncPtrList.cpp" />
     <ClCompile Include="jGenericValue.cpp" />
+    <ClCompile Include="jGridContainer.cpp" />
     <ClCompile Include="jHealthPoint.cpp" />
-    <ClCompile Include="jInputEvent.cpp" />
     <ClCompile Include="jInventory.cpp" />
     <ClCompile Include="jLinear.cpp" />
     <ClCompile Include="jNavigator.cpp" />
     <ClCompile Include="jParabolic2.cpp" />
     <ClCompile Include="jParticle.cpp" />
     <ClCompile Include="jPng.cpp" />
+    <ClCompile Include="jRectangle2D.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
     <ClCompile Include="jShaderHPBar.cpp" />
     <ClCompile Include="jShaderUI.cpp" />
+    <ClCompile Include="jShape.cpp" />
     <ClCompile Include="jTerrainCollider.cpp" />
     <ClCompile Include="jTinyDB.cpp" />
     <ClCompile Include="jTrigger.cpp" />
     <ClCompile Include="jZMapLoader.cpp" />
     <ClCompile Include="jParserMeta.cpp" />
-    <ClCompile Include="jStateMachine.cpp" />
     <ClCompile Include="ObjBomb.cpp" />
     <ClCompile Include="ObjCreateHeightmap.cpp" />
     <ClCompile Include="ObjEnemy.cpp" />
@@ -204,12 +211,21 @@
     <ClCompile Include="ObjTerrainMgr.cpp" />
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="ObjUI.cpp" />
+    <ClCompile Include="oCollisionMgr.cpp" />
+    <ClCompile Include="oCuiDriver.cpp" />
     <ClCompile Include="oFormMain.cpp" />
     <ClCompile Include="oFormStats.cpp" />
+    <ClCompile Include="oUserInputDriver.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cActionReceiver.h" />
+    <ClInclude Include="cCollider.h" />
+    <ClInclude Include="cCuiDriven.h" />
+    <ClInclude Include="cHeightMap.h" />
+    <ClInclude Include="cMovement.h" />
+    <ClInclude Include="cUserInputDriven.h" />
     <ClInclude Include="jAnimator.h" />
     <ClInclude Include="jBitmap.h" />
     <ClInclude Include="jCoroutine.h" />
@@ -223,23 +239,24 @@
     <ClInclude Include="jForm.h" />
     <ClInclude Include="jFuncPtrList.h" />
     <ClInclude Include="jGenericValue.h" />
+    <ClInclude Include="jGridContainer.h" />
     <ClInclude Include="jHealthPoint.h" />
-    <ClInclude Include="jInputEvent.h" />
     <ClInclude Include="jInventory.h" />
     <ClInclude Include="jLinear.h" />
     <ClInclude Include="jNavigator.h" />
     <ClInclude Include="jParabolic2.h" />
     <ClInclude Include="jParticle.h" />
     <ClInclude Include="jPng.h" />
+    <ClInclude Include="jRectangle2D.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
     <ClInclude Include="jShaderHPBar.h" />
     <ClInclude Include="jShaderUI.h" />
+    <ClInclude Include="jShape.h" />
     <ClInclude Include="jTerrainCollider.h" />
     <ClInclude Include="jTinyDB.h" />
     <ClInclude Include="jTrigger.h" />
     <ClInclude Include="jZMapLoader.h" />
     <ClInclude Include="jParserMeta.h" />
-    <ClInclude Include="jStateMachine.h" />
     <ClInclude Include="jTypeToString.h" />
     <ClInclude Include="ObjBomb.h" />
     <ClInclude Include="ObjCreateHeightmap.h" />
@@ -285,8 +302,11 @@
     <ClInclude Include="ObjTerrainMgr.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="ObjUI.h" />
+    <ClInclude Include="oCollisionMgr.h" />
+    <ClInclude Include="oCuiDriver.h" />
     <ClInclude Include="oFormMain.h" />
     <ClInclude Include="oFormStats.h" />
+    <ClInclude Include="oUserInputDriver.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Vectors.h" />

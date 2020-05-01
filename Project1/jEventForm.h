@@ -1,20 +1,17 @@
 #pragma once
-#include "jInputEvent.h"
+#include "cUserInputDriven.h"
 
 class jUISystem;
 
 class jEventForm :
-	public jInputEvent
+	public cUserInputDriven
 {
 public:
-	jEventForm(jUISystem *form);
+	jEventForm(jUISystem *form, char toggleKey);
 	virtual ~jEventForm();
 
 protected:
 	jUISystem * mForm;
-
-	virtual void OnMouseDown(Vector2n pt, int type);
-	virtual void OnMouseUp(Vector2n pt, int type);
-	virtual void OnMouseMove(Vector2n pt, Vector2n delta);
+	char mToggleKey;
 };
 

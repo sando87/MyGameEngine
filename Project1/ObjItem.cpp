@@ -8,12 +8,13 @@
 #include "jShaderDefault.h"
 #include "jTime.h"
 #include "jTransform.h"
-#include "ObjTerrainMgr.h"
-#include "jCrash.h"
+#include "cCollider.h"
+#include "cActionReceiver.h"
+#include "ObjUI.h"
+#include "jTerrainCollider.h"
 
 ObjItem::ObjItem(u32 dbID) : mDBID(dbID), jGameObject("item")
 {
-	mHeightTerrain = 0;
 }
 
 ObjItem::~ObjItem()
@@ -35,43 +36,45 @@ void ObjItem::OnLoad()
 	AddComponent(new jImage(PATH_RESOURCES + string("img/") + mDBItemResorce.img));
 	AddComponent(new jShaderDefault());
 
-	jCrash * crash = new jCrash();
-	crash->SetShape(4, 2);
-	AddComponent(crash);
+	cColliderSphere * collider = new cColliderSphere();
+	collider->SetRound(2);
+	AddComponent(collider);
 
 	mHeights.Init(Vector2(0.15, 10), Vector2());
-}
 
-void ObjItem::OnStart()
-{
-	ObjTerrainMgr* terrain = GetEngine().FindGameObject<ObjTerrainMgr>();
-	_exceptif(terrain == nullptr, return);
+	jTerrainCollider* terrainCol = new jTerrainCollider();
+	terrainCol->EventUnderTerrain = [&](double height) {
+		mAnimateDrop = false;
+		Vector3 pos = GetTransform().getPos();
+		pos.z = height;
+		GetTransform().lookat(pos, pos + Vector3(0, 1, 0), Vector3(0, 0, 1));
+	};
+	AddComponent(terrainCol);
 
-	Vector3 pos = GetTransform().getPos();
-	terrain->GetHeight(pos.x, pos.y, mHeightTerrain);
-	pos.z = mHeightTerrain;
-	GetTransform().moveTo(pos);
+	cActionReceiver* action = new cActionReceiver();
+	action->RegisterAction([&](jGameObject* from) {
+		ObjUI* formInven = GetEngine().FindGameObject<ObjUI>();
+		if (formInven->IsFull())
+			StartDropAnimation();
+		else
+		{
+			formInven->PickItem(GetDBItem());
+			Destroy();
+		}
+	});
+	action->SetAttackable(false);
+	AddComponent(action);
 }
 
 void ObjItem::OnUpdate()
 {
-	if (mHeights.AccX < 0.3)
+	if (mAnimateDrop)
 	{
 		double deltaPos = mHeights.CalcVelAcc(jTime::Delta()) * jTime::Delta();
-		if (mHeights.AccX >= 0.3)
-		{
-			Vector3 pos = GetTransform().getPos();
-			pos.z = mHeightTerrain;
-			GetTransform().lookat(pos, pos + Vector3(0, 1, 0), Vector3(0, 0, 1));
-		}
-		else
-		{
-			Vector3 pos = GetTransform().getPos();
-			pos.z += deltaPos;
-			GetTransform().rotateAxis(Vector3(0, 1, 0), 20);
-			GetTransform().moveTo(pos);
-		}
-		
+		Vector3 pos = GetTransform().getPos();
+		pos.z += deltaPos;
+		GetTransform().rotateAxis(Vector3(0, 1, 0), 20);
+		GetTransform().moveTo(pos);
 	}
 }
 
@@ -94,5 +97,15 @@ void ObjItem::NewRandomItem()
 	
 	
 	mDBItemResorce.Load(mDBItem.rsrcID);
+}
+
+void ObjItem::StartDropAnimation()
+{
+	double height = FindComponent<jTerrainCollider>()->GetHeight();
+	Vector3 pos = GetTransform().getPos();
+	pos.z = height;
+	GetTransform().moveTo(pos);
+	mAnimateDrop = true;
+	mHeights.AccX = 0;
 }
 

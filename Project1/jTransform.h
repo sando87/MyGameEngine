@@ -33,6 +33,7 @@ public :
 	jTransform&		lookPos(Vector3 pos);
 	jTransform&		goForward(double dist);
 	jTransform&		moveTo(Vector3 pos);
+	jTransform&		setHeight(double height);
 	jTransform&		goTo(Vector3 dir);
 	jTransform&		rotateAxis(Vector3 axis, double degree);
 	jTransform&		rotateAxis(Vector3 groundPt, Vector3 axisUP, double degree);

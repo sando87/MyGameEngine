@@ -36,6 +36,7 @@ struct Matrix3x4f
 
 struct Parser3DAnimKey
 {
+	unsigned int tick;
 	Matrix3x4f bones[45];
 };
 

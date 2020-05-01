@@ -15,6 +15,9 @@
 #include "ObjHealthBars.h"
 #include "oFormMain.h"
 #include "oFormStats.h"
+#include "oUserInputDriver.h"
+#include "oCollisionMgr.h"
+#include "oCuiDriver.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -39,6 +42,7 @@ bool jGameObjectMgr::Initialize()
 	ID3D11DeviceContext* pDevCont = jRenderer::GetInst().GetDeviceContext();
 
 	/*
+	printf("1234");
 	pDev->CreateSamplerState(NULL, NULL);
 	pDev->CreateTexture2D(NULL, NULL, NULL);
 	pDev->CreateShaderResourceView(NULL, NULL, NULL);
@@ -63,9 +67,8 @@ bool jGameObjectMgr::Initialize()
 	
 	pDevCont->Map(NULL, 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, NULL);
 	pDevCont->Unmap(NULL, 0);
-	Present는 jRenderer::EndScene()함수에서 확인 필요
-	00007FFEA8D34300
-	00007FFEA8D30000
+	jRenderer::GetInst().EndScene(); //Present는 jRenderer::EndScene()함수에서 확인 필요
+	printf("abcd");
 	*/
 
 
@@ -73,6 +76,9 @@ bool jGameObjectMgr::Initialize()
 	AddGameObject(new ObjTerrainMgr());
 	AddGameObject(new ObjGroundAxis());
 	AddGameObject(new ObjHealthBars());
+	AddGameObject(new oUserInputDriver());
+	AddGameObject(new oCollisionMgr());
+	AddGameObject(new oCuiDriver());
 
 #ifdef HeightmapCaptureMode
 	AddGameObject(new ObjCreateHeightmap());
@@ -91,16 +97,6 @@ bool jGameObjectMgr::Initialize()
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
-		obj0->mOff = (i - 0) * 20.0f;
-		AddGameObject(obj0);
-		vecObjs.push_back(obj0);
-	}
-	int objs[] = { 103, 105, 108 };
-	for (int i = 0; i < 0; ++i)
-	{
-		ObjParser* obj0 = new ObjParser();
-		obj0->mFileIndex = objs[i];
-		obj0->mOff = (objs[i] - 0) * 20.0f;
 		AddGameObject(obj0);
 		vecObjs.push_back(obj0);
 	}
@@ -115,10 +111,10 @@ bool jGameObjectMgr::Initialize()
 		MyRes_CreateShader* pDataPS = (MyRes_CreateShader*)parser.mMapRes[parser.mContext.ps_addr].first;
 		_printlog("%d vs[%d] ps[%d]\n", i, pDataVS->head.crc, pDataPS->head.crc);
 		_printlog("%d vs[%p] ps[%p]\n", i, parser.mContext.vs_addr, parser.mContext.ps_addr);
-		_printlog("%d tex0[%p]\n", i, parser.mContext.tex[0].addr);
-		_printlog("%d tex1[%p]\n", i, parser.mContext.tex[1].addr);
-		_printlog("%d tex2[%p]\n", i, parser.mContext.tex[2].addr);
-		_printlog("%d tex3[%p]\n", i, parser.mContext.tex[3].addr);
+		//_printlog("%d tex0[%p]\n", i, parser.mContext.tex[0].addr);
+		//_printlog("%d tex1[%p]\n", i, parser.mContext.tex[1].addr);
+		//_printlog("%d tex2[%p]\n", i, parser.mContext.tex[2].addr);
+		//_printlog("%d tex3[%p]\n", i, parser.mContext.tex[3].addr);
 		_printlog("\n");
 
 #define TERRAIN
@@ -338,7 +334,7 @@ void jGameObjectMgr::StartCoRoutine(string name, std::function<void(void)> task,
 
 jGameObject* jGameObjectMgr::RayCast(Vector3 pos, Vector3 dir, jGameObject* skipObject)
 {
-	jLine3D line(pos, dir);
+	jLine3D line(pos, pos + dir);
 	
 	jGameObject* ret = nullptr;
 	double minDist = 1000000.0;

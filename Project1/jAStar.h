@@ -27,6 +27,7 @@ private:
 	vector<Vector2> mRouteResults;
 	Vector2 mStartPos;
 	Vector2 mEndPos;
+	RouteInfo mClosestPoint;
 	bool mRunning;
 	double mStep;
 

@@ -5,12 +5,12 @@
 
 class jCrash;
 
-enum ShapeType {
+enum ShapeTypeOld {
 	NoShape, Capsule, Point, Line,  Area
 };
 struct ShapeCrash
 {
-	ShapeType type;
+	ShapeTypeOld type;
 	double round;
 	Vector3 posA;
 	Vector3 posB;
@@ -45,7 +45,7 @@ public:
 	jCrash();
 	virtual ~jCrash();
 
-	void SetShape(double round, double height) { mShape.type = ShapeType::Capsule; mShape.round = round; mShape.height = height; }
+	void SetShape(double round, double height) { mShape.type = ShapeTypeOld::Capsule; mShape.round = round; mShape.height = height; }
 
 	jRect3D GetRect();
 	Vector3 GetCenter();
@@ -67,6 +67,6 @@ protected:
 
 	static unordered_multimap<u64, jCrash*> mCrashGrid;
 	static CrashInfo CheckCrashed(jCrash* left, jCrash* right);
-	static void GetGrids(jRect rect, vector<pair<u64, jCrashes>>& grids);
+	//static void GetGrids(jRect rect, vector<pair<u64, jCrashes>>& grids);
 };
 

@@ -11,10 +11,8 @@
 #include "jCrash.h"
 #include "jAnimator.h"
 #include "jLine3D.h"
-#include "jInputEvent.h"
 #include "jTerrainCollider.h"
 #include "jNavigator.h"
-#include "jStateMachine.h"
 #include "jInventory.h"
 #include "ObjItem.h"
 #include "jTinyDB.h"
@@ -24,57 +22,13 @@
 #include "oFormStats.h"
 #include "ObjBomb.h"
 #include "jHealthPoint.h"
-
-class jEventPlayer : public jInputEvent
-{
-private:
-	ObjPlayer * mPlayer;
-	ObjCamera * mCamera;
-	ObjTerrainMgr * mTerrain;
-	virtual void OnLoad();
-	virtual void OnMouseDown(Vector2n pt, int type);
-	virtual void OnKeyDown(char ch);
-};
-class jAnimatorGroup : public jComponent
-{
-public:
-	string GetAnimation();
-	void SetAnimation(string name);
-	void AddEvent(string name, float rate, function<void(void)> event);
-protected:
-	virtual void OnLoad();
-
-	vector<jAnimator*> mAnimators;
-};
-class MyCrash : public jCrash 
-{
-	virtual void OnCollision(CrashInfo info) 
-	{
-		Vector2 dir = GetCenter() - info.target->GetCenter();
-		dir.normalize();
-		double rate = info.dist / (GetRound() + info.target->GetRound());
-		double scale = 0.3 * (rate - 1) * (rate - 1) + 0.01;
-		Vector3 newPos = GetGameObject()->GetTransform().getPos() + scale * dir;
-		GetGameObject()->GetTransform().moveTo(newPos);
-	}
-};
-class StateMachPlayer : public jStateMachine
-{
-private:
-	virtual void OnLoad();
-	virtual void OnIdle();
-	virtual void OnMove();
-	virtual void OnAttack();
-
-	ObjPlayer * mPlayer;
-	bool CloseEnoughToTarget();
-	bool CloseEnoughToDest(Vector2 dest);
-};
+#include "cMovement.h"
+#include "cCollider.h"
+#include "cActionReceiver.h"
 
 ObjPlayer::ObjPlayer()
 {
 }
-
 
 ObjPlayer::~ObjPlayer()
 {
@@ -88,8 +42,6 @@ void ObjPlayer::OnLoad()
 	GetTransform().Zoom(Vector3(1.3, 1.3, 1.3));
 	GetTransform().moveTo(dbPlayer.startPos);
 
-	//AddComponent(new jInventory(mDBid));
-
 	DBClasses dbClasses;
 	dbClasses.Load(dbPlayer.classes);
 	CreateChild("body", dbClasses.bodyMesh, dbClasses.bodyImg, dbClasses.bodyAnim);
@@ -99,22 +51,43 @@ void ObjPlayer::OnLoad()
 
 	AddComponent(new jHealthPoint(dbClasses.spec));
 
-	mAnim = new jAnimatorGroup();
-	AddComponent(mAnim);
+	mMovement = new cMovement();
+	mMovement->EventDetected = [&](jGameObject* target) {
+		if (nullptr == target)
+		{
+			SetAnimation("idle");
+			mMovement->Stop();
+		}
+		else
+		{
+			DoAction(target);
+		}
+	};
+	AddComponent(mMovement);
 
-	AddComponent(new jEventPlayer());
+	mCollider = new cColliderCylinder();
+	mCollider->SetHeight(7);
+	mCollider->SetRound(1);
+	mCollider->EventCollision = [&](cCollider* target, CrashResult retsult) {
+		mMovement->Navigate();
+	};
+	AddComponent(mCollider);
 
-	mState = new StateMachPlayer();
-	AddComponent(mState);
+	cUserInputDriven* playerEvent = new cUserInputDriven();
+	playerEvent->EventMouseDown = [&](InputEventArgs args) { 
+		OnMouseDown(args);
+		return EventResult::TransferEvent;
+	};
+	playerEvent->EventKeyDown = [&](InputEventArgs args) { 
+		OnKeyDown(args);
+		return EventResult::TransferEvent;
+	};
+	AddComponent(playerEvent);
 
-	mNavi = new jNavigator();
-	AddComponent(mNavi);
+	//mNavi = new jNavigator();
+	//AddComponent(mNavi);
 
-	MyCrash * crash = new MyCrash();
-	crash->SetShape(2, 5);
-	AddComponent(crash);
-
-	AddComponent(new jTerrainCollider(crash->GetRound()));
+	AddComponent(new jTerrainCollider());
 }
 
 void ObjPlayer::OnStart()
@@ -140,18 +113,10 @@ void ObjPlayer::OnStart()
 			dbPlayer.statsRemain += 5;
 		}
 		dbPlayer.Save();
-		FindComponent<jStateMachine>()->SetState(StateType::IDLE);
-		mTarget = nullptr;
-		mWayPoints.clear();
 	};
 
-	mAnim->AddEvent("attack1", 0.6f, [this]() { 
-		_warnif(mTarget == nullptr);
-		jHealthPoint* hp = mTarget->FindComponent<jHealthPoint>();
-		if (hp != nullptr)
-			mHP->Attack(hp);
-	});
-	mAnim->AddEvent("attack1", 1.0f, [this]() { mAnim->SetAnimation("idle"); });
+	SetAnimEvent("attack", 1.0f, [&]() { SetAnimation("idle"); });
+	SetAnimEvent("cast", 1.0f, [&]() { SetAnimation("idle"); });
 }
 void ObjPlayer::OnUpdate()
 {
@@ -163,6 +128,13 @@ jGameObject* ObjPlayer::CreateChild(string name, string meshFullname, string img
 	child->AddComponent(new jMesh(PATH_RESOURCES + string("mesh/") + meshFullname));
 	child->AddComponent(new jImage(PATH_RESOURCES + string("img/") + imgFullname));
 	child->AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + animFullname));
+
+	//jMesh* mesh = new jMesh();
+	//mesh->LoadCube(4);
+	//child->AddComponent(mesh);
+	//child->AddComponent(new jImage(PATH_RESOURCES + string("img/") + imgFullname));
+	//child->AddComponent(new jAnimator(PATH_RESOURCES + string("anim/") + animFullname));
+
 	jShaderSkin* shader = new jShaderSkin();
 	shader->SetRenderOrder(RenderOrder_Skin);
 	child->AddComponent(shader);
@@ -170,243 +142,102 @@ jGameObject* ObjPlayer::CreateChild(string name, string meshFullname, string img
 	return child;
 }
 
-
-string jAnimatorGroup::GetAnimation()
+void ObjPlayer::OnMouseDown(InputEventArgs args)
 {
-	jAnimator* firstAnimator = mAnimators.front();
-	return firstAnimator->GetAnimation();
-}
+	string curState = GetCurrentAnimName();
+	if ("idle" != curState && "walk" != curState)
+		return;
 
-void jAnimatorGroup::SetAnimation(string name)
-{
-	for (jAnimator* animator : mAnimators)
-		animator->SetAnimation(name);
-}
-
-void jAnimatorGroup::AddEvent(string name, float rate, function<void(void)> event)
-{
-	jAnimator* firstAnimator = mAnimators.front();
-	firstAnimator->AddEvent(name, rate, event);
-}
-
-void jAnimatorGroup::OnLoad()
-{
-	list<jGameObject*> childs = GetGameObject()->GetChilds();
-	for (jGameObject* child : childs)
+	if (nullptr != args.hoveredObject)
 	{
-		jAnimator* anim = child->FindComponent<jAnimator>();
-		if(anim != nullptr)
-			mAnimators.push_back(anim);
+		SetAnimation("walk");
+		mMovement->Move(args.hoveredObject, 5);
+	}
+	else
+	{
+		SetAnimation("walk");
+		mMovement->Move(args.terrainPt);
 	}
 }
 
-
-void jEventPlayer::OnLoad()
+void ObjPlayer::OnKeyDown(InputEventArgs args)
 {
-	mPlayer = GetEngine().FindGameObject<ObjPlayer>();
-	mCamera = GetEngine().FindGameObject<ObjCamera>();
-	mTerrain = GetEngine().FindGameObject<ObjTerrainMgr>();
-	if (mTerrain == nullptr)
-		SetEnable(false);
-}
-
-void jEventPlayer::OnMouseDown(Vector2n pt, int type)
-{
-	Vector3 view = mCamera->ScreenToWorldView(pt.x, pt.y);
-	Vector3 camPos = mCamera->GetTransform().getPos();
-	Vector3 playerPos = mPlayer->GetTransform().getPos();
-
-	if (type == 1)
+	switch (args.key)
 	{
-		Vector3 pointOnTerrain;
-		Vector2 obstaclePos;
-		mTerrain->RayCastTerrain(camPos, view, pointOnTerrain);
-		bool obstacled = mTerrain->FindObstacle(playerPos, pointOnTerrain, obstaclePos, 1);
-		mPlayer->mDestPos = obstaclePos;
-		mPlayer->mWayPoints.clear();
-		if (obstacled)
+	case 'Q':
+	case 'W':
+	case 'E':
+	case 'R':
+	{
+		string name = GetCurrentAnimName();
+		if (name == "idle" || name == "walk")
 		{
-			mPlayer->mNavi->StartNavigate(pointOnTerrain, [this](list<Vector2>& waypoints) {
-				mPlayer->mWayPoints.clear();
-				if (!waypoints.empty())
-				{
-					mPlayer->mDestPos = waypoints.back();
-					mPlayer->mWayPoints = waypoints;
-					mPlayer->mState->SetState(StateType::MOVE);
-					mPlayer->mAnim->SetAnimation("walk");
-				}
+			Vector3 destPos = args.terrainPt;
+			SetAnimation("cast");
+			SetAnimEvent("cast", 0.5f, [&, destPos]() {
+				CreateBombSkill(destPos);
 			});
 		}
-		mPlayer->mState->SetState(StateType::MOVE);
-		mPlayer->mAnim->SetAnimation("walk");
-		mPlayer->mTarget = GetEngine().RayCast(camPos, view, GetGameObject());
+		break;
 	}
-
-	
-}
-
-void jEventPlayer::OnKeyDown(char ch)
-{
-	switch (ch)
-	{
-	case 'A':
-	{
-		jGameObject* obj = GetEngine().FindGameObject<oFormStats>();
-		bool isEnabled = obj->GetEnable();
-		obj->SetEnable(!isEnabled);
-	}
-		break;
-	case 'S':
-	{
-		jGameObject* obj = GetEngine().FindGameObject<oFormMain>();
-		bool isEnabled = obj->GetEnable();
-		obj->SetEnable(!isEnabled);
-	}
-		break;
-	case 'D':
-	{
-		jGameObject* obj = GetEngine().FindGameObject<ObjUI>();
-		bool isEnabled = obj->GetEnable();
-		obj->SetEnable(!isEnabled);
-	}
-		break;
-	case 'Q':
-	{
-		Vector2 mousePt = jOS_APIs::GetCursorScreenPos();
-		Vector3 view = mCamera->ScreenToWorldView(mousePt.x, mousePt.y);
-		Vector3 camPos = mCamera->GetTransform().getPos();
-		Vector3 playerPos = mPlayer->GetTransform().getPos();
-
-		Vector3 pointOnTerrain;
-		mTerrain->RayCastTerrain(camPos, view, pointOnTerrain);
-
-		ObjBomb* objBomb = new ObjBomb();
-		objBomb->GetTransform().moveTo(playerPos);
-		objBomb->SetDestPos(pointOnTerrain);
-		objBomb->SetOwner(GetGameObject());
-
-		GetEngine().AddGameObject(objBomb);
-	}
-		break;
-	case 'W':
-		break;
-	case 'E':
-		break;
-	case 'R':
-		break;
 	default:
 		break;
 	}
 }
 
-void StateMachPlayer::OnLoad()
+void ObjPlayer::CreateBombSkill(Vector3 destPos)
 {
-	mPlayer = (ObjPlayer *)GetGameObject();
+	Vector3 playerPos = GetTransform().getPos();
+	ObjBomb* objBomb = new ObjBomb();
+	objBomb->GetTransform().moveTo(playerPos);
+	objBomb->SetDestPos(destPos);
+	objBomb->SetOwner(this);
+	GetEngine().AddGameObject(objBomb);
 }
 
-void StateMachPlayer::OnIdle()
+string ObjPlayer::GetCurrentAnimName()
 {
+	jAnimator* anim = mChilds.front()->FindComponent<jAnimator>();
+	_exceptif(nullptr == anim, return "");
+	return anim->GetAnimation();
 }
 
-void StateMachPlayer::OnMove()
+void ObjPlayer::SetAnimation(string name)
 {
-	if (mPlayer->mTarget != nullptr)
+	for (jGameObject* child : mChilds)
 	{
-		if (mPlayer->mWayPoints.empty())
-		{
-			GetGameObject()->GetTransform().moveSmoothlyToward2D(mPlayer->mTarget->GetTransform().getPos(), 20, jTime::Delta());
-			if (CloseEnoughToTarget())
-			{
-				if (mPlayer->mTarget->GetName() == "item")
-				{
-					ObjItem* objItem = (ObjItem*)mPlayer->mTarget;
-					ObjUI* formInven = GetEngine().FindGameObject<ObjUI>();
-					if (formInven->IsFull())
-						objItem->ResetAnimate();
-					else
-					{
-						formInven->PickItem(objItem->GetDBItem());
-						objItem->Destroy();
-					}
+		jAnimator* anim = child->FindComponent<jAnimator>();
+		_exceptif(nullptr == anim, break);
+		anim->SetAnimation(name);
+	}
+}
 
-					SetState(StateType::IDLE);
-					mPlayer->mAnim->SetAnimation("idle");
-				}
-				else
-				{
-					SetState(StateType::ATTACK);
-					mPlayer->mAnim->SetAnimation("attack1");
-				}
-			}
-		}
-		else
-		{
-			Vector2 dest = mPlayer->mWayPoints.front();
-			GetGameObject()->GetTransform().moveSmoothlyToward2D(dest, 20, jTime::Delta());
-			if (CloseEnoughToDest(dest))
-			{
-				mPlayer->mWayPoints.pop_front();
-				if (mPlayer->mWayPoints.size() == 1)
-					mPlayer->mWayPoints.clear();
-			}
-		}
+void ObjPlayer::SetAnimEvent(string name, float rate, function<void(void)> handler)
+{
+	jAnimator* anim = mChilds.front()->FindComponent<jAnimator>();
+	_exceptif(nullptr == anim, return);
+	anim->SetEvent(name, rate, handler);
+}
+
+void ObjPlayer::DoAction(jGameObject* target)
+{
+	cActionReceiver* action = target->FindComponent<cActionReceiver>();
+	if (nullptr == action)
+		return;
+
+	if (action->GetAttackable())
+	{
+		mMovement->Stop();
+		SetAnimation("attack");
+		SetAnimEvent("attack", 0.6f, [this, action]() {
+			action->InvokeAction(this);
+		});
 	}
 	else
 	{
-		if (mPlayer->mWayPoints.empty())
-		{
-			GetGameObject()->GetTransform().moveSmoothlyToward2D(mPlayer->mDestPos, 20, jTime::Delta());
-			if (CloseEnoughToDest(mPlayer->mDestPos))
-			{
-				SetState(StateType::IDLE);
-				mPlayer->mAnim->SetAnimation("idle");
-			}
-		}
-		else
-		{
-			Vector2 dest = mPlayer->mWayPoints.front();
-			GetGameObject()->GetTransform().moveSmoothlyToward2D(dest, 20, jTime::Delta());
-			if (CloseEnoughToDest(dest))
-			{
-				mPlayer->mWayPoints.pop_front();
-				if (mPlayer->mWayPoints.empty())
-				{
-					SetState(StateType::IDLE);
-					mPlayer->mAnim->SetAnimation("idle");
-				}
-			}
-		}
+		mMovement->Stop();
+		SetAnimation("idle");
+		action->InvokeAction(this);
 	}
 }
 
-void StateMachPlayer::OnAttack()
-{
-	if (mPlayer->mTarget == nullptr)
-		return;
-	if (mPlayer->mAnim->GetAnimation() != "idle")
-		return;
-
-	if (CloseEnoughToTarget())
-	{
-		if (mPlayer->mAnim->GetAnimation() == "idle")
-			mPlayer->mAnim->SetAnimation("attack1");
-	}
-	else
-	{
-		SetState(StateType::MOVE);
-		mPlayer->mAnim->SetAnimation("walk");
-	}
-}
-
-bool StateMachPlayer::CloseEnoughToTarget()
-{
-	Vector2 targetPos = mPlayer->mTarget->GetTransform().getPos();
-	Vector2 myPos = mPlayer->GetTransform().getPos();
-	return targetPos.distance(myPos) < 7;
-}
-
-bool StateMachPlayer::CloseEnoughToDest(Vector2 dest)
-{
-	Vector2 myPos = mPlayer->GetTransform().getPos();
-	return dest.distance(myPos) < 1;
-}

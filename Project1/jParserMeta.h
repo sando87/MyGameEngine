@@ -13,6 +13,7 @@
 #define MF_Img			"img"
 #define MF_Child			"child"
 #define MF_Item				"item"
+#define MF_Type			"type"
 
 class jParserMeta
 {
@@ -21,13 +22,23 @@ public:
 	~jParserMeta();
 
 	bool Load(string fullname);
+	bool Save(string fullname);
 	string ToString();
+	void SetValue(string field, string value);
 	template<typename Ty> void AddValue(string field, Ty value);
 	template<typename Ty = string> Ty GetValue(string field);
 	template<typename Ty = string> vector<Ty> GetValues(string field);
 private:
 	unordered_multimap<string, string> mData;
 };
+
+inline void jParserMeta::SetValue(string field, string value)
+{
+	if (mData.find(field) == mData.end())
+		mData.insert(make_pair(field, value));
+	else
+		mData.find(field)->second = value;
+}
 
 template<>
 inline void jParserMeta::AddValue(string field, string value)

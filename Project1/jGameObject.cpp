@@ -54,10 +54,10 @@ jGameObjectMgr & jGameObject::GetEngine()
 {
 	return *mEngine;
 }
-bool jGameObject::LoadTxt(string filename)
+bool jGameObject::LoadTxt(string fullname)
 {
 	jParserMeta parse;
-	bool ret = parse.Load(PATH_RESOURCES + string("meta/") + filename);
+	bool ret = parse.Load(fullname);
 	if (!ret)
 	{
 		_warn();
@@ -123,6 +123,7 @@ void jGameObject::AddChild(jGameObject* child)
 void jGameObject::SubChild(jGameObject * child)
 {
 	mChilds.remove(child);
+	child->mParent = nullptr;
 }
 void jGameObject::AddComponent(jComponent* comp)
 {

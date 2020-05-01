@@ -25,3 +25,4 @@ public:
 	bool GetHeight(float worldX, float worldY, float& outHeight);
 	static bool Save(string fullname, jRect3D rt, int step, u32* pixels, int imgWidth);
 };
+

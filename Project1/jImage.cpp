@@ -35,6 +35,8 @@ void jImage::OnLoad()
 bool jImage::LoadImgFile()
 {
 	string fullname = GetFullname();
+	_exceptif(false == jUtils::ExistFile(fullname), _echoS(fullname); return false;);
+
 	string ext = jUtils::GetFileExtension(fullname);
 	if (ext == "dump")
 	{

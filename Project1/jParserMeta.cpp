@@ -23,6 +23,19 @@ bool jParserMeta::Load(string fullname)
 	return mData.empty() ? false : true;
 }
 
+bool jParserMeta::Save(string fullname)
+{
+	string data;
+	for (auto item : mData)
+	{
+		string line = item.first + "\t\t:" + item.second + "\r\n";
+		data += line;
+	}
+
+	jUtils::SaveToFile(fullname, data);
+	return true;
+}
+
 string jParserMeta::ToString()
 {
 	string ret = "";

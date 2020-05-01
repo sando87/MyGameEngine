@@ -21,7 +21,7 @@ void jNavigator::OnLoad()
 	mTerrain = GetEngine().FindGameObject<ObjTerrainMgr>();
 	mAstar.Moveable = [this](Vector2 worldPos) {
 		float height = 0;
-		bool ret = mTerrain->GetHeight(worldPos.x, worldPos.y, height);
+		bool ret = mTerrain->GetHeight(worldPos, height);
 		return ret;
 	};
 }

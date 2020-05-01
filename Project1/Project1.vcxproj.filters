@@ -176,9 +176,6 @@
     <ClCompile Include="jHealthPoint.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="jStateMachine.cpp">
-      <Filter>소스 파일\Components</Filter>
-    </ClCompile>
     <ClCompile Include="jAnimator.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
@@ -187,9 +184,6 @@
     </ClCompile>
     <ClCompile Include="jParserMeta.cpp">
       <Filter>소스 파일\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="jInputEvent.cpp">
-      <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="jTerrainCollider.cpp">
       <Filter>소스 파일\Components</Filter>
@@ -259,6 +253,42 @@
     </ClCompile>
     <ClCompile Include="jTransform.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="oUserInputDriver.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="oCollisionMgr.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="oCuiDriver.cpp">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="cActionReceiver.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="cCollider.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="cCuiDriven.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="cHeightMap.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="cMovement.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="cUserInputDriven.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="jRectangle2D.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="jGridContainer.cpp">
+      <Filter>소스 파일\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="jShape.cpp">
+      <Filter>소스 파일\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -418,9 +448,6 @@
     <ClInclude Include="jTypeToString.h">
       <Filter>소스 파일\CommonHeader</Filter>
     </ClInclude>
-    <ClInclude Include="jStateMachine.h">
-      <Filter>소스 파일\Components</Filter>
-    </ClInclude>
     <ClInclude Include="jAnimator.h">
       <Filter>소스 파일\Components</Filter>
     </ClInclude>
@@ -429,9 +456,6 @@
     </ClInclude>
     <ClInclude Include="jParserMeta.h">
       <Filter>소스 파일\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="jInputEvent.h">
-      <Filter>소스 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="jTerrainCollider.h">
       <Filter>소스 파일\Components</Filter>
@@ -501,6 +525,42 @@
     </ClInclude>
     <ClInclude Include="jTransform.h">
       <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="oUserInputDriver.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="oCollisionMgr.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="oCuiDriver.h">
+      <Filter>소스 파일\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="cActionReceiver.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="cCollider.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="cCuiDriven.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="cHeightMap.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="cMovement.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="cUserInputDriven.h">
+      <Filter>소스 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="jRectangle2D.h">
+      <Filter>소스 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="jShape.h">
+      <Filter>소스 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="jGridContainer.h">
+      <Filter>소스 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

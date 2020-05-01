@@ -47,9 +47,8 @@ bool jShaderSkin::OnRender(ObjCamera* cam)
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	u32 stride = sizeof(VertexFormatPTNIW);
-	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
-	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
+	u32 vertCount = mMesh->GetVerticies().size();
+	Draw(sizeof(VertexFormatPTNIW), prim, vertCount, mMesh->GetIndicies().size());
 	return true;
 }
 
@@ -114,28 +113,20 @@ void jShaderSkin::LoadMesh()
 	mMesh->Load();
 	string key = mMesh->GetFullname();
 
-	if (!mMesh->GetStream().empty())
+	vector<VertexFormatPTNIW> vertices;
+	vector<VertexFormat>& meshVert = mMesh->GetVerticies();
+	int cnt = meshVert.size();
+	for (int i = 0; i < cnt; ++i)
 	{
-		vector<char>& stream = mMesh->GetStream();
-		CacheCBVertex(&stream[0], stream.size(), key);
+		VertexFormatPTNIW vertex;
+		vertex.p = meshVert[i].position;
+		vertex.t = meshVert[i].texel;
+		vertex.n = meshVert[i].normal;
+		vertex.i = meshVert[i].boneIndexs;
+		vertex.w = meshVert[i].weights;
+		vertices.push_back(vertex);
 	}
-	else
-	{
-		vector<VertexFormatPTNIW> vertices;
-		vector<VertexFormat>& meshVert = mMesh->GetVerticies();
-		int cnt = meshVert.size();
-		for (int i = 0; i < cnt; ++i)
-		{
-			VertexFormatPTNIW vertex;
-			vertex.p = meshVert[i].position;
-			vertex.t = meshVert[i].texel;
-			vertex.n = meshVert[i].normal;
-			vertex.i = meshVert[i].boneIndexs;
-			vertex.w = meshVert[i].weights;
-			vertices.push_back(vertex);
-		}
-		CacheCBVertex(&vertices[0], sizeof(VertexFormatPTNIW) * vertices.size(), key);
-	}
+	CacheCBVertex(&vertices[0], sizeof(VertexFormatPTNIW) * vertices.size(), key);
 }
 
 

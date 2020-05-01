@@ -2,15 +2,7 @@
 #include "junks.h"
 #include "jLine3D.h"
 #include "jGameObjectMgr.h"
-#include "jInputEvent.h"
 #include "jRenderer.h"
-
-class jEventCamera : public jInputEvent
-{
-private:
-	virtual void OnMouseDrag(Vector2n delta, int type);
-	virtual void OnMouseWheel(int delta);
-};
 
 //INITIALIZER(camera)
 //{
@@ -29,31 +21,42 @@ ObjCamera::~ObjCamera()
 
 void ObjCamera::OnLoad()
 {
-	AddComponent(new jEventCamera());
+	cUserInputDriven* eventCam = new cUserInputDriven();
+	eventCam->EventMouseDrag = [&](InputEventArgs args) { 
+		OnMouseDrag(args.deltaPt, args.type); 
+		return EventResult::TransferEvent; 
+	};
+	eventCam->EventMouseWheel = [&](InputEventArgs args) { 
+		OnMouseWheel(args.delta); 
+		return EventResult::TransferEvent; 
+	};
+	AddComponent(eventCam);
 }
 
 void ObjCamera::OnStart()
 {
 	int screenWidth = jRenderer::GetInst().GetScreenWidth();
 	int screenHeight = jRenderer::GetInst().GetScreenHeight();
-	mPlayer = GetEngine().FindGameObject("ObjPlayer");
 	setProjectionMatrix(screenWidth, screenHeight, 45, 1.0, 1000.0);
-	GetTransform().lookat(Vector3(35, 35, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
+
+	mPlayer = GetEngine().FindGameObject("ObjPlayer");
+	if(mPlayer == nullptr)
+		//GetTransform().lookat(Vector3(2340, 4860, 0) + Vector3(35, 35, 50), Vector3(2340, 4860, 0), Vector3(0, 0, 1));
+		GetTransform().lookat(Vector3(0, 0, 0) + Vector3(35, 35, 50), Vector3(0, 0, 0), Vector3(0, 0, 1));
+	else
+	{
+		Vector3 pos = mPlayer->GetTransform().getPos();
+		GetTransform().lookat(pos + Vector3(35, 35, 50), pos, Vector3(0, 0, 1));
+	}
 }
 void ObjCamera::OnUpdate()
 {
-	if (mPlayer != nullptr)
-	{
-		Vector3 pos = mPlayer->GetTransform().getPos();
-		GetTransform().moveTo(pos + Vector3(35, 35, 50));
-	}
-
 	mGroundRect = UpdateGroundRect();
-	Vector2 center = mGroundRect.Center();
-	static int iii = 0;
-	iii++;
-	if (iii % 180 == 0)
-		_printlog("cen : %f, %f\n", center.x, center.y);
+	//Vector2 center = mGroundRect.GetCenter();
+	//static int iii = 0;
+	//iii++;
+	//if (iii % 180 == 0)
+	//	_printlog("cen : %f, %f\n", center.x, center.y);
 }
 
 void ObjCamera::setProjectionMatrix(int _width, int _height, double fovDeg, double zNear, double zFar)
@@ -126,8 +129,8 @@ Vector3 ObjCamera::ScreenToWorldView(int _pixelX, int _pixelY)
 	if (mIsOrthogonal)
 		return GetTransform().getView();
 
-	double wh = (mWidth - 17) / 2; //Window 좌우 경계 픽셀 제외
-	double hh = (mHeight - 40) / 2; //window title 및 하단 경계 픽셀 제외
+	double wh = mWidth / 2;
+	double hh = mHeight / 2;
 	double pixelRateX = (_pixelX - wh) / wh;
 	double pixelRateY = (hh - _pixelY) / hh;
 	double width_half = tan(DegToRad(mFovDegHori*0.5));
@@ -147,37 +150,49 @@ Vector3 ObjCamera::GetViewOnMouse(int _x, int _y)
 	return view.normalize();
 }
 
-jRect ObjCamera::UpdateGroundRect()
+jRectangle2D ObjCamera::UpdateGroundRect()
 {
-	jRect rt;
+	jRectangle2D rt;
+	Vector3 view = GetTransform().getView();
+	Vector3 cross = GetTransform().getCross();
+	Vector3 up = GetTransform().getUp();
+	Vector3 pos = GetTransform().getPos();
 	if (mIsOrthogonal)
 	{
 		double width_half = mOrthRect.Size().x * 0.5;
 		double height_half = mOrthRect.Size().y * 0.5;
-		Vector3 posA = GetTransform().getPos() + width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
-		Vector3 posB = GetTransform().getPos() + width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
-		Vector3 posC = GetTransform().getPos() - width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
-		Vector3 posD = GetTransform().getPos() - width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
-		Vector2 gptA = jLine3D(posA, GetTransform().getView()).GetXY(0);
-		Vector2 gptB = jLine3D(posB, GetTransform().getView()).GetXY(0);
-		Vector2 gptC = jLine3D(posC, GetTransform().getView()).GetXY(0);
-		Vector2 gptD = jLine3D(posD, GetTransform().getView()).GetXY(0);
-		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+		Vector3 posA = pos + width_half * cross + height_half * up;
+		Vector3 posB = pos + width_half * cross - height_half * up;
+		Vector3 posC = pos - width_half * cross + height_half * up;
+		Vector3 posD = pos - width_half * cross - height_half * up;
+		Vector2 gptA = jLine3D(posA, posA + view).GetXY(0);
+		Vector2 gptB = jLine3D(posB, posB + view).GetXY(0);
+		Vector2 gptC = jLine3D(posC, posC + view).GetXY(0);
+		Vector2 gptD = jLine3D(posD, posD + view).GetXY(0);
+		double minX = min(min(min(gptA.x, gptB.x), gptC.x), gptD.x);
+		double minY = min(min(min(gptA.y, gptB.y), gptC.y), gptD.y);
+		double maxX = max(max(max(gptA.x, gptB.x), gptC.x), gptD.x);
+		double maxY = max(max(max(gptA.y, gptB.y), gptC.y), gptD.y);
+		rt.SetMinMax(Vector2(minX, minY), Vector2(maxX, maxY));
 		rt.ClipMinus();
 	}
 	else
 	{
 		double width_half = tan(DegToRad(mFovDegHori*0.5));
 		double height_half = width_half / mAspect;
-		Vector3 dirA = GetTransform().getView() + width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
-		Vector3 dirB = GetTransform().getView() + width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
-		Vector3 dirC = GetTransform().getView() - width_half * GetTransform().getCross() + height_half * GetTransform().getUp();
-		Vector3 dirD = GetTransform().getView() - width_half * GetTransform().getCross() - height_half * GetTransform().getUp();
-		Vector2 gptA = jLine3D(GetTransform().getPos(), dirA).GetXY(0);
-		Vector2 gptB = jLine3D(GetTransform().getPos(), dirB).GetXY(0);
-		Vector2 gptC = jLine3D(GetTransform().getPos(), dirC).GetXY(0);
-		Vector2 gptD = jLine3D(GetTransform().getPos(), dirD).GetXY(0);
-		rt.expand(gptA).expand(gptB).expand(gptC).expand(gptD);
+		Vector3 dirA = view + width_half * cross + height_half * up;
+		Vector3 dirB = view + width_half * cross - height_half * up;
+		Vector3 dirC = view - width_half * cross + height_half * up;
+		Vector3 dirD = view - width_half * cross - height_half * up;
+		Vector2 gptA = jLine3D(pos, pos + dirA).GetXY(0);
+		Vector2 gptB = jLine3D(pos, pos + dirB).GetXY(0);
+		Vector2 gptC = jLine3D(pos, pos + dirC).GetXY(0);
+		Vector2 gptD = jLine3D(pos, pos + dirD).GetXY(0);
+		double minX = min(min(min(gptA.x, gptB.x), gptC.x), gptD.x);
+		double minY = min(min(min(gptA.y, gptB.y), gptC.y), gptD.y);
+		double maxX = max(max(max(gptA.x, gptB.x), gptC.x), gptD.x);
+		double maxY = max(max(max(gptA.y, gptB.y), gptC.y), gptD.y);
+		rt.SetMinMax(Vector2(minX, minY), Vector2(maxX, maxY));
 		rt.ClipMinus();
 	}
 	return rt;
@@ -252,18 +267,19 @@ void ObjCamera::getOrthofInfo(float& left, float& right, float& bottom, float& t
 */
 
 
-void jEventCamera::OnMouseDrag(Vector2n delta, int type)
+void ObjCamera::OnMouseDrag(Vector2n delta, MouseButtonType type)
 {
-	Vector3 pos = GetGameObject()->GetTransform().getPos();
-	Vector3 view = GetGameObject()->GetTransform().getView();
-	jTransform& trans = GetGameObject()->GetTransform();
-	if (type == 2) //middle
+	jTransform& trans = GetTransform();
+	Vector3 pos = trans.getPos();
+	Vector3 view = trans.getView();
+	
+	if (MouseButtonType::Center == type)
 	{
-		jLine3D line(pos, view);
+		jLine3D line(pos, pos + view);
 		Vector3 pos = line.GetXY(0);
 		trans.rotateAxis(Vector3(pos.x, pos.y, 0.0f), Vector3(0, 0, 1), delta.x);
 	}
-	else if (type == 0) //left
+	else if (MouseButtonType::Left == type)
 	{
 		float sensX = -delta.x * 0.01f * pos.z;
 		float sensY = delta.y * 0.01f * pos.z;
@@ -277,10 +293,10 @@ void jEventCamera::OnMouseDrag(Vector2n delta, int type)
 	}
 }
 
-void jEventCamera::OnMouseWheel(int delta)
+void ObjCamera::OnMouseWheel(int delta)
 {
 	if (delta > 0)
-		GetGameObject()->GetTransform().goForward(10.0f);
+		GetTransform().goForward(10.0f);
 	else if (delta < 0)
-		GetGameObject()->GetTransform().goForward(-10.0f);
+		GetTransform().goForward(-10.0f);
 }

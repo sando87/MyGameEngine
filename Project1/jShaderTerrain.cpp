@@ -46,9 +46,8 @@ bool jShaderTerrain::OnRender(ObjCamera* cam)
 	else if (mMesh->GetPrimitive() == PrimitiveMode::TriangleStrip)
 		prim = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	u32 stride = sizeof(VertexFormatPT);
-	u32 vertCount = mMesh->GetStream().empty() ? mMesh->GetVerticies().size() : mMesh->GetStream().size() / stride;
-	Draw(stride, prim, vertCount, mMesh->GetIndicies().size());
+	u32 vertCount = mMesh->GetVerticies().size();
+	Draw(sizeof(VertexFormatPT), prim, vertCount, mMesh->GetIndicies().size());
 	return true;
 }
 
@@ -79,24 +78,16 @@ void jShaderTerrain::LoadMesh()
 	mMesh->Load();
 	string key = mMesh->GetFullname();
 
-	if (!mMesh->GetStream().empty())
+	vector<VertexFormatPT> vertices;
+	vector<VertexFormat>& meshVert = mMesh->GetVerticies();
+	int cnt = meshVert.size();
+	for (int i = 0; i < cnt; ++i)
 	{
-		vector<char>& stream = mMesh->GetStream();
-		CacheCBVertex(&stream[0], stream.size(), key);
+		VertexFormatPT vertex;
+		vertex.p = meshVert[i].position;
+		vertex.t = meshVert[i].texel;
+		vertices.push_back(vertex);
 	}
-	else
-	{
-		vector<VertexFormatPT> vertices;
-		vector<VertexFormat>& meshVert = mMesh->GetVerticies();
-		int cnt = meshVert.size();
-		for (int i = 0; i < cnt; ++i)
-		{
-			VertexFormatPT vertex;
-			vertex.p = meshVert[i].position;
-			vertex.t = meshVert[i].texel;
-			vertices.push_back(vertex);
-		}
-		CacheCBVertex(&vertices[0], sizeof(VertexFormatPT) * vertices.size(), key);
-	}
+	CacheCBVertex(&vertices[0], sizeof(VertexFormatPT) * vertices.size(), key);
 }
 

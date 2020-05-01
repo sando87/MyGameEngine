@@ -11,22 +11,21 @@ public:
 	ObjItem(u32 dbID = 0);
 	~ObjItem();
 
-	void ResetAnimate() { mHeights.AccX = 0; }
 	const DBItem& GetDBItem() const { return mDBItem; }
 	const DBItemResource& GetDBItemResource() const { return mDBItemResorce; }
 
 protected:
 	virtual void OnLoad();
-	virtual void OnStart();
 	virtual void OnUpdate();
 
 	void NewRandomItem();
-
+	void StartDropAnimation();
+	
 	u32 mDBID;
-	float mHeightTerrain;
-	jParabolic2 mHeights;
 	DBItem mDBItem;
 	DBItemResource mDBItemResorce;
 	DBSpecification mDBItemSpec;
+	jParabolic2 mHeights;
+	bool mAnimateDrop = true;
 };
 

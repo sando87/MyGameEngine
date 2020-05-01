@@ -2,6 +2,7 @@
 #include "jShaderSkin.h"
 #include "jTime.h"
 #include "jCaches.h"
+#include "jHealthPoint.h"
 
 struct AnimFileHead
 {
@@ -24,7 +25,7 @@ jAnimator::~jAnimator()
 }
 void jAnimator::OnLoad()
 {
-	SplitCSVtoClips();
+	//SplitCSVtoClips();
 
 	string baseFullname = jUtils::RemoveExtension(GetFullname());
 	string filter = baseFullname + "_*.dump";
@@ -46,6 +47,8 @@ void jAnimator::OnLoad()
 		_errorif(mAnims.find("idle") == mAnims.end());
 		SetAnimation("idle");
 		mShader = GetGameObject()->FindComponent<jShaderSkin>();
+		mHP = GetGameObject()->FindComponent<jHealthPoint>();
+		_exceptif(nullptr == mHP || nullptr == mShader, return);
 	}
 }
 void jAnimator::OnUpdate()
@@ -62,15 +65,55 @@ void jAnimator::OnUpdate()
 }
 mat4s jAnimator::Animate(float _deltaTime)
 {
-	mCurrentTime += _deltaTime;
-	mat4s mats = mCurrentAnim->Animate(mCurrentTime);
-	return mats;
+	_exceptif (nullptr == mCurrentAnim, return mat4s());
+	float speed = GetAnimationSpeed();
+	float endTime = mCurrentAnim->endTime * speed;
+	float preTime = mPreTimeRate * endTime;
+	float curTime = preTime + _deltaTime;
+	float curRate = curTime / endTime;
+	curRate = curRate - (int)curRate;
+	int matIdx = curRate * mCurrentAnim->keyMats.size();
+
+	//InvokeEvent
+	float fixedRate = curRate < mPreTimeRate ? curRate + 1.0f : curRate;
+	for (auto item : mCurrentAnim->events)
+	{
+		float eventRate = item.first;
+		if (mPreTimeRate < eventRate && eventRate < fixedRate)
+			item.second();
+	}
+
+	mPreTimeRate = curRate;
+	return mCurrentAnim->keyMats[matIdx];
 }
-void jAnimator::AddEvent(string animName, float rate, function<void(void)> event)
+float jAnimator::GetAnimationSpeed()
 {
-	_warnif(mAnims.find(animName) == mAnims.end());
+	if (mHP == nullptr || mHP->CurSpec.MoveSpeed == 0)
+		return 1.0;
+
+	if (mCurrentAnim->name == "walk")
+	{
+		return mCurrentAnim->moveSpeed / mHP->CurSpec.MoveSpeed;
+	}
+	//else if(mCurrentAnim->name == "attack1")
+	//{
+	//	float periodAttack = 0.7666f; //mHP->CurSpec.attackSpeed; 1회 공격당 걸리는 시간(주기)
+	//	return periodAttack / mCurrentAnim->endTime;
+	//}
+	return 1.0;
+}
+void jAnimator::SetEvent(string animName, float rate, function<void(void)> event)
+{
+	_exceptif(mAnims.find(animName) == mAnims.end(), return);
 	if (mAnims.find(animName) != mAnims.end())
-		mAnims[animName].AddEvent(rate, event);
+		mAnims[animName].events[rate] = event;
+}
+
+void jAnimator::ClearEvent(string animName)
+{
+	_exceptif(mAnims.find(animName) == mAnims.end(), return);
+	if (mAnims.find(animName) != mAnims.end())
+		mAnims[animName].events.clear();
 }
 
 void jAnimator::SplitCSVtoClips()
@@ -96,7 +139,7 @@ void jAnimator::SplitCSVtoClips()
 		strings pieces = jUtils::Split2(lines[idx], ",");
 		string clipName = pieces[0];
 		clip.name = clipName;
-		clip.frameRate = 1 / 30.0f;
+		float frameRate = 1 / 30.0f;
 
 		idx++;
 		while (idx < num)
@@ -109,7 +152,8 @@ void jAnimator::SplitCSVtoClips()
 			idx++;
 		}
 
-		clip.endTime = clip.frameRate * clip.keyMats.size();
+		clip.endTime = frameRate * clip.keyMats.size();
+		clip.moveSpeed = 4.0f;
 		clip.SaveToFile(baseFullname + "_" + clipName + ".dump");
 	}
 }
@@ -120,8 +164,7 @@ void jAnimator::SetAnimation(string name)
 	if (mAnims.find(name) != mAnims.end())
 	{
 		mCurrentAnim = &mAnims[name];
-		mCurrentAnim->prevPosRate = 0;
-		mCurrentTime = 0;
+		mPreTimeRate = 0;
 	}
 }
 
@@ -130,39 +173,13 @@ string jAnimator::GetAnimation()
 	return mCurrentAnim == nullptr ? "" : mCurrentAnim->name;
 }
 
-
-mat4s AnimationClip::Animate(float _time)
-{
-	float a = _time / endTime;
-	float b = a - (int)a;
-	float c = b * endTime;
-	int n = (int)(c / frameRate);
-	ProcEvent(b);
-	return keyMats[n];
-}
-void AnimationClip::AddEvent(float rate, function<void(void)> event)
-{
-	events.push_back(make_pair(rate, event));
-}
-void AnimationClip::ProcEvent(float currentRate)
-{
-	float fixedRate = currentRate < prevPosRate ? currentRate + 1.0f : currentRate;
-	for (auto item : events)
-	{
-		float eventRate = item.first;
-		if (prevPosRate < eventRate && eventRate < fixedRate)
-			item.second();
-	}
-	prevPosRate = currentRate;
-}
-void AnimationClip::SaveToFile(string fullname)
+void AnimationClipOri::SaveToFile(string fullname)
 {
 	AnimFileHead head;
 	head.magic = 0x7a;
 	sprintf_s(head.name, "%s", name.c_str());
-	head.frameRate = frameRate;
+	head.frameRate = 1 / 30.0f;
 	head.endTime = endTime;
-	head.prevPosRate = prevPosRate;
 	head.boneCount = keyMats.empty() ? 0 : keyMats.front()->size();
 	head.keyCount = keyMats.size();
 
@@ -182,7 +199,7 @@ void AnimationClip::SaveToFile(string fullname)
 	free(buf);
 }
 
-bool AnimationClip::LoadFromFile(string fullname)
+bool AnimationClipOri::LoadFromFile(string fullname)
 {
 	chars buf = jUtils::LoadFile2(fullname);
 	if (!buf)
@@ -190,13 +207,63 @@ bool AnimationClip::LoadFromFile(string fullname)
 
 	AnimFileHead * head = (AnimFileHead *)&buf[0];
 	name = head->name;
-	frameRate = head->frameRate;
 	endTime = head->endTime;
-	prevPosRate = head->prevPosRate;
+	moveSpeed = 4.0f;
 	int boneCount = head->boneCount;
 	int keyCount = head->keyCount;
 
 	char* curKey = &buf[0] + sizeof(AnimFileHead);
+	int size = sizeof(Matrix4) * boneCount;
+	for (int i = 0; i < keyCount; ++i)
+	{
+		mat4s keyframe;
+		keyframe->resize(boneCount);
+		memcpy(&keyframe[0], curKey, size);
+		keyMats.push_back(keyframe);
+		curKey += size;
+	}
+	return true;
+}
+
+void AnimationClip::SaveToFile(string fullname)
+{
+	magic = 0x7a;
+	headerLen = 128;
+	int bodyLen = sizeof(Matrix4) * boneCount * keyCount;
+	string headerString = HeaderToString();
+	_exceptif(headerString.length() > 120, return);
+
+	int totalSize = headerLen + bodyLen;
+	char * buf = (char *)malloc(totalSize);
+	memset(buf, 0x00, totalSize);
+	memcpy(buf, &magic, 4);
+	memcpy(buf + 4, &headerLen, 4);
+	memcpy(buf + 8, headerString.c_str(), headerString.length());
+	char * data = buf + headerLen;
+	for (int i = 0; i < keyMats.size(); ++i)
+	{
+		mat4s mats = keyMats[i];
+		int size = sizeof(Matrix4) * mats->size();
+		memcpy(data, &mats[0], size);
+		data += size;
+	}
+
+	jUtils::SaveToFile(fullname, buf, totalSize);
+	free(buf);
+}
+
+bool AnimationClip::LoadFromFile(string fullname)
+{
+	chars buf = jUtils::LoadFile2(fullname);
+	_exceptif(!buf, return false);
+
+	char* pBuf = &buf[0];
+	magic = *((int*)pBuf);
+	headerLen = *((int*)(pBuf + 4));
+	string headerString = string(pBuf + 8);
+	StringToHead(headerString);
+
+	char* curKey = &buf[0] + headerLen;
 	int size = sizeof(Matrix4) * boneCount;
 	for (int i = 0; i < keyCount; ++i)
 	{

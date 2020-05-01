@@ -38,9 +38,7 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 			break;
 	}
 
-	if(curIdx == endKey)
-		SearchRouteResult();
-
+	SearchRouteResult();
 	mRunning = false;
 	return true;
 }
@@ -77,6 +75,11 @@ u64 jAStar::FindNextKey()
 		RouteInfo& info = mIndexTable[key];
 		if (info.state == StatePoint::WAIT)
 		{
+			if (mClosestPoint.key == -1)
+				mClosestPoint = info;
+			else if (info.weight < mClosestPoint.weight)
+				mClosestPoint = info;
+
 			info.state = StatePoint::CHECKED;
 			return info.key;
 		}
@@ -107,8 +110,8 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 void jAStar::SearchRouteResult()
 {
 	mRouteResults.clear();
-	mRouteResults.push_back(mEndPos);
-	u64 nextKey = ToIndex(mEndPos);
+	mRouteResults.push_back(ToWorld(mClosestPoint.key));
+	u64 nextKey = mClosestPoint.key;
 	u64 startIdx = ToIndex(mStartPos);
 	while (true)
 	{
@@ -118,7 +121,7 @@ void jAStar::SearchRouteResult()
 
 		mRouteResults.push_back(ToWorld(nextKey));
 	}
-	mRouteResults.push_back(mStartPos);
+	//mRouteResults.push_back(mStartPos);
 }
 
 void jAStar::Reset()
@@ -128,6 +131,7 @@ void jAStar::Reset()
 	mRouteResults.clear();
 	mStartPos = Vector2();
 	mEndPos = Vector2();
+	mClosestPoint = RouteInfo();
 	mRunning = false;
 	mStep = 0;
 }

@@ -14,3 +14,8 @@ void jLog::Log(const char* format, ...)
 
 	va_end(args);
 }
+
+void jLog::LogString(const char * format, const char * func, int lineNum, std::string log)
+{
+	jLog::Log(format, func, lineNum, log.c_str());
+}

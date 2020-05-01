@@ -93,7 +93,7 @@ void ObjBomb::OnUpdate()
 	
 	Vector3 pos = GetTransform().getPos();
 	float height = 0;
-	mTerrain->GetHeight(pos.x, pos.y, height);
+	mTerrain->GetHeight(pos, height);
 	if(pos.z < height)
 	{
 		CreateExploreParticle();
