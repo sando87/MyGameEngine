@@ -21,7 +21,7 @@ public:
 	jTransform& GetTransform();
 	jGameObjectMgr& GetEngine();
 	bool LoadTxt(string fullname);
-	void AddComponent(jComponent* comp);
+	jComponent* AddComponent(jComponent* comp);
 	template<typename T = jComponent> T* FindComponent();
 	template<typename T = jComponent> vector<T*> FindComponents();
 	jComponent* FindComponent(string componentName);

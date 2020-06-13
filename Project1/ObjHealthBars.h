@@ -2,15 +2,24 @@
 #include "jGameObject.h"
 
 class jMesh;
-class jParticle;
+class cParticleSystem;
 class jShaderHPBar;
-struct ShaderBufferHPBars;
+class jHealthPoint;
+
+struct HpDrawInfo
+{
+	jGameObject* obj;
+	jHealthPoint* hp;
+	double lifeTime;
+	double accTime;
+};
 
 class ObjHealthBars :
 	public jGameObject
 {
 public:
-	void ShowHPBar(jGameObject* obj);
+	void ShowHPBar(jHealthPoint* hp);
+	void DeleteHPBar(jHealthPoint* hp);
 
 protected:
 	virtual void OnLoad();
@@ -18,8 +27,8 @@ protected:
 
 	jMesh* CreateHpMesh(int count);
 
-	jParticle* mParticle;
+	cParticleSystem* mParticle;
 	jShaderHPBar* mShader;
-	ShaderBufferHPBars* mParamsBars;
+	unordered_map<jHealthPoint*, HpDrawInfo> mHPBars;
 };
 

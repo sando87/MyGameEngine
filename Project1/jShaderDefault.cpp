@@ -24,8 +24,8 @@ void jShaderDefault::OnLoad()
 	CacheSamplerState();
 	CacheBlendState();
 	CacheDepthState();
-	CacheVS(ResName_Shader_Vertex);
-	CachePS(ResName_Shader_Pixel);
+	CacheVS(mVSFullname.length() == 0 ? ResName_Shader_Vertex : mVSFullname);
+	CachePS(mPSFullname.length() == 0 ? ResName_Shader_Pixel : mPSFullname);
 
 	LoadLayout();
 	LoadMesh();
@@ -78,7 +78,7 @@ void jShaderDefault::LoadLayout()
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
 
-	CacheInputLayout(polygonLayout, 3, ResName_Layout, ResName_Shader_Vertex);
+	CacheInputLayout(polygonLayout, 3, ResName_Layout, mVSFullname.length() == 0 ? ResName_Shader_Vertex : mVSFullname);
 }
 
 void jShaderDefault::LoadMesh()

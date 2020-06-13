@@ -1,6 +1,7 @@
 #include "ObjPlayer.h"
 #include "ObjCamera.h"
 #include "ObjTerrainMgr.h"
+#include "oSkillIcebolt.h"
 #include "jMesh.h"
 #include "jShaderSkin.h"
 #include "jTransform.h"
@@ -68,8 +69,16 @@ void ObjPlayer::OnLoad()
 	mCollider = new cColliderCylinder();
 	mCollider->SetHeight(7);
 	mCollider->SetRound(1);
-	mCollider->EventCollision = [&](cCollider* target, CrashResult retsult) {
-		mMovement->Navigate();
+	mCollider->EventCollision = [&](vector<CrashResult>& retsults) {
+		if (mMovement->IsMoving())
+		{
+			_trace();
+			if (false == mMovement->Navigate())
+			{
+				SetAnimation("idle");
+				mMovement->Stop();
+			}
+		}
 	};
 	AddComponent(mCollider);
 
@@ -150,14 +159,17 @@ void ObjPlayer::OnMouseDown(InputEventArgs args)
 
 	if (nullptr != args.hoveredObject)
 	{
-		SetAnimation("walk");
-		mMovement->Move(args.hoveredObject, 5);
+		cActionReceiver* action = args.hoveredObject->FindComponent<cActionReceiver>();
+		if (nullptr != action)
+		{
+			SetAnimation("walk");
+			mMovement->Move(args.hoveredObject, 5);
+			return;
+		}
 	}
-	else
-	{
-		SetAnimation("walk");
-		mMovement->Move(args.terrainPt);
-	}
+
+	SetAnimation("walk");
+	mMovement->Move(args.terrainPt);
 }
 
 void ObjPlayer::OnKeyDown(InputEventArgs args)
@@ -167,7 +179,6 @@ void ObjPlayer::OnKeyDown(InputEventArgs args)
 	case 'Q':
 	case 'W':
 	case 'E':
-	case 'R':
 	{
 		string name = GetCurrentAnimName();
 		if (name == "idle" || name == "walk")
@@ -176,6 +187,19 @@ void ObjPlayer::OnKeyDown(InputEventArgs args)
 			SetAnimation("cast");
 			SetAnimEvent("cast", 0.5f, [&, destPos]() {
 				CreateBombSkill(destPos);
+			});
+		}
+		break;
+	}
+	case 'R':
+	{
+		string name = GetCurrentAnimName();
+		if (name == "idle" || name == "walk")
+		{
+			Vector3 destPos = args.terrainPt;
+			SetAnimation("cast");
+			SetAnimEvent("cast", 0.5f, [&, destPos]() {
+				CreateIceBolt(destPos);
 			});
 		}
 		break;
@@ -193,6 +217,14 @@ void ObjPlayer::CreateBombSkill(Vector3 destPos)
 	objBomb->SetDestPos(destPos);
 	objBomb->SetOwner(this);
 	GetEngine().AddGameObject(objBomb);
+}
+void ObjPlayer::CreateIceBolt(Vector3 destPos)
+{
+	Vector3 playerPos = GetTransform().getPos();
+	oSkillIcebolt* icdBolt = new oSkillIcebolt();
+	icdBolt->SetStartPos(playerPos);
+	icdBolt->SetDestPos(destPos);
+	GetEngine().AddGameObject(icdBolt);
 }
 
 string ObjPlayer::GetCurrentAnimName()

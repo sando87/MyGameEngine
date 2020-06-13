@@ -350,6 +350,18 @@ int jUtils::Random()
 	return rand();
 }
 
+void jUtils::RandomVector(double& x, double& y, double& z)
+{
+	Vector3 vec;
+	vec.x = (jUtils::Random() % 256) - 128.0;
+	vec.y = (jUtils::Random() % 256) - 128.0;
+	vec.z = (jUtils::Random() % 256) - 128.0;
+	vec.normalize();
+	x = vec.x;
+	y = vec.y;
+	z = vec.z;
+}
+
 void jUtils::ForEachFiles(void* _object, const char* _path, bool(*_func)(void *_this, char *_filename))
 {
 	struct _finddata_t fd;

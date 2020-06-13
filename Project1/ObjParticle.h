@@ -2,7 +2,7 @@
 #include "jGameObject.h"
 
 class jMesh;
-class jParticle;
+class cParticleSystem;
 class jShaderEffectTrace;
 struct ShaderBufferBillboards;
 
@@ -21,12 +21,11 @@ protected:
 	jMesh* CreateParticleMesh(int count);
 
 	jShaderEffectTrace* mShader;
-	ShaderBufferBillboards* mParamsBillboards;
 
-
-	Property_Setter(jParticle *, Particle, nullptr)
+	Property_Getter(cParticleSystem *, ParticleSystem, nullptr)
 	Property_Setter(string, ImageFullname, "")
 	Property_Setter(Vector2n, ImageGridCount, Vector2n())
 	Property_Setter(Vector2f, ImageStepUV, Vector2f())
+	Property_Setter(bool, ImageBlendBlack, false)
 };
 

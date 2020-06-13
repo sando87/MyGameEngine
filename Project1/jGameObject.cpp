@@ -125,7 +125,7 @@ void jGameObject::SubChild(jGameObject * child)
 	mChilds.remove(child);
 	child->mParent = nullptr;
 }
-void jGameObject::AddComponent(jComponent* comp)
+jComponent* jGameObject::AddComponent(jComponent* comp)
 {
 	if (comp->GetCompName().length() <= 0)
 		comp->SetCompName(TypeToString(comp));
@@ -135,6 +135,7 @@ void jGameObject::AddComponent(jComponent* comp)
 	if (GetEngine().Added(this))
 		comp->Load();
 	mComponents.push_back(comp);
+	return comp;
 }
 jComponent * jGameObject::FindComponent(string componentName)
 {

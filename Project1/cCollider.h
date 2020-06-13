@@ -13,15 +13,17 @@ class cCollider :
 	public jComponent
 {
 public:
+	friend class oCollisionMgr;
 	virtual ~cCollider();
 	virtual jShape * GetShape() = 0;
 
-	function<void(cCollider*, CrashResult)> EventCollision;
+	function<void(vector<CrashResult>&)> EventCollision;
 
-	void InvokeCollision(cCollider* target, CrashResult result);
+	void InvokeCollision(vector<CrashResult>& results);
 
 protected:
 	oCollisionMgr* mCollisionMgr;
+	Vector3 mPreviousWorldPos;
 
 	Property_GetSetter(bool, EnableCollision, true)
 };

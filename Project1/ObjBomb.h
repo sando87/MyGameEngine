@@ -2,8 +2,7 @@
 #include "jGameObject.h"
 #include "jParabolic2.h"
 
-class jParticle;
-class ObjTerrainMgr;
+class cParticleSystem;
 
 class ObjBomb :
 	public jGameObject
@@ -23,11 +22,10 @@ protected:
 
 	void AttackEnemies();
 
-	ObjTerrainMgr* mTerrain;
-	jParticle *mParticleBomb;
-	jParticle *mParticleFlame;
-	jParticle *mParticleExplore;
-	jParticle *mParticleSmoke;
+	cParticleSystem *mParticleBomb;
+	cParticleSystem *mParticleFlame;
+	cParticleSystem *mParticleExplore;
+	cParticleSystem *mParticleSmoke;
 
 	string mResImgBomb;
 	string mResImgFlame;

@@ -23,6 +23,7 @@ struct CrashResult
 	double dist;
 	cCollider* from;
 	cCollider* to;
+	cCollider* target;
 	CrashResult() { memset(this, 0x00, sizeof(CrashResult)); }
 };
 
@@ -37,7 +38,7 @@ public:
 	virtual jRect3D GetBox() = 0;
 	virtual CrashResult IsCrash(jShape* shape) = 0;
 
-	cCollider * Parent;
+	cCollider * Collider;
 	ShapeType Type;
 
 	static CrashResult IsCrashSphSph(jShapeSphere* sphereA, jShapeSphere* sphereB);

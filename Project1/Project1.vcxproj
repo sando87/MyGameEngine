@@ -156,7 +156,7 @@
     <ClCompile Include="jLinear.cpp" />
     <ClCompile Include="jNavigator.cpp" />
     <ClCompile Include="jParabolic2.cpp" />
-    <ClCompile Include="jParticle.cpp" />
+    <ClCompile Include="cParticleSystem.cpp" />
     <ClCompile Include="jPng.cpp" />
     <ClCompile Include="jRectangle2D.cpp" />
     <ClCompile Include="jShaderEffectTrace.cpp" />
@@ -215,6 +215,7 @@
     <ClCompile Include="oCuiDriver.cpp" />
     <ClCompile Include="oFormMain.cpp" />
     <ClCompile Include="oFormStats.cpp" />
+    <ClCompile Include="oSkillIcebolt.cpp" />
     <ClCompile Include="oUserInputDriver.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vectors.cpp" />
@@ -245,7 +246,7 @@
     <ClInclude Include="jLinear.h" />
     <ClInclude Include="jNavigator.h" />
     <ClInclude Include="jParabolic2.h" />
-    <ClInclude Include="jParticle.h" />
+    <ClInclude Include="cParticleSystem.h" />
     <ClInclude Include="jPng.h" />
     <ClInclude Include="jRectangle2D.h" />
     <ClInclude Include="jShaderEffectTrace.h" />
@@ -306,6 +307,7 @@
     <ClInclude Include="oCuiDriver.h" />
     <ClInclude Include="oFormMain.h" />
     <ClInclude Include="oFormStats.h" />
+    <ClInclude Include="oSkillIcebolt.h" />
     <ClInclude Include="oUserInputDriver.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tinyxml2.h" />

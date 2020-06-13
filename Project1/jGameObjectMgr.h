@@ -27,6 +27,7 @@ private:
 
 public:
 	bool Initialize();
+	bool TestParser();
 	void Release();
 	void RunObjects();
 

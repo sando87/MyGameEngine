@@ -11,6 +11,7 @@ jHealthPoint::jHealthPoint(u32 specID)
 
 jHealthPoint::~jHealthPoint()
 {
+	mObjHPBar->DeleteHPBar(this);
 }
 
 void jHealthPoint::AddEffect(const DBSpecification& spec)
@@ -34,7 +35,7 @@ void jHealthPoint::Attack(jHealthPoint* target, jHealthPoint* with)
 
 	double alpha = with != nullptr ? with->CurSpec.pa : 0;
 	target->CurSpec.hp -= (CurSpec.pa + alpha);
-	mObjHPBar->ShowHPBar(target->GetGameObject());
+	mObjHPBar->ShowHPBar(target);
 	if (target->CurSpec.hp <= 0)
 	{
 		target->CurSpec.hp = 0;

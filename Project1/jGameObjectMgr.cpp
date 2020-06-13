@@ -18,6 +18,7 @@
 #include "oUserInputDriver.h"
 #include "oCollisionMgr.h"
 #include "oCuiDriver.h"
+#include "oSkillIceBolt.h"
 
 #include "jTime.h"
 #include "jShader.h"
@@ -71,6 +72,7 @@ bool jGameObjectMgr::Initialize()
 	printf("abcd");
 	*/
 
+	//if (TestParser()) return true;
 
 	AddGameObject(new ObjCamera());
 	AddGameObject(new ObjTerrainMgr());
@@ -85,18 +87,36 @@ bool jGameObjectMgr::Initialize()
 #endif
 	
 	AddGameObject(new ObjPlayer());
-	AddGameObject(new ObjEnemy());
+	//AddGameObject(new ObjEnemy());
 	AddGameObject(new ObjUI())->SetEnable(false);
 	AddGameObject(new oFormStats())->SetEnable(false);
 	AddGameObject(new oFormMain())->SetEnable(false);
 	
-	//jParserD3::LoadResources(1);
+	return true;
+}
+
+bool jGameObjectMgr::TestParser()
+{
+	AddGameObject(new ObjCamera());
+	AddGameObject(new ObjTerrainMgr());
+	AddGameObject(new ObjGroundAxis());
+	AddGameObject(new oUserInputDriver());
+	AddGameObject(new oCollisionMgr());
+	AddGameObject(new oCuiDriver());
+
+	jParserD3::LoadResources(1);
 	static vector<ObjParser*> vecObjs;
 	tmpIdx = 0;
-	for(int i = 0; i < 0; ++i)
+	for (int i = 99; i < 102; ++i)
 	{
 		ObjParser* obj0 = new ObjParser();
 		obj0->mFileIndex = i;
+		AddGameObject(obj0);
+		vecObjs.push_back(obj0);
+	}
+	{
+		ObjParser* obj0 = new ObjParser();
+		obj0->mFileIndex = 116;
 		AddGameObject(obj0);
 		vecObjs.push_back(obj0);
 	}
@@ -168,8 +188,8 @@ bool jGameObjectMgr::Initialize()
 			pos.y = parser->mCBMain.matWorld[7];
 			pos.z = parser->mCBMain.matWorld[11];
 
-			_printlog("%d v[%d %d] p[%d %d] %f %f %f\n", vecObjs[tmpIdx]->mFileIndex, 
-				pDataVS->head.crc, pDataVS->head.totalSize, 
+			_printlog("%d v[%d %d] p[%d %d] %f %f %f\n", vecObjs[tmpIdx]->mFileIndex,
+				pDataVS->head.crc, pDataVS->head.totalSize,
 				pDataPS->head.crc, pDataPS->head.totalSize,
 				pos.x, pos.y, pos.z);
 		}
@@ -195,9 +215,9 @@ bool jGameObjectMgr::Initialize()
 				pos.x, pos.y, pos.z);
 		}
 	};
-
 	return true;
 }
+
 void jGameObjectMgr::RunObjects()
 {
 	jTime::Update();

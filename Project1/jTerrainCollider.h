@@ -20,5 +20,7 @@ protected:
 	virtual void OnUpdate();
 
 	ObjTerrainMgr * mTerrain;
+
+	Property_GetSetter(bool, OnTerrain, true)
 };
 

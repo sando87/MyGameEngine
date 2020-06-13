@@ -181,10 +181,15 @@ void oCollisionMgr::OnUpdate()
 	CandidatePairs(pairs);
 	
 	InvokeColliderEvent(pairs);
+
+	for (cCollider* col : mDynamicColliders)
+		col->mPreviousWorldPos = col->GetGameObject()->GetTransform().getPos();
 }
 
 void oCollisionMgr::InvokeColliderEvent(unordered_map<u64, CollisionInfo>& pairs)
 {
+	unordered_map<cCollider*, vector<CrashResult>> crashedList;
+	
 	for (auto pair : pairs)
 	{
 		cCollider* left = pair.second.left;
@@ -192,10 +197,15 @@ void oCollisionMgr::InvokeColliderEvent(unordered_map<u64, CollisionInfo>& pairs
 		CrashResult ret = left->GetShape()->IsCrash(right->GetShape());
 		if (ret.isCrash)
 		{
-			left->InvokeCollision(right, ret);
-			right->InvokeCollision(left, ret);
+			ret.target = right;
+			crashedList[left].push_back(ret);
+			ret.target = left;
+			crashedList[right].push_back(ret);
 		}
 	}
+
+	for (auto col : crashedList)
+		col.first->InvokeCollision(col.second);
 }
 
 void oCollisionMgr::CandidatePairs(unordered_map<u64, CollisionInfo>& pairs)
@@ -219,11 +229,23 @@ void oCollisionMgr::CandidatePairs(unordered_map<u64, CollisionInfo>& pairs)
 				info.left = *iterOut;
 				info.right = *iterIn;
 				info.key = key;
+				if (false == IsClosing(info.left, info.right))
+					continue;
+
 				u64 pairKey = (((u64)info.left << 32) | ((u64)info.right & 0xffffffffULL));
 				pairs[pairKey] = info;
 			}
 		}
 	}
+}
+
+bool oCollisionMgr::IsClosing(cCollider * left, cCollider * right)
+{
+	double preDist = left->mPreviousWorldPos.distance(right->mPreviousWorldPos);
+	Vector3 curPosLeft = left->GetGameObject()->GetTransform().getPos();
+	Vector3 curPosRight = right->GetGameObject()->GetTransform().getPos();
+	double curDist = curPosLeft.distance(curPosRight);
+	return curDist < preDist;
 }
 
 void oCollisionMgr::UpdateDynamicGrid()

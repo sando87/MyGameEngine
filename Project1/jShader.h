@@ -83,6 +83,8 @@ protected:
 	ID3D11Buffer *			mCBIndex;
 	ID3D11BlendState *			mBlendStateOff;
 	ID3D11BlendState *			mBlendStateOn;
+	ID3D11BlendState *			mBlendBlackOn;
+	ID3D11DepthStencilState *	mDepthStencilStateNoCompNoWrite;
 	ID3D11DepthStencilState *	mDepthStencilStateOff;
 	ID3D11DepthStencilState *	mDepthStencilStateOn;
 	vector<ID3D11ShaderResourceView *>	mTextureViews;
@@ -92,6 +94,7 @@ protected:
 
 
 	Property_GetSetter(bool, AlphaOn, false)
+	Property_GetSetter(bool, AlphaBlackOn, false)
 	Property_GetSetter(bool, DepthOn, true)
 	Property_GetSetter(float, RenderOrder, 0)
 };

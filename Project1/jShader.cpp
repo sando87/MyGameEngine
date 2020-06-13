@@ -234,6 +234,24 @@ void jShader::CacheBlendState()
 			_warn();
 		return blendState;
 	});
+
+	key = "jShader.blendBlackOn";
+	mBlendBlackOn = (ID3D11BlendState *)mGraphicResources->CacheResource(key, [&](string _name) {
+		ID3D11BlendState * blendState = nullptr;
+		D3D11_BLEND_DESC bsDesc;
+		memset(&bsDesc, 0x00, sizeof(bsDesc));
+		bsDesc.RenderTarget[0].BlendEnable = true;
+		bsDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		bsDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_ONE;
+		bsDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_ONE;
+		bsDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		bsDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+		bsDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+		bsDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		if (FAILED(mDev->CreateBlendState(&bsDesc, &blendState)))
+			_warn();
+		return blendState;
+	});
 }
 void jShader::CacheDepthState()
 {
@@ -285,6 +303,21 @@ void jShader::CacheDepthState()
 		dssDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 		dssDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 		dssDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		if (FAILED(mDev->CreateDepthStencilState(&dssDesc, &depthState)))
+			_warn();
+
+		return depthState;
+	});
+
+	key = "jShader.depthNoCompNoWrite";
+	mDepthStencilStateNoCompNoWrite = (ID3D11DepthStencilState *)mGraphicResources->CacheResource(key, [&](string _name) {
+		ID3D11DepthStencilState * depthState = nullptr;
+
+		D3D11_DEPTH_STENCIL_DESC dssDesc;
+		memset(&dssDesc, 0x00, sizeof(dssDesc));
+		dssDesc.DepthEnable = false;
+		dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; //비교도 안하고 쓰기도 안함
+		dssDesc.StencilEnable = false;
 		if (FAILED(mDev->CreateDepthStencilState(&dssDesc, &depthState)))
 			_warn();
 
@@ -508,7 +541,7 @@ void jShader::SetRenderContext(ObjCamera * cam)
 		mDevContext->PSSetShaderResources(i, 1, &mTextureViews[i]);
 
 
-	mDevContext->OMSetBlendState(GetAlphaOn() ? mBlendStateOn : mBlendStateOff, nullptr, 0xffffffff);
+	mDevContext->OMSetBlendState(GetAlphaBlackOn() ? mBlendBlackOn : (GetAlphaOn() ? mBlendStateOn : mBlendStateOff), nullptr, 0xffffffff);
 
 	mDevContext->OMSetDepthStencilState(GetDepthOn() ? mDepthStencilStateOn : mDepthStencilStateOff, 1);
 

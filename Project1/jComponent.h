@@ -19,7 +19,7 @@ public:
 	void SetFullname(string val) { mFullname = val; mLoaded = false; }
 
 protected:
-	friend void jGameObject::AddComponent(jComponent* comp);
+	friend jComponent* jGameObject::AddComponent(jComponent* comp);
 
 	jGameObjectMgr* mEngine = nullptr;
 	Property_Getter(jGameObject*, GameObject, nullptr)

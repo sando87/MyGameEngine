@@ -43,6 +43,7 @@ void ObjItem::OnLoad()
 	mHeights.Init(Vector2(0.15, 10), Vector2());
 
 	jTerrainCollider* terrainCol = new jTerrainCollider();
+	terrainCol->SetOnTerrain(false);
 	terrainCol->EventUnderTerrain = [&](double height) {
 		mAnimateDrop = false;
 		Vector3 pos = GetTransform().getPos();

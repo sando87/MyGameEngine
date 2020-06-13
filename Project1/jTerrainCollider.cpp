@@ -42,13 +42,15 @@ void jTerrainCollider::OnUpdate()
 
 	float height = 0;
 	Vector3 pos = GetGameObject()->GetTransform().getPos();
-	mTerrain->GetHeight(pos, height);
+	bool ret = mTerrain->GetHeight(pos, height);
+	_exceptif(false == ret, return);
+
+	if (mOnTerrain)
+		GetGameObject()->GetTransform().setHeight(height);
 
 	if (pos.z < height - 1e-4)
 	{
 		if (EventUnderTerrain)
 			EventUnderTerrain(height);
-		else
-			GetGameObject()->GetTransform().setHeight(height);
 	}
 }

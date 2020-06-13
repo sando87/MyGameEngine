@@ -43,10 +43,10 @@ void ObjParser::OnLoad()
 		return;
 	}
 
-	GetEngine().StartCoRoutine("test", 1000, [](CorMember& mem, bool isFirst) {
-		_trace();
-		return CorCmd::Keep;
-	});
+	//GetEngine().StartCoRoutine("test", 1000, [](CorMember& mem, bool isFirst) {
+	//	_trace();
+	//	return CorCmd::Keep;
+	//});
 
 	class jShaderParserOnly : public jShader
 	{
@@ -148,6 +148,13 @@ void ObjParser::OnLoad()
 			mParser->ReadyToExportInfo("skin", false, true);
 			mParser->mExportInfo.ExportImage(PATH_RESOURCES + string("img/"));
 			mParser->mExportInfo.ExportMeshDump(PATH_RESOURCES + string("mesh/"), rotDeg);
+			mParser->mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
+		}
+		else if (cmd == "export")
+		{
+			mParser->ReadyToExportInfo("default", false, true);
+			mParser->mExportInfo.ExportImage(PATH_RESOURCES + string("img/"));
+			mParser->mExportInfo.ExportMeshDump(PATH_RESOURCES + string("mesh/"));
 			mParser->mExportInfo.ExportMetaInfo(PATH_RESOURCES + string("meta/"));
 		}
 		else

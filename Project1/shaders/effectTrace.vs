@@ -5,7 +5,7 @@
 struct Billboard
 {
     float4 transform; //xyz:position, w:size
-    float4 info; //x:texIdx, y:refDiscard, zw:reserve
+    float4 info; //x:texIdx, y:refDiscard, z:rotate, w:reserve
     float4 color; //xyz:rga, w:alpha
 };
 
@@ -62,10 +62,15 @@ PixelInputType jVS(VertexInputType input)
     
 	Billboard board = boards[input.index.x];
 	float size = board.transform.w;
+	float rotate = board.info.z;
+	float4 inputVertex;
 	
-    input.position.w = 1.0f;
 	input.position.xyz *= size;
-    output.position = mul(input.position, billboardMat);
+	inputVertex.x = input.position.x * cos(rotate) - input.position.z * sin(rotate);
+	inputVertex.z = input.position.x * sin(rotate) + input.position.z * cos(rotate);
+	inputVertex.y = input.position.y;
+	inputVertex.w = 1.0f;
+    output.position = mul(inputVertex, billboardMat);
 	output.position.xyz += board.transform.xyz;
     output.position = mul(output.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);

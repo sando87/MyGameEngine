@@ -16,6 +16,11 @@ jRectangle2D::jRectangle2D(double x, double y, double w, double h)
 	SetPosSize(Vector2(x, y), Vector2(w, h));
 }
 
+jRectangle2D::jRectangle2D(Vector2 min, Vector2 max)
+{
+	SetMinMax(min, max);
+}
+
 void jRectangle2D::SetMinMax(Vector2 min, Vector2 max)
 {
 	mMin = min;
@@ -124,3 +129,9 @@ void jRectangle2D::ClipGrid(double step, std::vector<Vector2>& points)
 		}
 	}
 }
+
+double jRectangle2D::GetRound()
+{
+	return (Width() + Height()) * 0.5;
+}
+

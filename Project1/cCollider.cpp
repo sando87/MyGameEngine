@@ -9,10 +9,10 @@ cCollider::~cCollider()
 	mCollisionMgr->SubDynamicCollider(this);
 }
 
-void cCollider::InvokeCollision(cCollider * target, CrashResult result)
+void cCollider::InvokeCollision(vector<CrashResult>& results)
 {
 	if (EventCollision)
-		EventCollision(target, result);
+		EventCollision(results);
 }
 
 
@@ -26,10 +26,12 @@ jShape * cColliderSphere::GetShape()
 
 void cColliderSphere::OnLoad()
 {
+	mPreviousWorldPos = GetGameObject()->GetTransform().getPos();
 	mCollisionMgr = GetEngine().FindGameObject<oCollisionMgr>();
 	_exceptif(mCollisionMgr == nullptr, return);
 	
-	mShape.Parent = this;
+	mShape.Collider = this;
+
 
 	mCollisionMgr->AddDynamicCollider(this);
 }
@@ -45,10 +47,11 @@ jShape * cColliderCylinder::GetShape()
 
 void cColliderCylinder::OnLoad()
 {
+	mPreviousWorldPos = GetGameObject()->GetTransform().getPos();
 	mCollisionMgr = GetEngine().FindGameObject<oCollisionMgr>();
 	_exceptif(mCollisionMgr == nullptr, return);
 
-	mShape.Parent = this;
+	mShape.Collider = this;
 
 	mCollisionMgr->AddDynamicCollider(this);
 }
@@ -61,6 +64,7 @@ jShape * cColliderGridPole::GetShape()
 
 void cColliderGridPole::OnLoad()
 {
+	mPreviousWorldPos = GetGameObject()->GetTransform().getPos();
 	mCollisionMgr = GetEngine().FindGameObject<oCollisionMgr>();
 	jMesh* mesh = GetGameObject()->FindComponent<jMesh>();
 	_exceptif(mCollisionMgr == nullptr || mesh == nullptr, return);
@@ -80,7 +84,7 @@ void cColliderGridPole::OnLoad()
 		{
 			Vector2 pos = mShape.Shapes.ToPosition(key);
 			jShapeCylinder cylinder;
-			cylinder.Parent = this;
+			cylinder.Collider = this;
 			cylinder.PositionBottom = Vector3(pos.x, pos.y, mShape.Box.Min().z);
 			cylinder.PositionTop = Vector3(pos.x, pos.y, worldPos.z);
 			cylinder.Round = step * 0.5;

@@ -8,6 +8,7 @@ public:
 	jRectangle2D();
 	~jRectangle2D();
 	jRectangle2D(double x, double y, double w, double h);
+	jRectangle2D(Vector2 min, Vector2 max);
 
 	void SetMinMax(Vector2 min, Vector2 max);
 	void SetPosSize(Vector2 pos, Vector2 size);
@@ -21,6 +22,7 @@ public:
 	jRectangle2D& Expand(Vector2 pt);
 	void ClipMinus();
 	void ClipGrid(double step, std::vector<Vector2>& points);
+	double GetRound();
 
 	Vector2 GetMin() { return mMin; }
 	Vector2 GetMax() { return mMax; }
@@ -35,8 +37,8 @@ public:
 	double Width() { return mMax.x - mMin.x; }
 	double Height() { return mMax.y - mMin.y; }
 
-	jRectangle2D& operator+(Vector2 pos) { mMin += pos; mMax += pos; return (*this); }
-	jRectangle2D& operator-(Vector2 pos) { mMin -= pos; mMax -= pos; return (*this); }
+	jRectangle2D operator+(Vector2 pos) { return jRectangle2D(mMin + pos, mMax + pos); }
+	jRectangle2D operator-(Vector2 pos) { return jRectangle2D(mMin - pos, mMax - pos); }
 
 private:
 	Vector2 mMin;

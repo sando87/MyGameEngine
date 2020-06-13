@@ -34,6 +34,8 @@ bool jShaderEffectTrace::OnRender(ObjCamera * cam)
 {
 	SetRenderContext(cam);
 
+	mDevContext->OMSetDepthStencilState(mDepthStencilStateNoCompNoWrite, 1);
+
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	mDevContext->Map(mCBBillboard, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	ShaderBufferBillboards* dataPtr = (ShaderBufferBillboards*)mappedResource.pData;

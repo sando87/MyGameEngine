@@ -14,8 +14,8 @@ CrashResult jShape::IsCrashSphSph(jShapeSphere* sphereA, jShapeSphere* sphereB)
 	ret.posTo = sphereB->Position;
 	ret.dir = (sphereB->Position - sphereA->Position).normalize();
 	ret.isCrash = true;
-	ret.from = sphereA->Parent;
-	ret.to = sphereB->Parent;
+	ret.from = sphereA->Collider;
+	ret.to = sphereB->Collider;
 	return ret;
 }
 
@@ -32,8 +32,8 @@ CrashResult jShape::IsCrashSphCyl(jShapeSphere* sphere, jShapeCylinder* cylinder
 	ret.posFrom = sphere->Position;
 	ret.posTo = cylinder->PositionBottom;
 	ret.posTo.z = sphere->Position.z;
-	ret.from = sphere->Parent;
-	ret.to = cylinder->Parent;
+	ret.from = sphere->Collider;
+	ret.to = cylinder->Collider;
 	return ret;
 }
 
@@ -52,8 +52,8 @@ CrashResult jShape::IsCrashSphLine(jShapeSphere* sphere, jShapeLine* line)
 	ret.posTo = ptOnLine;
 	ret.dist = dist;
 	ret.dir = ptOnLine - sphere->Position;
-	ret.from = sphere->Parent;
-	ret.to = line->Parent;
+	ret.from = sphere->Collider;
+	ret.to = line->Collider;
 	return ret;
 }
 
@@ -70,8 +70,8 @@ CrashResult jShape::IsCrashCylCyl(jShapeCylinder * cylinderA, jShapeCylinder * c
 	ret.isCrash = true;
 	ret.dist = DistAtoB.length();
 	ret.dir = DistAtoB;
-	ret.from = cylinderA->Parent;
-	ret.to = cylinderB->Parent;
+	ret.from = cylinderA->Collider;
+	ret.to = cylinderB->Collider;
 	return ret;
 }
 
@@ -92,8 +92,8 @@ CrashResult jShape::IsCrashCylLine(jShapeCylinder * cylinder, jShapeLine * line)
 	ret.posTo = ptOnLine;
 	ret.dist = dist;
 	ret.dir = ptOnLine - ptOnCylinder;
-	ret.from = cylinder->Parent;
-	ret.to = line->Parent;
+	ret.from = cylinder->Collider;
+	ret.to = line->Collider;
 	return ret;
 }
 

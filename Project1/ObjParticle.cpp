@@ -1,5 +1,5 @@
 #include "ObjParticle.h"
-#include "jParticle.h"
+#include "cParticleSystem.h"
 #include "jMesh.h"
 #include "jShaderEffectTrace.h"
 #include "jImage.h"
@@ -7,22 +7,19 @@
 
 ObjParticle::ObjParticle()
 {
+	mParticleSystem = new cParticleSystem();;
 }
-
 
 ObjParticle::~ObjParticle()
 {
+	delete mParticleSystem;
 }
 
 void ObjParticle::OnLoad()
 {
-	if (mParticle == nullptr)
-	{
-		mParticle = new jParticle();
-	}
-	AddComponent(mParticle);
+	AddComponent(mParticleSystem);
 
-	jMesh* mesh = CreateParticleMesh(mParticle->GetReserve());
+	jMesh* mesh = CreateParticleMesh(mParticleSystem->GetMaxCount());
 	AddComponent(mesh);
 
 	AddComponent(new jImage(mImageFullname));
@@ -32,9 +29,8 @@ void ObjParticle::OnLoad()
 	mShader->SetAlphaOn(true);
 	mShader->SetDepthOn(false);
 	mShader->SetRenderOrder(RenderOrder_Terrain_Env_Alpha);
+	mShader->SetAlphaBlackOn(mImageBlendBlack);
 	AddComponent(mShader);
-
-	mParamsBillboards = &mShader->GetParamBillboard();
 }
 
 void ObjParticle::OnStart()
@@ -42,37 +38,28 @@ void ObjParticle::OnStart()
 	ObjCamera* cam = GetEngine().FindGameObject<ObjCamera>();
 	jTransform trans;
 	trans.lookat(Vector3(), cam->GetTransform().getView(), Vector3(0, 0, 1));
-	mParamsBillboards->billboardMat = trans.getLocalMatrix().transpose();
+	mShader->GetParamBillboard().billboardMat = trans.getLocalMatrix().transpose();
 }
 
 void ObjParticle::OnUpdate()
 {
-	list<Particle*>::iterator iter = mParticle->GetParticles().begin();
-	list<Particle*>::iterator end = mParticle->GetParticles().end();
-	int count = mParticle->GetReserve();
-	for (int i = 0; i < count; ++i)
-	{
-		if (iter != end)
-		{
-			Particle* particle = *iter;
-			mParamsBillboards->boards[i].transform.x = particle->Pos.x;
-			mParamsBillboards->boards[i].transform.y = particle->Pos.y;
-			mParamsBillboards->boards[i].transform.z = particle->Pos.z;
-			mParamsBillboards->boards[i].size = particle->size;
-			mParamsBillboards->boards[i].texIndex = particle->texIdx;
-			mParamsBillboards->boards[i].refDiscard = particle->refDiscard;
-			mParamsBillboards->boards[i].color = particle->color;
-			++iter;
-		}
-		else
-		{
-			mParamsBillboards->boards[i] = Billboard();
-			mParamsBillboards->boards[i].size = 0;
-		}
-	}
+	ShaderBufferBillboards& param = mShader->GetParamBillboard();
+	memset(param.boards, 0x00, sizeof(param.boards));
 
-	if (mParticle->IsFinished())
-		Destroy();
+	int idx = 0;
+	for (Particle* part : mParticleSystem->GetParticles())
+	{
+		param.boards[idx].transform.x = part->Pos.x;
+		param.boards[idx].transform.y = part->Pos.y;
+		param.boards[idx].transform.z = part->Pos.z;
+		param.boards[idx].size = part->size;
+		param.boards[idx].texIndex = part->texIdx;
+		param.boards[idx].refDiscard = part->refDiscard;
+		param.boards[idx].rotate = part->rotate;
+		param.boards[idx].reserve = part->reserve;
+		param.boards[idx].color = part->color;
+		idx++;
+	}
 }
 jMesh* ObjParticle::CreateParticleMesh(int count)
 {
@@ -111,3 +98,4 @@ jMesh* ObjParticle::CreateParticleMesh(int count)
 	mesh->LoadVerticies(verticies, indicies, "MeshEffectTracer" + jUtils::ToString(count));
 	return mesh;
 }
+

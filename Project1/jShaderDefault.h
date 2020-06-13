@@ -20,4 +20,7 @@ protected:
 
 	jMesh* mMesh;
 	jImage* mImage;
+
+	Property_GetSetter(string, VSFullname, "")
+	Property_GetSetter(string, PSFullname, "")
 };

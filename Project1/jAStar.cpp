@@ -35,12 +35,15 @@ bool jAStar::Route(Vector2 startWorldPos, Vector2 endWorldPos, u32 limitDepth, d
 		if (curIdx == (u64)-1 || depth >= limitDepth)
 			break;
 		else if (curIdx == endKey)
+		{
+			SearchRouteResult();
 			break;
+		}
 	}
-
-	SearchRouteResult();
+	
+	_echoN(depth);
 	mRunning = false;
-	return true;
+	return mRouteResults.empty() ? false : true;
 }
 
 bool jAStar::UpdateWeights(u64 idx)
@@ -110,6 +113,9 @@ RouteInfo * jAStar::GetRouteInfo(u64 idx)
 void jAStar::SearchRouteResult()
 {
 	mRouteResults.clear();
+	if (mClosestPoint.key == (u64)-1)
+		return;
+
 	mRouteResults.push_back(ToWorld(mClosestPoint.key));
 	u64 nextKey = mClosestPoint.key;
 	u64 startIdx = ToIndex(mStartPos);

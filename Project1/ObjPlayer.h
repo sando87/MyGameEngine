@@ -30,6 +30,7 @@ private:
 	void OnMouseDown(InputEventArgs args);
 	void OnKeyDown(InputEventArgs args);
 	void CreateBombSkill(Vector3 destPos);
+	void CreateIceBolt(Vector3 destPos);
 
 	string GetCurrentAnimName();
 	void SetAnimation(string name);

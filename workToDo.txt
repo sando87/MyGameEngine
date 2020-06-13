@@ -1,4 +1,9 @@
-Player 이동 Navi 테스트
+충돌판정시 방향에 따른 판정 개선 필요(주변지형같은 경우 실제 물체랑 중심위치가 많이 달라서 문제)
+Terrain Grid 충돌시스템 개편필요
+다른 GameObject에서 BaseComponent 참고할때 문제..
+예) FindComponent<jShader>() => jShaderDefault는 못찾음..어떻게 해결?
+
+
 =======구현한 모듈들=======
 Engine Architecture
 Render(shaders)

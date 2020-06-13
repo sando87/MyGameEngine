@@ -16,6 +16,7 @@ class A {
 	std::weak_ptr<A> other;
 
 public:
+	A() : s("") {};
 	A(const std::string& s) : s(s) { std::cout << "자원을 획득함!" << std::endl; }
 
 	~A() { std::cout << "소멸자 호출!" << std::endl; }
@@ -32,7 +33,6 @@ public:
 	}
 	std::string name() { return s; }
 };
-
 int main()
 {
 	//std::vector<std::shared_ptr<A>> vec;

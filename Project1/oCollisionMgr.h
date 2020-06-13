@@ -46,6 +46,7 @@ protected:
 	void GetColliders(vector<u64>& keys, vector<cCollider*>& colliders);
 	void InvokeColliderEvent(unordered_map<u64, CollisionInfo>& pairs);
 	void CandidatePairs(unordered_map<u64, CollisionInfo>& pairs);
+	bool IsClosing(cCollider* left, cCollider* right);
 	void UpdateDynamicGrid();
 
 	Property_Getter(double, Step, 3.0)

@@ -321,7 +321,10 @@ void jParserD3::InitFuncConvTex()
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
+	case RES_ID(0x3c, 0x1fcc):
 	case RES_ID(0xd0, 0xf10):	//109
+	case RES_ID(0xcb, 0x22a8): //169-2
+	case RES_ID(0x47, 0x1a18): //171-2
 		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
 			Vector2f ret = CalcTexCoord(_p);
 			return Vector2f(ret.x, REV_V(ret.y));
@@ -358,13 +361,6 @@ void jParserD3::InitFuncConvTex()
 			Vector2f ret;
 			ret.x = p[0] * matTex[0] + p[1] * matTex[1] + (1.0f) * matTex[3];
 			ret.y = p[0] * matTex[4] + p[1] * matTex[5] + (1.0f) * matTex[7];
-			return Vector2f(ret.x, REV_V(ret.y));
-		};
-		break;
-	case RES_ID(0xcb, 0x22a8): //169-2
-	case RES_ID(0x47, 0x1a18): //171-2
-		mFuncConvertTex = [&](int _idx, unsigned char* _p) {
-			Vector2f ret = CalcTexCoord(_p);
 			return Vector2f(ret.x, REV_V(ret.y));
 		};
 		break;
@@ -484,6 +480,7 @@ void jParserD3::InitTextureList()
 	case RES_ID(0x7e, 0x1418):
 	case RES_ID(0x5a, 0x1418):
 	case RES_ID(0x38, 0x1088):
+	case RES_ID(0xc, 0xff4):
 		mTextures.push_back(1);
 		break;
 	case RES_ID(0xf4, 0x11a4): //171-2

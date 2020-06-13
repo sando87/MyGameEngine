@@ -1,58 +1,15 @@
 #include "ObjHealthBars.h"
-#include "jParticle.h"
 #include "jMesh.h"
 #include "jShaderHPBar.h"
 #include "jImage.h"
 #include "ObjCamera.h"
 #include "jTransform.h"
 #include "jHealthPoint.h"
-
-class HPParticle : public Particle
-{
-public:
-	jTransform* partTransform;
-	jHealthPoint* partHP;
-	jGameObject* partObject;
-	HPParticle(jGameObject* obj)
-	{
-		partObject = obj;
-		partTransform = obj->FindComponent<jTransform>();
-		partHP = obj->FindComponent<jHealthPoint>();
-	}
-	virtual void OnUpdate()
-	{
-		Pos = partTransform->getPos();
-		Pos.z += 7.0;
-		refDiscard = partHP->CurSpec.hp / partHP->MaxSpec.hp; //hp Rate
-		Death = (LifeTime < AccTime) ? true : false;
-	}
-};
-
-void ObjHealthBars::ShowHPBar(jGameObject * obj)
-{
-	list<Particle*>& parties = mParticle->GetParticles();
-	for (Particle* part : parties)
-		if (((HPParticle*)part)->partObject == obj)
-		{
-			part->AccTime = 0;
-			return;
-		}
-			
-
-	HPParticle* particle = new HPParticle(obj);
-	mParticle->Burst(particle);
-}
+#include "jTime.h"
 
 void ObjHealthBars::OnLoad()
 {
-	mParticle = new jParticle();
-	mParticle->SetCount(1);
-	mParticle->SetMassRate(0);
-	mParticle->SetDuration(5);
-	mParticle->SetBurstCount(0); //infinite mode
-	AddComponent(mParticle);
-
-	jMesh* mesh = CreateHpMesh(mParticle->GetReserve());
+	jMesh* mesh = CreateHpMesh(40);
 	AddComponent(mesh);
 
 	AddComponent(new jImage("./res/img/hpbar.png"));
@@ -62,34 +19,35 @@ void ObjHealthBars::OnLoad()
 	mShader->SetDepthOn(false);
 	mShader->SetRenderOrder(RenderOrder_Terrain_Env_Alpha);
 	AddComponent(mShader);
-
-	mParamsBars = &mShader->GetParamBars();
 }
 
 void ObjHealthBars::OnUpdate()
 {
-	list<Particle*>::iterator iter = mParticle->GetParticles().begin();
-	list<Particle*>::iterator end = mParticle->GetParticles().end();
-	int count = mParticle->GetReserve();
-	for (int i = 0; i < count; ++i)
+	ShaderBufferHPBars& param = mShader->GetParamBars();
+	memset(param.bars, 0x00, sizeof(param.bars));
+
+	int idx = 0;
+	for (auto iter = mHPBars.begin(); iter != mHPBars.end();)
 	{
-		if (iter != end)
+		HpDrawInfo& info = iter->second;
+		Vector3 pos = info.obj->GetTransform().getPos();
+		pos.z += 7.0;
+		double refDiscard = info.hp->CurSpec.hp / info.hp->MaxSpec.hp; //hp Rate
+		info.accTime += jTime::Delta();
+		bool isDeath = (info.lifeTime < info.accTime) ? true : false;
+
+		if (isDeath)
 		{
-			Particle* particle = *iter;
-			mParamsBars->bars[i].transform.x = particle->Pos.x;
-			mParamsBars->bars[i].transform.y = particle->Pos.y;
-			mParamsBars->bars[i].transform.z = particle->Pos.z;
-			mParamsBars->bars[i].size.x = particle->size;
-			mParamsBars->bars[i].size.y = particle->size;
-			mParamsBars->bars[i].reserve = 0;
-			mParamsBars->bars[i].hpRate = particle->refDiscard;
-			mParamsBars->bars[i].color = particle->color;
-			++iter;
+			mHPBars.erase(++iter);
 		}
 		else
 		{
-			mParamsBars->bars[i] = HPInfo();
-			mParamsBars->bars[i].size = Vector2f();
+			param.bars[idx].transform.x = pos.x;
+			param.bars[idx].transform.y = pos.y;
+			param.bars[idx].transform.z = pos.z;
+			param.bars[idx].hpRate = refDiscard;
+			idx++;
+			++iter;
 		}
 	}
 }
@@ -130,4 +88,20 @@ jMesh * ObjHealthBars::CreateHpMesh(int count)
 
 	mesh->LoadVerticies(verticies, indicies, "HealthBars" + jUtils::ToString(count));
 	return mesh;
+}
+
+void ObjHealthBars::ShowHPBar(jHealthPoint* hp)
+{
+	HpDrawInfo info;
+	info.obj = hp->GetGameObject();
+	info.hp = hp;
+	info.lifeTime = 5;
+	info.accTime = 0;
+	mHPBars[hp] = info;
+}
+
+void ObjHealthBars::DeleteHPBar(jHealthPoint * hp)
+{
+	if (mHPBars.find(hp) != mHPBars.end())
+		mHPBars.erase(hp);
 }

@@ -63,7 +63,8 @@ struct Billboard
 	float size;
 	float texIndex;
 	float refDiscard;
-	Vector2f reserve;
+	float rotate;
+	float reserve;
 	Vector4f color; //xyz:rga, w:alpha
 	Billboard()
 	{
@@ -71,7 +72,8 @@ struct Billboard
 		size = 1;
 		texIndex = 0;
 		refDiscard = 0;
-		reserve = Vector2f(0, 0);
+		rotate = 0;
+		reserve = 0;
 		color = Vector4f(1, 1, 1, 1);
 	}
 };
